@@ -8,9 +8,9 @@ export default function CollapsibleSection({ title, children, level = 2 }) {
   const HeadingTag = `h${level}`;
 
   return (
-    <section className="border-b border-zinc-700 pb-6 mb-6 last:border-b-0 last:mb-0">
+    <section>
       <div
-        className="flex items-center justify-between cursor-pointer mb-4"
+        className="flex items-center justify-between cursor-pointer mb-2"
         onClick={() => setOpen(!open)}
       >
         <HeadingTag className="text-blue-300 font-semibold text-xl md:text-2xl">

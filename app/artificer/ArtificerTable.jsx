@@ -216,7 +216,25 @@ export default function ArtificerTable() {
             <tr key={i} className="hover:bg-gray-700 transition">
               <td className="px-4 py-2">{row.level}</td>
               <td className="px-4 py-2">{row.prof}</td>
-              <td className="px-4 py-2 whitespace-pre-wrap">{row.features}</td>
+              <td className="px-4 py-2 whitespace-pre-wrap">
+                {row.features !== "–"
+                  ? row.features
+                      .split(", ")
+                      .map((feature) => (
+                        <a
+                          key={feature}
+                          href={`#${feature
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}`}
+                          className="text-blue-400 hover:underline"
+                        >
+                          {feature}
+                        </a>
+                      ))
+                      .reduce((prev, curr) => [prev, ", ", curr])
+                  : "–"}
+              </td>
+
               <td className="px-4 py-2">{row.infusionsKnown}</td>
               <td className="px-4 py-2">{row.infusedItems}</td>
               <td className="px-4 py-2">{row.cantripsKnown}</td>
