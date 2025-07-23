@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-export default function CollapsibleSection({ title, children, level = 2 }) {
-  const [open, setOpen] = useState(false);
-  const HeadingTag = `h${level}`;
+export default function CollapsibleSection({ title, children, level }) {
+  const [open, setOpen] = useState(true);
+  const HeadingTag = `h2`;
 
   return (
     <section>
@@ -14,7 +14,7 @@ export default function CollapsibleSection({ title, children, level = 2 }) {
         onClick={() => setOpen(!open)}
       >
         <HeadingTag className="text-blue-300 font-semibold text-xl md:text-2xl">
-          {title}
+          Level {level}: {title}
         </HeadingTag>
         {open ? (
           <ChevronUp className="text-blue-300" />
