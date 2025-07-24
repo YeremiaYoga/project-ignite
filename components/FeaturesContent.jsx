@@ -8,7 +8,7 @@ export default function FeatureContent({ content, level }) {
           return (
             <p
               key={idx}
-              className="text-zinc-300 mb-4 leading-relaxed text-base"
+              className="text-zinc-300 mb-2 leading-relaxed text-base"
             >
               {item.value}
             </p>
@@ -23,15 +23,10 @@ export default function FeatureContent({ content, level }) {
             return (
               <ul
                 key={idx}
-                className="list-disc list-inside text-zinc-300 space-y-2"
+                className="list-disc list-inside text-zinc-300 space-y-2 break-words"
               >
                 {item.items.map((li, i) => (
-                  <li key={i}>
-                    <span className="font-semibold text-zinc-100">
-                      {li.label}:
-                    </span>{" "}
-                    {li.value}
-                  </li>
+                  <li key={i}>{li}</li>
                 ))}
               </ul>
             );
@@ -49,7 +44,7 @@ export default function FeatureContent({ content, level }) {
         }
         if (item.type === "note") {
           return (
-            <div key={idx} className="text-zinc-400 mt-4 italic">
+            <div key={idx} className="text-zinc-400 italic">
               <div className=" p-3 my-3 rounded">
                 <div className="font-bold mb-1">{item.value}</div>
                 {item.content &&

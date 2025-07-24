@@ -32,12 +32,12 @@ export default function ArtificerPage() {
           </p>
         </section>
 
-        <section>
+        <div>
           <ArtificerTable />
-        </section>
-        <section>
+        </div>
+        <div>
           <ArtificerFeatures />
-        </section>
+        </div>
       </div>
     </main>
   );

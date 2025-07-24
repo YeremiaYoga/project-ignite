@@ -25,7 +25,7 @@ export default function CollapsibleSection({ title, children, level }) {
 
       <div
         className={`transition-all duration-300 ease-in-out overflow-hidden ${
-          open ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+          open ? "max-h-full opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="space-y-4">{children}</div>

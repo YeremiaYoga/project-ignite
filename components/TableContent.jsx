@@ -9,6 +9,7 @@ export default function TableContent({ data, columns, title, slotHeader }) {
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   };
 
+  console.log(data);
   return (
     <div className="overflow-x-auto border border-gray-700 rounded-lg shadow mt-6 bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900">
       <table className="w-full text-sm text-left text-gray-200">
@@ -25,11 +26,15 @@ export default function TableContent({ data, columns, title, slotHeader }) {
           </tr>
           <tr className="uppercase text-xs bg-blue-900">
             {columns.map((col) => (
-              <th key={col.key} className="px-4 py-2">{col.label}</th>
+              <th key={col.key} className="px-4 py-2">
+                {col.label}
+              </th>
             ))}
             {slotHeader &&
               slotHeader.map((h, i) => (
-                <th key={i} className="px-4 py-2">{h}</th>
+                <th key={i} className="px-4 py-2">
+                  {h}
+                </th>
               ))}
           </tr>
         </thead>
@@ -42,20 +47,29 @@ export default function TableContent({ data, columns, title, slotHeader }) {
                     ? col.render(row[col.key], row, i)
                     : col.key === "level"
                     ? ordinal(row.level)
-                    : col.isArray && Array.isArray(row[col.key])
-                    ? row[col.key].length > 0 && row[col.key][0] !== "—"
-                      ? row[col.key]
-                          .map((feature) => (
+                    : col.key === "features" &&
+                      Array.isArray(row.features) &&
+                      Array.isArray(row.featuresId)
+                    ? row.features.length > 0 && row.features[0] !== "—"
+                      ? row.features
+                          .map((feature, idx) => (
                             <a
-                              key={feature}
-                              href={`#${feature
-                                .toLowerCase()
-                                .replace(/[^a-z0-9]+/g, "-")
-                                .replace(/^-|-$/g, "")}`}
+                              key={row.featuresId[idx]}
+                              href={`#${row.featuresId[idx]}`}
                               className="text-blue-400 hover:underline"
                             >
                               {feature}
                             </a>
+                          ))
+                          .reduce((prev, curr) => [prev, ", ", curr])
+                      : "—"
+                    : col.isArray && Array.isArray(row[col.key])
+                    ? row[col.key].length > 0 && row[col.key][0] !== "—"
+                      ? row[col.key]
+                          .map((val) => (
+                            <span key={val} className="inline-block">
+                              {val}
+                            </span>
                           ))
                           .reduce((prev, curr) => [prev, ", ", curr])
                       : "—"

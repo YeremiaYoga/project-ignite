@@ -1,4 +1,4 @@
-const artificerFeatures2 = [
+const artificerFeatures = [
   {
     id: "optional-rule-firearm-proficiency-1",
     title: "Optional Rule: Firearm Proficiency",
@@ -135,60 +135,76 @@ const artificerFeatures2 = [
     ],
   },
   {
-  id: "infuse-item-2",
-  title: "Infuse Item",
-  level: 2,
-  content: [
-    {
-      type: "paragraph",
-      value:
-        "You've gained the ability to imbue mundane items with certain magical infusions, turning those objects into magic items.",
-    },
-    {
-      type: "heading",
-      value: "Infusions Known",
-    },
-    {
-      type: "paragraph",
-      value:
-        "When you gain this feature, pick four artificer infusions to learn, choosing from the 'Artificer Infusions' section at the end of the class's description. You learn additional infusions of your choice when you reach certain levels in this class, as shown in the Infusions Known column of the Artificer table.",
-    },
-    {
-      type: "note",
-      value: "Artificer Infusions",
-      content: [
-        "Artificers have invented numerous magical infusions, extraordinary processes that rapidly create magic items. To many, artificers seem like wonderworkers, accomplishing in hours what others need weeks to complete.",
-        "The description of each of the following infusions details the type of item that can receive it, along with whether the resulting magic item requires attunement.",
-        "Some infusions specify a minimum artificer level. You can't learn such an infusion until you are at least that level.",
-        "Unless an infusion's description says otherwise, you can't learn an infusion more than once."
-      ]
-    },
-    {
-      type: "heading",
-      value: "Infusing an Item",
-    },
-    {
-      type: "paragraph",
-      value:
-        "Whenever you finish a long rest, you can touch a nonmagical object and imbue it with one of your artificer infusions, turning it into a magic item. An infusion works only on certain kinds of objects, as specified in the infusion’s description. If the item requires attunement, you can attune yourself to it the instant you infuse the item. If you decide to attune to the item later, you must do so using the normal process for attunement (see 'Attunement' in chapter 7 of the Dungeon Master's Guide).",
-    },
-    {
-      type: "paragraph",
-      value:
-        "Your infusion remains in an item indefinitely, but when you die, the infusion vanishes after a number of days have passed equal to your Intelligence modifier (minimum of 1 day). The infusion also vanishes if you give up your knowledge of the infusion for another one.",
-    },
-    {
-      type: "paragraph",
-      value:
-        "You can infuse more than one nonmagical object at the end of a long rest; the maximum number of objects appears in the Infused Items column of the Artificer table. You must touch each of the objects, and each of your infusions can be in only one object at a time. Moreover, no object can bear more than one of your infusions at a time. If you try to exceed your maximum number of infusions, the oldest infusion immediately ends, and then the new infusion applies.",
-    },
-    {
-      type: "paragraph",
-      value:
-        "If an infusion ends on an item that contains other things, like a bag of holding, its contents harmlessly appear in and around its space.",
-    }
-  ],
-},
+    id: "infuse-item-2",
+    title: "Infuse Item",
+    level: 2,
+    content: [
+      {
+        type: "paragraph",
+        value:
+          "You've gained the ability to imbue mundane items with certain magical infusions, turning those objects into magic items.",
+      },
+      {
+        type: "heading",
+        value: "Infusions Known",
+      },
+      {
+        type: "paragraph",
+        value:
+          "When you gain this feature, pick four artificer infusions to learn, choosing from the 'Artificer Infusions' section at the end of the class's description. You learn additional infusions of your choice when you reach certain levels in this class, as shown in the Infusions Known column of the Artificer table.",
+      },
+      {
+        type: "note",
+        value: "Artificer Infusions",
+        content: [
+          "Artificers have invented numerous magical infusions, extraordinary processes that rapidly create magic items. To many, artificers seem like wonderworkers, accomplishing in hours what others need weeks to complete.",
+          "The description of each of the following infusions details the type of item that can receive it, along with whether the resulting magic item requires attunement.",
+          "Some infusions specify a minimum artificer level. You can't learn such an infusion until you are at least that level.",
+          "Unless an infusion's description says otherwise, you can't learn an infusion more than once.",
+        ],
+      },
+      {
+        type: "heading",
+        value: "Infusing an Item",
+      },
+      {
+        type: "paragraph",
+        value:
+          "Whenever you finish a long rest, you can touch a nonmagical object and imbue it with one of your artificer infusions, turning it into a magic item. An infusion works only on certain kinds of objects, as specified in the infusion’s description. If the item requires attunement, you can attune yourself to it the instant you infuse the item. If you decide to attune to the item later, you must do so using the normal process for attunement (see 'Attunement' in chapter 7 of the Dungeon Master's Guide).",
+      },
+      {
+        type: "paragraph",
+        value:
+          "Your infusion remains in an item indefinitely, but when you die, the infusion vanishes after a number of days have passed equal to your Intelligence modifier (minimum of 1 day). The infusion also vanishes if you give up your knowledge of the infusion for another one.",
+      },
+      {
+        type: "paragraph",
+        value:
+          "You can infuse more than one nonmagical object at the end of a long rest; the maximum number of objects appears in the Infused Items column of the Artificer table. You must touch each of the objects, and each of your infusions can be in only one object at a time. Moreover, no object can bear more than one of your infusions at a time. If you try to exceed your maximum number of infusions, the oldest infusion immediately ends, and then the new infusion applies.",
+      },
+      {
+        type: "paragraph",
+        value:
+          "If an infusion ends on an item that contains other things, like a bag of holding, its contents harmlessly appear in and around its space.",
+      },
+    ],
+  },
+  {
+    id: "artificer-specialist-3",
+    title: "Artificer Specialist",
+    level: 3,
+    content: [
+      {
+        type: "paragraph",
+        value:
+          "Choose an Artificer Specialist subclass at 3rd level. Your choice grants you features at 3rd, 5th, 9th, and 15th level.",
+      },
+      {
+        type: "subclass",
+        value: "No Subclasses Available",
+      },
+    ],
+  },
   {
     id: "the-right-tool-for-the-job-3",
     title: "The Right Tool for the Job",
@@ -225,11 +241,10 @@ const artificerFeatures2 = [
     content: [
       {
         type: "paragraph",
-        value:
-          "You gain a feature granted by your Artificer Specialist choice.",
+        value: "You gain a feature granted by your Artificer Specialist choice.",
       },
       {
-        type: "note",
+        type: "subclass",
         value: "No Subclasses Available",
       },
     ],
@@ -287,11 +302,10 @@ const artificerFeatures2 = [
     content: [
       {
         type: "paragraph",
-        value:
-          "You gain a feature granted by your Artificer Specialist choice.",
+        value: "You gain a feature granted by your Artificer Specialist choice.",
       },
       {
-        type: "note",
+        type: "subclass",
         value: "No Subclasses Available",
       },
     ],
@@ -374,11 +388,10 @@ const artificerFeatures2 = [
     content: [
       {
         type: "paragraph",
-        value:
-          "You gain a feature granted by your Artificer Specialist choice.",
+        value: "You gain a feature granted by your Artificer Specialist choice.",
       },
       {
-        type: "note",
+        type: "subclass",
         value: "No Subclasses Available",
       },
     ],
@@ -450,4 +463,4 @@ const artificerFeatures2 = [
   },
 ];
 
-export default artificerFeatures2;
+export default artificerFeatures;
