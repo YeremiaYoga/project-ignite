@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import CollapsibleSection from "./CollapseSection";
+import CollapsibleSection from "../../../components/CollapseSection";
 import FeaturesContent from "@/components/FeaturesContent";
 import FeatureTable from "@/components/FeatureTable";
 import artificerFeatures from "@/data/classes/artificer/classFeatures";
