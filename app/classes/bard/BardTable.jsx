@@ -3,7 +3,7 @@ import React from "react";
 import bardTableData from "@/data/classes/bard/tableData";
 import TableContent from "@/components/TableContent";
 
-export default function ArtificerTable() {
+export default function BardTable() {
   const columns = [
     { key: "level", label: "Level" },
     { key: "proficiencyBonus", label: "Proficiency Bonus" },

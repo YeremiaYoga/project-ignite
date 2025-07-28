@@ -21,7 +21,7 @@ const subclasses = [
   { key: "zealot", label: "Zealot (PHB'24)" },
 ];
 
-export default function ArtificerFeatures() {
+export default function BarbarianFeatures() {
   const [activeSubclasses, setActiveSubclasses] = useState([]);
 
   const router = useRouter();

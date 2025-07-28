@@ -9,7 +9,6 @@ export default function TableContent({ data, columns, title, slotHeader }) {
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   };
 
-  console.log(data);
   return (
     <div className="overflow-x-auto border border-gray-700 rounded-lg shadow mt-6 bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900">
       <table className="w-full text-sm text-left text-gray-200">
@@ -41,30 +40,35 @@ export default function TableContent({ data, columns, title, slotHeader }) {
         <tbody className="divide-y divide-gray-700 bg-gray-800">
           {data.map((row, i) => (
             <tr key={i} className="hover:bg-gray-700 transition">
-              {columns.map((col) => (
-                <td key={col.key} className="px-4 py-2 whitespace-pre-wrap">
-                  {col.render
-                    ? col.render(row[col.key], row, i)
-                    : col.key === "level"
-                    ? ordinal(row.level)
-                    : col.key === "features" &&
-                      Array.isArray(row.features) &&
-                      Array.isArray(row.featuresId)
-                    ? row.features.length > 0 && row.features[0] !== "—"
+              {columns.map((col) => {
+                let content;
+
+                if (col.render) {
+                  content = col.render(row[col.key], row, i);
+                } else if (col.key === "level") {
+                  content = ordinal(row.level);
+                } else if (
+                  col.key === "features" &&
+                  Array.isArray(row.features) &&
+                  Array.isArray(row.featuresId)
+                ) {
+                  content =
+                    row.features.length > 0 && row.features[0] !== "—"
                       ? row.features
                           .map((feature, idx) => (
                             <a
                               key={row.featuresId[idx]}
                               href={`#${row.featuresId[idx]}`}
-                              className="text-blue-400 hover:underline"
+                              className="text-blue-400 hover:underline custom"
                             >
                               {feature}
                             </a>
                           ))
                           .reduce((prev, curr) => [prev, ", ", curr])
-                      : "—"
-                    : col.isArray && Array.isArray(row[col.key])
-                    ? row[col.key].length > 0 && row[col.key][0] !== "—"
+                      : "—";
+                } else if (col.isArray && Array.isArray(row[col.key])) {
+                  content =
+                    row[col.key].length > 0 && row[col.key][0] !== "—"
                       ? row[col.key]
                           .map((val) => (
                             <span key={val} className="inline-block">
@@ -72,10 +76,24 @@ export default function TableContent({ data, columns, title, slotHeader }) {
                             </span>
                           ))
                           .reduce((prev, curr) => [prev, ", ", curr])
-                      : "—"
-                    : row[col.key]}
-                </td>
-              ))}
+                      : "—";
+                }
+                // else if (col.key === "proficiencyBonus") {
+                //   content =
+                //     typeof row[col.key] === "number"
+                //       ? `+${row[col.key]}`
+                //       : row[col.key];
+                // }
+                else {
+                  content = row[col.key];
+                }
+
+                return (
+                  <td key={col.key} className="px-4 py-2 whitespace-pre-wrap">
+                    {content}
+                  </td>
+                );
+              })}
               {slotHeader &&
                 row.spellSlots &&
                 row.spellSlots.map((slot, idx) => (

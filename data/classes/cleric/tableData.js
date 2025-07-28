@@ -1,4 +1,4 @@
-export const clericClassTable = [
+const clericTableData = [
   {
     level: 1,
     proficiencyBonus: 2,
@@ -116,7 +116,7 @@ export const clericClassTable = [
     featuresId: ["ability-score-improvement-12"],
     channelDivinity: 3,
     cantrips: 5,
-    preparedSpells: 18,
+    preparedSpells: 16,
     spellSlots: [4, 3, 3, 3, 2, 1, "—", "—", "—"],
   },
   {
@@ -136,7 +136,7 @@ export const clericClassTable = [
     featuresId: ["improved-blessed-strikes-14"],
     channelDivinity: 3,
     cantrips: 5,
-    preparedSpells: 18,
+    preparedSpells: 17,
     spellSlots: [4, 3, 3, 3, 2, 1, 1, "—", "—"],
   },
   {
@@ -146,7 +146,7 @@ export const clericClassTable = [
     featuresId: ["—"],
     channelDivinity: 3,
     cantrips: 5,
-    preparedSpells: 19,
+    preparedSpells: 18,
     spellSlots: [4, 3, 3, 3, 2, 1, 1, 1, "—"],
   },
   {
@@ -156,7 +156,7 @@ export const clericClassTable = [
     featuresId: ["ability-score-improvement-16"],
     channelDivinity: 3,
     cantrips: 5,
-    preparedSpells: 20,
+    preparedSpells: 18,
     spellSlots: [4, 3, 3, 3, 2, 1, 1, 1, "—"],
   },
   {
@@ -166,7 +166,7 @@ export const clericClassTable = [
     featuresId: ["subclass-feature-17"],
     channelDivinity: 3,
     cantrips: 5,
-    preparedSpells: 21,
+    preparedSpells: 19,
     spellSlots: [4, 3, 3, 3, 2, 1, 1, 1, 1],
   },
   {
@@ -176,7 +176,7 @@ export const clericClassTable = [
     featuresId: ["—"],
     channelDivinity: 4,
     cantrips: 5,
-    preparedSpells: 22,
+    preparedSpells: 20,
     spellSlots: [4, 3, 3, 3, 3, 1, 1, 1, 1],
   },
   {
@@ -186,7 +186,7 @@ export const clericClassTable = [
     featuresId: ["epic-boon-19"],
     channelDivinity: 4,
     cantrips: 5,
-    preparedSpells: 23,
+    preparedSpells: 21,
     spellSlots: [4, 3, 3, 3, 3, 2, 1, 1, 1],
   },
   {
@@ -196,7 +196,8 @@ export const clericClassTable = [
     featuresId: ["greater-divine-intervention-20"],
     channelDivinity: 4,
     cantrips: 5,
-    preparedSpells: 24,
+    preparedSpells: 22,
     spellSlots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
   },
 ];
+export default clericTableData;

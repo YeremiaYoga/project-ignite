@@ -1,7 +1,7 @@
 const fighterTableData = [
   {
     level: 1,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Fighting Style", "Second Wind", "Weapon Mastery"],
     featuresId: ["fighting-style-1", "second-wind-1", "weapon-mastery-1"],
     secondWind: 2,
@@ -9,7 +9,7 @@ const fighterTableData = [
   },
   {
     level: 2,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Action Surge", "Tactical Mind"],
     featuresId: ["action-surge-2", "tactical-mind-2"],
     secondWind: 2,
@@ -17,7 +17,7 @@ const fighterTableData = [
   },
   {
     level: 3,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Fighter Subclass"],
     featuresId: ["fighter-subclass-3"],
     secondWind: 2,
@@ -25,7 +25,7 @@ const fighterTableData = [
   },
   {
     level: 4,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-4"],
     secondWind: 3,
@@ -33,7 +33,7 @@ const fighterTableData = [
   },
   {
     level: 5,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Extra Attack", "Tactical Shift"],
     featuresId: ["extra-attack-5", "tactical-shift-5"],
     secondWind: 3,
@@ -41,7 +41,7 @@ const fighterTableData = [
   },
   {
     level: 6,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-6"],
     secondWind: 3,
@@ -49,7 +49,7 @@ const fighterTableData = [
   },
   {
     level: 7,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Subclass Feature"],
     featuresId: ["subclass-feature-7"],
     secondWind: 3,
@@ -57,7 +57,7 @@ const fighterTableData = [
   },
   {
     level: 8,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-8"],
     secondWind: 3,
@@ -65,7 +65,7 @@ const fighterTableData = [
   },
   {
     level: 9,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Indomitable", "Tactical Master"],
     featuresId: ["indomitable-9", "tactical-master-9"],
     secondWind: 3,
@@ -73,7 +73,7 @@ const fighterTableData = [
   },
   {
     level: 10,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Subclass Feature"],
     featuresId: ["subclass-feature-10"],
     secondWind: 4,
@@ -81,7 +81,7 @@ const fighterTableData = [
   },
   {
     level: 11,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Two Extra Attacks"],
     featuresId: ["two-extra-attacks-11"],
     secondWind: 4,
@@ -89,7 +89,7 @@ const fighterTableData = [
   },
   {
     level: 12,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-12"],
     secondWind: 4,
@@ -97,7 +97,7 @@ const fighterTableData = [
   },
   {
     level: 13,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Indomitable", "Studied Attacks"],
     featuresId: ["indomitable-13", "studied-attacks-13"],
     secondWind: 4,
@@ -105,7 +105,7 @@ const fighterTableData = [
   },
   {
     level: 14,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-14"],
     secondWind: 4,
@@ -113,7 +113,7 @@ const fighterTableData = [
   },
   {
     level: 15,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Subclass Feature"],
     featuresId: ["subclass-feature-15"],
     secondWind: 4,
@@ -121,7 +121,7 @@ const fighterTableData = [
   },
   {
     level: 16,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-16"],
     secondWind: 4,
@@ -129,7 +129,7 @@ const fighterTableData = [
   },
   {
     level: 17,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Action Surge", "Indomitable"],
     featuresId: ["action-surge-17", "indomitable-17"],
     secondWind: 4,
@@ -137,7 +137,7 @@ const fighterTableData = [
   },
   {
     level: 18,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Subclass Feature"],
     featuresId: ["subclass-feature-18"],
     secondWind: 4,
@@ -145,7 +145,7 @@ const fighterTableData = [
   },
   {
     level: 19,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Epic Boon"],
     featuresId: ["epic-boon-19"],
     secondWind: 4,
@@ -153,7 +153,7 @@ const fighterTableData = [
   },
   {
     level: 20,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Three Extra Attacks"],
     featuresId: ["three-extra-attacks-20"],
     secondWind: 4,

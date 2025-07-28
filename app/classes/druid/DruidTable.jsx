@@ -1,14 +1,14 @@
 "use client";
 import React from "react";
-import clericTableData from "@/data/classes/cleric/tableData";
+import druidTableData from "@/data/classes/druid/tableData";
 import TableContent from "@/components/TableContent";
 
-export default function ClericTable() {
+export default function DruidTable() {
   const columns = [
     { key: "level", label: "Level" },
     { key: "proficiencyBonus", label: "Proficiency Bonus" },
     { key: "features", label: "Features", isArray: true },
-    { key: "channelDivinity", label: "Channel Divinity" },
+    { key: "wildShape", label: "Wild Shape" },
     { key: "cantrips", label: "Cantrips" },
     { key: "preparedSpells", label: "Prepared Spells" },
   ];
@@ -26,9 +26,9 @@ export default function ClericTable() {
 
   return (
     <TableContent
-      data={clericTableData}
+      data={druidTableData}
       columns={columns}
-      title="The Cleric"
+      title="The Druid"
       slotHeader={slotHeader}
     />
   );

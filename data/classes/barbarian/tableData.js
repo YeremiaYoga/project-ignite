@@ -1,7 +1,7 @@
 const barbarianTableData = [
   {
     level: 1,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Rage", "Unarmored Defense", "Weapon Mastery"],
     featuresId: ["rage-1", "unarmored-defense-1", "weapon-mastery-1"],
     rages: 2,
@@ -10,7 +10,7 @@ const barbarianTableData = [
   },
   {
     level: 2,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Danger Sense", "Reckless Attack"],
     featuresId: ["danger-sense-2", "reckless-attack-2"],
     rages: 2,
@@ -19,7 +19,7 @@ const barbarianTableData = [
   },
   {
     level: 3,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Barbarian Subclass", "Primal Knowledge"],
     featuresId: ["barbarian-subclass-3", "primal-knowledge-3"],
     rages: 3,
@@ -28,7 +28,7 @@ const barbarianTableData = [
   },
   {
     level: 4,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-4"],
     rages: 3,
@@ -37,7 +37,7 @@ const barbarianTableData = [
   },
   {
     level: 5,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Extra Attack", "Fast Movement"],
     featuresId: ["extra-attack-5", "fast-movement-5"],
     rages: 3,
@@ -46,7 +46,7 @@ const barbarianTableData = [
   },
   {
     level: 6,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Subclass Feature"],
     featuresId: ["subclass-feature-6"],
     rages: 4,
@@ -55,7 +55,7 @@ const barbarianTableData = [
   },
   {
     level: 7,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Feral Instinct", "Instinctive Pounce"],
     featuresId: ["feral-instinct-7", "instinctive-pounce-7"],
     rages: 4,
@@ -64,7 +64,7 @@ const barbarianTableData = [
   },
   {
     level: 8,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-8"],
     rages: 4,
@@ -73,7 +73,7 @@ const barbarianTableData = [
   },
   {
     level: 9,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Brutal Strike"],
     featuresId: ["brutal-strike-9"],
     rages: 4,
@@ -82,7 +82,7 @@ const barbarianTableData = [
   },
   {
     level: 10,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Subclass Feature"],
     featuresId: ["subclass-feature-10"],
     rages: 4,
@@ -91,7 +91,7 @@ const barbarianTableData = [
   },
   {
     level: 11,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Relentless Rage"],
     featuresId: ["relentless-rage-11"],
     rages: 4,
@@ -100,7 +100,7 @@ const barbarianTableData = [
   },
   {
     level: 12,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-12"],
     rages: 5,
@@ -109,7 +109,7 @@ const barbarianTableData = [
   },
   {
     level: 13,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Improved Brutal Strike"],
     featuresId: ["improved-brutal-strike-13"],
     rages: 5,
@@ -118,7 +118,7 @@ const barbarianTableData = [
   },
   {
     level: 14,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Subclass Feature"],
     featuresId: ["subclass-feature-14"],
     rages: 5,
@@ -127,7 +127,7 @@ const barbarianTableData = [
   },
   {
     level: 15,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Persistent Rage"],
     featuresId: ["persistent-rage-15"],
     rages: 5,
@@ -136,7 +136,7 @@ const barbarianTableData = [
   },
   {
     level: 16,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-16"],
     rages: 5,
@@ -145,7 +145,7 @@ const barbarianTableData = [
   },
   {
     level: 17,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Improved Brutal Strike"],
     featuresId: ["improved-brutal-strike-17"],
     rages: 6,
@@ -154,7 +154,7 @@ const barbarianTableData = [
   },
   {
     level: 18,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Indomitable Might"],
     featuresId: ["indomitable-might-18"],
     rages: 6,
@@ -163,7 +163,7 @@ const barbarianTableData = [
   },
   {
     level: 19,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Epic Boon"],
     featuresId: ["epic-boon-19"],
     rages: 6,
@@ -172,7 +172,7 @@ const barbarianTableData = [
   },
   {
     level: 20,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Primal Champion"],
     featuresId: ["primal-champion-20"],
     rages: 6,

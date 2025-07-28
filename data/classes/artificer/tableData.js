@@ -1,7 +1,7 @@
 const artificerTableData = [
   {
     level: 1,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: [
       "Optional Rule: Firearm Proficiency",
       "Magical Tinkering",
@@ -19,7 +19,7 @@ const artificerTableData = [
   },
   {
     level: 2,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Infuse Item"],
     featuresId: ["infuse-item-2"],
     infusionsKnown: 4,
@@ -29,7 +29,7 @@ const artificerTableData = [
   },
   {
     level: 3,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: [
       "Artificer Specialist",
       "The Right Tool for the Job"
@@ -45,7 +45,7 @@ const artificerTableData = [
   },
   {
     level: 4,
-    proficiencyBonus: "+2",
+    proficiencyBonus: 2,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-4"],
     infusionsKnown: 4,
@@ -55,7 +55,7 @@ const artificerTableData = [
   },
   {
     level: 5,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Artificer Specialist Feature"],
     featuresId: ["artificer-specialist-feature-5"],
     infusionsKnown: 4,
@@ -65,7 +65,7 @@ const artificerTableData = [
   },
   {
     level: 6,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Tool Expertise"],
     featuresId: ["tool-expertise-6"],
     infusionsKnown: 6,
@@ -75,7 +75,7 @@ const artificerTableData = [
   },
   {
     level: 7,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Flash of Genius"],
     featuresId: ["flash-of-genius-7"],
     infusionsKnown: 6,
@@ -85,7 +85,7 @@ const artificerTableData = [
   },
   {
     level: 8,
-    proficiencyBonus: "+3",
+    proficiencyBonus: 3,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-8"],
     infusionsKnown: 6,
@@ -95,7 +95,7 @@ const artificerTableData = [
   },
   {
     level: 9,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Artificer Specialist Feature"],
     featuresId: ["artificer-specialist-feature-9"],
     infusionsKnown: 6,
@@ -105,7 +105,7 @@ const artificerTableData = [
   },
   {
     level: 10,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Magic Item Adept"],
     featuresId: ["magic-item-adept-10"],
     infusionsKnown: 8,
@@ -115,7 +115,7 @@ const artificerTableData = [
   },
   {
     level: 11,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Spell-Storing Item"],
     featuresId: ["spell-storing-item-11"],
     infusionsKnown: 8,
@@ -125,7 +125,7 @@ const artificerTableData = [
   },
   {
     level: 12,
-    proficiencyBonus: "+4",
+    proficiencyBonus: 4,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-12"],
     infusionsKnown: 8,
@@ -135,7 +135,7 @@ const artificerTableData = [
   },
   {
     level: 13,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: [],
     featuresId: [],
     infusionsKnown: 8,
@@ -145,7 +145,7 @@ const artificerTableData = [
   },
   {
     level: 14,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Magic Item Savant"],
     featuresId: ["magic-item-savant-14"],
     infusionsKnown: 10,
@@ -155,7 +155,7 @@ const artificerTableData = [
   },
   {
     level: 15,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Artificer Specialist Feature"],
     featuresId: ["artificer-specialist-feature-15"],
     infusionsKnown: 10,
@@ -165,7 +165,7 @@ const artificerTableData = [
   },
   {
     level: 16,
-    proficiencyBonus: "+5",
+    proficiencyBonus: 5,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-16"],
     infusionsKnown: 10,
@@ -175,7 +175,7 @@ const artificerTableData = [
   },
   {
     level: 17,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: [],
     featuresId: [],
     infusionsKnown: 10,
@@ -185,7 +185,7 @@ const artificerTableData = [
   },
   {
     level: 18,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Magic Item Master"],
     featuresId: ["magic-item-master-18"],
     infusionsKnown: 12,
@@ -195,7 +195,7 @@ const artificerTableData = [
   },
   {
     level: 19,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Ability Score Improvement"],
     featuresId: ["ability-score-improvement-19"],
     infusionsKnown: 12,
@@ -205,7 +205,7 @@ const artificerTableData = [
   },
   {
     level: 20,
-    proficiencyBonus: "+6",
+    proficiencyBonus: 6,
     features: ["Soul of Artifice"],
     featuresId: ["soul-of-artifice-20"],
     infusionsKnown: 12,

@@ -1,4 +1,4 @@
-export const druidClassTable = [
+const druidTableData = [
   {
     level: 1,
     proficiencyBonus: 2,
@@ -7,7 +7,7 @@ export const druidClassTable = [
     wildShape: "—",
     cantrips: 2,
     preparedSpells: 4,
-    spellSlots: [2, "—", "—", "—", "—", "—", "—", "—", "—"]
+    spellSlots: [2, "—", "—", "—", "—", "—", "—", "—", "—"],
   },
   {
     level: 2,
@@ -17,7 +17,7 @@ export const druidClassTable = [
     wildShape: 2,
     cantrips: 2,
     preparedSpells: 5,
-    spellSlots: [3, "—", "—", "—", "—", "—", "—", "—", "—"]
+    spellSlots: [3, "—", "—", "—", "—", "—", "—", "—", "—"],
   },
   {
     level: 3,
@@ -27,7 +27,7 @@ export const druidClassTable = [
     wildShape: 2,
     cantrips: 2,
     preparedSpells: 6,
-    spellSlots: [4, 2, "—", "—", "—", "—", "—", "—", "—"]
+    spellSlots: [4, 2, "—", "—", "—", "—", "—", "—", "—"],
   },
   {
     level: 4,
@@ -37,7 +37,7 @@ export const druidClassTable = [
     wildShape: 2,
     cantrips: 3,
     preparedSpells: 7,
-    spellSlots: [4, 3, "—", "—", "—", "—", "—", "—", "—"]
+    spellSlots: [4, 3, "—", "—", "—", "—", "—", "—", "—"],
   },
   {
     level: 5,
@@ -47,7 +47,7 @@ export const druidClassTable = [
     wildShape: 2,
     cantrips: 3,
     preparedSpells: 9,
-    spellSlots: [4, 3, 2, "—", "—", "—", "—", "—", "—"]
+    spellSlots: [4, 3, 2, "—", "—", "—", "—", "—", "—"],
   },
   {
     level: 6,
@@ -57,7 +57,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 3,
     preparedSpells: 10,
-    spellSlots: [4, 3, 3, "—", "—", "—", "—", "—", "—"]
+    spellSlots: [4, 3, 3, "—", "—", "—", "—", "—", "—"],
   },
   {
     level: 7,
@@ -67,7 +67,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 3,
     preparedSpells: 11,
-    spellSlots: [4, 3, 3, 1, "—", "—", "—", "—", "—"]
+    spellSlots: [4, 3, 3, 1, "—", "—", "—", "—", "—"],
   },
   {
     level: 8,
@@ -77,7 +77,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 3,
     preparedSpells: 12,
-    spellSlots: [4, 3, 3, 2, "—", "—", "—", "—", "—"]
+    spellSlots: [4, 3, 3, 2, "—", "—", "—", "—", "—"],
   },
   {
     level: 9,
@@ -87,7 +87,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 3,
     preparedSpells: 14,
-    spellSlots: [4, 3, 3, 3, 1, "—", "—", "—", "—"]
+    spellSlots: [4, 3, 3, 3, 1, "—", "—", "—", "—"],
   },
   {
     level: 10,
@@ -97,7 +97,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 4,
     preparedSpells: 15,
-    spellSlots: [4, 3, 3, 3, 2, "—", "—", "—", "—"]
+    spellSlots: [4, 3, 3, 3, 2, "—", "—", "—", "—"],
   },
   {
     level: 11,
@@ -107,7 +107,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 4,
     preparedSpells: 16,
-    spellSlots: [4, 3, 3, 3, 2, 1, "—", "—", "—"]
+    spellSlots: [4, 3, 3, 3, 2, 1, "—", "—", "—"],
   },
   {
     level: 12,
@@ -117,7 +117,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 4,
     preparedSpells: 16,
-    spellSlots: [4, 3, 3, 3, 2, 1, "—", "—", "—"]
+    spellSlots: [4, 3, 3, 3, 2, 1, "—", "—", "—"],
   },
   {
     level: 13,
@@ -127,7 +127,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 4,
     preparedSpells: 17,
-    spellSlots: [4, 3, 3, 3, 2, 1, 1, "—", "—"]
+    spellSlots: [4, 3, 3, 3, 2, 1, 1, "—", "—"],
   },
   {
     level: 14,
@@ -137,7 +137,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 4,
     preparedSpells: 17,
-    spellSlots: [4, 3, 3, 3, 2, 1, 1, "—", "—"]
+    spellSlots: [4, 3, 3, 3, 2, 1, 1, "—", "—"],
   },
   {
     level: 15,
@@ -147,7 +147,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 4,
     preparedSpells: 18,
-    spellSlots: [4, 3, 3, 3, 2, 1, 1, 1, "—"]
+    spellSlots: [4, 3, 3, 3, 2, 1, 1, 1, "—"],
   },
   {
     level: 16,
@@ -157,7 +157,7 @@ export const druidClassTable = [
     wildShape: 3,
     cantrips: 4,
     preparedSpells: 18,
-    spellSlots: [4, 3, 3, 3, 2, 1, 1, 1, "—"]
+    spellSlots: [4, 3, 3, 3, 2, 1, 1, 1, "—"],
   },
   {
     level: 17,
@@ -167,7 +167,7 @@ export const druidClassTable = [
     wildShape: 4,
     cantrips: 4,
     preparedSpells: 19,
-    spellSlots: [4, 3, 3, 3, 2, 1, 1, 1, 1]
+    spellSlots: [4, 3, 3, 3, 2, 1, 1, 1, 1],
   },
   {
     level: 18,
@@ -177,7 +177,7 @@ export const druidClassTable = [
     wildShape: 4,
     cantrips: 4,
     preparedSpells: 20,
-    spellSlots: [4, 3, 3, 3, 3, 1, 1, 1, 1]
+    spellSlots: [4, 3, 3, 3, 3, 1, 1, 1, 1],
   },
   {
     level: 19,
@@ -187,7 +187,7 @@ export const druidClassTable = [
     wildShape: 4,
     cantrips: 4,
     preparedSpells: 21,
-    spellSlots: [4, 3, 3, 3, 3, 2, 1, 1, 1]
+    spellSlots: [4, 3, 3, 3, 3, 2, 1, 1, 1],
   },
   {
     level: 20,
@@ -197,6 +197,8 @@ export const druidClassTable = [
     wildShape: 4,
     cantrips: 4,
     preparedSpells: 22,
-    spellSlots: [4, 3, 3, 3, 3, 2, 2, 1, 1]
-  }
+    spellSlots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
+  },
 ];
+
+export default druidTableData;
