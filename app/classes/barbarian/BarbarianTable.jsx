@@ -20,6 +20,7 @@ export default function BarbarianTable() {
       columns={columns}
       title="The Barbarian"
       slotHeader={""}
+      nameClass="Barbarian" 
     />
   );
 }

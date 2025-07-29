@@ -1,12 +1,13 @@
 import ArtificerTable from "./ArtificerTable";
 import ArtificerFeatures from "./ArtificerFeatures";
+import ClassHeader from "@/components/ClassHeaderName";
 
 export default function ArtificerPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-800 via-gray-900 to-[#0f172a] px-4 py-10">
       <div className="max-w-6xl mx-auto space-y-8">
         <header className="text-left border-b border-gray-700 pb-2">
-          <h1 className="text-4xl font-bold text-blue-400">Artificer</h1>
+          <ClassHeader className="artificer" />
         </header>
 
         <section className="text-gray-300 space-y-4">

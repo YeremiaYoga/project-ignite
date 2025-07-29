@@ -1,4 +1,4 @@
-export const rangerClassTable = [
+const rangerTableData = [
   {
     level: 1,
     proficiencyBonus: 2,
@@ -180,3 +180,5 @@ export const rangerClassTable = [
     spellSlots: [4, 3, 3, 3, 2]
   },
 ];
+
+export default rangerTableData;

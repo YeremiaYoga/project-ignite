@@ -1,7 +1,13 @@
 "use client";
 import React from "react";
 
-export default function TableContent({ data, columns, title, slotHeader }) {
+export default function TableContent({
+  data,
+  columns,
+  title,
+  slotHeader,
+  nameClass,
+}) {
   const ordinal = (n) => {
     if (n === "—" || n === "-") return n;
     const s = ["th", "st", "nd", "rd"],
@@ -9,10 +15,28 @@ export default function TableContent({ data, columns, title, slotHeader }) {
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   };
 
+  const classColors = {
+    Artificer: "#a890f0",
+    Barbarian: "#d32f2f",
+    Bard: "#ba68c8",
+    "Blood Hunter": "#8e24aa",
+    Cleric: "#fbc02d",
+    Druid: "#388e3c",
+    Fighter: "#455a64",
+    Monk: "#009688",
+    Paladin: "#fdd835",
+    Ranger: "#558b2f",
+    Rogue: "#212121",
+    Sorcerer: "#f06292",
+    Warlock: "#6a1b9a",
+    Wizard: "#1976d2",
+  };
+
+  const headerColor = classColors[nameClass] || "#1976d2";
   return (
     <div className="overflow-x-auto border border-gray-700 rounded-lg shadow mt-6 bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900">
       <table className="w-full text-sm text-left text-gray-200">
-        <thead className="bg-blue-900 text-blue-200">
+        <thead style={{ backgroundColor: headerColor }} className="text-white">
           <tr>
             <th className="px-4 py-2" colSpan={columns.length}>
               {title}
@@ -23,7 +47,10 @@ export default function TableContent({ data, columns, title, slotHeader }) {
               </th>
             )}
           </tr>
-          <tr className="uppercase text-xs bg-blue-900">
+          <tr
+            style={{ backgroundColor: headerColor }}
+            className="uppercase text-xs "
+          >
             {columns.map((col) => (
               <th key={col.key} className="px-4 py-2">
                 {col.label}

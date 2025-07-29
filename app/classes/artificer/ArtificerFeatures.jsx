@@ -5,7 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import CollapsibleSection from "../../../components/CollapseSection";
 import FeaturesContent from "@/components/FeaturesContent";
 import FeatureTable from "@/components/FeatureTable";
+
 import artificerFeatures from "@/data/classes/artificer/classFeatures";
+import artificerCoreTraits from "@/data/classes/artificer/coreTraits";
+import CoreTraitsDisplay from "@/components/CoreTraitsDisplay";
 import { artificerSubclasses } from "@/data/classes/artificer/subclassData";
 
 const subclasses = [
@@ -79,6 +82,10 @@ export default function ArtificerFeatures() {
           </button>
         ))}
       </div>
+
+      <CollapsibleSection title="Core Traits">
+        <CoreTraitsDisplay data={artificerCoreTraits} />
+      </CollapsibleSection>
 
       {artificerFeatures.map((feature) => {
         const subclassFeatures = getSubclassFeaturesForLevel(feature.level);

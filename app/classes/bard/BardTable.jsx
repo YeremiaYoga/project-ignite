@@ -30,6 +30,7 @@ export default function BardTable() {
       columns={columns}
       title="The Bard"
       slotHeader={slotHeader}
+      nameClass="Bard" 
     />
   );
 }

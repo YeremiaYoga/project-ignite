@@ -20,6 +20,7 @@ export default function MonkTable() {
       columns={columns}
       title="The Monk"
       slotHeader={""}
+      nameClass="Monk" 
     />
   );
 }

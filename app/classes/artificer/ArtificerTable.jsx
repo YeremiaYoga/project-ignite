@@ -20,6 +20,7 @@ export default function ArtificerTable() {
       columns={columns}
       title="The Artificer"
       slotHeader={slotHeader}
+      nameClass="Artificer" 
     />
   );
 }

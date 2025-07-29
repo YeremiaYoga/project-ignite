@@ -19,6 +19,7 @@ export default function FighterTable() {
       columns={columns}
       title="The Fighter"
       slotHeader={""}
+      nameClass="Fighter" 
     />
   );
 }

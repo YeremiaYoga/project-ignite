@@ -30,6 +30,7 @@ export default function DruidTable() {
       columns={columns}
       title="The Druid"
       slotHeader={slotHeader}
+      nameClass="Druid" 
     />
   );
 }

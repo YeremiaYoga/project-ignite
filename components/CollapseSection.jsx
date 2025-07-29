@@ -14,8 +14,9 @@ export default function CollapsibleSection({ title, children, level }) {
         onClick={() => setOpen(!open)}
       >
         <HeadingTag className="text-blue-300 font-semibold text-xl md:text-2xl">
-          Level {level}: {title}
+          {level ? `Level ${level}: ${title}` : title}
         </HeadingTag>
+
         {open ? (
           <ChevronUp className="text-blue-300" />
         ) : (

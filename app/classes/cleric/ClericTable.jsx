@@ -30,6 +30,7 @@ export default function ClericTable() {
       columns={columns}
       title="The Cleric"
       slotHeader={slotHeader}
+      nameClass="Cleric" 
     />
   );
 }

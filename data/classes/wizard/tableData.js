@@ -1,4 +1,4 @@
-export const wizardClassTable = [
+const wizardTableData = [
   {
     level: 1,
     proficiencyBonus: 2,
@@ -180,3 +180,4 @@ export const wizardClassTable = [
     spellSlots: [4, 3, 3, 3, 3, 2, 2, 1, 1],
   },
 ];
+export default wizardTableData;

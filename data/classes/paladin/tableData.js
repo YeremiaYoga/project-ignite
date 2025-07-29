@@ -1,4 +1,4 @@
-export const paladinClassTable = [
+const paladinTableData = [
   {
     level: 1,
     proficiencyBonus: 2,
@@ -180,3 +180,5 @@ export const paladinClassTable = [
     spellSlots: [4, 3, 3, 3, 2]
   },
 ];
+
+export default paladinTableData;

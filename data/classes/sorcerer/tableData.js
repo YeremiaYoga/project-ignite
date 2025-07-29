@@ -1,4 +1,4 @@
-export const sorcererClassTable = [
+const sorcererTableData = [
   {
     level: 1,
     proficiencyBonus: 2,
@@ -200,3 +200,6 @@ export const sorcererClassTable = [
     spellSlots: [4, 3, 3, 3, 3, 2, 2, 1, 1]
   },
 ];
+
+
+export default sorcererTableData;

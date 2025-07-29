@@ -5,6 +5,8 @@ import CollapsibleSection from "../../../components/CollapseSection";
 import FeaturesContent from "@/components/FeaturesContent";
 import FeatureTable from "@/components/FeatureTable";
 import barbarianFeatures from "@/data/classes/barbarian/classFeatures";
+import barbarianCoreTraits from "@/data/classes/barbarian/coreTraits";
+import CoreTraitsDisplay from "@/components/CoreTraitsDisplay";
 import { barbarianSubclasses } from "@/data/classes/barbarian/subclassData";
 
 const subclasses = [
@@ -85,6 +87,9 @@ export default function BarbarianFeatures() {
           </button>
         ))}
       </div>
+      <CollapsibleSection title="Core Traits">
+        <CoreTraitsDisplay data={barbarianCoreTraits} />
+      </CollapsibleSection>
 
       {barbarianFeatures.map((feature) => {
         const subclassFeatures = getSubclassFeaturesForLevel(feature.level);
