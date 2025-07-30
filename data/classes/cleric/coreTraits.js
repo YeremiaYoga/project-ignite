@@ -1,4 +1,4 @@
-// data/clericCoreTraits.js
+
 
 const clericCoreTraits = {
   class: "Cleric",

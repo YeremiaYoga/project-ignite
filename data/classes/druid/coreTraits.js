@@ -1,4 +1,3 @@
-// data/druidCoreTraits.js
 
 const druidCoreTraits = {
   class: "Druid",
@@ -23,7 +22,7 @@ const druidCoreTraits = {
     ],
   },
   weaponProficiencies: ["Simple weapons"],
-  toolProficiencies: ["Herbalism Kit"], // Specific tool proficiency
+  toolProficiencies: ["Herbalism Kit"], 
   armorTraining: ["Light armor", "Shields"],
   startingEquipment: {
     instruction: "Choose A or B:",
@@ -36,7 +35,7 @@ const druidCoreTraits = {
           "Sickle",
           "Druidic Focus (Quarterstaff)",
           "Explorer's Pack",
-          "Herbalism kit", // Pastikan Herbalism kit di sini jika itu bagian dari pilihan A
+          "Herbalism kit", 
           "9 GP",
         ],
       },
@@ -46,7 +45,7 @@ const druidCoreTraits = {
       },
     ],
   },
-  optionalEquipment: {}, // Objek kosong karena tidak ada bagian 'alternatively' terpisah setelah starting equipment
+  optionalEquipment: {}, 
 };
 
 export default druidCoreTraits;

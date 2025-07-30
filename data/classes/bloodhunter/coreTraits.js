@@ -1,4 +1,4 @@
-// data/bloodHunterCoreTraits.js
+
 
 const bloodHunterCoreTraits = {
   class: "Blood Hunter",

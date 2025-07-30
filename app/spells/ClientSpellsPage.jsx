@@ -10,7 +10,6 @@ export default function ClientSpellsPage({ spells }) {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black p-4">
-      <h1 className="text-3xl font-bold text-white mb-4">Spell List</h1>
 
       <div className="mb-4">
         <DetailSpells spell={selectedSpell} />
