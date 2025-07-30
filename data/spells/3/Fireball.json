@@ -5,9 +5,10 @@
     "short_source": "PHB 2024",
     "source": "Player's Handbook 2024",
     "school": "Evocation",
-    "casting_time": "1 action",
-    "range": "150 feet",
-    "area": "20 feet",
+    "casting_time": "1 Action",
+    "range": 150,
+    "measurement": "feet",
+    "area": "20 feet sphere",
     "components": "V, S, M",
     "duration": "Instantaneous",
     "concentration": false,
@@ -16,10 +17,7 @@
     "damage_level": "2d6",
     "saving_throw": "dex",
     "material": "(a tiny ball of bat guano and sulfur)",
-    "classes": [
-      "Sorcerer",
-      "Wizard"
-    ],
+    "classes": ["Sorcerer", "Wizard"],
     "additional_classes": [
       "Arcane Trickster Rogue",
       "Artillerist Artificer",

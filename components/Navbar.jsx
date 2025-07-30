@@ -7,10 +7,9 @@ import Cookies from "js-cookie";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [linkColor, setLinkColor] = useState("#3b82f6"); // default: blue-500
+  const [linkColor, setLinkColor] = useState("#3b82f6"); 
   const menuRef = useRef(null);
 
-  // Ambil warna dari cookie saat pertama kali mount
   useEffect(() => {
     const savedColor = Cookies.get("ignite-hyperlink-color");
     if (savedColor) {
@@ -22,7 +21,6 @@ export default function Navbar() {
     }
   }, []);
 
-  // Tutup menu jika klik di luar dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -33,7 +31,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handler ubah warna dan simpan ke cookie
   const handleColorChange = (e) => {
     const newColor = e.target.value;
     setLinkColor(newColor);
@@ -43,7 +40,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full bg-gray-950 border-b border-gray-800 shadow-sm sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center relative">
+      <div className="max-w-6xl mx-auto px-6 py-2 flex justify-between items-center relative">
         <Link href="/" className="text-xl font-bold text-blue-700">
           Home
         </Link>
