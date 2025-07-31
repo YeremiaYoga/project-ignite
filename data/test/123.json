@@ -1,0 +1,28 @@
+[
+  {
+    "name": "123",
+    "level": "2",
+    "short_source": "123",
+    "source": "",
+    "school": "",
+    "casting_time": "",
+    "range": "",
+    "measurement": "feet",
+    "area": "",
+    "components": "",
+    "duration": "",
+    "concentration": false,
+    "damage_type": "",
+    "damage_dice": "",
+    "damage_level": "",
+    "saving_throw": "",
+    "material": "",
+    "classes": "",
+    "additional_classes": "",
+    "species": "",
+    "feats": "",
+    "other_options_features": "",
+    "description": "123",
+    "higher_level": ""
+  }
+]
