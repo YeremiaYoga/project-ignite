@@ -66,7 +66,7 @@ export default function ClientSpellsPage({ spells }) {
   });
 
   return (
-    <main className="h-screen bg-gradient-to-b from-gray-900 to-black p-4 overflow-y-hidden">
+    <main className="h-screen  p-4 overflow-y-hidden max-w-6xl mx-auto">
       <div className="md:col-span-1">
         <div className=" rounded p-4 h-[60vh] overflow-y-auto">
           <DetailSpells spell={selectedSpell} />

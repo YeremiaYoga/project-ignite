@@ -3,11 +3,11 @@ import BardFeatures from "./BardFeatures";
 import ClassHeader from "@/components/ClassHeaderName";
 export default function BardPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-800 via-gray-900 to-[#0f172a] px-4 py-10">
+    <main className="min-h-screen px-4 py-10">
       <div className="max-w-6xl mx-auto space-y-8">
-        <header className="text-left border-b border-gray-700 pb-2">
+        <div className="text-left border-b border-gray-700 pb-2">
           <ClassHeader className="bard" />
-        </header>
+        </div>
 
         <section className="text-gray-300 space-y-4">
           <p className="italic font-medium">

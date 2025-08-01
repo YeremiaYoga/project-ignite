@@ -18,7 +18,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${convergence.variable} font-sans antialiased`}>
         <Navbar />
-        <main>{children}</main>
+        <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[var(--bg-top)] via-[var(--bg-middle)] to-[var(--bg-bottom)]">
+          {children}
+        </main>
       </body>
     </html>
   );

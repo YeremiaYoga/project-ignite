@@ -28,7 +28,7 @@ export default function ClassesLayout({ children }) {
     return `/assets/classIcon/${normalized}_icon.webp`;
   };
   return (
-    <div className="relative min-h-screen bg-gray-900 text-white">
+    <div className="relative min-h-screen text-white ">
       <div className="">{children}</div>
 
       <button
@@ -50,7 +50,7 @@ export default function ClassesLayout({ children }) {
                   <img
                     src={getIconSrc(className)}
                     alt={`${className} icon`}
-                     className="w-6 h-6 object-contain flex-shrink-0"
+                    className="w-6 h-6 object-contain flex-shrink-0"
                   />
                   {className.replace("-", " ")}
                 </Link>

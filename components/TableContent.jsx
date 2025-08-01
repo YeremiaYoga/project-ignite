@@ -86,7 +86,7 @@ export default function TableContent({
                             <a
                               key={row.featuresId[idx]}
                               href={`#${row.featuresId[idx]}`}
-                              className="text-blue-400 hover:underline custom"
+                              className="text-blue-400 hover:underline sub1"
                             >
                               {feature}
                             </a>
@@ -104,14 +104,12 @@ export default function TableContent({
                           ))
                           .reduce((prev, curr) => [prev, ", ", curr])
                       : "—";
-                }
-                // else if (col.key === "proficiencyBonus") {
-                //   content =
-                //     typeof row[col.key] === "number"
-                //       ? `+${row[col.key]}`
-                //       : row[col.key];
-                // }
-                else {
+                } else if (col.key === "proficiencyBonus") {
+                  content =
+                    typeof row[col.key] === "number"
+                      ? `+${row[col.key]}`
+                      : row[col.key];
+                } else {
                   content = row[col.key];
                 }
 
