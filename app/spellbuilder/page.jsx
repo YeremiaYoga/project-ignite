@@ -73,7 +73,7 @@ export default function SpellBuilderPage() {
 
     if (res.ok) {
       alert("Spell berhasil dibuat!");
-      setForm(initialForm); // reset seluruh form
+      setForm(initialForm);
     } else {
       alert("Gagal membuat file.");
     }
@@ -109,7 +109,17 @@ export default function SpellBuilderPage() {
             { name: "damage_dice", label: "Damage Dice" },
             { name: "damage_level", label: "Damage Increase per Level" },
             { name: "saving_throw", label: "Saving Throw" },
-       
+            { name: "classes", label: "Classes (comma-separated)" },
+            {
+              name: "additional_classes",
+              label: "Additional Classes (comma-separated)",
+            },
+            { name: "species", label: "Species (comma-separated)" },
+            { name: "feats", label: "Feats (comma-separated)" },
+            {
+              name: "other_options_features",
+              label: "Other Options / Features (comma-separated)",
+            },
           ].map(({ name, label, type = "text" }) => (
             <div key={name}>
               <label htmlFor={name} className="block text-sm font-medium mb-1">
@@ -126,8 +136,63 @@ export default function SpellBuilderPage() {
             </div>
           ))}
         </div>
+        <div>
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium mb-1"
+          >
+            Description
+          </label>
+          <textarea
+            name="description"
+            id="description"
+            value={form.description}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={4}
+          />
+        </div>
 
-   
+        <div>
+          <label
+            htmlFor="higher_level"
+            className="block text-sm font-medium mb-1"
+          >
+            Higher Level Description
+          </label>
+          <textarea
+            name="higher_level"
+            id="higher_level"
+            value={form.higher_level}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={3}
+          />
+        </div>
+
+        <div className="flex items-center space-x-6">
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="concentration"
+              checked={form.concentration}
+              onChange={handleChange}
+              className="accent-blue-600"
+            />
+            <span>Concentration</span>
+          </label>
+
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="ritual"
+              checked={form.ritual}
+              onChange={handleChange}
+              className="accent-blue-600"
+            />
+            <span>Ritual</span>
+          </label>
+        </div>
 
         <button
           type="submit"
