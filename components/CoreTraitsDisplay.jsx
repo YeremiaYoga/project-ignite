@@ -4,7 +4,7 @@ import React from "react";
 
 export default function CoreTraitsDisplay({ data }) {
   if (!data) return null;
-
+  console.log(data);
   const Row = ({ label, content }) => {
     if (content === null || (Array.isArray(content) && content.length === 0)) {
       return null;
@@ -31,8 +31,15 @@ export default function CoreTraitsDisplay({ data }) {
         label="Hit Point Die"
         content={
           <span className="text-gray-300">
-            {data.hitDie} per ${data.class} level
+            {data.hitDie} per {data.class} level
           </span>
+        }
+      />
+
+         <Row
+        label={`Hit Points at Level 1`}
+        content={
+          <span className="text-gray-300">{data.hitPointsAtLevel1}</span>
         }
       />
 
@@ -57,13 +64,19 @@ export default function CoreTraitsDisplay({ data }) {
         content={
           <>
             <p className="text-gray-300 mb-1">
-              <span className="underline">{`Choose ${data.skillProficiencies.choose} from:`}</span>
+              <span className="underline">
+                {`Choose ${data.skillProficiencies.choose ?? ""}`}
+              </span>
             </p>
-            <ul className="list-disc ml-5 text-gray-300">
-              {data.skillProficiencies.options.map((skill, i) => (
-                <li key={i}>{skill}</li>
-              ))}
-            </ul>
+
+            {Array.isArray(data.skillProficiencies.options) &&
+              data.skillProficiencies.options.length > 0 && (
+                <ul className="list-disc ml-5 text-gray-300">
+                  {data.skillProficiencies.options.map((skill, i) => (
+                    <li key={i}>{skill}</li>
+                  ))}
+                </ul>
+              )}
           </>
         }
       />

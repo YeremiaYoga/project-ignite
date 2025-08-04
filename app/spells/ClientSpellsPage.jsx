@@ -51,17 +51,28 @@ export default function ClientSpellsPage({ spells }) {
         spell.range.toLowerCase().includes(r.toString().toLowerCase())
       );
 
-    // const matchesSchool =
-    //   !activeFilters?.schools?.length ||
-    //   activeFilters.schools.includes(spell.school);
+    const matchesSchool =
+      !activeFilters?.school?.length ||
+      (spell?.school &&
+        activeFilters.school.some((time) =>
+          spell.school.toLowerCase().includes(time.toLowerCase())
+        ));
+
+    const matchesDamageType =
+      !activeFilters?.damageType?.length ||
+      (spell?.damage_type &&
+        activeFilters.damageType.some((time) =>
+          spell.damage_type.toLowerCase().includes(time.toLowerCase())
+        ));
 
     return (
       matchesSearch &&
       matchesClass &&
       matchesLevel &&
       matchesCastTime &&
-      matchesRange
-      // matchesSchool
+      matchesRange &&
+      matchesSchool &&
+      matchesDamageType
     );
   });
 

@@ -1,4 +1,4 @@
-// data/sorcererCoreTraits.js
+
 
 const sorcererCoreTraits = {
   class: "Sorcerer",

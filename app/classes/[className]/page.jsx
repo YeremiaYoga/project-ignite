@@ -1,26 +1,56 @@
-import dynamic from "next/dynamic";
-import path from "path";
-import fs from "fs/promises";
+import ClassHeader from "@/components/ClassHeaderName";
+import ClassTable from "./ClassTable";
+import ClassFeatures from "./ClassFeatures";
 
 export default async function ClassPage({ params }) {
-  const { className } = params;
-
+  const className = params.className.replace(/-/g, "_");
   try {
-    const classPath = path.join(process.cwd(), "data/classes", className);
-
-    const [tableData, coreTraits, classFeatures, subclassData] = await Promise.all([
-      import(`@/data/classes/${className}/tableData.js`).then(m => m.default),
-      import(`@/data/classes/${className}/coreTraits.js`).then(m => m.default),
-      import(`@/data/classes/${className}/classFeatures.js`).then(m => m.default).catch(() => null),
-      import(`@/data/classes/${className}/subclassData.js`).then(m => m.default).catch(() => null),
+    const [classData, classFeatures, subclassData] = await Promise.all([
+      import(`@/data/classes/${className}/classData.js`).then((m) => m.default),
+      import(`@/data/classes/${className}/classFeatures.js`)
+        .then((m) => m.default)
+        .catch(() => null),
+      import(`@/data/classes/${className}/subclassData.js`)
+        .then((m) => m.default)
+        .catch(() => null),
     ]);
 
     return (
-      <main className="p-6">
-        <h1 className="text-3xl font-bold capitalize">{className}</h1>
-        <pre className="mt-4 text-sm bg-gray-900 p-4 rounded">
-          {JSON.stringify({ tableData, coreTraits, classFeatures, subclassData }, null, 2)}
-        </pre>
+      <main className="min-h-screen  px-4 py-10">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <header className="text-left border-b border-gray-700 pb-2">
+            <ClassHeader classId={className} />
+          </header>
+
+          <section className="text-gray-300 space-y-4">
+            {classData.descriptionClass.map((desc, i) => {
+              if (desc.color === "white") {
+                return (
+                  <p key={i} className="italic font-medium">
+                    {desc.text}
+                  </p>
+                );
+              } else if (desc.color === "gray") {
+                return (
+                  <p key={i} className="text-sm text-gray-400 italic">
+                    {desc.text}
+                  </p>
+                );
+              } else {
+                return (
+                  <p key={i} className="text-sm text-white">
+                    {desc.text}
+                  </p>
+                );
+              }
+            })}
+          </section>
+
+          <div>
+            <ClassTable tableData={classData} nameClass={className} />
+          </div>
+          <ClassFeatures classId={className} />
+        </div>
       </main>
     );
   } catch (err) {

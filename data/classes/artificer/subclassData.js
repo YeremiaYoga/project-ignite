@@ -1,4 +1,4 @@
-export const artificerSubclasses = [
+ const artificerSubclasses = [
   {
     key: "alchemist",
     name: "Alchemist",
@@ -337,3 +337,5 @@ You can use this energy a number of times equal to your Intelligence modifier (m
     ],
   },
 ];
+
+export default artificerSubclasses;

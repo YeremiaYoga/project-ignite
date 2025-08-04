@@ -1,8 +1,8 @@
 import Image from "next/image";
 
-export default function ClassHeader({ className }) {
-  const normalized = className.toLowerCase().replace(/\s+/g, "_");
-  const capitalized = className.charAt(0).toUpperCase() + className.slice(1);
+export default function ClassHeader({ classId }) {
+  const normalized = classId.toLowerCase().replace(/\s+/g, "_");
+  const capitalized = classId.charAt(0).toUpperCase() + classId.slice(1);
   return (
     <header className="flex items-center gap-3 border-b border-gray-700 pb-2">
       <Image

@@ -1,4 +1,3 @@
-// data/rogueCoreTraits.js
 
 const rogueCoreTraits = {
   class: "Rogue",

@@ -30,8 +30,31 @@ const FILTERS = {
     "Special",
   ],
   range: ["Self", "Touch", "Point", "Area", "Special"],
-  damageType: [],
-  school: [],
+  damageType: [
+    "acid",
+    "bludgeoning",
+    "cold",
+    "fire",
+    "force",
+    "lightning",
+    "necrotic",
+    "piercing",
+    "poison",
+    "psychic",
+    "radiant",
+    "slashing",
+    "thunder",
+  ],
+  school: [
+    "Abjuration",
+    "Conjuration",
+    "Divination",
+    "Enchantment",
+    "Evocation",
+    "Illusion",
+    "Necromancy",
+    "Transmutation",
+  ],
 };
 
 const INITIAL_SELECTED = {
@@ -93,7 +116,7 @@ export default function ModalFilter({ isOpen, onClose, onApply }) {
                   <button
                     key={value}
                     className={`text-sm px-3 py-1 rounded border transition ${
-                      selected[key].includes(value)
+                      (selected[key] ?? []).includes(value)
                         ? "bg-blue-600 border-blue-600 text-white"
                         : "bg-gray-800 border-gray-600 text-gray-200"
                     }`}
@@ -103,7 +126,7 @@ export default function ModalFilter({ isOpen, onClose, onApply }) {
                       ? value === "Cantrips"
                         ? "Cantrips"
                         : `${value}th`
-                      : value}
+                      : value.charAt(0).toUpperCase() + value.slice(1)}
                   </button>
                 ))
               )}
