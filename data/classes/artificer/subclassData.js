@@ -1,4 +1,4 @@
- const artificerSubclass = [
+const artificerSubclass = [
   {
     key: "alchemist",
     name: "Alchemist",
@@ -76,19 +76,20 @@ You can create additional experimental elixirs by expending a spell slot of 1st 
       {
         level: 9,
         title: "Restorative Reagents",
-        description: `Starting at 9th level, you can incorporate restorative reagents into some of your works:
-
-- Whenever a creature drinks an *experimental elixir* you created, the creature gains temporary hit points equal to 2d6 + your Intelligence modifier (minimum of 1 temporary hit point).
-- You can cast *lesser restoration* without expending a spell slot and without preparing the spell, provided you use alchemist’s supplies as the spellcasting focus. You can do so a number of times equal to your Intelligence modifier (minimum of once), and you regain all expended uses when you finish a long rest.`,
+        description: `Starting at 9th level, you can incorporate restorative reagents into some of your works`,
+        list: [
+          "Whenever a creature drinks an *experimental elixir* you created, the creature gains temporary hit points equal to 2d6 + your Intelligence modifier (minimum of 1 temporary hit point).",
+          "You can cast *lesser restoration* without expending a spell slot and without preparing the spell, provided you use alchemist’s supplies as the spellcasting focus. You can do so a number of times equal to your Intelligence modifier (minimum of once), and you regain all expended uses when you finish a long rest.",
+        ],
       },
-
       {
         level: 15,
         title: "Chemical Mastery",
-        description: `By 15th level, you have been exposed to so many chemicals that they pose little risk to you, and you can use them to quickly end certain ailments:
-
-- You gain resistance to acid damage and poison damage, and you are immune to the *poisoned* condition.
-- You can cast *greater restoration* and *heal* without expending a spell slot, without preparing the spell, and without material components, provided you use alchemist’s supplies as the spellcasting focus. Once you cast either spell with this feature, you can’t cast that spell with it again until you finish a long rest.`,
+        description: `By 15th level, you have been exposed to so many chemicals that they pose little risk to you, and you can use them to quickly end certain ailments:`,
+        list: [
+          "You gain resistance to acid damage and poison damage, and you are immune to the *poisoned* condition.",
+          "You can cast *greater restoration* and *heal* without expending a spell slot, without preparing the spell, and without material components, provided you use alchemist’s supplies as the spellcasting focus. Once you cast either spell with this feature, you can’t cast that spell with it again until you finish a long rest.",
+        ],
       },
     ],
   },
@@ -124,11 +125,13 @@ You can create additional experimental elixirs by expending a spell slot of 1st 
         subfeatures: [
           {
             title: "Arcane Armor Benefits",
-            description: `You gain the following benefits while wearing this armor:
-- If the armor normally has a Strength requirement, the arcane armor lacks this requirement for you.
-- You can use the arcane armor as a spellcasting focus for your artificer spells.
-- The armor attaches to you and can’t be removed against your will. It also expands to cover your entire body and replaces any missing limbs. The armor continues to be Arcane Armor until you don another suit or you die.
-- You can don or doff the armor as an action.`,
+            description: `You gain the following benefits while wearing this armor:`,
+            list: [
+              "If the armor normally has a Strength requirement, the arcane armor lacks this requirement for you.",
+              "You can use the arcane armor as a spellcasting focus for your artificer spells.",
+              "The armor attaches to you and can’t be removed against your will. It also expands to cover your entire body and replaces any missing limbs. The armor continues to be Arcane Armor until you don another suit or you die.",
+              "You can don or doff the armor as an action.",
+            ],
           },
         ],
       },
@@ -139,18 +142,20 @@ You can create additional experimental elixirs by expending a spell slot of 1st 
         subfeatures: [
           {
             title: "Guardian Model",
-            description: `You design your armor to be in the front line of conflict. It has the following features:
-
-- **Thunder Gauntlets.** Your armored fists each count as a simple melee weapon dealing 1d8 thunder damage. On a hit, the target has disadvantage on attack rolls against creatures other than you until the start of your next turn.
-- **Defensive Field.** As a bonus action, you gain temporary hit points equal to your artificer level, replacing any temporary hit points you already have. You can use this a number of times equal to your proficiency bonus per long rest.`,
+            description: `You design your armor to be in the front line of conflict. It has the following features:`,
+            list: [
+              "Thunder Gauntlets. Your armored fists each count as a simple melee weapon dealing 1d8 thunder damage. On a hit, the target has disadvantage on attack rolls against creatures other than you until the start of your next turn.",
+              "Defensive Field. As a bonus action, you gain temporary hit points equal to your artificer level, replacing any temporary hit points you already have. You can use this a number of times equal to your proficiency bonus per long rest.",
+            ],
           },
           {
             title: "Infiltrator Model",
-            description: `You customize your armor for subtle undertakings. It has the following features:
-
-- **Lightning Launcher.** A gem-like node appears on one of your armored fists or chest (your choice). It counts as a simple ranged weapon with a normal range of 90 feet and long range of 300 feet, dealing 1d6 lightning damage on a hit. Once per turn, when you hit a target with it, you can deal an extra 1d6 lightning damage.
-- **Powered Steps.** Your walking speed increases by 5 feet.
-- **Dampening Field.** You have advantage on Dexterity (Stealth) checks, and if the armor normally imposes disadvantage on such checks, the advantage and disadvantage cancel each other out.`,
+            description: `You customize your armor for subtle undertakings. It has the following features:`,
+            list: [
+              "Lightning Launcher. A gem-like node appears on one of your armored fists or chest (your choice). It counts as a simple ranged weapon with a normal range of 90 feet and long range of 300 feet, dealing 1d6 lightning damage on a hit. Once per turn, when you hit a target with it, you can deal an extra 1d6 lightning damage.",
+              "Powered Steps. Your walking speed increases by 5 feet.",
+              "Dampening Field. You have advantage on Dexterity (Stealth) checks, and if the armor normally imposes disadvantage on such checks, the advantage and disadvantage cancel each other out.",
+            ],
           },
         ],
       },
@@ -163,27 +168,39 @@ You can create additional experimental elixirs by expending a spell slot of 1st 
       {
         level: 9,
         title: "Armor Modifications",
-        description: `You learn how to use your artificer infusions to specially modify your Arcane Armor. That armor now counts as separate items for the purposes of your Infuse Items feature:\n
-- Armor (the chest piece)\n
-- Boots\n
-- Helmet\n
-- The armor's special weapon\n\n
-Each of those items can bear one of your infusions, and the infusions transfer over if you change your armor's model with the Armor Model feature.\n\n
-Additionally, the maximum number of items you can infuse at once increases by 2. These extra infusions must be part of your Arcane Armor.`,
+        description: `You learn how to use your artificer infusions to specially modify your Arcane Armor. That armor now counts as separate items for the purposes of your Infuse Items feature:`,
+        list: [
+          "Armor (the chest piece)",
+          "Boots",
+          "Helmet",
+          "The armor's special weapon",
+          `Each of those items can bear one of your infusions, and the infusions transfer over if you change your armor's model with the Armor Model feature.`,
+          `Additionally, the maximum number of items you can infuse at once increases by 2. These extra infusions must be part of your Arcane Armor.`,
+        ],
       },
       {
         level: 15,
         title: "Perfected Armor",
-        description: `Your Arcane Armor gains additional benefits based on its model:\n\n
-**Guardian**\n
-- When a Huge or smaller creature you can see ends its turn within 30 feet of you, you can use your reaction to magically force it to make a Strength saving throw against your spell save DC.\n
-- On a failed save, you pull the creature up to 25 feet directly to an unoccupied space.\n
-- If you pull it within 5 feet of you, you can make a melee weapon attack against it as part of the same reaction.\n
-- You can use this reaction a number of times equal to your proficiency bonus, regaining all uses after a long rest.\n\n
-**Infiltrator**\n
-- Any creature damaged by your Lightning Launcher glimmers with magical light until the start of your next turn.\n
-- The creature sheds dim light in a 5-foot radius and has **disadvantage** on attack rolls against you.\n
-- The next attack roll against that creature has **advantage**, and if it hits, the target takes an additional **1d6 lightning damage**.`,
+        description: `Your Arcane Armor gains additional benefits based on its model:`,
+        subfeatures: [
+          {
+            title: "Guardian",
+            list: [
+              "When a Huge or smaller creature you can see ends its turn within 30 feet of you, you can use your reaction to magically force it to make a Strength saving throw against your spell save DC.",
+              "On a failed save, you pull the creature up to 25 feet directly to an unoccupied space.",
+              "If you pull it within 5 feet of you, you can make a melee weapon attack against it as part of the same reaction.",
+              "You can use this reaction a number of times equal to your proficiency bonus, regaining all uses after a long rest.",
+            ],
+          },
+          {
+            title: "Infiltrator",
+            list: [
+              "Any creature damaged by your Lightning Launcher glimmers with magical light until the start of your next turn.",
+              "The creature sheds dim light in a 5-foot radius and has **disadvantage** on attack rolls against you.",
+              "The next attack roll against that creature has **advantage**, and if it hits, the target takes an additional **1d6 lightning damage**.",
+            ],
+          },
+        ],
       },
     ],
   },
@@ -251,18 +268,20 @@ You can use your arcane firearm as a spellcasting focus for your artificer spell
       {
         level: 9,
         title: "Explosive Cannon",
-        description: `Starting at 9th level, every eldritch cannon you create is more destructive:
-
-- The cannon's damage rolls all increase by **1d8**.
-- As an action, you can command the cannon to **detonate** if you are within 60 feet of it. Doing so destroys the cannon and forces each creature within 20 feet of it to make a Dexterity saving throw against your spell save DC, taking **3d8 force damage** on a failed save or half as much damage on a successful one.`,
+        description: `Starting at 9th level, every eldritch cannon you create is more destructive:`,
+        list: [
+          "The cannon's damage rolls all increase by **1d8**.",
+          "As an action, you can command the cannon to **detonate** if you are within 60 feet of it. Doing so destroys the cannon and forces each creature within 20 feet of it to make a Dexterity saving throw against your spell save DC, taking **3d8 force damage** on a failed save or half as much damage on a successful one.",
+        ],
       },
       {
         level: 15,
         title: "Fortified Position",
-        description: `Starting at 15th level, you're a master at forming well-defended emplacements using Eldritch Cannon:
-
-- You and your allies have **half cover** while within 10 feet of a cannon you create with Eldritch Cannon, as a result of a shimmering field of magical protection that the cannon emits.
-- You can now have **two cannons at the same time**. You can create both with the same action (but not the same spell slot), and you can activate both of them with the same bonus action. You determine whether the cannons are identical to each other or different. You can't create a third cannon while you have two.`,
+        description: `Starting at 15th level, you're a master at forming well-defended emplacements using Eldritch Cannon:`,
+        list: [
+          "You and your allies have **half cover** while within 10 feet of a cannon you create with Eldritch Cannon, as a result of a shimmering field of magical protection that the cannon emits.",
+          "You can now have **two cannons at the same time**. You can create both with the same action (but not the same spell slot), and you can activate both of them with the same bonus action. You determine whether the cannons are identical to each other or different. You can't create a third cannon while you have two.",
+        ],
       },
     ],
   },
@@ -294,10 +313,11 @@ You can use your arcane firearm as a spellcasting focus for your artificer spell
       {
         level: 3,
         title: "Battle Ready",
-        description: `When you reach 3rd level, your combat training and your experiments with magic have paid off in two ways:
-
-- You gain proficiency with martial weapons.
-- When you attack with a magic weapon, you can use your Intelligence modifier, instead of Strength or Dexterity, for the attack and damage rolls.`,
+        description: `When you reach 3rd level, your combat training and your experiments with magic have paid off in two ways:`,
+        list: [
+          "You gain proficiency with martial weapons.",
+          "When you attack with a magic weapon, you can use your Intelligence modifier, instead of Strength or Dexterity, for the attack and damage rolls.",
+        ],
       },
       {
         level: 3,
@@ -318,21 +338,21 @@ At the end of a long rest, you can create a new Steel Defender if you have your 
       {
         level: 9,
         title: "Arcane Jolt",
-        description: `At 9th level, you learn new ways to channel arcane energy to harm or heal. When either you hit a target with a magic weapon attack or your Steel Defender hits a target, you can channel magical energy through the strike to create one of the following effects:
-
-- The target takes an extra 2d6 force damage.
-- Choose one creature or object you can see within 30 feet of the target. Healing energy flows into the chosen recipient, restoring 2d6 hit points to it.
-
-You can use this energy a number of times equal to your Intelligence modifier (minimum of once), but you can do so no more than once on a turn. You regain all expended uses when you finish a long rest.`,
+        description: `At 9th level, you learn new ways to channel arcane energy to harm or heal. When either you hit a target with a magic weapon attack or your Steel Defender hits a target, you can channel magical energy through the strike to create one of the following effects:`,
+        list: [
+          "The target takes an extra 2d6 force damage.",
+          "Choose one creature or object you can see within 30 feet of the target. Healing energy flows into the chosen recipient, restoring 2d6 hit points to it.",
+        ],
       },
       {
         level: 15,
         title: "Improved Defender",
-        description: `At 15th level, your Arcane Jolt and Steel Defender become more powerful:
-
-- The extra damage and the healing of your Arcane Jolt both increase to 4d6.
-- Your Steel Defender gains a +2 bonus to Armor Class.
-- Whenever your Steel Defender uses its Deflect Attack, the attacker takes force damage equal to 1d4 + your Intelligence modifier.`,
+        description: `At 15th level, your Arcane Jolt and Steel Defender become more powerful:`,
+        list: [
+          "The extra damage and the healing of your Arcane Jolt both increase to 4d6.",
+          "Your Steel Defender gains a +2 bonus to Armor Class.",
+          "Whenever your Steel Defender uses its Deflect Attack, the attacker takes force damage equal to 1d4 + your Intelligence modifier.",
+        ],
       },
     ],
   },

@@ -78,7 +78,6 @@ export default function ClassFeatures({ classId }) {
   };
 
   const capitalizedClass = classId.charAt(0).toUpperCase() + classId.slice(1);
-  console.log(subclasses);
 
   return (
     <div className="text-zinc-100 p-8 rounded-xl mx-auto shadow-lg">
@@ -89,22 +88,35 @@ export default function ClassFeatures({ classId }) {
 
       {subclasses.length > 0 && (
         <div className="flex gap-2 mb-6 flex-wrap">
-          {subclasses.map((sub) => (
-            <button
-              key={sub.key}
-              className={`px-3 py-1 rounded border text-sm ${
-                activeSubclasses.includes(sub.key)
-                  ? "bg-blue-700 border-blue-400 text-white"
-                  : "bg-zinc-900 border-zinc-700 text-zinc-300"
-              }`}
-              onClick={() => handleToggleSubclass(sub.key)}
-            >
-              {sub.key
-                .split("-")
-                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ")}
-            </button>
-          ))}
+          {subclasses.map((sub) => {
+            const imageSrc = `/assets/subclassIcon/${classId}/${sub.key.replace(
+              /-/g,
+              "_"
+            )}_icon.png`;
+            const displayName = sub.key
+              .split("-")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ");
+
+            return (
+              <button
+                key={sub.key}
+                className={`px-3 py-1 rounded border text-sm flex items-center gap-2 ${
+                  activeSubclasses.includes(sub.key)
+                    ? "bg-blue-700 border-blue-400 text-white"
+                    : "bg-zinc-900 border-zinc-700 text-zinc-300"
+                }`}
+                onClick={() => handleToggleSubclass(sub.key)}
+              >
+                <img
+                  src={imageSrc}
+                  alt={`${displayName} icon`}
+                  className="w-5 h-5 object-contain"
+                />
+                {displayName}
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -144,6 +156,15 @@ export default function ClassFeatures({ classId }) {
                           </div>
                           <div className="text-zinc-300 whitespace-pre-line">
                             {subFeat.description}
+
+                            {Array.isArray(subFeat.list) &&
+                              subFeat.list.length > 0 && (
+                                <ul className="list-disc list-inside mt-2 space-y-1">
+                                  {subFeat.list.map((item, idx) => (
+                                    <li key={idx}>{item}</li>
+                                  ))}
+                                </ul>
+                              )}
                           </div>
                           {subFeat.table && (
                             <FeatureTable table={subFeat.table} />
@@ -153,6 +174,42 @@ export default function ClassFeatures({ classId }) {
                               {subFeat.note}
                             </div>
                           )}
+                          {subFeat.subfeatures &&
+                            subFeat.subfeatures.length > 0 && (
+                              <div className="mt-4 space-y-4">
+                                {subFeat.subfeatures.map((sub, idx) => (
+                                  <div
+                                    key={sub.title + idx}
+                                    className="ml-4 border-l border-blue-600 pl-4 space-y-2"
+                                  >
+                                    <div className="font-semibold text-blue-400">
+                                      {sub.title}
+                                    </div>
+
+                                    {sub.description && (
+                                      <div className="text-zinc-300 whitespace-pre-line">
+                                        {sub.description}
+                                      </div>
+                                    )}
+
+                                    {Array.isArray(sub.list) &&
+                                      sub.list.length > 0 && (
+                                        <ul className="list-disc list-inside text-zinc-300 space-y-1">
+                                          {sub.list.map((item, i) => (
+                                            <li key={i}>{item}</li>
+                                          ))}
+                                        </ul>
+                                      )}
+
+                                    {sub.note && (
+                                      <div className="text-sm text-zinc-500 italic">
+                                        {sub.note}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                         </div>
                       ))
                     ) : (

@@ -102,23 +102,36 @@ export default function ClientClassesLayout({ children, currentClass }) {
             Subclasses
           </h3>
           <ul className="space-y-2">
-            {subclasses.map((sub) => (
-              <li key={sub.key}>
-                <button
-                  onClick={() => handleToggleSubclass(sub.key)}
-                  className={`w-full text-left text-sm px-3 py-1 rounded flex items-center gap-2 transition border ${
-                    activeSubclasses.includes(sub.key)
-                      ? "border-blue-400 text-white"
-                      : "border-zinc-700 text-zinc-300"
-                  }`}
-                >
-                  {sub.key
-                    .split("-")
-                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                    .join(" ")}
-                </button>
-              </li>
-            ))}
+            {subclasses.map((sub) => {
+              const imageSrc = `/assets/subclassIcon/${currentClass}/${sub.key.replace(
+                /-/g,
+                "_"
+              )}_icon.png`;
+              const displayName = sub.key
+                .split("-")
+                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(" ");
+
+              return (
+                <li key={sub.key}>
+                  <button
+                    onClick={() => handleToggleSubclass(sub.key)}
+                    className={`w-full text-left text-sm px-3 py-1 rounded flex items-center gap-2 transition border ${
+                      activeSubclasses.includes(sub.key)
+                        ? "border-blue-400 text-white"
+                        : "border-zinc-700 text-zinc-300"
+                    }`}
+                  >
+                    <img
+                      src={imageSrc}
+                      alt={`${displayName} icon`}
+                      className="w-5 h-5 object-contain"
+                    />
+                    {displayName}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
