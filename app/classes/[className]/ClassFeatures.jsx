@@ -135,7 +135,7 @@ export default function ClassFeatures({ classId }) {
             <section
               key={feature.id}
               id={feature.id}
-              className="border-b border-zinc-700 pb-6 mb-6 last:border-b-0 last:mb-0"
+              className="scroll-mt-20 border-b border-zinc-700 pb-6 mb-6 last:border-b-0 last:mb-0"
             >
               <CollapsibleSection title={feature.title} level={feature.level}>
                 <FeaturesContent
