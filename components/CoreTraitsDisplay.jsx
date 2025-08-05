@@ -36,7 +36,7 @@ export default function CoreTraitsDisplay({ data }) {
         }
       />
 
-         <Row
+      <Row
         label={`Hit Points at Level 1`}
         content={
           <span className="text-gray-300">{data.hitPointsAtLevel1}</span>
@@ -81,14 +81,16 @@ export default function CoreTraitsDisplay({ data }) {
         }
       />
 
-      <Row
-        label="Weapon Proficiencies"
-        content={
-          <span className="text-gray-300">
-            {data.weaponProficiencies.join(" and ")}
-          </span>
-        }
-      />
+      {data.weaponProficiencies && data.weaponProficiencies.length > 0 && (
+        <Row
+          label="Weapon Proficiencies"
+          content={
+            <span className="text-gray-300">
+              {data.weaponProficiencies.join(" and ")}
+            </span>
+          }
+        />
+      )}
 
       {data.toolProficiencies && data.toolProficiencies.length > 0 && (
         <Row
@@ -101,14 +103,16 @@ export default function CoreTraitsDisplay({ data }) {
         />
       )}
 
-      <Row
-        label="Armor Training"
-        content={
-          <span className="text-gray-300">
-            {data.armorTraining.join(" and ")}
-          </span>
-        }
-      />
+      {data.armorTraining && data.armorTraining.length > 0 && (
+        <Row
+          label="Armor Training"
+          content={
+            <span className="text-gray-300">
+              {data.armorTraining.join(" and ")}
+            </span>
+          }
+        />
+      )}
 
       {data.startingEquipment &&
         Object.keys(data.startingEquipment).length > 0 && (

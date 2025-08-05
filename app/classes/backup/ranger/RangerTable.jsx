@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import rangerTableData from "@/data/classes/ranger/tableData";
+import rangerTableData from "@/data/classes/ranger/classData";
 import TableContent from "@/components/TableContent";
 
 export default function RangerTable() {

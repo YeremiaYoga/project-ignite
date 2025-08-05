@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import sorcererTableData from "@/data/classes/sorcerer/tableData";
+import sorcererTableData from "@/data/classes/sorcerer/classData";
 import TableContent from "@/components/TableContent";
 
 export default function SorcererTable() {

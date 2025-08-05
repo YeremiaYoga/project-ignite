@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import warlockTableData from "@/data/classes/warlock/tableData";
+import warlockTableData from "@/data/classes/warlock/classData";
 import TableContent from "@/components/TableContent";
 
 export default function WarlockTable() {

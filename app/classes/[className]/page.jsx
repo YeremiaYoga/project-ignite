@@ -3,7 +3,7 @@ import ClassTable from "./ClassTable";
 import ClassFeatures from "./ClassFeatures";
 
 export default async function ClassPage({ params }) {
-  const className = params.className.replace(/-/g, "_");
+  const className = (await params).className.replace(/-/g, "_");
   try {
     const [classData, classFeatures, subclassData] = await Promise.all([
       import(`@/data/classes/${className}/classData.js`).then((m) => m.default),

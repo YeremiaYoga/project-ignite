@@ -42,8 +42,12 @@ export default function ClassFeatures({ classId }) {
 
   useEffect(() => {
     const urlSubclasses = searchParams.get("subclasses");
+
     if (urlSubclasses) {
-      setActiveSubclasses(urlSubclasses.split(","));
+      const list = urlSubclasses.split(",");
+      setActiveSubclasses(list);
+    } else {
+      setActiveSubclasses([]);
     }
   }, [searchParams]);
 

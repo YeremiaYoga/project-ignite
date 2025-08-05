@@ -3,6 +3,23 @@
 import { useState } from "react";
 
 export default function SpellBuilderPage() {
+  const classList = [
+    "artificer",
+    "barbarian",
+    "bard",
+    "blood-hunter",
+    "cleric",
+    "druid",
+    "fighter",
+    "monk",
+    "paladin",
+    "ranger",
+    "rogue",
+    "sorcerer",
+    "warlock",
+    "wizard",
+  ];
+
   const initialForm = {
     name: "",
     level: "0",
@@ -22,7 +39,7 @@ export default function SpellBuilderPage() {
     damage_level: "",
     saving_throw: "",
     material: "",
-    classes: "",
+    classes: [],
     additional_classes: "",
     species: "",
     feats: "",
@@ -58,7 +75,6 @@ export default function SpellBuilderPage() {
           ? parseInt(form.range)
           : form.range.trim().toLowerCase(),
 
-      classes: toArray(form.classes),
       additional_classes: toArray(form.additional_classes),
       species: toArray(form.species),
       feats: toArray(form.feats),
@@ -109,7 +125,6 @@ export default function SpellBuilderPage() {
             { name: "damage_dice", label: "Damage Dice" },
             { name: "damage_level", label: "Damage Increase per Level" },
             { name: "saving_throw", label: "Saving Throw" },
-            { name: "classes", label: "Classes (comma-separated)" },
             {
               name: "additional_classes",
               label: "Additional Classes (comma-separated)",
@@ -136,6 +151,56 @@ export default function SpellBuilderPage() {
             </div>
           ))}
         </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Classes</label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {form.classes.map((cls) => (
+              <span
+                key={cls}
+                className="flex items-center bg-blue-700 text-white px-2 py-1 rounded-full text-sm"
+              >
+                {cls}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      classes: prev.classes.filter((c) => c !== cls),
+                    }))
+                  }
+                  className="ml-2 text-white hover:text-red-300"
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+          </div>
+          <select
+            value=""
+            onChange={(e) => {
+              const selected = e.target.value;
+              if (!form.classes.includes(selected)) {
+                setForm((prev) => ({
+                  ...prev,
+                  classes: [...prev.classes, selected],
+                }));
+              }
+            }}
+            className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="" disabled>
+              Select Class
+            </option>
+            {classList
+              .filter((cls) => !form.classes.includes(cls))
+              .map((cls) => (
+                <option key={cls} value={cls}>
+                  {cls.charAt(0).toUpperCase() + cls.slice(1).replace("-", " ")}
+                </option>
+              ))}
+          </select>
+        </div>
+
         <div>
           <label
             htmlFor="description"

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import rogueTableData from "@/data/classes/rogue/tableData";
+import rogueTableData from "@/data/classes/rogue/classData";
 import TableContent from "@/components/TableContent";
 
 export default function RogueTable() {

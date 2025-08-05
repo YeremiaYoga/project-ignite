@@ -1,9 +1,9 @@
-// layout.jsx (server component)
 import ClientClassesLayout from "./ClientClassesLayout";
 
-export default function Layout({ children, params }) {
+export default async function Layout({ children, params }) {
+  const { className } = await params;
   return (
-    <ClientClassesLayout currentClass={params.className}>
+    <ClientClassesLayout currentClass={className}>
       {children}
     </ClientClassesLayout>
   );

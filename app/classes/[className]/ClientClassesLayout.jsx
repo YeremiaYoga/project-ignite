@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const classList = [
   "artificer",
@@ -24,11 +25,36 @@ export default function ClientClassesLayout({ children, currentClass }) {
   const [showClasses, setShowClasses] = useState(false);
   const [showSubclasses, setShowSubclasses] = useState(false);
   const [subclasses, setSubclasses] = useState([]);
+  const [activeSubclasses, setActiveSubclasses] = useState([]);
 
-  const getIconSrc = (name) => {
-    const normalized = name.replace(/-/g, "_");
-    return `/assets/classIcon/${normalized}_icon.webp`;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleToggleSubclass = (key) => {
+    setActiveSubclasses((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
   };
+
+  useEffect(() => {
+    const urlSubclasses = searchParams.get("subclasses");
+    if (urlSubclasses) {
+      setActiveSubclasses(urlSubclasses.split(","));
+    } else {
+      setActiveSubclasses([]);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (activeSubclasses.length > 0) {
+      params.set("subclasses", activeSubclasses.join(","));
+    } else {
+      params.delete("subclasses");
+    }
+
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }, [activeSubclasses]);
 
   useEffect(() => {
     if (!currentClass) return;
@@ -38,9 +64,16 @@ export default function ClientClassesLayout({ children, currentClass }) {
       .catch(() => setSubclasses([]));
   }, [currentClass]);
 
+  const getIconSrc = (name) => {
+    const normalized = name.replace(/-/g, "_");
+    return `/assets/classIcon/${normalized}_icon.webp`;
+  };
+
   return (
     <div className="relative min-h-screen text-white">
-      <div>{children}</div>
+      {children && typeof children === "function"
+        ? children({ activeSubclasses, handleToggleSubclass })
+        : children}
 
       <div className="fixed bottom-6 left-6 flex flex-col gap-3 z-50">
         <button
@@ -50,7 +83,7 @@ export default function ClientClassesLayout({ children, currentClass }) {
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-4 py-2 rounded-full shadow-lg"
         >
-          {showSubclasses ? "Close " : "Subclass"}
+          {showSubclasses ? "Close" : "Subclass"}
         </button>
         <button
           onClick={() => {
@@ -59,7 +92,7 @@ export default function ClientClassesLayout({ children, currentClass }) {
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-4 py-2 rounded-full shadow-lg"
         >
-          {showClasses ? "Close " : "Classes"}
+          {showClasses ? "Close" : "Classes"}
         </button>
       </div>
 
@@ -71,17 +104,19 @@ export default function ClientClassesLayout({ children, currentClass }) {
           <ul className="space-y-2">
             {subclasses.map((sub) => (
               <li key={sub.key}>
-                <Link
-                  href={`/classes/${currentClass}/${sub.key}`}
-                  className="text-blue-300 hover:text-blue-100 flex items-center gap-2 transition"
+                <button
+                  onClick={() => handleToggleSubclass(sub.key)}
+                  className={`w-full text-left text-sm px-3 py-1 rounded flex items-center gap-2 transition border ${
+                    activeSubclasses.includes(sub.key)
+                      ? "border-blue-400 text-white"
+                      : "border-zinc-700 text-zinc-300"
+                  }`}
                 >
-                  <img
-                    src={getIconSrc(currentClass)}
-                    alt={`${sub.name} icon`}
-                    className="w-5 h-5 object-contain"
-                  />
-                  {sub.name}
-                </Link>
+                  {sub.key
+                    .split("-")
+                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join(" ")}
+                </button>
               </li>
             ))}
           </ul>

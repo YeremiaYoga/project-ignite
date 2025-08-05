@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import wizardTableData from "@/data/classes/wizard/tableData";
+import wizardTableData from "@/data/classes/wizard/classData";
 import TableContent from "@/components/TableContent";
 
 export default function WizardTable() {

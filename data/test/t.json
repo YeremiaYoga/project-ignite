@@ -1,0 +1,33 @@
+[
+  {
+    "name": "t",
+    "level": 0,
+    "short_source": "",
+    "source": "",
+    "school": "",
+    "casting_time": "",
+    "range": "",
+    "measurement": "feet",
+    "area": "",
+    "components": "",
+    "duration": "",
+    "concentration": false,
+    "ritual": false,
+    "damage_type": "",
+    "damage_dice": "",
+    "damage_level": "",
+    "saving_throw": "",
+    "material": "",
+    "classes": [
+      "artificer",
+      "barbarian",
+      "bard"
+    ],
+    "additional_classes": [],
+    "species": [],
+    "feats": [],
+    "other_options_features": [],
+    "description": "",
+    "higher_level": ""
+  }
+]
