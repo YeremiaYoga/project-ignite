@@ -20,6 +20,14 @@ const fighterClassData = {
       featuresId: ["fighting-style-1", "second-wind-1", "weapon-mastery-1"],
       secondWind: 2,
       weaponMastery: 3,
+      eldritch_knight: {
+        spellsPrepared: "—",
+        spellSlots: ["—", "—", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "—",
+        number: "—",
+      },
     },
     {
       level: 2,
@@ -28,6 +36,14 @@ const fighterClassData = {
       featuresId: ["action-surge-2", "tactical-mind-2"],
       secondWind: 2,
       weaponMastery: 3,
+      eldritch_knight: {
+        spellsPrepared: "—",
+        spellSlots: ["—", "—", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "—",
+        number: "—",
+      },
     },
     {
       level: 3,
@@ -36,6 +52,14 @@ const fighterClassData = {
       featuresId: ["fighter-subclass-3"],
       secondWind: 2,
       weaponMastery: 3,
+      eldritch_knight: {
+        spellsPrepared: "3",
+        spellSlots: ["2", "—", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D6",
+        number: "4",
+      },
     },
     {
       level: 4,
@@ -44,6 +68,14 @@ const fighterClassData = {
       featuresId: ["ability-score-improvement-4"],
       secondWind: 3,
       weaponMastery: 4,
+      eldritch_knight: {
+        spellsPrepared: "4",
+        spellSlots: ["3", "—", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D6",
+        number: "4",
+      },
     },
     {
       level: 5,
@@ -52,6 +84,14 @@ const fighterClassData = {
       featuresId: ["extra-attack-5", "tactical-shift-5"],
       secondWind: 3,
       weaponMastery: 4,
+      eldritch_knight: {
+        spellsPrepared: "4",
+        spellSlots: ["3", "—", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D8",
+        number: "6",
+      },
     },
     {
       level: 6,
@@ -60,6 +100,14 @@ const fighterClassData = {
       featuresId: ["ability-score-improvement-6"],
       secondWind: 3,
       weaponMastery: 4,
+      eldritch_knight: {
+        spellsPrepared: "4",
+        spellSlots: ["3", "—", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D8",
+        number: "6",
+      },
     },
     {
       level: 7,
@@ -68,6 +116,14 @@ const fighterClassData = {
       featuresId: ["subclass-feature-7"],
       secondWind: 3,
       weaponMastery: 4,
+      eldritch_knight: {
+        spellsPrepared: "5",
+        spellSlots: ["4", "2", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D8",
+        number: "6",
+      },
     },
     {
       level: 8,
@@ -76,6 +132,14 @@ const fighterClassData = {
       featuresId: ["ability-score-improvement-8"],
       secondWind: 3,
       weaponMastery: 4,
+      eldritch_knight: {
+        spellsPrepared: "6",
+        spellSlots: ["4", "2", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D8",
+        number: "6",
+      },
     },
     {
       level: 9,
@@ -84,6 +148,14 @@ const fighterClassData = {
       featuresId: ["indomitable-9", "tactical-master-9"],
       secondWind: 3,
       weaponMastery: 4,
+      eldritch_knight: {
+        spellsPrepared: "6",
+        spellSlots: ["4", "2", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D8",
+        number: "8",
+      },
     },
     {
       level: 10,
@@ -92,6 +164,14 @@ const fighterClassData = {
       featuresId: ["subclass-feature-10"],
       secondWind: 4,
       weaponMastery: 5,
+      eldritch_knight: {
+        spellsPrepared: "7",
+        spellSlots: ["4", "3", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D8",
+        number: "8",
+      },
     },
     {
       level: 11,
@@ -100,6 +180,14 @@ const fighterClassData = {
       featuresId: ["two-extra-attacks-11"],
       secondWind: 4,
       weaponMastery: 5,
+      eldritch_knight: {
+        spellsPrepared: "8",
+        spellSlots: ["4", "3", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D10",
+        number: "8",
+      },
     },
     {
       level: 12,
@@ -108,6 +196,14 @@ const fighterClassData = {
       featuresId: ["ability-score-improvement-12"],
       secondWind: 4,
       weaponMastery: 5,
+      eldritch_knight: {
+        spellsPrepared: "8",
+        spellSlots: ["4", "3", "—", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D10",
+        number: "8",
+      },
     },
     {
       level: 13,
@@ -116,6 +212,14 @@ const fighterClassData = {
       featuresId: ["indomitable-13", "studied-attacks-13"],
       secondWind: 4,
       weaponMastery: 5,
+      eldritch_knight: {
+        spellsPrepared: "9",
+        spellSlots: ["4", "3", "2", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D10",
+        number: "10",
+      },
     },
     {
       level: 14,
@@ -124,6 +228,14 @@ const fighterClassData = {
       featuresId: ["ability-score-improvement-14"],
       secondWind: 4,
       weaponMastery: 5,
+      eldritch_knight: {
+        spellsPrepared: "10",
+        spellSlots: ["4", "3", "2", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D10",
+        number: "10",
+      },
     },
     {
       level: 15,
@@ -132,6 +244,14 @@ const fighterClassData = {
       featuresId: ["subclass-feature-15"],
       secondWind: 4,
       weaponMastery: 5,
+      eldritch_knight: {
+        spellsPrepared: "10",
+        spellSlots: ["4", "3", "2", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D10",
+        number: "10",
+      },
     },
     {
       level: 16,
@@ -140,6 +260,14 @@ const fighterClassData = {
       featuresId: ["ability-score-improvement-16"],
       secondWind: 4,
       weaponMastery: 6,
+      eldritch_knight: {
+        spellsPrepared: "11",
+        spellSlots: ["4", "3", "3", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D10",
+        number: "10",
+      },
     },
     {
       level: 17,
@@ -148,6 +276,14 @@ const fighterClassData = {
       featuresId: ["action-surge-17", "indomitable-17"],
       secondWind: 4,
       weaponMastery: 6,
+      eldritch_knight: {
+        spellsPrepared: "11",
+        spellSlots: ["4", "3", "3", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D12",
+        number: "12",
+      },
     },
     {
       level: 18,
@@ -156,6 +292,14 @@ const fighterClassData = {
       featuresId: ["subclass-feature-18"],
       secondWind: 4,
       weaponMastery: 6,
+      eldritch_knight: {
+        spellsPrepared: "11",
+        spellSlots: ["4", "3", "3", "—"],
+      },
+      psi_warrior: {
+        dieDice: "D12",
+        number: "12",
+      },
     },
     {
       level: 19,
@@ -164,6 +308,14 @@ const fighterClassData = {
       featuresId: ["epic-boon-19"],
       secondWind: 4,
       weaponMastery: 6,
+      eldritch_knight: {
+        spellsPrepared: "12",
+        spellSlots: ["4", "3", "3", "1"],
+      },
+      psi_warrior: {
+        dieDice: "D12",
+        number: "12",
+      },
     },
     {
       level: 20,
@@ -172,6 +324,14 @@ const fighterClassData = {
       featuresId: ["three-extra-attacks-20"],
       secondWind: 4,
       weaponMastery: 6,
+      eldritch_knight: {
+        spellsPrepared: "13",
+        spellSlots: ["4", "3", "3", "1"],
+      },
+      psi_warrior: {
+        dieDice: "D12",
+        number: "12",
+      },
     },
   ],
   coreTraits: {

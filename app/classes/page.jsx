@@ -17,7 +17,7 @@ const classList = [
   "warlock",
   "wizard",
   "artificer",
-  "blood-hunter",
+  "blood_hunter",
 ];
 
 const classInfo = {
@@ -138,10 +138,10 @@ const classInfo = {
     hitDie: "d8",
     savingThrows: ["Constitution", "Intelligence"],
   },
-  "blood-hunter": {
+  "blood_hunter": {
     title: "Blood Hunter",
     description: "-",
-    icon: "/assets/classIcon/blood-hunter_icon.webp",
+    icon: "/assets/classIcon/blood_hunter_icon.webp",
     primaryAbility: "-",
     hitDie: "-",
     savingThrows: [],

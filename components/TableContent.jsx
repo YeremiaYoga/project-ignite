@@ -33,6 +33,10 @@ export default function TableContent({
   };
 
   const headerColor = classColors[nameClass] || "#1976d2";
+  function getValueByPath(obj, path) {
+    return path.split(".").reduce((acc, part) => acc?.[part] ?? "—", obj);
+  }
+  console.log
   return (
     <div className="overflow-x-auto border border-gray-700 rounded-lg shadow mt-6 bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900">
       <table className="w-full text-sm text-left text-gray-200">
@@ -71,7 +75,7 @@ export default function TableContent({
                 let content;
 
                 if (col.render) {
-                  content = col.render(row[col.key], row, i);
+                  content = col.render(getValueByPath(row, col.key), row, i);
                 } else if (col.key === "level") {
                   content = ordinal(row.level);
                 } else if (
@@ -93,10 +97,14 @@ export default function TableContent({
                           ))
                           .reduce((prev, curr) => [prev, ", ", curr])
                       : "—";
-                } else if (col.isArray && Array.isArray(row[col.key])) {
+                } else if (
+                  col.isArray &&
+                  Array.isArray(getValueByPath(row, col.key))
+                ) {
+                  const arrayVal = getValueByPath(row, col.key);
                   content =
-                    row[col.key].length > 0 && row[col.key][0] !== "—"
-                      ? row[col.key]
+                    arrayVal.length > 0 && arrayVal[0] !== "—"
+                      ? arrayVal
                           .map((val) => (
                             <span key={val} className="inline-block">
                               {val}
@@ -105,12 +113,10 @@ export default function TableContent({
                           .reduce((prev, curr) => [prev, ", ", curr])
                       : "—";
                 } else if (col.key === "proficiencyBonus") {
-                  content =
-                    typeof row[col.key] === "number"
-                      ? `+${row[col.key]}`
-                      : row[col.key];
+                  const val = getValueByPath(row, col.key);
+                  content = typeof val === "number" ? `+${val}` : val;
                 } else {
-                  content = row[col.key];
+                  content = getValueByPath(row, col.key);
                 }
 
                 return (
@@ -119,6 +125,7 @@ export default function TableContent({
                   </td>
                 );
               })}
+
               {slotHeader &&
                 row.spellSlots &&
                 row.spellSlots.map((slot, idx) => (

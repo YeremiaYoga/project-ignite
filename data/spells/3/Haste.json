@@ -12,16 +12,13 @@
     "components": "V, S, M",
     "duration": "1 minute",
     "concentration": true,
+    "ritual": false,
     "damage_type": null,
     "damage_dice": null,
     "damage_level": null,
     "saving_throw": null,
     "material": "(a shaving of licorice root)",
-    "classes": [
-      "Artificer",
-      "Sorcerer",
-      "Wizard"
-    ],
+    "classes": ["Artificer", "Sorcerer", "Wizard"],
     "additional_classes": [
       "Arcane Trickster Rogue",
       "Architect of Ruin Illrigger",
@@ -36,11 +33,7 @@
       "Zeal (PSA) Cleric"
     ],
     "species": [],
-    "feats": [
-      "Prismari Student",
-      "Quandrix Student",
-      "Rakdos Cultist"
-    ],
+    "feats": ["Prismari Student", "Quandrix Student", "Rakdos Cultist"],
     "other_options_features": [],
     "description": "Choose a willing creature that you can see within range. Until the spell ends, the target's Speed is doubled, it gains a +2 bonus to Armor Class, it has Advantage on Dexterity saving throws, and it gains an additional action on each of its turns. That action can be used to take only the Attack (one attack only), Dash, Disengage, Hide, or Utilize action.\n\nWhen the spell ends, the target is Incapacitated and has a Speed of 0 until the end of its next turn, as a wave of lethargy washes over it.",
     "higher_level": null

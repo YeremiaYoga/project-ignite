@@ -8,7 +8,7 @@ const classList = [
   "artificer",
   "barbarian",
   "bard",
-  "blood-hunter",
+  "blood_hunter",
   "cleric",
   "druid",
   "fighter",
@@ -70,7 +70,7 @@ export default function ClientClassesLayout({ children, currentClass }) {
   };
 
   return (
-    <div className="relative min-h-screen text-white">
+    <div className="relative min-h-screen text-white overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
       {children && typeof children === "function"
         ? children({ activeSubclasses, handleToggleSubclass })
         : children}

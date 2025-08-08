@@ -31,6 +31,14 @@ const rogueClassData = {
         "weapon-mastery-1",
       ],
       sneakAttack: "1d6",
+      arcane_trickster: {
+        spellsPrepared: "—",
+        spellSlots: ["—", "—", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "—",
+        number: "—",
+      },
     },
     {
       level: 2,
@@ -38,6 +46,14 @@ const rogueClassData = {
       features: ["Cunning Action"],
       featuresId: ["cunning-action-2"],
       sneakAttack: "1d6",
+      arcane_trickster: {
+        spellsPrepared: "—",
+        spellSlots: ["—", "—", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "—",
+        number: "—",
+      },
     },
     {
       level: 3,
@@ -45,6 +61,14 @@ const rogueClassData = {
       features: ["Rogue Subclass", "Steady Aim"],
       featuresId: ["rogue-subclass-3", "steady-aim-3"],
       sneakAttack: "2d6",
+      arcane_trickster: {
+        spellsPrepared: "3",
+        spellSlots: ["2", "—", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D6",
+        number: "4",
+      },
     },
     {
       level: 4,
@@ -52,6 +76,14 @@ const rogueClassData = {
       features: ["Ability Score Improvement"],
       featuresId: ["ability-score-improvement-4"],
       sneakAttack: "2d6",
+      arcane_trickster: {
+        spellsPrepared: "4",
+        spellSlots: ["3", "—", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D6",
+        number: "4",
+      },
     },
     {
       level: 5,
@@ -59,6 +91,14 @@ const rogueClassData = {
       features: ["Cunning Strike", "Uncanny Dodge"],
       featuresId: ["cunning-strike-5", "uncanny-dodge-5"],
       sneakAttack: "3d6",
+      arcane_trickster: {
+        spellsPrepared: "4",
+        spellSlots: ["3", "—", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D8",
+        number: "6",
+      },
     },
     {
       level: 6,
@@ -66,6 +106,14 @@ const rogueClassData = {
       features: ["Expertise"],
       featuresId: ["expertise-6"],
       sneakAttack: "3d6",
+      arcane_trickster: {
+        spellsPrepared: "4",
+        spellSlots: ["3", "—", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D8",
+        number: "6",
+      },
     },
     {
       level: 7,
@@ -73,6 +121,14 @@ const rogueClassData = {
       features: ["Evasion", "Reliable Talent"],
       featuresId: ["evasion-7", "reliable-talent-7"],
       sneakAttack: "4d6",
+      arcane_trickster: {
+        spellsPrepared: "5",
+        spellSlots: ["4", "2", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D8",
+        number: "6",
+      },
     },
     {
       level: 8,
@@ -80,6 +136,14 @@ const rogueClassData = {
       features: ["Ability Score Improvement"],
       featuresId: ["ability-score-improvement-8"],
       sneakAttack: "4d6",
+      arcane_trickster: {
+        spellsPrepared: "6",
+        spellSlots: ["4", "2", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D8",
+        number: "6",
+      },
     },
     {
       level: 9,
@@ -87,6 +151,14 @@ const rogueClassData = {
       features: ["Subclass Feature"],
       featuresId: ["subclass-feature-9"],
       sneakAttack: "5d6",
+      arcane_trickster: {
+        spellsPrepared: "6",
+        spellSlots: ["4", "2", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D8",
+        number: "8",
+      },
     },
     {
       level: 10,
@@ -94,6 +166,14 @@ const rogueClassData = {
       features: ["Ability Score Improvement"],
       featuresId: ["ability-score-improvement-10"],
       sneakAttack: "5d6",
+      arcane_trickster: {
+        spellsPrepared: "7",
+        spellSlots: ["4", "3", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D8",
+        number: "8",
+      },
     },
     {
       level: 11,
@@ -101,6 +181,14 @@ const rogueClassData = {
       features: ["Improved Cunning Strike"],
       featuresId: ["improved-cunning-strike-11"],
       sneakAttack: "6d6",
+      arcane_trickster: {
+        spellsPrepared: "8",
+        spellSlots: ["4", "3", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D10",
+        number: "8",
+      },
     },
     {
       level: 12,
@@ -108,6 +196,14 @@ const rogueClassData = {
       features: ["Ability Score Improvement"],
       featuresId: ["ability-score-improvement-12"],
       sneakAttack: "6d6",
+      arcane_trickster: {
+        spellsPrepared: "8",
+        spellSlots: ["4", "3", "—", "—"],
+      },
+      soulknife: {
+        dieDice: "D10",
+        number: "8",
+      },
     },
     {
       level: 13,
@@ -115,6 +211,14 @@ const rogueClassData = {
       features: ["Subclass Feature"],
       featuresId: ["subclass-feature-13"],
       sneakAttack: "7d6",
+      arcane_trickster: {
+        spellsPrepared: "9",
+        spellSlots: ["4", "3", "2", "—"],
+      },
+      soulknife: {
+        dieDice: "D10",
+        number: "10",
+      },
     },
     {
       level: 14,
@@ -122,6 +226,14 @@ const rogueClassData = {
       features: ["Devious Strikes"],
       featuresId: ["devious-strikes-14"],
       sneakAttack: "7d6",
+      arcane_trickster: {
+        spellsPrepared: "10",
+        spellSlots: ["4", "3", "2", "—"],
+      },
+      soulknife: {
+        dieDice: "D10",
+        number: "10",
+      },
     },
     {
       level: 15,
@@ -129,6 +241,14 @@ const rogueClassData = {
       features: ["Slippery Mind"],
       featuresId: ["slippery-mind-15"],
       sneakAttack: "8d6",
+      arcane_trickster: {
+        spellsPrepared: "10",
+        spellSlots: ["4", "3", "2", "—"],
+      },
+      soulknife: {
+        dieDice: "D10",
+        number: "10",
+      },
     },
     {
       level: 16,
@@ -136,6 +256,14 @@ const rogueClassData = {
       features: ["Ability Score Improvement"],
       featuresId: ["ability-score-improvement-16"],
       sneakAttack: "8d6",
+      arcane_trickster: {
+        spellsPrepared: "11",
+        spellSlots: ["4", "3", "3", "—"],
+      },
+      soulknife: {
+        dieDice: "D10",
+        number: "10",
+      },
     },
     {
       level: 17,
@@ -143,6 +271,14 @@ const rogueClassData = {
       features: ["Subclass Feature"],
       featuresId: ["subclass-feature-17"],
       sneakAttack: "9d6",
+      arcane_trickster: {
+        spellsPrepared: "11",
+        spellSlots: ["4", "3", "3", "—"],
+      },
+      soulknife: {
+        dieDice: "D12",
+        number: "12",
+      },
     },
     {
       level: 18,
@@ -150,6 +286,14 @@ const rogueClassData = {
       features: ["Elusive"],
       featuresId: ["elusive-18"],
       sneakAttack: "9d6",
+      arcane_trickster: {
+        spellsPrepared: "11",
+        spellSlots: ["4", "3", "3", "—"],
+      },
+      soulknife: {
+        dieDice: "D12",
+        number: "12",
+      },
     },
     {
       level: 19,
@@ -157,6 +301,14 @@ const rogueClassData = {
       features: ["Epic Boon"],
       featuresId: ["epic-boon-19"],
       sneakAttack: "10d6",
+      arcane_trickster: {
+        spellsPrepared: "12",
+        spellSlots: ["4", "3", "3", "1"],
+      },
+      soulknife: {
+        dieDice: "D12",
+        number: "12",
+      },
     },
     {
       level: 20,
@@ -164,6 +316,14 @@ const rogueClassData = {
       features: ["Stroke of Luck"],
       featuresId: ["stroke-of-luck-20"],
       sneakAttack: "10d6",
+      arcane_trickster: {
+        spellsPrepared: "13",
+        spellSlots: ["4", "3", "3", "1"],
+      },
+      soulknife: {
+        dieDice: "D12",
+        number: "12",
+      },
     },
   ],
   coreTraits: {

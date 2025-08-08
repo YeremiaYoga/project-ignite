@@ -12,6 +12,7 @@
     "components": "V, S, M",
     "duration": "Instantaneous",
     "concentration": false,
+    "ritual": false,
     "damage_type": "fire",
     "damage_dice": "8d6",
     "damage_level": "2d6",

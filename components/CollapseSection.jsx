@@ -10,7 +10,7 @@ export default function CollapsibleSection({ title, children, level }) {
   return (
     <section>
       <div
-        className="flex items-center justify-between cursor-pointer mb-2"
+        className="flex items-center justify-between cursor-pointer mb-2 "
         onClick={() => setOpen(!open)}
       >
         <HeadingTag className="text-blue-300 font-semibold text-xl md:text-2xl">

@@ -16,13 +16,13 @@ export default async function ClassPage({ params }) {
     ]);
 
     return (
-      <main className="min-h-screen  px-4 py-10">
-        <div className="max-w-6xl mx-auto space-y-8">
+      <main className="min-h-screen px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
           <header className="text-left border-b border-gray-700 pb-2">
             <ClassHeader classId={className} />
           </header>
 
-          <section className="text-gray-300 space-y-4">
+          <section className="text-gray-300 space-y-4 text-sm sm:text-base">
             {classData.descriptionClass.map((desc, i) => {
               if (desc.color === "white") {
                 return (
@@ -32,7 +32,10 @@ export default async function ClassPage({ params }) {
                 );
               } else if (desc.color === "gray") {
                 return (
-                  <p key={i} className="text-sm text-gray-400 italic">
+                  <p
+                    key={i}
+                    className="text-xs sm:text-sm text-gray-400 italic"
+                  >
                     {desc.text}
                   </p>
                 );
@@ -46,9 +49,10 @@ export default async function ClassPage({ params }) {
             })}
           </section>
 
-          <div>
+          <div className="overflow-x-auto">
             <ClassTable tableData={classData} nameClass={className} />
           </div>
+
           <ClassFeatures classId={className} />
         </div>
       </main>

@@ -1,9 +1,39 @@
 "use client";
 
 import { useState } from "react";
+import MultiSelectTags from "./MultipSelectTags";
 
 export default function SpellBuilderPage() {
-  const classList = [
+  const initialForm = {
+    name: "",
+    level: "0",
+    short_source: "",
+    source: "",
+    school: "",
+    casting_time: "",
+    measurement: "feet",
+    area: "",
+    components: [],
+    duration: "",
+    concentration: false,
+    ritual: false,
+    damage_type: [],
+    damage_dice: "",
+    damage_level: "",
+    saving_throw: [],
+    material: "",
+    classes: [],
+    additional_classes: "",
+    species: "",
+    feats: "",
+    other_options_features: "",
+    description: "",
+    higher_level: "",
+  };
+
+  const [form, setForm] = useState(initialForm);
+
+  const classOptions = [
     "artificer",
     "barbarian",
     "bard",
@@ -18,43 +48,99 @@ export default function SpellBuilderPage() {
     "sorcerer",
     "warlock",
     "wizard",
+  ].map((cls) => ({
+    label: cls.charAt(0).toUpperCase() + cls.slice(1).replace("-", " "),
+    value: cls,
+  }));
+
+  const savingThrowOptions = [
+    { label: "Strength", value: "str" },
+    { label: "Dexterity", value: "dex" },
+    { label: "Constitution", value: "con" },
+    { label: "Intelligence", value: "int" },
+    { label: "Wisdom", value: "wis" },
+    { label: "Charisma", value: "cha" },
   ];
 
-  const initialForm = {
-    name: "",
-    level: "0",
-    short_source: "",
-    source: "",
-    school: "",
-    casting_time: "",
-    range: "",
-    measurement: "feet",
-    area: "",
-    components: "",
-    duration: "",
-    concentration: false,
-    ritual: false,
-    damage_type: "",
-    damage_dice: "",
-    damage_level: "",
-    saving_throw: "",
-    material: "",
-    classes: [],
-    additional_classes: "",
-    species: "",
-    feats: "",
-    other_options_features: "",
-    description: "",
-    higher_level: "",
-  };
+  const componentOptions = [
+    { label: "Verbal", value: "V" },
+    { label: "Somatic", value: "S" },
+    { label: "Material", value: "M" },
+  ];
 
-  const [form, setForm] = useState(initialForm);
+  const damageTypeOptions = [
+    "acid",
+    "bludgeoning",
+    "cold",
+    "fire",
+    "force",
+    "lightning",
+    "necrotic",
+    "piercing",
+    "poison",
+    "psychic",
+    "radiant",
+    "slashing",
+    "thunder",
+  ].map((type) => ({
+    label: type.charAt(0).toUpperCase() + type.slice(1),
+    value: type,
+  }));
+
+  const schoolOptions = [
+    "Abjuration",
+    "Conjuration",
+    "Divination",
+    "Enchantment",
+    "Evocation",
+    "Illusion",
+    "Necromancy",
+    "Transmutation",
+  ];
+
+  const castingTimeOptions = [
+    "Action",
+    "Bonus Action",
+    "Reaction",
+    "Round",
+    "Minute",
+    "Hour",
+    "Special",
+  ];
+  const rangeOptions = ["Self", "Touch", "Point", "Area", "Special"];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    if (name === "level" && type === "number") {
+      const numValue = parseInt(value);
+      if (isNaN(numValue) || numValue < 0) {
+        setForm((prev) => ({ ...prev, [name]: "0" }));
+        return;
+      } else if (numValue > 9) {
+        setForm((prev) => ({ ...prev, [name]: "9" }));
+        return;
+      }
+    }
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleAddItem = (name, item) => {
+    if (!form[name].includes(item)) {
+      setForm((prev) => ({
+        ...prev,
+        [name]: [...prev[name], item],
+      }));
+    }
+  };
+
+  const handleRemoveItem = (name, item) => {
+    setForm((prev) => ({
+      ...prev,
+      [name]: prev[name].filter((i) => i !== item),
     }));
   };
 
@@ -64,23 +150,32 @@ export default function SpellBuilderPage() {
       .map((item) => item.trim())
       .filter(Boolean);
 
+  const formatWithExpPrefix = (value) => {
+    const trimmedValue = value.trim();
+    return trimmedValue !== "" ? `Exp : ${trimmedValue}` : "";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = {
       ...form,
       level: parseInt(form.level),
-      range:
-        !isNaN(form.range) && form.range.trim() !== ""
-          ? parseInt(form.range)
-          : form.range.trim().toLowerCase(),
+
+      short_source: formatWithExpPrefix(form.short_source),
+      source: formatWithExpPrefix(form.source),
+      area: formatWithExpPrefix(form.area),
+
+      components: form.components,
+      damage_type: form.damage_type,
+      saving_throw: form.saving_throw,
+      classes: form.classes,
 
       additional_classes: toArray(form.additional_classes),
       species: toArray(form.species),
       feats: toArray(form.feats),
       other_options_features: toArray(form.other_options_features),
     };
-
     const res = await fetch("/api/spellbuilder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -95,36 +190,31 @@ export default function SpellBuilderPage() {
     }
   };
 
-  const input = ({ type = "text", ...props }) => (
-    <input
-      type={type}
-      {...props}
-      className="w-full p-2 bg-gray-800 text-white rounded"
-    />
-  );
-
   return (
-    <main className="max-w-3xl mx-auto px-4 py-10 text-white">
-      <h1 className="text-3xl font-bold mb-6">Spell Builder</h1>
+    <main className="max-w-3xl mx-auto px-4 py-10 text-white bg-gray-900 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-center">Spell Builder</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
+            { name: "image", label: "Image Url" },
             { name: "name", label: "Name" },
-            { name: "level", label: "Level", type: "number" },
+            {
+              name: "level",
+              label: "Level",
+              type: "number",
+              min: "0",
+              max: "9",
+            },
             { name: "short_source", label: "Short Source" },
             { name: "source", label: "Source" },
             { name: "school", label: "School" },
             { name: "casting_time", label: "Casting Time" },
-            { name: "range", label: "Range" },
             { name: "measurement", label: "Measurement" },
             { name: "area", label: "Area" },
-            { name: "components", label: "Components" },
             { name: "material", label: "Material Component" },
             { name: "duration", label: "Duration" },
-            { name: "damage_type", label: "Damage Type" },
             { name: "damage_dice", label: "Damage Dice" },
             { name: "damage_level", label: "Damage Increase per Level" },
-            { name: "saving_throw", label: "Saving Throw" },
             {
               name: "additional_classes",
               label: "Additional Classes (comma-separated)",
@@ -135,7 +225,7 @@ export default function SpellBuilderPage() {
               name: "other_options_features",
               label: "Other Options / Features (comma-separated)",
             },
-          ].map(({ name, label, type = "text" }) => (
+          ].map(({ name, label, type = "text", min, max }) => (
             <div key={name}>
               <label htmlFor={name} className="block text-sm font-medium mb-1">
                 {label}
@@ -146,59 +236,111 @@ export default function SpellBuilderPage() {
                 id={name}
                 value={form[name]}
                 onChange={handleChange}
+                min={min}
+                max={max}
                 className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           ))}
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Classes</label>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {form.classes.map((cls) => (
-              <span
-                key={cls}
-                className="flex items-center bg-blue-700 text-white px-2 py-1 rounded-full text-sm"
-              >
-                {cls}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setForm((prev) => ({
-                      ...prev,
-                      classes: prev.classes.filter((c) => c !== cls),
-                    }))
-                  }
-                  className="ml-2 text-white hover:text-red-300"
-                >
-                  ✕
-                </button>
-              </span>
-            ))}
-          </div>
-          <select
-            value=""
-            onChange={(e) => {
-              const selected = e.target.value;
-              if (!form.classes.includes(selected)) {
-                setForm((prev) => ({
-                  ...prev,
-                  classes: [...prev.classes, selected],
-                }));
-              }
-            }}
-            className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="" disabled>
-              Select Class
-            </option>
-            {classList
-              .filter((cls) => !form.classes.includes(cls))
-              .map((cls) => (
-                <option key={cls} value={cls}>
-                  {cls.charAt(0).toUpperCase() + cls.slice(1).replace("-", " ")}
+          <div>
+            <label htmlFor="school" className="block text-sm font-medium mb-1">
+              School
+            </label>
+            <select
+              name="school"
+              id="school"
+              value={form.school}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>
+                Select School
+              </option>
+              {schoolOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
                 </option>
               ))}
-          </select>
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="casting_time"
+              className="block text-sm font-medium mb-1"
+            >
+              Casting Time
+            </label>
+            <select
+              name="casting_time"
+              id="casting_time"
+              value={form.casting_time}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>
+                Select Casting Time
+              </option>
+              {castingTimeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="range" className="block text-sm font-medium mb-1">
+              Range
+            </label>
+            <select
+              name="range"
+              id="range"
+              value={form.range}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>
+                Select Range
+              </option>
+              {rangeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <MultiSelectTags
+            label="Classes"
+            options={classOptions}
+            selected={form.classes}
+            onSelect={(value) => handleAddItem("classes", value)}
+            onDeselect={(value) => handleRemoveItem("classes", value)}
+          />
+          <MultiSelectTags
+            label="Saving Throw"
+            options={savingThrowOptions}
+            selected={form.saving_throw}
+            onSelect={(value) => handleAddItem("saving_throw", value)}
+            onDeselect={(value) => handleRemoveItem("saving_throw", value)}
+          />
+          <MultiSelectTags
+            label="Components"
+            options={componentOptions}
+            selected={form.components}
+            onSelect={(value) => handleAddItem("components", value)}
+            onDeselect={(value) => handleRemoveItem("components", value)}
+          />
+          <MultiSelectTags
+            label="Damage Type"
+            options={damageTypeOptions}
+            selected={form.damage_type}
+            onSelect={(value) => handleAddItem("damage_type", value)}
+            onDeselect={(value) => handleRemoveItem("damage_type", value)}
+          />
         </div>
 
         <div>
