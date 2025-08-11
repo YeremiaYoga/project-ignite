@@ -138,7 +138,7 @@ const classInfo = {
     hitDie: "d8",
     savingThrows: ["Constitution", "Intelligence"],
   },
-  "blood_hunter": {
+  blood_hunter: {
     title: "Blood Hunter",
     description: "-",
     icon: "/assets/classIcon/blood_hunter_icon.webp",
@@ -152,7 +152,7 @@ export default function ClassesPage() {
   return (
     <div className="p-6 min-h-screen  text-white">
       <h1 className="text-3xl font-bold mb-6">Classes</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         {classList.map((cls) => (
           <ClassCard key={cls} className={cls} info={classInfo[cls]} />
         ))}

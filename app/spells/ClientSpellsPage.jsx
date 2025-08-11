@@ -5,10 +5,13 @@ import ListSpells from "./ListSpells";
 import DetailSpells from "./DetailSpells";
 import { Search, SlidersHorizontal, Bookmark } from "lucide-react";
 import FilterModal from "./FilterModal";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ClientSpellsPage({ spells }) {
-  const [selectedSpell, setSelectedSpell] = useState(null);
+   const router = useRouter();
+  const searchParams = useSearchParams();
 
+  const [selectedSpell, setSelectedSpell] = useState(null);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -18,9 +21,26 @@ export default function ClientSpellsPage({ spells }) {
     const handler = setTimeout(() => {
       setSearchQuery(searchInput);
     }, 1000);
-
     return () => clearTimeout(handler);
   }, [searchInput]);
+
+  useEffect(() => {
+    const spellParam = searchParams.get("spell");
+    if (spellParam) {
+      const foundSpell = spells.find(
+        (s) =>
+          s.name.toLowerCase() === decodeURIComponent(spellParam).toLowerCase()
+      );
+      if (foundSpell) setSelectedSpell(foundSpell);
+    }
+  }, [searchParams, spells]);
+
+  const handleSelectSpell = (spell) => {
+    setSelectedSpell(spell);
+    const params = new URLSearchParams(window.location.search);
+    params.set("spell", encodeURIComponent(spell.name));
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   const handleApplyFilters = (filters) => {
     setActiveFilters(filters);
@@ -65,6 +85,10 @@ export default function ClientSpellsPage({ spells }) {
           spell.damage_type.toLowerCase().includes(time.toLowerCase())
         ));
 
+const matchesRitual =
+  !activeFilters?.ritual || 
+  spell?.ritual === true;   
+
     return (
       matchesSearch &&
       matchesClass &&
@@ -72,7 +96,8 @@ export default function ClientSpellsPage({ spells }) {
       matchesCastTime &&
       matchesRange &&
       matchesSchool &&
-      matchesDamageType
+      matchesDamageType &&
+      matchesRitual
     );
   });
 
@@ -109,7 +134,7 @@ export default function ClientSpellsPage({ spells }) {
         <div className="grid grid-cols-1 gap-4">
           <ListSpells
             spells={filteredSpells}
-            onSelect={setSelectedSpell}
+            onSelect={handleSelectSpell}
             selectedSpell={selectedSpell}
           />
         </div>

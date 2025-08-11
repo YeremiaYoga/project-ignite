@@ -25,7 +25,7 @@ export default function ClassTable({ tableData, nameClass }) {
   };
 
   const baseColumns = Object.keys(sample)
-    .filter((key) => key !== "featuresId" && typeof sample[key] !== "object")
+    .filter((key) => key !== "featuresId" && !(!Array.isArray(sample[key]) && typeof sample[key] === "object"))
     .map((key) => ({
       key,
       label:

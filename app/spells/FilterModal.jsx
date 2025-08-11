@@ -55,6 +55,7 @@ const FILTERS = {
     "Necromancy",
     "Transmutation",
   ],
+  ritual: ["true"],
 };
 
 const INITIAL_SELECTED = {
@@ -64,6 +65,7 @@ const INITIAL_SELECTED = {
   damageType: [],
   range: [],
   school: [],
+  ritual: false,
 };
 
 export default function ModalFilter({ isOpen, onClose, onApply }) {
@@ -78,6 +80,9 @@ export default function ModalFilter({ isOpen, onClose, onApply }) {
 
   const toggleOption = (category, value) => {
     setSelected((prev) => {
+      if (category === "ritual") {
+        return { ...prev, ritual: !prev.ritual };
+      }
       const current = prev[category];
       const updated = current.includes(value)
         ? current.filter((v) => v !== value)
@@ -90,6 +95,7 @@ export default function ModalFilter({ isOpen, onClose, onApply }) {
     const modified = {
       ...selected,
       castTime: selected.castTime.map((ct) => ct.toLowerCase()),
+      ritual: selected.ritual ? ["true"] : [],
     };
     onApply(modified);
     onClose();
@@ -107,30 +113,44 @@ export default function ModalFilter({ isOpen, onClose, onApply }) {
 
         {Object.entries(FILTERS).map(([key, options]) => (
           <div key={key} className="mb-4">
-            <h3 className="font-semibold capitalize mb-1">{key}</h3>
-            <div className="flex flex-wrap gap-2">
-              {options.length === 0 ? (
-                <span className="text-sm text-gray-400">...</span>
-              ) : (
-                options.map((value) => (
-                  <button
-                    key={value}
-                    className={`text-sm px-3 py-1 rounded border transition ${
-                      (selected[key] ?? []).includes(value)
-                        ? "bg-blue-600 border-blue-600 text-white"
-                        : "bg-gray-800 border-gray-600 text-gray-200"
-                    }`}
-                    onClick={() => toggleOption(key, value)}
-                  >
-                    {key === "levels"
-                      ? value === "Cantrips"
-                        ? "Cantrips"
-                        : `${value}th`
-                      : value.charAt(0).toUpperCase() + value.slice(1)}
-                  </button>
-                ))
-              )}
-            </div>
+            <h3 className="font-semibold capitalize mb-1">
+              {key === "ritual" ? "Other Filters" : key}
+            </h3>
+
+            {key === "ritual" ? (
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selected.ritual}
+                  onChange={() => toggleOption("ritual")}
+                />
+                Ritual
+              </label>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {options.length === 0 ? (
+                  <span className="text-sm text-gray-400">...</span>
+                ) : (
+                  options.map((value) => (
+                    <button
+                      key={value}
+                      className={`text-sm px-3 py-1 rounded border transition ${
+                        (selected[key] ?? []).includes(value)
+                          ? "bg-blue-600 border-blue-600 text-white"
+                          : "bg-gray-800 border-gray-600 text-gray-200"
+                      }`}
+                      onClick={() => toggleOption(key, value)}
+                    >
+                      {key === "levels"
+                        ? value === "Cantrips"
+                          ? "Cantrips"
+                          : `${value}th`
+                        : value.charAt(0).toUpperCase() + value.slice(1)}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         ))}
 

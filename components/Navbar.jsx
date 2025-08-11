@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { CircleUserRound } from "lucide-react";
+import { CircleUserRound, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showThemeColors, setShowThemeColors] = useState(false);
   const [colors, setColors] = useState({
     sub1: "#3b82f6",
@@ -17,6 +18,7 @@ export default function Navbar() {
   });
 
   const menuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   useEffect(() => {
     const storedColors = {
@@ -36,29 +38,20 @@ export default function Navbar() {
         setIsMenuOpen(false);
         setShowThemeColors(false);
       }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target)) {
+        setIsMobileMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const applyCSSVariables = (colorObj) => {
-    document.documentElement.style.setProperty(
-      "--hyperlink-sub1",
-      colorObj.sub1
-    );
-    document.documentElement.style.setProperty(
-      "--hyperlink-sub2",
-      colorObj.sub2
-    );
+    document.documentElement.style.setProperty("--hyperlink-sub1", colorObj.sub1);
+    document.documentElement.style.setProperty("--hyperlink-sub2", colorObj.sub2);
     document.documentElement.style.setProperty("--bg-top", colorObj.bgTop);
-    document.documentElement.style.setProperty(
-      "--bg-middle",
-      colorObj.bgMiddle
-    );
-    document.documentElement.style.setProperty(
-      "--bg-bottom",
-      colorObj.bgBottom
-    );
+    document.documentElement.style.setProperty("--bg-middle", colorObj.bgMiddle);
+    document.documentElement.style.setProperty("--bg-bottom", colorObj.bgBottom);
   };
 
   const handleColorChange = (e, type) => {
@@ -82,10 +75,39 @@ export default function Navbar() {
   return (
     <nav className="w-full border-b border-gray-800 bg-gray-800 shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 py-2 flex justify-between items-center relative">
+        
+        {/* Left: Hamburger for mobile */}
+        <div className="md:hidden" ref={mobileMenuRef}>
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-gray-300 hover:text-white"
+          >
+            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+          {isMobileMenuOpen && (
+            <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50 p-3 space-y-2">
+              <Link
+                href="/spells"
+                className="block text-gray-800 dark:text-gray-200 hover:underline"
+              >
+                Spells
+              </Link>
+              <Link
+                href="/classes"
+                className="block text-gray-800 dark:text-gray-200 hover:underline"
+              >
+                Classes
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Middle: Logo */}
         <Link href="/" className="text-xl font-bold">
           Home
         </Link>
 
+        {/* Right: User settings */}
         <div className="relative" ref={menuRef}>
           <button
             className="text-gray-300 hover:text-white"
