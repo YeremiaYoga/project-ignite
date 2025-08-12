@@ -77,7 +77,10 @@ export default function ClassFeatures({ classId }) {
       );
   };
 
-  const capitalizedClass = classId.charAt(0).toUpperCase() + classId.slice(1);
+  const capitalizedClass = classId
+  .replace(/_/g, " ")
+  .replace(/^./, (char) => char.toUpperCase());
+
 
   return (
     <div className="text-zinc-100 p-8 rounded-xl mx-auto shadow-lg">

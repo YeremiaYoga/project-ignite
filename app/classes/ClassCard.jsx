@@ -3,7 +3,9 @@ import Link from "next/link";
 
 export default function ClassCard({ className, info }) {
   const normalized = className.replace(/-/g, "_");
-  const capitalized = normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  const capitalized = normalized
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
     <div className="group">

@@ -12,7 +12,11 @@ export default function ClassHeader({ classId }) {
         height={40}
         className="object-contain"
       />
-      <h1 className="text-4xl font-bold text-blue-400">{capitalized}</h1>
+      <h1 className="text-4xl font-bold text-blue-400">
+        {capitalized
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (char) => char.toUpperCase())}
+      </h1>
     </header>
   );
 }
