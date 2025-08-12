@@ -27,7 +27,7 @@ export default function ClientRacesLayout({ children, currentRace }) {
 
   const getIconSrc = (name) => {
     const normalized = name.replace(/-/g, "_");
-    return `/assets/raceIcon/${normalized}_icon.webp`; 
+    return `/assets/raceIcon/${normalized}_icon.webp`;
   };
 
   return (

@@ -6,21 +6,22 @@ export default function ClassCard({ className, info }) {
   const capitalized = normalized.charAt(0).toUpperCase() + normalized.slice(1);
 
   return (
-    <div>
-      <div className="rounded overflow-hidden flex flex-col w-44  sm:w-100 aspect-[3/2]">
+    <div className="group">
+      <div className="rounded overflow-hidden flex flex-col w-44 sm:w-100 aspect-[3/2]">
         <div
-          className="relative bg-gray-700 rounded-xl flex-shrink-0"
+          className="relative bg-gray-700 rounded-xl flex-shrink-0 overflow-hidden"
           style={{ flexBasis: "100%" }}
         >
           <Image
             src={`/assets/classes/classImage/${normalized}.webp`}
             alt={`${capitalized} Art`}
             fill
-            className="object-cover opacity-70 rounded-xl"
+            className="object-cover opacity-70 rounded-xl transform transition-transform duration-300 ease-out group-hover:scale-110"
             sizes="(max-width: 640px) 180px, 350px"
             priority
           />
-          <div className="absolute h-full right-0 bg-gray-800/50  p-2 rounded-md shadow-md w-[66%] z-10 sm:p-3 sm:w-[66%]">
+
+          <div className="absolute h-full right-0 bg-gray-800/50 p-2 rounded-md shadow-md w-[66%] z-10 sm:p-3 sm:w-[66%] overflow-y-auto">
             <div className="flex items-center gap-2">
               <div className="relative w-3 sm:w-10 aspect-square">
                 <Image
@@ -37,6 +38,7 @@ export default function ClassCard({ className, info }) {
                 {info.title || capitalized}
               </h2>
             </div>
+
             <p className="text-[7px] sm:text-sm text-gray-400 italic mt-1">
               Player’s Handbook
             </p>
@@ -60,7 +62,8 @@ export default function ClassCard({ className, info }) {
           </div>
         </div>
       </div>
-      <div className=" py-2 px-4 mt-2  rounded-b-xl">
+
+      <div className="py-2 px-4 mt-2 rounded-b-xl">
         <Link href={`/classes/${className}`}>
           <button className="w-full bg-orange-500 text-white font-bold text-[7px] sm:text-sm py-2 rounded hover:bg-orange-600 transition">
             VIEW {capitalized.toUpperCase()} DETAILS

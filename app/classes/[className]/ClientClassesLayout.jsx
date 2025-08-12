@@ -153,7 +153,7 @@ export default function ClientClassesLayout({ children, currentClass }) {
                     alt={`${className} icon`}
                     className="w-5 h-5 object-contain"
                   />
-                  {className.replace("-", " ")}
+                  {className.replace(/[-_]/g, " ")}
                 </Link>
               </li>
             ))}

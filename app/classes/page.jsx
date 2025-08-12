@@ -175,7 +175,7 @@ export default function ClassesPage() {
           type="text"
           placeholder="Search classes..."
           value={search}
-         
+          onChange={(e) => setSearch(e.target.value)}
           className="px-3 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-64"
         />
       </div>

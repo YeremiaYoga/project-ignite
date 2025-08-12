@@ -17,11 +17,10 @@ export default async function ClassPage({ params }) {
 
     return (
       <main className="min-h-screen px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 mb-25">
           <header className="text-left border-b border-gray-700 pb-2">
             <ClassHeader classId={className} />
           </header>
-
           <section className="text-gray-300 space-y-4 text-sm sm:text-base">
             {classData.descriptionClass.map((desc, i) => {
               if (desc.color === "white") {

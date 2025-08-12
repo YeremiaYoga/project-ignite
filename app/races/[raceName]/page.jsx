@@ -8,12 +8,23 @@ export default async function RacePage({ params }) {
   const normalizedRaceName = raceName.replace(/-/g, "_");
 
   try {
-    // Path ke folder data di root 'data/races'
-    const dataDir = path.join(process.cwd(), "data", "races", normalizedRaceName);
+    const dataDir = path.join(
+      process.cwd(),
+      "data",
+      "races",
+      normalizedRaceName
+    );
 
-    // Baca file JSON secara async
-    const raceDetailRaw = await fs.readFile(path.join(dataDir, `${normalizedRaceName}Detail.json`), "utf-8");
-    const raceSubraceRaw = await fs.readFile(path.join(dataDir, `${normalizedRaceName}Subrace.json`), "utf-8").catch(() => null);
+    const raceDetailRaw = await fs.readFile(
+      path.join(dataDir, `${normalizedRaceName}Detail.json`),
+      "utf-8"
+    );
+    const raceSubraceRaw = await fs
+      .readFile(
+        path.join(dataDir, `${normalizedRaceName}Subrace.json`),
+        "utf-8"
+      )
+      .catch(() => null);
 
     const raceDetail = JSON.parse(raceDetailRaw);
     const raceSubrace = raceSubraceRaw ? JSON.parse(raceSubraceRaw) : null;
