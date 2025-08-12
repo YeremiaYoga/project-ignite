@@ -1,87 +1,41 @@
 "use client";
 
 import { useState } from "react";
+import RaceDataForm from "./RaceDataForm";
+import RaceDetailForm from "./RaceDetailForm";
 
-export default function RaceBuilder() {
-  const [raceName, setRaceName] = useState("");
-  const [handbook, setHandbook] = useState("");
-  const [description, setDescription] = useState("");
-  const [traitsInput, setTraitsInput] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const traitsArray = traitsInput
-      .split(",")
-      .map((t) => t.trim())
-      .filter((t) => t !== "");
-
-    const raceData = {
-      raceName,
-      handbook,
-      description,
-      traits: traitsArray,
-    };
-
-    console.log("Race Data:", raceData);
-    alert("Race data submitted! Check console.");
-  };
+export default function Page() {
+  const [activeForm, setActiveForm] = useState("data");
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-gray-800 rounded-lg shadow-lg text-white">
-      <h1 className="text-2xl font-bold mb-4">Race Builder</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block font-semibold mb-1">Race Name</label>
-          <input
-            type="text"
-            value={raceName}
-            onChange={(e) => setRaceName(e.target.value)}
-            className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="e.g. Elf"
-          />
-        </div>
-
-        <div>
-          <label className="block font-semibold mb-1">Handbook</label>
-          <input
-            type="text"
-            value={handbook}
-            onChange={(e) => setHandbook(e.target.value)}
-            className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="e.g. Player’s Handbook"
-          />
-        </div>
-
-        <div>
-          <label className="block font-semibold mb-1">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            rows={4}
-            placeholder="Describe the race..."
-          />
-        </div>
-
-        <div>
-          <label className="block font-semibold mb-1">Traits</label>
-          <input
-            type="text"
-            value={traitsInput}
-            onChange={(e) => setTraitsInput(e.target.value)}
-            className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="e.g. Darkvision, Keen Senses, Fey Ancestry"
-          />
-        </div>
-
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex gap-4 mb-6">
         <button
-          type="submit"
-          className="w-full bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600 transition"
+          className={`px-6 py-3 text-lg font-semibold rounded-lg transition ${
+            activeForm === "data"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-300 text-gray-800 hover:bg-gray-400"
+          }`}
+          onClick={() => setActiveForm("data")}
         >
-          Save Race
+          Race Data Form
         </button>
-      </form>
+        <button
+          className={`px-6 py-3 text-lg font-semibold rounded-lg transition ${
+            activeForm === "detail"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-300 text-gray-800 hover:bg-gray-400"
+          }`}
+          onClick={() => setActiveForm("detail")}
+        >
+          Race Detail Form
+        </button>
+      </div>
+
+      {/* Form Area */}
+      <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
+        {activeForm === "data" ? <RaceDataForm /> : <RaceDetailForm />}
+      </div>
     </div>
   );
 }

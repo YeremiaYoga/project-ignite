@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import ClassCard from "./ClassCard";
 
@@ -140,20 +141,46 @@ const classInfo = {
   },
   blood_hunter: {
     title: "Blood Hunter",
-    description: "-",
+    description:
+      "Willing to suffer whatever it takes to achieve victory, these adept warriors have forged themselves into a potent force dedicated to protecting the innocent.",
     icon: "/assets/classIcon/blood_hunter_icon.webp",
-    primaryAbility: "-",
-    hitDie: "-",
-    savingThrows: [],
+    primaryAbility: "Strength or Dexterity, & Intelligence or Wisdom",
+    hitDie: "d10",
+    savingThrows: ["Dexterity", "Intelligence"],
   },
 };
 
 export default function ClassesPage() {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  const filteredClasses = classList.filter((cls) =>
+    classInfo[cls].title.toLowerCase().includes(debouncedSearch.toLowerCase())
+  );
   return (
     <div className="p-6 min-h-screen  text-white">
-      <h1 className="text-3xl font-bold mb-6">Classes</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h1 className="text-3xl font-bold">Classes</h1>
+        <input
+          type="text"
+          placeholder="Search classes..."
+          value={search}
+         
+          className="px-3 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-64"
+        />
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-        {classList.map((cls) => (
+        {filteredClasses.map((cls) => (
           <ClassCard key={cls} className={cls} info={classInfo[cls]} />
         ))}
       </div>

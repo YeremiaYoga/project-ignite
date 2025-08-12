@@ -1,0 +1,13 @@
+{
+  "name": "Dragonborn",
+  "source": "Player's Handbook",
+  "description": "The ancestors of dragonborn hatched from the eggs of chromatic and metallic dragons.",
+  "traits": [
+    "Dragon Ancestry",
+    "Breath Weapon",
+    "Damage Resistance",
+    "Darkvision",
+    "Draconic Flight"
+  ],
+  "image": "https://heraldenterimentmedia.my.id/Race/Dragonborn/Dragonborn.webp"
+}
