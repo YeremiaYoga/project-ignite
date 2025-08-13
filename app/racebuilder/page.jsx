@@ -8,8 +8,8 @@ export default function Page() {
   const [activeForm, setActiveForm] = useState("data");
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex gap-4 mb-6">
+    <div className="p-6 mx-auto w-full max-w-5xl">
+      <div className="flex gap-4 mb-6 justify-center">
         <button
           className={`px-6 py-3 text-lg font-semibold rounded-lg transition ${
             activeForm === "data"
@@ -33,8 +33,12 @@ export default function Page() {
       </div>
 
       {/* Form Area */}
-      <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-        {activeForm === "data" ? <RaceDataForm /> : <RaceDetailForm />}
+      <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-full">
+        {activeForm === "data" ? (
+          <RaceDataForm className="w-full" />
+        ) : (
+          <RaceDetailForm className="w-full" />
+        )}
       </div>
     </div>
   );

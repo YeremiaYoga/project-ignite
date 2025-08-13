@@ -57,7 +57,7 @@ export default function RaceDataForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-4 mx-auto">
       <div>
         <label className="block font-semibold mb-1">Race Name</label>
         <input

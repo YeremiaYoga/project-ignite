@@ -1,0 +1,11 @@
+{
+  "name": "Human",
+  "source": "Player's Handbook",
+  "description": "Found throughout the multiverse, humans are as varied as they are numerous.",
+  "traits": [
+    "Resourceful",
+    "Skillful",
+    "Versatile"
+  ],
+  "image": "https://heraldenterimentmedia.my.id/Race/Human/Human.webp"
+}
