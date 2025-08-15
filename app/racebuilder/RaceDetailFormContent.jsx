@@ -80,12 +80,11 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
       });
 
       if (response.ok) {
-        alert("Detail ras berhasil disimpan!");
         if (onSubmit) onSubmit(dataToSave);
       } else {
         const errorData = await response.json();
         alert(
-          `Gagal menyimpan detail ras: ${
+          `failed ${
             errorData.message || response.statusText
           }`
         );

@@ -1,20 +1,92 @@
+import fs from "fs";
+import path from "path";
+
 export default function RaceSubrace({ data }) {
-  if (!data) return null;
+  if (!data || !data.name) return null;
+
+  const subraceDir = path.join(
+    process.cwd(),
+    "data",
+    "races",
+    data.name.toLowerCase(),
+    "subrace"
+  );
+
+  let subraces = [];
+  if (fs.existsSync(subraceDir)) {
+    const files = fs
+      .readdirSync(subraceDir)
+      .filter((file) => file.endsWith(".json"));
+    subraces = files.map((file) => {
+      const filePath = path.join(subraceDir, file);
+      return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    });
+  }
 
   return (
     <section>
-      <h2 className="text-2xl font-bold mb-4">Subraces</h2>
-      {data.subraces && data.subraces.length > 0 ? (
-        <ul className="list-disc list-inside">
-          {data.subraces.map((subrace, idx) => (
-            <li key={idx}>
-              <strong>{subrace.name}</strong>:{" "}
-              {subrace.description || "No description"}
-            </li>
+      {subraces.length > 0 ? (
+        <div className="mt-8 space-y-6">
+          {subraces.map((subrace, idx) => (
+            <section
+              key={subrace.name.toLowerCase().replace(/\s+/g, "_")}
+              id={subrace.name.toLowerCase().replace(/\s+/g, "_")}
+            >
+              <div key={idx} className="bg-gray-800 p-4 rounded-lg shadow">
+                <h3 className="text-xl font-bold text-orange-400 mb-2">
+                  {subrace.name}
+                </h3>
+
+                {subrace.description && (
+                  <p className="text-gray-200 mb-3">{subrace.description}</p>
+                )}
+
+                {subrace.table && subrace.table.headers && (
+                  <div className="overflow-x-auto mb-3">
+                    <table className="table-auto border-collapse border border-gray-600 w-full text-sm">
+                      <thead>
+                        <tr>
+                          {subrace.table.headers.map((header, hIdx) => (
+                            <th
+                              key={hIdx}
+                              className="border border-gray-600 px-3 py-1 bg-gray-700 text-gray-100"
+                            >
+                              {header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {subrace.table.rows.map((row, rIdx) => (
+                          <tr key={rIdx}>
+                            {row.map((cell, cIdx) => (
+                              <td
+                                key={cIdx}
+                                className="border border-gray-600 px-3 py-1 text-gray-200"
+                              >
+                                {cell}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {subrace.list && subrace.list.length > 0 && (
+                  <ul className="list-disc list-inside text-gray-200">
+                    {subrace.list.map((item, lIdx) => (
+                      <li key={lIdx}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
           ))}
-        </ul>
+        </div>
       ) : (
-        <p>No subraces available.</p>
+        <p className="text-gray-200">No subraces available.</p>
       )}
     </section>
   );

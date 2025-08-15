@@ -1,10 +1,10 @@
 import Image from "next/image";
-
+import RaceSubrace from "./RaceSubrace";
 export default function RaceDetail({ data }) {
   if (!data) return <p>No race data available.</p>;
 
   return (
-    <section className="max-w-6xl mx-auto p-4">
+    <section className="">
       <section
         key={data.name.toLowerCase()}
         id={data.name.toLowerCase()}
@@ -26,7 +26,7 @@ export default function RaceDetail({ data }) {
           </div>
 
           <div className="flex-1 order-2 lg:order-1">
-            <h1 className="text-3xl font-bold mb-2">{data.name}</h1>
+            <h1 className="text-3xl font-bold mb-2"> {data.name.charAt(0).toUpperCase() + data.name.slice(1)}</h1>
 
             <div className="text-gray-300 space-y-1 mb-4 text-sm">
               <p>
@@ -60,7 +60,7 @@ export default function RaceDetail({ data }) {
       >
         {data.features?.length > 0 && (
           <div className="mt-8 space-y-6">
-            <h2 className="text-2xl font-semibold">{data.name} Traits</h2>
+            <h2 className="text-2xl font-semibold"> {data.name.charAt(0).toUpperCase() + data.name.slice(1)} Traits</h2>
             {data.features.map((feature, idx) => (
               <div key={idx} className="bg-gray-800 p-4 rounded-lg shadow">
                 <h3 className="text-xl font-bold text-orange-400 mb-2">

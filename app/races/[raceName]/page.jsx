@@ -30,13 +30,14 @@ export default async function RacePage({ params }) {
     const raceSubrace = raceSubraceRaw ? JSON.parse(raceSubraceRaw) : null;
 
     return (
-      <main className="min-h-screen px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+      <main className="min-h-screen sm:px-6  py-8 sm:py-10">
+        <div className="mx-auto space-y-6 sm:space-y-8 max-w-6xl">
           <div className="overflow-x-auto">
             <RaceDetail data={raceDetail} />
           </div>
-
-          {raceSubrace && <RaceSubrace data={raceSubrace} />}
+          <div>
+            <RaceSubrace data={raceDetail} />
+          </div>
         </div>
       </main>
     );

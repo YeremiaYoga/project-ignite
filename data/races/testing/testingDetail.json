@@ -12,38 +12,20 @@
       "title": "testing1",
       "description": "deskripsi",
       "table": {
-        "headers": [
-          "header 1",
-          "header 2"
-        ],
-        "rows": [
-          [
-            "123",
-            "123"
-          ]
-        ]
+        "headers": ["header 1", "header 2"],
+        "rows": [["123", "123"]]
       }
     },
     {
       "title": "testing2",
       "table": {
-        "headers": [
-          "123"
-        ],
-        "rows": [
-          [
-            "123"
-          ]
-        ]
+        "headers": ["123"],
+        "rows": [["123"]]
       }
     },
     {
       "title": "testing3",
-      "list": [
-        "123",
-        "1234",
-        "453"
-      ]
+      "list": ["123", "1234", "453"]
     }
   ]
 }

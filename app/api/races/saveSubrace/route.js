@@ -4,15 +4,16 @@ import fs from "fs/promises";
 
 export async function POST(request) {
   try {
-    const { name, parent_race_name } = await request.json();
+    const { name, raceName, description, table, list } = await request.json();
 
-    if (!name || !parent_race_name) {
+    if (!name || !raceName) {
       return NextResponse.json(
         { message: "Subrace name and parent race name are required." },
         { status: 400 }
       );
     }
-    const raceFolder = parent_race_name.toLowerCase();
+
+    const raceFolder = raceName.toLowerCase();
     const subraceDirPath = path.join(
       process.cwd(),
       "data",
@@ -20,20 +21,27 @@ export async function POST(request) {
       raceFolder,
       "subrace"
     );
+
     const fileName = `${name}.json`;
     const filePath = path.join(subraceDirPath, fileName);
-    const dataToSave = {
-      name: name,
-    };
+
+    const dataToSave = { name };
+
+    if (description) dataToSave.description = description;
+    if (table && table.headers?.length && table.rows?.length) {
+      dataToSave.table = table;
+    }
+    if (list && list.length) {
+      dataToSave.list = list;
+    }
 
     await fs.mkdir(subraceDirPath, { recursive: true });
-
     await fs.writeFile(filePath, JSON.stringify(dataToSave, null, 2), "utf-8");
 
     return NextResponse.json(
       {
         message: `Subrace '${name}' saved successfully in '${raceFolder}/subrace' folder!`,
-        filePath: filePath,
+        filePath,
       },
       { status: 200 }
     );

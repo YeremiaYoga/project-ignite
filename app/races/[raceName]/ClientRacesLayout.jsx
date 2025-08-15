@@ -26,6 +26,7 @@ export default function ClientRacesLayout({ children, currentRace }) {
     fetchRaces();
   }, []);
 
+
   return (
     <div className="relative min-h-screen text-white overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
       {children}
