@@ -8,8 +8,8 @@ export default function RaceCard({ race }) {
 
   return (
     <div>
-      <div className="rounded overflow-hidden flex flex-col w-44  sm:w-100 aspect-[3/2]">
-        <div className="relative aspect-square bg-gray-700 rounded-xl">
+      <div className="rounded overflow-hidden flex flex-col w-44 sm:w-100 aspect-[3/2]">
+        <div className="relative w-full h-full bg-gray-700 rounded-xl overflow-hidden">
           {image && (
             <Image
               src={image}

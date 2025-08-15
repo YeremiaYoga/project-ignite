@@ -1,0 +1,11 @@
+{
+  "name": "testing",
+  "source": "testing",
+  "description": "testing",
+  "traits": [
+    "testing1",
+    "testing2",
+    "testing3"
+  ],
+  "image": "https://heraldenterimentmedia.my.id/Race/testing/testing.webp"
+}

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import RaceDetailFormContent from "./RaceDetailFormContent"; 
+import SubraceDataFormContent from "./SubraceDataFormContent";
 
-export default function RaceDetailForm() {
+export default function SubraceDetailForm() {
   const [folders, setFolders] = useState([]);
   const [selectedFolder, setSelectedFolder] = useState("");
 
@@ -17,7 +17,7 @@ export default function RaceDetailForm() {
   return (
     <div>
       <label className="block mb-2 text-white font-medium">
-        Select Race Races
+        Select Race
       </label>
       <select
         value={selectedFolder}
@@ -34,7 +34,7 @@ export default function RaceDetailForm() {
 
       {selectedFolder && (
         <div>
-          <RaceDetailFormContent
+          <SubraceDataFormContent
             selectedFolder={selectedFolder}
             onSubmit={(data) => {
               console.log("Save to folder:", selectedFolder, data);

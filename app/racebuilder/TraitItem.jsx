@@ -1,7 +1,6 @@
 "use client";
 
 export default function TraitItem({ title, value, onChange }) {
-
   const ensureDescription = () => {
     if (!("description" in value)) onChange({ ...value, description: "" });
   };
@@ -48,7 +47,6 @@ export default function TraitItem({ title, value, onChange }) {
     onChange({ ...value, table: { headers: table.headers, rows: nextRows } });
   };
 
-  // LIST handlers
   const addListItem = () => {
     const next = [...(value.list || []), ""];
     onChange({ ...value, list: next });
@@ -105,8 +103,54 @@ export default function TraitItem({ title, value, onChange }) {
           />
         </div>
       )}
+      {"table" in value && (
+        <div className="mb-3">
+          <label className="block mb-1 font-medium">Table</label>
 
- 
+          <div className="flex flex-wrap gap-2 mb-2">
+            {(value.table?.headers || []).map((h, i) => (
+              <input
+                key={i}
+                type="text"
+                value={h}
+                onChange={(e) => changeTableHeader(i, e.target.value)}
+                className="px-2 py-1 rounded bg-gray-800 border border-gray-700"
+                placeholder={`Header ${i + 1}`}
+              />
+            ))}
+            <button
+              type="button"
+              onClick={addTableHeader}
+              className="bg-blue-600 hover:bg-blue-700 px-2 rounded"
+            >
+              + Header
+            </button>
+          </div>
+
+          {(value.table?.rows || []).map((row, rIdx) => (
+            <div key={rIdx} className="flex flex-wrap gap-2 mb-2">
+              {row.map((cell, cIdx) => (
+                <input
+                  key={cIdx}
+                  type="text"
+                  value={cell}
+                  onChange={(e) => changeTableCell(rIdx, cIdx, e.target.value)}
+                  className="px-2 py-1 rounded bg-gray-800 border border-gray-700"
+                  placeholder={`R${rIdx + 1}C${cIdx + 1}`}
+                />
+              ))}
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={addTableRow}
+            className="bg-blue-600 hover:bg-blue-700 px-2 rounded"
+          >
+            + Row
+          </button>
+        </div>
+      )}
 
       {"list" in value && (
         <div>

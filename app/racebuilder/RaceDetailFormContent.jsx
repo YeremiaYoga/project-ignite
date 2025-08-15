@@ -9,12 +9,14 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     asi: "",
     speed: "",
     size: "",
-    languages: "",
-    description: "",
+    creature_type: "",
+    details: "",
+    source: "",
     traits: [],
   });
 
   const [traitTitles, setTraitTitles] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setFormData((prev) => ({ ...prev, name: selectedFolder }));
@@ -38,17 +40,62 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
       .catch((err) => console.error("Error fetching race data:", err));
   }, [selectedFolder]);
 
-  const updateTraitByIndex = (idx, value) => {
+  const updateTraitByIndex = (idx, value, title) => {
     setFormData((prev) => {
       const next = [...prev.traits];
-      next[idx] = value;
+      next[idx] = { ...value, title: title };
       return { ...prev, traits: next };
     });
   };
 
-  const handleSubmit = (e) => {
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (onSubmit) onSubmit(formData);
+
+  //   console.log(formData);
+  // };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (onSubmit) onSubmit(formData);
+    setIsLoading(true);
+
+    const dataToSave = {
+      name: formData.name,
+      asi: formData.asi,
+      speed: formData.speed,
+      size: formData.size,
+      details: formData.details,
+      features: formData.traits,
+      creature_type: formData.creature_type,
+      source: formData.source,
+    };
+
+    try {
+      const response = await fetch("/api/races/saveRaceDetail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSave),
+      });
+
+      if (response.ok) {
+        alert("Detail ras berhasil disimpan!");
+        if (onSubmit) onSubmit(dataToSave);
+      } else {
+        const errorData = await response.json();
+        alert(
+          `Gagal menyimpan detail ras: ${
+            errorData.message || response.statusText
+          }`
+        );
+      }
+    } catch (error) {
+      console.error("Terjadi kesalahan saat menyimpan detail ras:", error);
+      alert("Terjadi kesalahan saat menyimpan detail ras.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -58,38 +105,36 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     >
       <input type="hidden" name="name" value={formData.name} />
 
-      {[
-        "asi",
-        "speed",
-        "size",
-        "languages",
-        "description",
-      ].map((field) => (
-        <div key={field}>
-          <label className="block mb-1 font-medium capitalize">{field}</label>
-          {field === "description" ? (
-            <textarea
-              name={field}
-              value={formData[field]}
-              onChange={(e) =>
-                setFormData({ ...formData, [field]: e.target.value })
-              }
-              rows="4"
-              className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
-            />
-          ) : (
-            <input
-              type="text"
-              name={field}
-              value={formData[field]}
-              onChange={(e) =>
-                setFormData({ ...formData, [field]: e.target.value })
-              }
-              className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
-            />
-          )}
-        </div>
-      ))}
+      {["creature_type", "size", "speed", "asi", "source", "details"].map(
+        (field) => (
+          <div key={field}>
+            <label className="block mb-1 font-medium capitalize">
+              {field.replace(/_/g, " ")}
+            </label>
+            {field === "details" ? (
+              <textarea
+                name={field}
+                value={formData[field]}
+                onChange={(e) =>
+                  setFormData({ ...formData, [field]: e.target.value })
+                }
+                rows="4"
+                className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
+              />
+            ) : (
+              <input
+                type="text"
+                name={field}
+                value={formData[field]}
+                onChange={(e) =>
+                  setFormData({ ...formData, [field]: e.target.value })
+                }
+                className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
+              />
+            )}
+          </div>
+        )
+      )}
 
       {traitTitles.length > 0 && (
         <div className="mt-6">
@@ -101,7 +146,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
                 key={`${title}-${idx}`}
                 title={title}
                 value={formData.traits[idx] || {}}
-                onChange={(updated) => updateTraitByIndex(idx, updated)}
+                onChange={(updated) => updateTraitByIndex(idx, updated, title)}
               />
             ))}
           </div>
