@@ -39,6 +39,8 @@ export async function POST(request) {
       speed: incomingData.speed || "",
       asi: incomingData.asi || "",
       source: incomingData.source || "",
+      age: incomingData.age || "",
+      languages: incomingData.languages || "",
       image: imageUrl,
       details: incomingData.details || "",
       features: incomingData.features || [],

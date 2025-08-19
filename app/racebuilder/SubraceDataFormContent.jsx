@@ -5,11 +5,7 @@ import { useState } from "react";
 export default function SubraceDataFormContent({ selectedFolder, onSubmit }) {
   const [subraceNameInput, setSubraceNameInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  // State untuk description, table, list → sekarang jadi detail
   const [detailValue, setDetailValue] = useState({});
-
-  // ====== Detail Logic ======
   const ensureDescription = () => {
     if (!("description" in detailValue))
       setDetailValue({ ...detailValue, description: "" });

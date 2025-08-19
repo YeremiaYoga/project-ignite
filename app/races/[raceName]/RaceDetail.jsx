@@ -26,7 +26,10 @@ export default function RaceDetail({ data }) {
           </div>
 
           <div className="flex-1 order-2 lg:order-1">
-            <h1 className="text-3xl font-bold mb-2"> {data.name.charAt(0).toUpperCase() + data.name.slice(1)}</h1>
+            <h1 className="text-3xl font-bold mb-2">
+        
+              {data.name.charAt(0).toUpperCase() + data.name.slice(1)}
+            </h1>
 
             <div className="text-gray-300 space-y-1 mb-4 text-sm">
               <p>
@@ -41,6 +44,16 @@ export default function RaceDetail({ data }) {
               {data.asi && (
                 <p>
                   <strong>ASI:</strong> {data.asi}
+                </p>
+              )}
+              {data.age && (
+                <p>
+                  <strong>Age:</strong> {data.age}
+                </p>
+              )}
+              {data.languages && (
+                <p>
+                  <strong>Languages:</strong> {data.languages}
                 </p>
               )}
               <p>
@@ -60,7 +73,10 @@ export default function RaceDetail({ data }) {
       >
         {data.features?.length > 0 && (
           <div className="mt-8 space-y-6">
-            <h2 className="text-2xl font-semibold"> {data.name.charAt(0).toUpperCase() + data.name.slice(1)} Traits</h2>
+            <h2 className="text-2xl font-semibold">
+              {" "}
+              {data.name.charAt(0).toUpperCase() + data.name.slice(1)} Traits
+            </h2>
             {data.features.map((feature, idx) => (
               <div key={idx} className="bg-gray-800 p-4 rounded-lg shadow">
                 <h3 className="text-xl font-bold text-orange-400 mb-2">

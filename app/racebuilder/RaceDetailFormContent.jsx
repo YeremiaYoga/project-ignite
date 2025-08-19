@@ -12,6 +12,8 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     creature_type: "",
     details: "",
     source: "",
+    age: "",
+    languages: "",
     traits: [],
   });
 
@@ -48,13 +50,6 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     });
   };
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (onSubmit) onSubmit(formData);
-
-  //   console.log(formData);
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -68,6 +63,8 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
       features: formData.traits,
       creature_type: formData.creature_type,
       source: formData.source,
+      age: formData.age,
+      languages: formData.languages,
     };
 
     try {
@@ -83,11 +80,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
         if (onSubmit) onSubmit(dataToSave);
       } else {
         const errorData = await response.json();
-        alert(
-          `failed ${
-            errorData.message || response.statusText
-          }`
-        );
+        alert(`failed ${errorData.message || response.statusText}`);
       }
     } catch (error) {
       console.error("Terjadi kesalahan saat menyimpan detail ras:", error);
@@ -104,36 +97,43 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     >
       <input type="hidden" name="name" value={formData.name} />
 
-      {["creature_type", "size", "speed", "asi", "source", "details"].map(
-        (field) => (
-          <div key={field}>
-            <label className="block mb-1 font-medium capitalize">
-              {field.replace(/_/g, " ")}
-            </label>
-            {field === "details" ? (
-              <textarea
-                name={field}
-                value={formData[field]}
-                onChange={(e) =>
-                  setFormData({ ...formData, [field]: e.target.value })
-                }
-                rows="4"
-                className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
-              />
-            ) : (
-              <input
-                type="text"
-                name={field}
-                value={formData[field]}
-                onChange={(e) =>
-                  setFormData({ ...formData, [field]: e.target.value })
-                }
-                className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
-              />
-            )}
-          </div>
-        )
-      )}
+      {[
+        "creature_type",
+        "size",
+        "speed",
+        "asi",
+        "source",
+        "details",
+        "age",
+        "languages",
+      ].map((field) => (
+        <div key={field}>
+          <label className="block mb-1 font-medium capitalize">
+            {field.replace(/_/g, " ")}
+          </label>
+          {field === "details" ? (
+            <textarea
+              name={field}
+              value={formData[field]}
+              onChange={(e) =>
+                setFormData({ ...formData, [field]: e.target.value })
+              }
+              rows="4"
+              className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
+            />
+          ) : (
+            <input
+              type="text"
+              name={field}
+              value={formData[field]}
+              onChange={(e) =>
+                setFormData({ ...formData, [field]: e.target.value })
+              }
+              className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
+            />
+          )}
+        </div>
+      ))}
 
       {traitTitles.length > 0 && (
         <div className="mt-6">

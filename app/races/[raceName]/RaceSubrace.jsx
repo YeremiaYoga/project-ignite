@@ -25,6 +25,9 @@ export default function RaceSubrace({ data }) {
 
   return (
     <section>
+      <h1 className="text-2xl font-bold mb-2">
+        {data.name.charAt(0).toUpperCase() + data.name.slice(1)} Subraces
+      </h1>
       {subraces.length > 0 ? (
         <div className="mt-8 space-y-6">
           {subraces.map((subrace, idx) => (

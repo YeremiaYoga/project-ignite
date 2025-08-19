@@ -1,6 +1,7 @@
 import { Convergence } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const convergence = Convergence({
   variable: "--font-convergence",
@@ -15,13 +16,17 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${convergence.variable} font-sans antialiased`}>
-        <Navbar />
-        <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[var(--bg-top)] via-[var(--bg-middle)] to-[var(--bg-bottom)]">
-          {children}
-        </main>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${convergence.variable} font-sans antialiased`}
+        >
+          <Navbar />
+          <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[var(--bg-top)] via-[var(--bg-middle)] to-[var(--bg-bottom)]">
+            {children}
+          </main>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

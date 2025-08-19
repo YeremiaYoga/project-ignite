@@ -1,9 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { CircleUserRound, Menu, X } from "lucide-react";
+import { Menu, X, CircleUserRound } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+  useUser,
+  useClerk,
+} from "@clerk/nextjs";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,9 +25,13 @@ export default function Navbar() {
     bgBottom: "#111827",
   });
 
+  const { user } = useUser();
   const menuRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
+  const { signOut } = useClerk();
+
+  // Load saved theme
   useEffect(() => {
     const storedColors = {
       sub1: Cookies.get("ignite-hyperlink-color-sub1") || "#3b82f6",
@@ -32,6 +44,7 @@ export default function Navbar() {
     applyCSSVariables(storedColors);
   }, []);
 
+  // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -46,14 +59,21 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Apply theme
   const applyCSSVariables = (colorObj) => {
-    document.documentElement.style.setProperty("--hyperlink-sub1", colorObj.sub1);
-    document.documentElement.style.setProperty("--hyperlink-sub2", colorObj.sub2);
-    document.documentElement.style.setProperty("--bg-top", colorObj.bgTop);
-    document.documentElement.style.setProperty("--bg-middle", colorObj.bgMiddle);
-    document.documentElement.style.setProperty("--bg-bottom", colorObj.bgBottom);
+    Object.entries(colorObj).forEach(([key, val]) => {
+      document.documentElement.style.setProperty(
+        `--${
+          key === "sub1" || key === "sub2"
+            ? "hyperlink-" + key
+            : "bg-" + key.toLowerCase()
+        }`,
+        val
+      );
+    });
   };
 
+  // Change theme
   const handleColorChange = (e, type) => {
     const newColor = e.target.value;
     const updatedColors = { ...colors, [type]: newColor };
@@ -75,8 +95,6 @@ export default function Navbar() {
   return (
     <nav className="w-full border-b border-gray-800 bg-gray-800 shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 py-2 flex justify-between items-center relative">
-        
-        {/* Left: Hamburger for mobile */}
         <div className="md:hidden" ref={mobileMenuRef}>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -85,33 +103,28 @@ export default function Navbar() {
             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
           {isMobileMenuOpen && (
-            <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50 p-3 space-y-2">
-              <Link
-                href="/spells"
-                className="block text-gray-800 dark:text-gray-200 hover:underline"
-              >
-                Spells
-              </Link>
-              <Link
-                href="/classes"
-                className="block text-gray-800 dark:text-gray-200 hover:underline"
-              >
-                Classes
-              </Link>
+            <div className="absolute left-1 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50 p-3 space-y-2">
+              {["Spells", "Classes", "Races"].map((item) => (
+                <Link
+                  key={item}
+                  href={`/${item.toLowerCase()}`}
+                  className="block text-gray-800 dark:text-gray-200 hover:underline"
+                >
+                  {item}
+                </Link>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Middle: Logo */}
-        <Link href="/" className="text-xl font-bold">
-          Home
+        <Link href="/" className="text-xl font-bold text-white">
+          Project Ignite
         </Link>
 
-        {/* Right: User settings */}
         <div className="relative" ref={menuRef}>
           <button
             className="text-gray-300 hover:text-white"
-            aria-label="Settings"
+            aria-label="User Menu"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <CircleUserRound size={28} />
@@ -119,6 +132,28 @@ export default function Navbar() {
 
           {isMenuOpen && (
             <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50 p-4 space-y-3 text-sm">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="block w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline">
+                    Login
+                  </button>
+                </SignInButton>
+              </SignedOut>
+
+              <SignedIn>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-800 dark:text-gray-200 truncate">
+                    {user?.fullName || user?.primaryEmailAddress?.emailAddress}
+                  </span>
+                  <button
+                    onClick={() => signOut(() => (window.location.href = "/"))}
+                    className="text-red-600 font-semibold hover:underline"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </SignedIn>
+
               <button
                 onClick={() => setShowThemeColors(!showThemeColors)}
                 className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"

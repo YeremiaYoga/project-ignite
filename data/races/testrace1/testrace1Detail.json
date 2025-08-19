@@ -1,0 +1,40 @@
+{
+  "name": "testrace1",
+  "creature_type": "human",
+  "size": "20",
+  "speed": "20",
+  "asi": "tidak ada",
+  "source": "123",
+  "age": "8",
+  "languages": "indo",
+  "image": "https://heraldenterimentmedia.my.id/Race/Testrace1/Testrace1-Main.webp",
+  "details": "bagus",
+  "features": [
+    {
+      "title": "1",
+      "description": "123"
+    },
+    {
+      "title": "2",
+      "table": {
+        "headers": [
+          "123",
+          "23"
+        ],
+        "rows": [
+          [
+            "w",
+            "q"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "3",
+      "list": [
+        "qw",
+        "qw"
+      ]
+    }
+  ]
+}

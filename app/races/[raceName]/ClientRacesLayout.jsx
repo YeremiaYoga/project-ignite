@@ -8,7 +8,7 @@ export default function ClientRacesLayout({ children, currentRace }) {
   const [showRaces, setShowRaces] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [races, setRaces] = useState([]);
-
+  const [subraces, setSubraces] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,6 +26,24 @@ export default function ClientRacesLayout({ children, currentRace }) {
     fetchRaces();
   }, []);
 
+  useEffect(() => {
+    if (!currentRace) return;
+
+    async function fetchSubraces() {
+      try {
+        const res = await fetch(
+          `/api/races/getAllSubraces?raceName=${currentRace}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch subraces");
+        const data = await res.json();
+        setSubraces(data.subraces || []);
+      } catch {
+        setSubraces([]);
+      }
+    }
+
+    fetchSubraces();
+  }, [currentRace]);
 
   return (
     <div className="relative min-h-screen text-white overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
@@ -68,6 +86,19 @@ export default function ClientRacesLayout({ children, currentRace }) {
                 Traits
               </a>
             </li>
+            {subraces.length > 0 && (
+              <>
+                {subraces.map((subrace) => (
+                  <li key={subrace.name} className="ml-2 text-blue-300">
+                    <a
+                      href={`#${subrace.name.replace(/ /g, "_").toLowerCase()}`}
+                    >
+                      {subrace.name}
+                    </a>
+                  </li>
+                ))}
+              </>
+            )}
           </ul>
         </div>
       )}
