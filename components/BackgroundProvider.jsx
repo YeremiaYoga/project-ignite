@@ -8,9 +8,9 @@ export default function BackgroundProvider({ children }) {
       document.cookie.split("; ").map((c) => c.split("="))
     );
 
-    const top = cookies["ignite-bg-top-color"] || "#006aff";
-    const middle = cookies["ignite-bg-middle-color"] || "#f1f1a1";
-    const bottom = cookies["ignite-bg-bottom-color"] || "#0438a9";
+    const top = cookies["ignite-bg-top-color"] || "#1f2937";
+    const middle = cookies["ignite-bg-middle-color"] || "#1f1f1f";
+    const bottom = cookies["ignite-bg-bottom-color"] || "#111827";
     document.documentElement.style.setProperty("--bg-top", top);
     document.documentElement.style.setProperty("--bg-middle", middle);
     document.documentElement.style.setProperty("--bg-bottom", bottom);
