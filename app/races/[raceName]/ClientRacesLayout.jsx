@@ -46,7 +46,7 @@ export default function ClientRacesLayout({ children, currentRace }) {
   }, [currentRace]);
 
   return (
-    <div className="relative min-h-screen text-white overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+    <div className="relative min-h-screen text-white overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 mx-5">
       {children}
       <div className="fixed bottom-6 left-6 flex flex-col gap-3 z-50">
         {currentRace && (
@@ -85,6 +85,9 @@ export default function ClientRacesLayout({ children, currentRace }) {
                   .replace(/\b\w/g, (s) => s.toUpperCase())}{" "}
                 Traits
               </a>
+            </li>
+            <li>
+              <hr className="my-2 border-gray-600" />
             </li>
             {subraces.length > 0 && (
               <>

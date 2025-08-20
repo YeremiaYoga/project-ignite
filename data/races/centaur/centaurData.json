@@ -1,0 +1,12 @@
+{
+  "name": "Centaur",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Centaurs gallop throughout the multiverse and trace their origins to many different realms.",
+  "traits": [
+    "Charge",
+    "Equine Build",
+    "Hooves",
+    "Natural Affinity"
+  ],
+  "image": "https://heraldenterimentmedia.my.id/Race/Centaur/Centaur.webp"
+}

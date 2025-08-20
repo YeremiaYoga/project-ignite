@@ -1,0 +1,11 @@
+{
+  "name": "Half-Elf",
+  "source": "Player's Handbook (2014)",
+  "description": "Half-elves combine what some say are the best qualities of their elf and human parents.",
+  "traits": [
+    "Darkvision",
+    "Fey Ancestry",
+    "Skill Versatility"
+  ],
+  "image": "https://heraldenterimentmedia.my.id/Race/Half-Elf/Half-Elf.webp"
+}

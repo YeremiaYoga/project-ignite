@@ -1,0 +1,24 @@
+{
+  "name": "Criminal",
+  "source": "Player's Handbook",
+  "description": "You eked out a living in dark alleyways, cutting purses or burgling shops. Perhaps you were part of a small gang of like-minded wrongdoers who looked out for each other. Or maybe you were a lone wolf, fending for yourself against the local thieves’ guild and more fearsome lawbreakers.",
+  "ability_scores": ["Dexterity", "Constitution", "Intelligence"],
+  "feat": "Alert",
+  "skill_proficiencies": ["Sleight of Hand", "Stealth"],
+  "tool_proficiencies": ["Thieves' Tools"],
+  "equipment_options": {
+    "A": {
+      "items": [
+        "2 Daggers",
+        "Thieves' Tools",
+        "Crowbar",
+        "2 Pouches",
+        "Traveler’s Clothes",
+        "16 GP"
+      ]
+    },
+    "B": {
+      "items": ["50 GP"]
+    }
+  }
+}

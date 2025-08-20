@@ -6,6 +6,7 @@ export default function RaceCard({ race }) {
   const capitalized = raceName.charAt(0).toUpperCase() + raceName.slice(1);
   const linkPath = `/races/${raceName.toLowerCase().replace(/\s+/g, "-")}`;
 
+  console.log(race);
   return (
     <div>
       <div className="rounded overflow-hidden flex flex-col w-44 sm:w-100 aspect-[3/2]">

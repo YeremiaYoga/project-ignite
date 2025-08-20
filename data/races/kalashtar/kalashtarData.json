@@ -1,0 +1,12 @@
+{
+  "name": "Kalashtar",
+  "source": "Eberron: Rising from the Last War",
+  "description": "The kalashtar are a compound people created from the union of humanity and renegade spirits from the plane of dreams.",
+  "traits": [
+    "Dual Mind",
+    "Mental Discipline",
+    "Mind Link",
+    "Severed from Dreams"
+  ],
+  "image": "https://heraldenterimentmedia.my.id/Race/Kalashtar/Kalashtar.webp"
+}

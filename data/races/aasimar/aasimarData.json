@@ -1,0 +1,13 @@
+{
+  "name": "Aasimar",
+  "source": "Player's Handbook",
+  "description": "Aasimar are mortals who carry a spark of the Upper Planes within their souls.",
+  "traits": [
+    "Celestial Resistance",
+    "Darkvision",
+    "Healing Hands",
+    "Light Bearer",
+    "Celestial Revelation"
+  ],
+  "image": "https://heraldenterimentmedia.my.id/Race/Aasimar/Aasimar.webp"
+}

@@ -1,0 +1,37 @@
+{
+  "name": "aasimar",
+  "creature_type": "Humanoid",
+  "size": "Medium (about 4-7 feet tall) or Small (about 2-4 feet tall), chosen when you select this species",
+  "speed": "30 feet.",
+  "asi": "",
+  "source": "Player's Handbook",
+  "image": "https://heraldenterimentmedia.my.id/Race/Aasimar/Aasimar-Main.webp",
+  "details": "The ancestors of aasimar trace their lineage to unions or blessings from celestial beings—angels, archons, and other spirits of the Upper Planes. Some stories claim the gods themselves shaped them as heralds of light, while others suggest that celestial power sometimes seeps into mortal bloodlines unbidden, carried across generations until it manifests in a child. Whatever their origin, aasimar walk among mortals as rare figures whose souls bear the reflection of the divine.\n\nAasimar resemble humans, yet their celestial heritage shines through in ways that cannot be mistaken. Their eyes may gleam with silver, gold, or radiant color; their voices often carry a resonance that seems too clear for the mortal world; their skin might hold a faint glow, as if brushed by starlight. Subtler still is the aura they project—an unseen weight of presence that others feel more than perceive. To some, this aura feels like warmth, safety, and the comfort of standing near a hearth. To others, it is like a calm silence before dawn, or the gentle awe of hearing a distant choir. Some aasimar radiate authority that demands respect, while others seem wrapped in serenity that soothes fear and quiets anger.\n\nThough not all aasimar understand the gift within them, their very presence marks them as touched by something beyond the mortal coil. For some, it is a blessing that inspires others to hope; for others, it is a burden that isolates them from those who cannot share the same light. Either way, they are reminders that the heavens watch the world, and sometimes choose to leave a trace of their glory within it.",
+  "features": [
+    {
+      "title": "Celestial Resistance",
+      "description": "You have Resistance to Necrotic damage and Radiant damage."
+    },
+    {
+      "title": "Darkvision",
+      "description": "You have Darkvision with a range of 60 feet."
+    },
+    {
+      "title": "Healing Hands",
+      "description": "As a Magic action, you touch a creature and roll a number of d4s equal to your Proficiency Bonus. The creature regains a number of Hit Points equal to the total rolled. Once you use this trait, you can't use it again until you finish a Long Rest."
+    },
+    {
+      "title": "Light Bearer",
+      "description": "You know the Light cantrip. Charisma is your spellcasting ability for it."
+    },
+    {
+      "title": "Celestial Revelation",
+      "description": "When you reach character level 3, you can transform as a Bonus Action using one of the options below (choose the option each time you transform). The transformation lasts for 1 minute or until you end it (no action required). Once you transform, you can’t do so again until you finish a Long Rest.\n\nOnce on each of your turns before the transformation ends, you can deal extra damage to one target when you deal damage to it with an attack or a spell. The extra damage equals your Proficiency Bonus, and the extra damage’s type is either Necrotic for Necrotic Shroud or Radiant for Heavenly Wings and Inner Radiance.\n\nHere are the transformation options:",
+      "list": [
+        "Heavenly Wings. Two spectral wings sprout from your back temporarily. Until the transformation ends, you have a Fly Speed equal to your Speed.",
+        "Inner Radiance. Searing light temporarily radiates from your eyes and mouth. For the duration, you shed Bright Light in a 10-foot radius and Dim Light for an additional 10 feet, and at the end of each of your turns, each creature within 10 feet of you takes Radiant damage equal to your Proficiency Bonus.",
+        "Necrotic Shroud. Your eyes briefly become pools of darkness, and flightless wings sprout from your back temporarily. Creatures other than your allies within 10 feet of you must succeed on a Charisma saving throw (DC 8 plus your Charisma modifier and Proficiency Bonus) or have the Frightened condition until the end of your next turn."
+      ]
+    }
+  ]
+}

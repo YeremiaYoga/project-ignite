@@ -1,39 +1,75 @@
-import fs from "fs";
-import path from "path";
+"use client";
+
+import { useEffect, useState } from "react";
 import RaceCard from "./RaceCard";
 
 export default function RacesPage() {
-  const racesDir = path.join(process.cwd(), "data", "races");
+  const [races, setRaces] = useState([]);
+  const [filteredRaces, setFilteredRaces] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const raceFolders = fs.readdirSync(racesDir).filter((folder) => {
-    const fullPath = path.join(racesDir, folder);
-    return fs.statSync(fullPath).isDirectory();
-  });
-
-  const raceDataList = raceFolders
-    .map((folder) => {
-      const filePath = path.join(racesDir, folder, `${folder}Data.json`);
+  useEffect(() => {
+    async function fetchRaces() {
       try {
-        const fileContent = fs.readFileSync(filePath, "utf-8");
-        const jsonData = JSON.parse(fileContent);
-        return {
-          raceName: folder,
-          ...jsonData,
-        };
+        const res = await fetch("/api/races/getAllDataRaces");
+        const data = await res.json();
+
+        setRaces(data);
+        setFilteredRaces(data);
       } catch (err) {
-        console.error(`Error reading ${filePath}:`, err);
-        return null;
+        console.error("Failed to fetch races:", err);
+      } finally {
+        setLoading(false);
       }
-    })
-    .filter(Boolean);
+    }
+    fetchRaces();
+  }, []);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (search.trim() === "") {
+        setFilteredRaces(races);
+      } else {
+        setFilteredRaces(
+          races.filter((race) =>
+            race.raceName.toLowerCase().includes(search.toLowerCase())
+          )
+        );
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [search, races]);
+
+  if (loading) {
+    return <p className="p-6 text-white">Loading...</p>;
+  }
 
   return (
     <div className="p-6 min-h-screen text-white">
-      <h1 className="text-3xl font-bold mb-6">Races</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <h1 className="text-3xl font-bold">Races</h1>
+
+        <input
+          type="text"
+          placeholder="Search race..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="px-3 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-64"
+        />
+      </div>
+
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
-        {raceDataList.map((race) => (
-          <RaceCard key={race.raceName} race={race} />
-        ))}
+        {filteredRaces.length > 0 ? (
+          filteredRaces.map((race) => (
+            <RaceCard key={race.raceName} race={race} />
+          ))
+        ) : (
+          <p className="col-span-full text-center text-gray-400">
+            No races found
+          </p>
+        )}
       </div>
     </div>
   );
