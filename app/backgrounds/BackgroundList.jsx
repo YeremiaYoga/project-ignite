@@ -18,7 +18,7 @@ export default function BackgroundList({ backgrounds }) {
         {/* {backgrounds.map((bg, idx) => (
           <BackgroundRow key={idx} bg={bg} />
         ))} */}
-         <BackgroundRow bg={backgrounds[0]} />
+        <BackgroundRow bg={backgrounds[0]} />
       </div>
     </div>
   );
@@ -27,12 +27,21 @@ export default function BackgroundList({ backgrounds }) {
 function BackgroundRow({ bg }) {
   const [expanded, setExpanded] = useState(false);
 
+  const bgImage = `/assets/backgrounds/${bg.name.replace(/\s+/g, "_")}.webp`;
+
   return (
-    <div className="bg-gray-800 text-gray-100">
+    <div
+      className="relative text-gray-100"
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <div className="grid grid-cols-5 gap-4 items-center px-4 py-3">
         <div>
           <h2 className="font-semibold">{bg.name}</h2>
-          <p className="text-xs text-gray-400 italic">{bg.source}</p>
+          <p className="text-xs text-gray-300 italic">{bg.source}</p>
         </div>
         <div className="text-sm">{bg.feat}</div>
         <div className="text-sm">{bg.skill_proficiencies.join(", ")}</div>

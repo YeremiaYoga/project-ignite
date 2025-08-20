@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import RaceDetailFormContent from "./RaceDetailFormContent"; 
+import RaceDetailFormContent from "./RaceDetailFormContent";
 
 export default function RaceDetailForm() {
   const [folders, setFolders] = useState([]);
   const [selectedFolder, setSelectedFolder] = useState("");
 
   useEffect(() => {
-    fetch("/api/races/getallraces")
+    fetch("/api/races/getAllRace")
       .then((res) => res.json())
       .then((data) => setFolders(data))
       .catch((err) => console.error("Error loading race folders:", err));
@@ -27,7 +27,7 @@ export default function RaceDetailForm() {
         <option value="">Choose Race</option>
         {folders.map((folder) => (
           <option key={folder} value={folder}>
-            {folder.charAt(0).toUpperCase() + folder.slice(1)}
+            {folder.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
           </option>
         ))}
       </select>

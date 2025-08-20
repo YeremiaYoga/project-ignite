@@ -1,0 +1,11 @@
+{
+  "name": "Half Elf",
+  "source": "Player's Handbook",
+  "description": "test",
+  "traits": [
+    "Darkvision",
+    "Fey Ancestry",
+    "Skill Versatility"
+  ],
+  "image": "https://heraldenterimentmedia.my.id/Race/Half_elf/Half_elf.webp"
+}

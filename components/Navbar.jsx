@@ -31,7 +31,6 @@ export default function Navbar() {
 
   const { signOut } = useClerk();
 
-  // Load saved theme
   useEffect(() => {
     const storedColors = {
       sub1: Cookies.get("ignite-hyperlink-color-sub1") || "#3b82f6",
@@ -44,7 +43,6 @@ export default function Navbar() {
     applyCSSVariables(storedColors);
   }, []);
 
-  // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -59,7 +57,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Apply theme
   const applyCSSVariables = (colorObj) => {
     Object.entries(colorObj).forEach(([key, val]) => {
       document.documentElement.style.setProperty(

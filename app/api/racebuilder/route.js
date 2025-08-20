@@ -10,9 +10,13 @@ export async function POST(req) {
       return new Response("Missing raceName", { status: 400 });
     }
 
-    const raceNameLower = raceName.toLowerCase();
+    const raceNameLower = raceName.toLowerCase().replace(/\s+/g, "_");
+    const raceNameImage = raceName
+      .replace(/\s+/g, "_")
+      .toLowerCase()
+      .replace(/^\w/, (c) => c.toUpperCase());
 
-    const image = `https://heraldenterimentmedia.my.id/Race/${raceName}/${raceName}.webp`;
+    const image = `https://heraldenterimentmedia.my.id/Race/${raceNameImage}/${raceNameImage}.webp`;
 
     const dirPath = path.join(process.cwd(), "data", "races", raceNameLower);
     const filePath = path.join(dirPath, `${raceNameLower}Data.json`);

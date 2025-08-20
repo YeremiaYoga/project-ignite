@@ -7,7 +7,7 @@ export async function POST(request) {
   try {
     const incomingData = await request.json();
 
-    const raceName = incomingData.name; // Contoh: "Dragonborn"
+    const raceName = incomingData.name;
 
     if (!raceName) {
       return NextResponse.json(
@@ -19,7 +19,6 @@ export async function POST(request) {
     const folderName = raceName.toLowerCase();
     const raceDir = path.join(process.cwd(), "data", "races", folderName);
 
-    // Buat folder jika belum ada
     await fs.mkdir(raceDir, { recursive: true });
 
     const fileName = `${raceName}Detail.json`;
@@ -28,12 +27,14 @@ export async function POST(request) {
     const formattedRaceNameForImage = raceName
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join("");
+      .join("_");
 
-    const imageUrl = `https://heraldenterimentmedia.my.id/Race/${formattedRaceNameForImage}/${formattedRaceNameForImage}-Main.webp`;
+    const imageUrl = `https://heraldenterimentmedia.my.id/Race/${formattedRaceNameForImage}/${formattedRaceNameForImage}_Main.webp`;
 
     const dataToSave = {
-      name: incomingData.name,
+      name: incomingData.name
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase()),
       creature_type: incomingData.creature_type || "",
       size: incomingData.size || "",
       speed: incomingData.speed || "",

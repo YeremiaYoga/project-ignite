@@ -3,8 +3,11 @@ import Link from "next/link";
 
 export default function RaceCard({ race }) {
   const { raceName, image, description, source, traits } = race;
-  const capitalized = raceName.charAt(0).toUpperCase() + raceName.slice(1);
-  const linkPath = `/races/${raceName.toLowerCase().replace(/\s+/g, "-")}`;
+  const capitalized = raceName
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const linkPath = `/races/${raceName.toLowerCase().replace(/\s+/g, "_")}`;
 
   console.log(race);
   return (
