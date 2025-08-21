@@ -55,7 +55,7 @@ const FILTERS = {
     "Necromancy",
     "Transmutation",
   ],
-  ritual: ["true"],
+  ritual: false,
 };
 
 const INITIAL_SELECTED = {
@@ -95,7 +95,7 @@ export default function ModalFilter({ isOpen, onClose, onApply }) {
     const modified = {
       ...selected,
       castTime: selected.castTime.map((ct) => ct.toLowerCase()),
-      ritual: selected.ritual ? ["true"] : [],
+       ritual: selected.ritual, 
     };
     onApply(modified);
     onClose();

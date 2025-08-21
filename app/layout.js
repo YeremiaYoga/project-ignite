@@ -22,7 +22,12 @@ export default function RootLayout({ children }) {
         <body className={`${convergence.variable} font-sans antialiased`}>
           <BackgroundProvider>
             <Navbar />
-            <main className="min-h-screen flex  justify-center bg-gradient-to-b from-[var(--bg-top)] via-[var(--bg-middle)] to-[var(--bg-bottom)]">
+            <main
+              className="min-h-screen flex justify-center"
+              style={{
+                background: `linear-gradient(to bottom, var(--bg-top), var(--bg-middle), var(--bg-bottom))`,
+              }}
+            >
               {children}
             </main>
           </BackgroundProvider>

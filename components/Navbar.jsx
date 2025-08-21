@@ -57,20 +57,22 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const applyCSSVariables = (colorObj) => {
-    Object.entries(colorObj).forEach(([key, val]) => {
-      document.documentElement.style.setProperty(
-        `--${
-          key === "sub1" || key === "sub2"
-            ? "hyperlink-" + key
-            : "bg-" + key.toLowerCase()
-        }`,
-        val
-      );
-    });
-  };
+const applyCSSVariables = (colorObj) => {
+  Object.entries(colorObj).forEach(([key, val]) => {
+    let varName;
+    if (key === "sub1" || key === "sub2") {
+      varName = `--hyperlink-${key}`;
+    } else if (key === "bgTop") {
+      varName = "--bg-top";
+    } else if (key === "bgMiddle") {
+      varName = "--bg-middle";
+    } else if (key === "bgBottom") {
+      varName = "--bg-bottom";
+    }
+    document.documentElement.style.setProperty(varName, val);
+  });
+};
 
-  // Change theme
   const handleColorChange = (e, type) => {
     const newColor = e.target.value;
     const updatedColors = { ...colors, [type]: newColor };

@@ -8,7 +8,7 @@ import FilterModal from "./FilterModal";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ClientSpellsPage({ spells }) {
-   const router = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [selectedSpell, setSelectedSpell] = useState(null);
@@ -47,6 +47,7 @@ export default function ClientSpellsPage({ spells }) {
   };
 
   const filteredSpells = spells.filter((spell) => {
+    console.log(spell);
     const matchesSearch = spell.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -78,17 +79,26 @@ export default function ClientSpellsPage({ spells }) {
           spell.school.toLowerCase().includes(time.toLowerCase())
         ));
 
-    const matchesDamageType =
-      !activeFilters?.damageType?.length ||
-      (spell?.damage_type &&
-        activeFilters.damageType.some((time) =>
-          spell.damage_type.toLowerCase().includes(time.toLowerCase())
-        ));
+    const matchesDamageType = activeFilters?.damageType?.length
+      ? spell?.damage_type
+        ? activeFilters.damageType.some(
+            (time) => spell.damage_type.toLowerCase() === time.toLowerCase()
+          )
+        : false
+      : true;
 
-const matchesRitual =
-  !activeFilters?.ritual || 
-  spell?.ritual === true;   
+    const matchesRitual = activeFilters?.ritual ? spell?.ritual === true : true;
 
+    // console.log(activeFilters);
+    // console.log(spell);
+
+    // console.log(matchesClass);
+    // console.log(matchesLevel);
+    // console.log(matchesCastTime);
+    // console.log(matchesRange);
+    // console.log(matchesSchool);
+    // console.log(matchesDamageType);
+    // console.log(matchesRitual);
     return (
       matchesSearch &&
       matchesClass &&
