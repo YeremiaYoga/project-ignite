@@ -6,6 +6,7 @@
   "feat": "Magic Initiate (Cleric)",
   "skill_proficiencies": ["Insight", "Religion"],
   "tool_proficiencies": ["Calligrapher's Supplies"],
+  "tags": [],
   "equipment_options": {
     "A": {
       "items": [

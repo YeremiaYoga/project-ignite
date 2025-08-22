@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
-
+import Link from "next/link";
 export default function BackgroundList({ backgrounds }) {
   return (
     <div className="w-full max-w-6xl mx-auto">
@@ -108,9 +108,11 @@ function BackgroundRow({ bg }) {
           </p>
 
           <div className="mt-3">
-            <button className="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 text-xs">
-              View {bg.name} Detail
-            </button>
+            <Link href={`/backgrounds/${bg.name.replace(/\s+/g, "_")}`}>
+              <button className="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 text-xs">
+                View {bg.name} Detail
+              </button>
+            </Link>
           </div>
         </div>
       )}

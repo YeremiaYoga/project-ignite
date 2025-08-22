@@ -1,0 +1,18 @@
+{
+  "name": "test",
+  "source": "test",
+  "description": "test",
+  "ability_scores": ["Strength", "Constitution"],
+  "feat": "test",
+  "skill_proficiencies": ["Athletics"],
+  "tool_proficiencies": ["test", "123"],
+  "tags": ["Detection"],
+  "equipment_options": {
+    "A": {
+      "items": ["test", "te2"]
+    },
+    "B": {
+      "items": ["50gb"]
+    }
+  }
+}

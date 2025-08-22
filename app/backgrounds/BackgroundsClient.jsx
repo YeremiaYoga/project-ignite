@@ -4,48 +4,10 @@ import { useState, useEffect } from "react";
 import BackgroundList from "./BackgroundList";
 import { Filter } from "lucide-react";
 
-// 👉 Data tags
-const tagsOptions = [
-  { value: "adventurers_league", label: "Adventurers League" },
-  { value: "buff", label: "Buff" },
-  { value: "combat", label: "Combat" },
-  { value: "control", label: "Control" },
-  { value: "damage", label: "Damage" },
-  { value: "deception", label: "Deception" },
-  { value: "detection", label: "Detection" },
-  { value: "exploration", label: "Exploration" },
-  { value: "guild", label: "Guild" },
-  { value: "healing", label: "Healing" },
-  { value: "monstrous", label: "Monstrous" },
-  { value: "movement", label: "Movement" },
-  { value: "religious", label: "Religious" },
-  { value: "social", label: "Social" },
-  { value: "species_feat", label: "Species Feat" },
-  { value: "utility", label: "Utility" },
-  { value: "warding", label: "Warding" },
-];
+import options from "@/data/bgoptions.json";
 
-// 👉 Data skills
-const skillsOptions = [
-  { value: "acrobatics", label: "Acrobatics" },
-  { value: "animal_handling", label: "Animal Handling" },
-  { value: "arcana", label: "Arcana" },
-  { value: "athletics", label: "Athletics" },
-  { value: "deception", label: "Deception" },
-  { value: "history", label: "History" },
-  { value: "insight", label: "Insight" },
-  { value: "intimidation", label: "Intimidation" },
-  { value: "investigation", label: "Investigation" },
-  { value: "medicine", label: "Medicine" },
-  { value: "nature", label: "Nature" },
-  { value: "perception", label: "Perception" },
-  { value: "performance", label: "Performance" },
-  { value: "persuasion", label: "Persuasion" },
-  { value: "religion", label: "Religion" },
-  { value: "sleight_of_hand", label: "Sleight of Hand" },
-  { value: "stealth", label: "Stealth" },
-  { value: "survival", label: "Survival" },
-];
+const { tagsOptions, skillsOptions } = options;
+
 
 export default function BackgroundsClient({ backgrounds }) {
   const [search, setSearch] = useState("");
