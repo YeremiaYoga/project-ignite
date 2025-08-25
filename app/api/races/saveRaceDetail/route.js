@@ -45,7 +45,7 @@ export async function POST(request) {
       const buffer = Buffer.from(await uploadedFile.arrayBuffer());
       await fs.writeFile(imagePath, buffer);
 
-      imageUrl = `/assets/races/${folderName}/${imageFileName}`;
+      imageUrl = `/public/assets/races/${folderName}/${imageFileName}`;
     }
 
     let features = [];
