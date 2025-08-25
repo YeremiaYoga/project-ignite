@@ -1,0 +1,14 @@
+{
+  "name": "Test Image",
+  "creature_type": "123",
+  "size": "123",
+  "speed": "123",
+  "asi": "12",
+  "source": "3123",
+  "age": "123",
+  "languages": "123",
+  "image": "/assets/races/test_image/test_image_main.png",
+  "details": "123",
+  "tales_details": "12",
+  "features": []
+}

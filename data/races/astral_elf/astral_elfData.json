@@ -1,0 +1,14 @@
+{
+  "name": "Astral Elf",
+  "source": "Astral Adventurer’s Guide",
+  "description": "Groups of elves ventured from the Feywild to the Astral Plane to be closer to their gods. Life in the Silver Void has imbued their souls with a spark of divine light.",
+  "traits": [
+    "Astral Fire",
+    "Darkvision",
+    "Fey Ancestry",
+    "Keen Senses",
+    "Starlight Step",
+    "Astral Trance"
+  ],
+  "image": "/assets/races/astral_elf/astral_elf.webp"
+}

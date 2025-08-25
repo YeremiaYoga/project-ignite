@@ -8,7 +8,7 @@ export default function SubraceDetailForm() {
   const [selectedFolder, setSelectedFolder] = useState("");
 
   useEffect(() => {
-    fetch("/api/races/getallraces")
+    fetch("/api/races/getAllRace")
       .then((res) => res.json())
       .then((data) => setFolders(data))
       .catch((err) => console.error("Error loading race folders:", err));
@@ -16,9 +16,7 @@ export default function SubraceDetailForm() {
 
   return (
     <div>
-      <label className="block mb-2 text-white font-medium">
-        Select Race
-      </label>
+      <label className="block mb-2 text-white font-medium">Select Race</label>
       <select
         value={selectedFolder}
         onChange={(e) => setSelectedFolder(e.target.value)}

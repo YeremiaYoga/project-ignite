@@ -11,6 +11,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     size: "",
     creature_type: "",
     details: "",
+    tales_details: "",
     source: "",
     age: "",
     languages: "",
@@ -19,6 +20,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
 
   const [traitTitles, setTraitTitles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     setFormData((prev) => ({ ...prev, name: selectedFolder }));
@@ -50,34 +52,37 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     });
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const dataToSave = {
-      name: formData.name,
-      asi: formData.asi,
-      speed: formData.speed,
-      size: formData.size,
-      details: formData.details,
-      features: formData.traits,
-      creature_type: formData.creature_type,
-      source: formData.source,
-      age: formData.age,
-      languages: formData.languages,
-    };
-
     try {
+      const formDataUpload = new FormData();
+
+      for (const [key, value] of Object.entries(formData)) {
+        formDataUpload.append(key, value);
+      }
+
+      if (imageFile) {
+        formDataUpload.append("image", imageFile);
+      }
+
+      console.log(formDataUpload);
       const response = await fetch("/api/races/saveRaceDetail", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataToSave),
+        body: formDataUpload,
       });
 
       if (response.ok) {
-        if (onSubmit) onSubmit(dataToSave);
+        const dataSaved = await response.json();
+        if (onSubmit) onSubmit(dataSaved);
       } else {
         const errorData = await response.json();
         alert(`failed ${errorData.message || response.statusText}`);
@@ -97,6 +102,16 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     >
       <input type="hidden" name="name" value={formData.name} />
 
+      <div>
+        <label className="block mb-1 font-medium">Race Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
+        />
+      </div>
+
       {[
         "creature_type",
         "size",
@@ -104,6 +119,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
         "asi",
         "source",
         "details",
+        "tales_details",
         "age",
         "languages",
       ].map((field) => (
@@ -111,7 +127,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
           <label className="block mb-1 font-medium capitalize">
             {field.replace(/_/g, " ")}
           </label>
-          {field === "details" ? (
+          {field === "details" || field === "tales_details" ? (
             <textarea
               name={field}
               value={formData[field]}
@@ -138,7 +154,6 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
       {traitTitles.length > 0 && (
         <div className="mt-6">
           <h3 className="font-semibold text-lg mb-3">Traits</h3>
-
           <div className="space-y-4">
             {traitTitles.map((title, idx) => (
               <TraitItem
@@ -155,9 +170,10 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
       <div className="flex justify-end gap-2 pt-4">
         <button
           type="submit"
+          disabled={isLoading}
           className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-semibold"
         >
-          Save
+          {isLoading ? "Saving..." : "Save"}
         </button>
       </div>
     </form>

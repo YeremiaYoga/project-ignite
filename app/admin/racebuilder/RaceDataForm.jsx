@@ -7,31 +7,24 @@ export default function RaceDataForm() {
   const [handbook, setHandbook] = useState("");
   const [description, setDescription] = useState("");
   const [traitsInput, setTraitsInput] = useState("");
+  const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const traitsArray = traitsInput
-      .split(",")
-      .map((t) => t.trim())
-      .filter((t) => t !== "");
-
-    const raceData = {
-      raceName,
-      handbook,
-      description,
-      traits: traitsArray,
-    };
+    const formData = new FormData();
+    formData.append("raceName", raceName);
+    formData.append("handbook", handbook);
+    formData.append("description", description);
+    formData.append("traits", traitsInput);
+    if (imageFile) formData.append("image", imageFile);
 
     try {
-      const res = await fetch("/api/racebuilder", {
+      const res = await fetch("/api/races/createRace", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(raceData),
+        body: formData,
       });
 
       if (!res.ok) {
@@ -49,6 +42,7 @@ export default function RaceDataForm() {
       setHandbook("");
       setDescription("");
       setTraitsInput("");
+      setImageFile(null);
     } catch (err) {
       setError("Network or server error");
       setMessage("");
@@ -57,7 +51,11 @@ export default function RaceDataForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 mx-auto"
+      encType="multipart/form-data"
+    >
       <div>
         <label className="block font-semibold mb-1">Race Name</label>
         <input
@@ -65,7 +63,6 @@ export default function RaceDataForm() {
           value={raceName}
           onChange={(e) => setRaceName(e.target.value)}
           className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          placeholder="e.g. Elf"
           required
         />
       </div>
@@ -77,7 +74,6 @@ export default function RaceDataForm() {
           value={handbook}
           onChange={(e) => setHandbook(e.target.value)}
           className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          placeholder="e.g. Player’s Handbook"
           required
         />
       </div>
@@ -89,7 +85,6 @@ export default function RaceDataForm() {
           onChange={(e) => setDescription(e.target.value)}
           className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
           rows={4}
-          placeholder="Describe the race..."
           required
         />
       </div>
@@ -101,8 +96,17 @@ export default function RaceDataForm() {
           value={traitsInput}
           onChange={(e) => setTraitsInput(e.target.value)}
           className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          placeholder="e.g. Darkvision, Keen Senses, Fey Ancestry"
           required
+        />
+      </div>
+
+      <div>
+        <label className="block font-semibold mb-1">Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImageFile(e.target.files[0])}
+          className="w-full p-2 rounded bg-gray-700 border border-gray-600"
         />
       </div>
 
@@ -112,9 +116,6 @@ export default function RaceDataForm() {
       >
         Save Race
       </button>
-
-      {/* {message && <p className="mt-4 text-green-400">{message}</p>}
-      {error && <p className="mt-4 text-red-500">{error}</p>} */}
     </form>
   );
 }
