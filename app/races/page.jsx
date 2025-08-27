@@ -60,7 +60,7 @@ export default function RacesPage() {
         />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {filteredRaces.length > 0 ? (
           filteredRaces.map((race) => (
             <RaceCard key={race.raceName} race={race} />

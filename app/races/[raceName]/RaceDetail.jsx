@@ -1,10 +1,15 @@
+"use client";
 import Image from "next/image";
-import RaceSubrace from "./RaceSubrace";
+import { useTalesMode } from "@/context/TalesModeContext";
+import { linkifyText } from "@/utils/linkifyText";
+
 export default function RaceDetail({ data }) {
+  const { talesMode } = useTalesMode();
+
   if (!data) return <p>No race data available.</p>;
 
   return (
-    <section className="">
+    <section>
       <section
         key={data.name.toLowerCase()}
         id={data.name.toLowerCase()}
@@ -27,7 +32,6 @@ export default function RaceDetail({ data }) {
 
           <div className="flex-1 order-2 lg:order-1">
             <h1 className="text-3xl font-bold mb-2">
-        
               {data.name.charAt(0).toUpperCase() + data.name.slice(1)}
             </h1>
 
@@ -57,11 +61,19 @@ export default function RaceDetail({ data }) {
                 </p>
               )}
               <p>
-                <strong>Source:</strong> {data.source}
+                <strong>Source:</strong> {data.source}{" "}
               </p>
             </div>
 
-            <p className="text-gray-200 whitespace-pre-line">{data.details}</p>
+            <p
+              className="text-gray-200 whitespace-pre-line "
+              dangerouslySetInnerHTML={{
+                __html: linkifyText(
+                  talesMode ? data.tales_details : data.details,
+                  "universalLink"
+                ),
+              }}
+            />
           </div>
         </div>
       </section>
@@ -74,7 +86,6 @@ export default function RaceDetail({ data }) {
         {data.features?.length > 0 && (
           <div className="mt-8 space-y-6">
             <h2 className="text-2xl font-semibold">
-              {" "}
               {data.name.charAt(0).toUpperCase() + data.name.slice(1)} Traits
             </h2>
             {data.features.map((feature, idx) => (
@@ -82,13 +93,23 @@ export default function RaceDetail({ data }) {
                 <h3 className="text-xl font-bold text-orange-400 mb-2">
                   {feature.title}
                 </h3>
+
+                {/* description */}
                 {feature.description && (
-                  <p className="text-gray-200 mb-3">{feature.description}</p>
+                  <p
+                    className="text-gray-200 mb-3 universalLink racesLink"
+                    dangerouslySetInnerHTML={{
+                      __html: linkifyText(
+                        feature.description,
+                        "universalLink racesLink"
+                      ),
+                    }}
+                  />
                 )}
 
+                {/* table */}
                 {feature.table && (
                   <div className="overflow-x-auto mb-3">
-                    {" "}
                     <table className="table-auto border-collapse border border-gray-600 w-full text-sm">
                       <thead>
                         <tr>
@@ -108,10 +129,14 @@ export default function RaceDetail({ data }) {
                             {row.map((cell, j) => (
                               <td
                                 key={j}
-                                className="border border-gray-600 px-3 py-1 text-gray-200"
-                              >
-                                {cell}
-                              </td>
+                                className="border border-gray-600 px-3 py-1 text-gray-200 universalLink racesLink"
+                                dangerouslySetInnerHTML={{
+                                  __html: linkifyText(
+                                    cell,
+                                    "universalLink racesLink"
+                                  ),
+                                }}
+                              />
                             ))}
                           </tr>
                         ))}
@@ -120,12 +145,22 @@ export default function RaceDetail({ data }) {
                   </div>
                 )}
 
+                {/* list */}
                 {feature.list &&
                   Array.isArray(feature.list) &&
                   feature.list.length > 0 && (
                     <ul className="list-disc list-inside text-gray-200">
                       {feature.list.map((item, i) => (
-                        <li key={i}>{item}</li>
+                        <li
+                          key={i}
+                          className="universalLink racesLink"
+                          dangerouslySetInnerHTML={{
+                            __html: linkifyText(
+                              item,
+                              "universalLink racesLink"
+                            ),
+                          }}
+                        />
                       ))}
                     </ul>
                   )}

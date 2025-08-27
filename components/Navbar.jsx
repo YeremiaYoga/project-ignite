@@ -4,11 +4,11 @@ import Link from "next/link";
 import { Menu, X, CircleUserRound } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
+import { useTalesMode } from "@/context/TalesModeContext";
 import {
   SignedIn,
   SignedOut,
   SignInButton,
-  UserButton,
   useUser,
   useClerk,
 } from "@clerk/nextjs";
@@ -17,6 +17,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showThemeColors, setShowThemeColors] = useState(false);
+  const [talesMode, setTalesMode] = useState(false);
   const [colors, setColors] = useState({
     sub1: "#3b82f6",
     sub2: "#10b981",
@@ -41,6 +42,10 @@ export default function Navbar() {
     };
     setColors(storedColors);
     applyCSSVariables(storedColors);
+
+    // talesMode dari cookie
+    const storedTales = Cookies.get("ignite-tales-mode");
+    setTalesMode(storedTales === "true");
   }, []);
 
   useEffect(() => {
@@ -57,21 +62,21 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-const applyCSSVariables = (colorObj) => {
-  Object.entries(colorObj).forEach(([key, val]) => {
-    let varName;
-    if (key === "sub1" || key === "sub2") {
-      varName = `--hyperlink-${key}`;
-    } else if (key === "bgTop") {
-      varName = "--bg-top";
-    } else if (key === "bgMiddle") {
-      varName = "--bg-middle";
-    } else if (key === "bgBottom") {
-      varName = "--bg-bottom";
-    }
-    document.documentElement.style.setProperty(varName, val);
-  });
-};
+  const applyCSSVariables = (colorObj) => {
+    Object.entries(colorObj).forEach(([key, val]) => {
+      let varName;
+      if (key === "sub1" || key === "sub2") {
+        varName = `--hyperlink-${key}`;
+      } else if (key === "bgTop") {
+        varName = "--bg-top";
+      } else if (key === "bgMiddle") {
+        varName = "--bg-middle";
+      } else if (key === "bgBottom") {
+        varName = "--bg-bottom";
+      }
+      document.documentElement.style.setProperty(varName, val);
+    });
+  };
 
   const handleColorChange = (e, type) => {
     const newColor = e.target.value;
@@ -89,6 +94,12 @@ const applyCSSVariables = (colorObj) => {
 
     Cookies.set(cookieKey, newColor, { expires: 365 });
     applyCSSVariables(updatedColors);
+  };
+
+  const toggleTalesMode = () => {
+    const newValue = !talesMode;
+    setTalesMode(newValue);
+    Cookies.set("ignite-tales-mode", newValue.toString(), { expires: 365 });
   };
 
   return (
@@ -152,6 +163,23 @@ const applyCSSVariables = (colorObj) => {
                   </button>
                 </div>
               </SignedIn>
+
+              {/* Tales Mode Slider */}
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700 dark:text-gray-100 font-semibold">
+                  Tales Mode
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={talesMode}
+                    onChange={toggleTalesMode}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600 transition"></div>
+                  <div className="absolute left-0.5 top-0.5 bg-white dark:bg-gray-300 h-5 w-5 rounded-full transition-transform peer-checked:translate-x-5"></div>
+                </label>
+              </div>
 
               <button
                 onClick={() => setShowThemeColors(!showThemeColors)}

@@ -40,10 +40,20 @@ export default function RaceSubrace({ data }) {
                   {subrace.name}
                 </h3>
 
+                {/* description */}
                 {subrace.description && (
-                  <p className="text-gray-200 mb-3">{subrace.description}</p>
+                  <p
+                    className="text-gray-200 mb-3 universalLink racesLink"
+                    dangerouslySetInnerHTML={{
+                      __html: linkifyText(
+                        subrace.description,
+                        "universalLink racesLink"
+                      ),
+                    }}
+                  />
                 )}
 
+                {/* table */}
                 {subrace.table && subrace.table.headers && (
                   <div className="overflow-x-auto mb-3">
                     <table className="table-auto border-collapse border border-gray-600 w-full text-sm">
@@ -65,10 +75,14 @@ export default function RaceSubrace({ data }) {
                             {row.map((cell, cIdx) => (
                               <td
                                 key={cIdx}
-                                className="border border-gray-600 px-3 py-1 text-gray-200"
-                              >
-                                {cell}
-                              </td>
+                                className="border border-gray-600 px-3 py-1 text-gray-200 universalLink racesLink"
+                                dangerouslySetInnerHTML={{
+                                  __html: linkifyText(
+                                    cell,
+                                    "universalLink racesLink"
+                                  ),
+                                }}
+                              />
                             ))}
                           </tr>
                         ))}
@@ -77,10 +91,17 @@ export default function RaceSubrace({ data }) {
                   </div>
                 )}
 
+                {/* list */}
                 {subrace.list && subrace.list.length > 0 && (
                   <ul className="list-disc list-inside text-gray-200">
                     {subrace.list.map((item, lIdx) => (
-                      <li key={lIdx}>{item}</li>
+                      <li
+                        key={lIdx}
+                        className="universalLink racesLink"
+                        dangerouslySetInnerHTML={{
+                          __html: linkifyText(item, "universalLink racesLink"),
+                        }}
+                      />
                     ))}
                   </ul>
                 )}

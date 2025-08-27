@@ -45,7 +45,7 @@ export async function POST(request) {
       const buffer = Buffer.from(await uploadedFile.arrayBuffer());
       await fs.writeFile(imagePath, buffer);
 
-      imageUrl = `/public/assets/races/${folderName}/${imageFileName}`;
+      imageUrl = `/assets/races/${folderName}/${imageFileName}`;
     }
 
     let features = [];
@@ -85,7 +85,6 @@ export async function POST(request) {
       features,
     };
 
-    // --- TULIS FILE JSON ---
     const fileName = `${folderName}Detail.json`;
     const filePath = path.join(raceDir, fileName);
 

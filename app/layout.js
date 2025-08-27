@@ -3,7 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 import BackgroundProvider from "@/components/BackgroundProvider";
-
+import { TalesModeProvider } from "@/context/TalesModeContext";
 const convergence = Convergence({
   variable: "--font-convergence",
   weight: "400",
@@ -20,17 +20,19 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="en">
         <body className={`${convergence.variable} font-sans antialiased`}>
-          <BackgroundProvider>
-            <Navbar />
-            <main
-              className="min-h-screen flex justify-center"
-              style={{
-                background: `linear-gradient(to bottom, var(--bg-top), var(--bg-middle), var(--bg-bottom))`,
-              }}
-            >
-              {children}
-            </main>
-          </BackgroundProvider>
+          <TalesModeProvider>
+            <BackgroundProvider>
+              <Navbar />
+              <main
+                className="min-h-screen flex justify-center"
+                style={{
+                  background: `linear-gradient(to bottom, var(--bg-top), var(--bg-middle), var(--bg-bottom))`,
+                }}
+              >
+                {children}
+              </main>
+            </BackgroundProvider>
+          </TalesModeProvider>
         </body>
       </html>
     </ClerkProvider>
