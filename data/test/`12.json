@@ -1,0 +1,31 @@
+[
+  {
+    "name": "`12",
+    "level": 2,
+    "short_source": "`12",
+    "source": "`12",
+    "school": "Conjuration",
+    "casting_time": "Round",
+    "measurement": "feet",
+    "area": "`12weqw",
+    "components": ["S"],
+    "duration": "412",
+    "concentration": false,
+    "ritual": false,
+    "damage_type": ["piercing"],
+    "damage_dice": "412",
+    "damage_level": "4124",
+    "saving_throw": ["con"],
+    "material": "`12",
+    "classes": ["blood-hunter"],
+    "additional_classes": ["124"],
+    "species": ["1241"],
+    "feats": ["2412"],
+    "other_options_features": ["41"],
+    "description": "124",
+    "higher_level": "124",
+    "image": "test",
+    "range": "`12",
+    "range_exp": "Point"
+  }
+]

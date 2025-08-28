@@ -2,7 +2,7 @@ import React from "react";
 
 const MultiSelectTags = ({ label, options, selected, onSelect, onDeselect }) => {
   return (
-    <div>
+    <div className="my-4">
       <label className="block text-sm font-medium mb-1">
         {label}
       </label>

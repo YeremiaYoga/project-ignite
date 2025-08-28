@@ -162,9 +162,9 @@ export default function SpellBuilderPage() {
       ...form,
       level: parseInt(form.level),
 
-      short_source: formatWithExpPrefix(form.short_source),
-      source: formatWithExpPrefix(form.source),
-      area: formatWithExpPrefix(form.area),
+      short_source: form.short_source,
+      source: form.source,
+      area: form.area,
 
       components: form.components,
       damage_type: form.damage_type,
@@ -191,7 +191,7 @@ export default function SpellBuilderPage() {
   };
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-10 text-white bg-gray-900 min-h-screen">
+    <main className="max-w-6xl mx-auto px-4 py-10 text-white bg-gray-900 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-center">Spell Builder</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -210,7 +210,9 @@ export default function SpellBuilderPage() {
             { name: "school", label: "School" },
             { name: "casting_time", label: "Casting Time" },
             { name: "measurement", label: "Measurement" },
+            { name: "range", label: "range", type: "number" },
             { name: "area", label: "Area" },
+
             { name: "material", label: "Material Component" },
             { name: "duration", label: "Duration" },
             { name: "damage_dice", label: "Damage Dice" },
@@ -293,12 +295,12 @@ export default function SpellBuilderPage() {
 
           <div>
             <label htmlFor="range" className="block text-sm font-medium mb-1">
-              Range
+              Range Exp
             </label>
             <select
-              name="range"
-              id="range"
-              value={form.range}
+              name="range_exp"
+              id="range_exp"
+              value={form.range_exp}
               onChange={handleChange}
               className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
