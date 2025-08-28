@@ -1,15 +1,16 @@
 import universalLinks from "@/data/hyperlink/universal.json";
 import raceLinks from "@/data/hyperlink/races.json";
-// import featsLinks from "@/data/hyperlink/feats.json";
+import spellsLinks from "@/data/hyperlink/spells.json";
 // import backgroundsLinks from "@/data/hyperlink/backgrounds.json";
 import classesLinks from "@/data/hyperlink/classes.json";
 
 const sourcesMap = {
   universal: universalLinks,
   races: raceLinks,
+  spells: spellsLinks,
   //   feats: featsLinks,
   //   backgrounds: backgroundsLinks,
-    classes: classesLinks,
+  classes: classesLinks,
 };
 
 export function linkifyText(text, classNameString = "") {

@@ -1,5 +1,5 @@
 "use client";
-
+import { linkifyText } from "@/utils/linkifyText";
 import { Star, StarOff } from "lucide-react";
 
 export default function DetailSpells({ spell }) {
@@ -37,7 +37,7 @@ export default function DetailSpells({ spell }) {
             <strong>Range</strong>: {spell.range} {spell.measurement}
             {spell.area && ` (${spell.area})`}
             <br />
-            <strong>Components</strong>: {spell.components.join(", ")}
+            <strong>Components</strong>: {spell.components || "-"}
             <br />
             <strong>Duration</strong>:{" "}
             {spell.concentration
