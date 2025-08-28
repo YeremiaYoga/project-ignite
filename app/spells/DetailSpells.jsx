@@ -37,7 +37,7 @@ export default function DetailSpells({ spell }) {
             <strong>Range</strong>: {spell.range} {spell.measurement}
             {spell.area && ` (${spell.area})`}
             <br />
-            <strong>Components</strong>: {spell.components}
+            <strong>Components</strong>: {spell.components.join(", ")}
             <br />
             <strong>Duration</strong>:{" "}
             {spell.concentration
@@ -53,8 +53,11 @@ export default function DetailSpells({ spell }) {
       </div>
 
       <div className="mt-4 text-xs leading-relaxed text-white">
-        <p>{spell.description}</p>
-
+        <p
+          dangerouslySetInnerHTML={{
+            __html: linkifyText(spell.description, "universalLink spellsLink"),
+          }}
+        />
         {spell.higher_level && (
           <p className="mt-3 italic text-yellow-100">
             <strong>Using a Higher-Level Spell Slot:</strong>{" "}

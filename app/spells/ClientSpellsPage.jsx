@@ -68,9 +68,10 @@ export default function ClientSpellsPage({ spells }) {
 
     const matchesRange =
       !activeFilters?.range?.length ||
-      activeFilters.range.some((r) =>
-        spell.range.toLowerCase().includes(r.toString().toLowerCase())
-      );
+      activeFilters.range
+        .map((r) => r.toString().toLowerCase())
+        .some((r) => spell.name.toLowerCase().includes(r));
+
 
     const matchesSchool =
       !activeFilters?.school?.length ||
@@ -95,7 +96,7 @@ export default function ClientSpellsPage({ spells }) {
     // console.log(matchesClass);
     // console.log(matchesLevel);
     // console.log(matchesCastTime);
-    // console.log(matchesRange);
+    console.log(matchesRange);
     // console.log(matchesSchool);
     // console.log(matchesDamageType);
     // console.log(matchesRitual);

@@ -1,6 +1,7 @@
 import ClassHeader from "@/components/ClassHeaderName";
 import ClassTable from "./ClassTable";
 import ClassFeatures from "./ClassFeatures";
+import { linkifyText } from "@/utils/linkifyText";
 
 export default async function ClassPage({ params }) {
   const className = (await params).className.replace(/-/g, "_");
@@ -25,24 +26,42 @@ export default async function ClassPage({ params }) {
             {classData.descriptionClass.map((desc, i) => {
               if (desc.color === "white") {
                 return (
-                  <p key={i} className="italic font-medium">
-                    {desc.text}
-                  </p>
+                  <p
+                    key={i}
+                    className="italic font-medium "
+                    dangerouslySetInnerHTML={{
+                      __html: linkifyText(
+                        desc.text,
+                        "universalLink classesLink"
+                      ),
+                    }}
+                  />
                 );
               } else if (desc.color === "gray") {
                 return (
                   <p
                     key={i}
-                    className="text-xs sm:text-sm text-gray-400 italic"
-                  >
-                    {desc.text}
-                  </p>
+                    className="text-xs sm:text-sm text-gray-400 italic "
+                    dangerouslySetInnerHTML={{
+                      __html: linkifyText(
+                        desc.text,
+                        "universalLink classesLink"
+                      ),
+                    }}
+                  />
                 );
               } else {
                 return (
-                  <p key={i} className="text-sm text-white">
-                    {desc.text}
-                  </p>
+                  <p
+                    key={i}
+                    className="text-sm text-white "
+                    dangerouslySetInnerHTML={{
+                      __html: linkifyText(
+                        desc.text,
+                        "universalLink classesLink"
+                      ),
+                    }}
+                  />
                 );
               }
             })}

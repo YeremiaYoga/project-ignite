@@ -1,14 +1,19 @@
 import React from "react";
 
-const MultiSelectTags = ({ label, options, selected, onSelect, onDeselect }) => {
+const MultiSelectTags = ({
+  label,
+  options,
+  selected,
+  onSelect,
+  onDeselect,
+}) => {
   return (
     <div className="my-4">
-      <label className="block text-sm font-medium mb-1">
-        {label}
-      </label>
-      <div className="flex flex-wrap gap-2 mb-2 min-h-[36px]">
+      <label className="block text-sm font-medium mb-1">{label}</label>
+      <div className="flex flex-wrap gap-2 mb-2">
         {selected.map((item) => {
-          const displayLabel = options.find(opt => opt.value === item)?.label || item;
+          const displayLabel =
+            options.find((opt) => opt.value === item)?.label || item;
           return (
             <span
               key={item}

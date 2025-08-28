@@ -1,5 +1,5 @@
 "use client";
-
+import { linkifyText } from "@/utils/linkifyText";
 export default function FeatureContent({ content, level }) {
   return (
     <>
@@ -9,9 +9,10 @@ export default function FeatureContent({ content, level }) {
             <p
               key={idx}
               className="text-zinc-300 mb-2 leading-relaxed text-base"
-            >
-              {item.value}
-            </p>
+              dangerouslySetInnerHTML={{
+                __html: linkifyText(item.value, "universalLink classesLink"),
+              }}
+            />
           );
         }
         if (item.type === "list") {
@@ -26,7 +27,13 @@ export default function FeatureContent({ content, level }) {
                 className="list-disc list-inside text-zinc-300 space-y-2 break-words"
               >
                 {item.items.map((li, i) => (
-                  <li key={i}>{li}</li>
+                  <li key={i}>
+                    <p
+                      dangerouslySetInnerHTML={{
+                        __html: linkifyText(li, "universalLink classesLink"),
+                      }}
+                    />
+                  </li>
                 ))}
               </ul>
             );
@@ -37,7 +44,14 @@ export default function FeatureContent({ content, level }) {
               className="list-disc list-inside text-zinc-300 space-y-2"
             >
               {item.items.map((li, i) => (
-                <li key={i}>{li}</li>
+                <li key={i}>
+                  {" "}
+                  <p
+                    dangerouslySetInnerHTML={{
+                      __html: linkifyText(li, "universalLink classesLink"),
+                    }}
+                  />
+                </li>
               ))}
             </ul>
           );
@@ -50,7 +64,14 @@ export default function FeatureContent({ content, level }) {
                 {item.content &&
                   item.content.map((text, i) => (
                     <div key={i} className="text-sm">
-                      {text}
+                      <p
+                        dangerouslySetInnerHTML={{
+                          __html: linkifyText(
+                            text,
+                            "universalLink classesLink"
+                          ),
+                        }}
+                      />
                     </div>
                   ))}
               </div>
@@ -89,7 +110,14 @@ export default function FeatureContent({ content, level }) {
                             className="py-2 px-4 bg-blue-900 text-blue-200"
                             colSpan={item.headers.length}
                           >
-                            {row[0]}
+                            <p
+                              dangerouslySetInnerHTML={{
+                                __html: linkifyText(
+                                  row[0],
+                                  "universalLink classesLink"
+                                ),
+                              }}
+                            />
                           </td>
                         </tr>
                       );
@@ -98,7 +126,14 @@ export default function FeatureContent({ content, level }) {
                       <tr key={i} className="border-b border-zinc-700">
                         {row.map((cell, j) => (
                           <td key={j} className="py-2 px-4">
-                            {cell}
+                            <p
+                              dangerouslySetInnerHTML={{
+                                __html: linkifyText(
+                                  cell,
+                                  "universalLink classesLink"
+                                ),
+                              }}
+                            />
                           </td>
                         ))}
                       </tr>

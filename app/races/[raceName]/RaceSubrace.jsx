@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-
+import { linkifyText } from "@/utils/linkifyText";
 export default function RaceSubrace({ data }) {
   if (!data || !data.name) return null;
 

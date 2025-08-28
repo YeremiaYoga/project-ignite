@@ -22,7 +22,7 @@ export default function SpellsPage() {
       const filePath = path.join(folderPath, fileName);
       const fileContents = fs.readFileSync(filePath, "utf8");
       const json = JSON.parse(fileContents);
-      spells.push(json[0]); 
+      spells.push(json); 
     }
   }
 

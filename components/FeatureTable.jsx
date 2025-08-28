@@ -1,3 +1,5 @@
+
+import { linkifyText } from "@/utils/linkifyText";
 export default function FeatureTable({ table }) {
   if (!table || !table.headers || !table.rows) return null;
 
@@ -21,8 +23,15 @@ export default function FeatureTable({ table }) {
                 {rowIndex + 1}
               </td>
               {row.map((cell, cellIndex) => (
-                <td key={cellIndex} className="px-4 py-2 border border-zinc-700">
-                  {cell}
+                <td
+                  key={cellIndex}
+                  className="px-4 py-2 border border-zinc-700"
+                >
+                  <p
+                    dangerouslySetInnerHTML={{
+                      __html: linkifyText(cell, "universalLink classesLink"),
+                    }}
+                  />
                 </td>
               ))}
             </tr>

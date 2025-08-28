@@ -161,7 +161,7 @@ export default function SpellBuilderPage() {
     const formData = {
       ...form,
       level: parseInt(form.level),
-
+      range: parseInt(form.range),
       short_source: form.short_source,
       source: form.source,
       area: form.area,
@@ -191,7 +191,7 @@ export default function SpellBuilderPage() {
   };
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-10 text-white bg-gray-900 min-h-screen">
+    <main className="max-w-6xl w-full mx-auto px-4 py-10 text-white bg-gray-900 min-h-screen m-5">
       <h1 className="text-3xl font-bold mb-6 text-center">Spell Builder</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -304,9 +304,7 @@ export default function SpellBuilderPage() {
               onChange={handleChange}
               className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="" disabled>
-                Select Range
-              </option>
+              <option value="">Select Range</option>
               {rangeOptions.map((option) => (
                 <option key={option} value={option}>
                   {option}

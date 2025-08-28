@@ -6,18 +6,24 @@ export async function POST(request) {
   const body = await request.json();
 
   const name = body.name?.trim();
+  const level = body.level?.toString().trim();
+
   if (!name) {
     return new Response("Nama spell kosong", { status: 400 });
   }
 
+  if (!level) {
+    return new Response("Level spell kosong", { status: 400 });
+  }
+
   const filename = `${name.replace(/\s+/g, "_")}.json`;
-  const dirPath = path.join(process.cwd(), "data", "test");
+  const dirPath = path.join(process.cwd(), "data", "spells", level);
 
   try {
     await mkdir(dirPath, { recursive: true });
     await writeFile(
       path.join(dirPath, filename),
-      JSON.stringify([body], null, 2)
+      JSON.stringify(body, null, 2)
     );
     return new Response("Berhasil", { status: 200 });
   } catch (err) {

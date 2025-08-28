@@ -1,0 +1,34 @@
+{
+  "name": "qwe",
+  "level": 2,
+  "short_source": "qwe",
+  "source": "wqe",
+  "school": "qwe",
+  "casting_time": "qwe",
+  "measurement": "feet",
+  "area": "qwe",
+  "components": [],
+  "duration": "qweq",
+  "concentration": false,
+  "ritual": true,
+  "damage_type": [],
+  "damage_dice": "we",
+  "damage_level": "qwe",
+  "saving_throw": [],
+  "material": "qwe",
+  "classes": [],
+  "additional_classes": [
+    "qwe"
+  ],
+  "species": [
+    "qwe"
+  ],
+  "feats": [
+    "qwe"
+  ],
+  "other_options_features": [],
+  "description": "qwe",
+  "higher_level": "qwe",
+  "range_exp": "Area",
+  "range": null
+}
