@@ -1,15 +1,16 @@
 import universalLinks from "@/data/hyperlink/universal.json";
 import raceLinks from "@/data/hyperlink/races.json";
 import spellsLinks from "@/data/hyperlink/spells.json";
-// import backgroundsLinks from "@/data/hyperlink/backgrounds.json";
+import backgroundsLinks from "@/data/hyperlink/backgrounds.json";
 import classesLinks from "@/data/hyperlink/classes.json";
+import featsLinks from "@/data/hyperlink/feats.json";
 
 const sourcesMap = {
   universal: universalLinks,
   races: raceLinks,
   spells: spellsLinks,
-  //   feats: featsLinks,
-  //   backgrounds: backgroundsLinks,
+  feats: featsLinks,
+  backgrounds: backgroundsLinks,
   classes: classesLinks,
 };
 

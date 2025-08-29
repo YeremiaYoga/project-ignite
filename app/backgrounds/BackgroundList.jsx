@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import Link from "next/link";
+import { linkifyText } from "@/utils/linkifyText";
 export default function BackgroundList({ backgrounds }) {
   return (
     <div className="w-full max-w-6xl mx-auto">
@@ -60,8 +61,16 @@ function BackgroundRow({ bg }) {
 
       {expanded && (
         <div className="px-4 py-3 bg-gray-900 border-t border-gray-700 text-xs">
-          <p className="mb-3 text-gray-200">{bg.description}</p>
-
+          <p
+            className="mb-3 text-gray-200"
+            dangerouslySetInnerHTML={{
+              __html: linkifyText(
+                bg.description,
+                "universalLink backgroundsLink"
+              ),
+            }}
+          />
+          {/* {bg.description} */}
           <hr className="border-orange-500 my-2" />
 
           <p className="mb-1">

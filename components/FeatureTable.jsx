@@ -27,12 +27,12 @@ export default function FeatureTable({ table }) {
                   key={cellIndex}
                   className="px-4 py-2 border border-zinc-700"
                 >
-                  {cell}
-                  {/* <p
+                  
+                  <p
                     dangerouslySetInnerHTML={{
                       __html: linkifyText(cell, "universalLink classesLink"),
                     }}
-                  /> */}
+                  />
                 </td>
               ))}
             </tr>

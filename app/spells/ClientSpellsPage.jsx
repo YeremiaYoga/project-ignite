@@ -70,8 +70,7 @@ export default function ClientSpellsPage({ spells }) {
       !activeFilters?.range?.length ||
       activeFilters.range
         .map((r) => r.toString().toLowerCase())
-        .some((r) => spell.name.toLowerCase().includes(r));
-
+        .some((r) => spell.range_exp.toLowerCase().includes(r));
 
     const matchesSchool =
       !activeFilters?.school?.length ||

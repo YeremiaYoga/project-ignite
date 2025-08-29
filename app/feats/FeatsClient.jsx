@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import FeatsList from "./FeatsList";
 import { Filter } from "lucide-react";
 
-// import options from "@/data/featoptions.json";
+import options from "@/data/featsOptions.json";
 
-// const { tagsOptions, prerequisitesOptions } = options;
+const { tagsOptions } = options;
 
 export default function FeatsClient({ feats }) {
   const [search, setSearch] = useState("");
@@ -119,9 +119,8 @@ export default function FeatsClient({ feats }) {
               Filters
             </h2>
 
-            {/* <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-          
-              <div>
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+              {/* <div>
                 <p className="text-gray-300 mb-2">Prerequisites:</p>
                 <div className="flex flex-wrap gap-2">
                   {prerequisitesOptions.map((p) => (
@@ -139,9 +138,8 @@ export default function FeatsClient({ feats }) {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
-    
               <div>
                 <p className="text-gray-300 mb-2">Tags:</p>
                 <div className="flex flex-wrap gap-2">
@@ -161,7 +159,7 @@ export default function FeatsClient({ feats }) {
                   ))}
                 </div>
               </div>
-            </div> */}
+            </div>
 
             <div className="flex justify-end gap-3 mt-6">
               <button

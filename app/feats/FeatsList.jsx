@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import Link from "next/link";
-
+import { linkifyText } from "@/utils/linkifyText";
 export default function FeatList({ feats }) {
   return (
     <div className="w-full max-w-6xl mx-auto">
@@ -15,10 +15,9 @@ export default function FeatList({ feats }) {
       </div>
 
       <div className="divide-y divide-gray-700">
-        {/* {feats.map((feat, idx) => (
+        {feats.map((feat, idx) => (
           <FeatRow key={idx} feat={feat} />
-        ))} */}
-        {feats.length > 0 && <FeatRow feat={feats[0]} />}
+        ))}
       </div>
     </div>
   );
@@ -69,9 +68,13 @@ function FeatRow({ feat }) {
           <div className="text-gray-200 leading-relaxed">
             {Array.isArray(feat.description) ? (
               feat.description.map((line, i) => (
-                <p key={i} className="mb-2">
-                  {line}
-                </p>
+                <p
+                  key={i}
+                  className="mb-2"
+                  dangerouslySetInnerHTML={{
+                    __html: linkifyText(line, "universalLink featsLink"),
+                  }}
+                />
               ))
             ) : (
               <p>{feat.description}</p>

@@ -158,15 +158,14 @@ export default function ClassFeatures({ classId }) {
                             {subFeat.subclass} Feature: {subFeat.title}
                           </div>
                           <div className="text-zinc-300 whitespace-pre-line">
-                            {subFeat.description}
-                            {/* <p
+                            <p
                               dangerouslySetInnerHTML={{
                                 __html: linkifyText(
                                   subFeat.description,
                                   "universalLink classesLink"
                                 ),
                               }}
-                            /> */}
+                            />
 
                             {Array.isArray(subFeat.list) &&
                               subFeat.list.length > 0 && (
@@ -182,15 +181,14 @@ export default function ClassFeatures({ classId }) {
                           )}
                           {subFeat.note && (
                             <div className="text-sm text-zinc-500 italic mt-2">
-                              {subFeat.note}
-                              {/* <p
+                              <p
                                 dangerouslySetInnerHTML={{
                                   __html: linkifyText(
                                     subFeat.note,
                                     "universalLink classesLink"
                                   ),
                                 }}
-                              /> */}
+                              />
                             </div>
                           )}
                           {subFeat.subfeatures &&
@@ -207,15 +205,14 @@ export default function ClassFeatures({ classId }) {
 
                                     {sub.description && (
                                       <div className="text-zinc-300 whitespace-pre-line">
-                                        {sub.description}
-                                        {/* <p
+                                        <p
                                           dangerouslySetInnerHTML={{
                                             __html: linkifyText(
                                               sub.description,
                                               "universalLink classesLink"
                                             ),
                                           }}
-                                        /> */}
+                                        />
                                       </div>
                                     )}
 
@@ -224,8 +221,7 @@ export default function ClassFeatures({ classId }) {
                                         <ul className="list-disc list-inside text-zinc-300 space-y-1">
                                           {sub.list.map((item, i) => (
                                             <li key={i}>
-                                              {item}
-                                              {/* <p
+                                              <p
                                                 key={i}
                                                 dangerouslySetInnerHTML={{
                                                   __html: linkifyText(
@@ -233,7 +229,7 @@ export default function ClassFeatures({ classId }) {
                                                     "universalLink classesLink"
                                                   ),
                                                 }}
-                                              /> */}
+                                              />
                                             </li>
                                           ))}
                                         </ul>
@@ -241,15 +237,14 @@ export default function ClassFeatures({ classId }) {
 
                                     {sub.note && (
                                       <div className="text-sm text-zinc-500 italic">
-                                        {sub.note}
-                                        {/* <p
+                                        <p
                                           dangerouslySetInnerHTML={{
                                             __html: linkifyText(
                                               sub.note,
                                               "universalLink classesLink"
                                             ),
                                           }}
-                                        /> */}
+                                        />
                                       </div>
                                     )}
                                   </div>
