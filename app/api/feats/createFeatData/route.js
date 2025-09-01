@@ -9,7 +9,7 @@ export async function POST(req) {
 
     if (!body.name) {
       return NextResponse.json(
-        { success: false, message: "Background name is required" },
+        { success: false, message: "Feats name is required" },
         { status: 400 }
       );
     }
@@ -17,15 +17,15 @@ export async function POST(req) {
    
     const folderName = body.name.toLowerCase().replace(/\s+/g, "_");
 
-    const folderPath = path.join(process.cwd(), "data", "backgrounds", folderName);
-    const filePath = path.join(folderPath, "bgData.json");
+    const folderPath = path.join(process.cwd(), "data", "feats", folderName);
+    const filePath = path.join(folderPath, "featData.json");
     await mkdir(folderPath, { recursive: true });
     await writeFile(filePath, JSON.stringify(body, null, 2), "utf-8");
     return NextResponse.json({
       success: true,
-      message: "Background saved successfully",
+      message: "Feats saved successfully",
       folder: folderName,
-      file: "bgData.json",
+      file: "featData.json",
       data: body,
     });
   } catch (error) {
