@@ -35,7 +35,7 @@ export default function Page() {
           "spells",
           "backgrounds",
           "feats",
-          ,
+          "factions",
         ].map((file, index, arr) => (
           <button
             key={file}

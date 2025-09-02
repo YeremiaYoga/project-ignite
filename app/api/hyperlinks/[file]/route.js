@@ -6,9 +6,8 @@ function getFilePath(file) {
   return path.join(process.cwd(), "data", "hyperlink", `${file}.json`);
 }
 
-// GET → ambil data
 export async function GET(req, { params }) {
-  const { file } = params;
+  const file = (await params).file;
 
   try {
     const filePath = getFilePath(file);
@@ -16,13 +15,15 @@ export async function GET(req, { params }) {
     const json = JSON.parse(content);
     return NextResponse.json(json);
   } catch {
-    return NextResponse.json({ error: "File tidak ditemukan" }, { status: 404 });
+    return NextResponse.json(
+      { error: "File tidak ditemukan" },
+      { status: 404 }
+    );
   }
 }
 
-// POST → tambah data
 export async function POST(req, { params }) {
-  const { file } = params;
+  const file = (await params).file;
   const { key, value } = await req.json();
 
   const filePath = getFilePath(file);
@@ -38,9 +39,8 @@ export async function POST(req, { params }) {
   return NextResponse.json(json);
 }
 
-// PUT → edit data
 export async function PUT(req, { params }) {
-  const { file } = params;
+  const file = (await params).file;
   const { oldKey, newKey, value } = await req.json();
 
   const filePath = getFilePath(file);
@@ -55,9 +55,8 @@ export async function PUT(req, { params }) {
   return NextResponse.json(json);
 }
 
-// DELETE → hapus data
 export async function DELETE(req, { params }) {
-  const { file } = params;
+  const file = (await params).file;
   const { key } = await req.json();
 
   const filePath = getFilePath(file);

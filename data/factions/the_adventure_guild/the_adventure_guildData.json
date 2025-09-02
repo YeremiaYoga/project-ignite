@@ -1,0 +1,55 @@
+{
+  "faction_name": "The Adventurer's Guild",
+  "logo": "assets/file.svg",
+  "group_type": "major",
+  "alignment": "LN",
+  "alignment_long": "Lawful Neutral",
+  "faction_motto": "For coin, for unknown tales, and for defying fate!",
+  "primary": "A sprawling network of guildhalls where wanderers, mercenaries, and explorers gather. The Guild provides structure to the chaos of adventuring. Posting contracts, offering training, and ensuring fair pay. Loved by common folk for their protection yet viewed warily by rulers, its members live by the creed: 'For coin, for unknown tales, and for defying fate!'",
+  
+  "main_logo": "Location",
+  "path": "The Six Star of Fate",
+  "main_philosophy": "Adventure and exploration serve both personal growth and the prosperity of the people and the land within it.",
+  "description": "The Adventurer’s Guild is among the oldest institutions still standing, its roots reaching back to the aftermath of the Calamity. Its true founder’s name was lost, like so much else swallowed by that age of fire and ash. Yet one remembrance endures: her title, *The Red Rose*, a hero whose thorns struck down horrors while her bloom gave hope to the broken.\n\nIt was she who first gathered wanderers and warriors beneath a single banner, forging not an army, but a fellowship. From her vision rose a guild where common folk could seek aid without fear — a place where pleas for help would always find listening ears, and where the right band of adventurers would be matched to each burden.\n\nThrough centuries of strife and peace, the Guild has remained a beacon: a hearth for the brave, a shield for the helpless, and a mirror of humanity’s will to endure. Though the founder’s name is gone, her legacy lives in every contract sealed, every quest fulfilled, and every torch lit against the dark.",
+  
+  "allies": [
+    "The Intelligentsia Guild",
+    "The Holy Order",
+    "The Arcane Protector",
+    "The Merchant's Guild",
+    "The Golden Claw",
+    "The Pathfinder"
+  ],
+  "enemies": [
+    "The Blood Ledger",
+    "The Eclipsed Fang",
+    "The Ashen Crucible",
+    "The Finality",
+    "The Black Legion",
+    "The Ouroboros Group",
+    "The Red Eyes",
+    "The Black Eyes"
+  ],
+  
+  "founder": "The Red Lady",
+  "current_leader": "The Adventurer's Guild Council",
+  "sub_group": ["The OPAL Foundation"],
+  "off_shot": [
+    "The Evernight",
+    "The Clock of Shattered Mirror",
+    "The Lord of Unknown",
+    "The Finality",
+    "The Shattered Knight",
+    "Hope and Glory Group"
+  ],
+  "notable_members": ["The Red Lady"],
+  "influence": [
+    "The Orange Corral Incident 1623 AC",
+    "The Calamity Event"
+  ],
+  
+  "general_base": "A sprawling guildhall that is located all over Vallarian, and in smaller town/village where they are locate their quest at quest board which is near taverns or near the townhall.",
+  "main_base": "Orange Corral, Delstainvia",
+  "founding_date": "Unknown, but believed to be around the end of the Age of Calamity",
+  "membership": "Numbers unknown, but believed to be over 10 million"
+}
