@@ -7,7 +7,6 @@ import { Plus } from "lucide-react";
 export default function FactionCard({ faction }) {
   return (
     <div className="flex items-start border border-gray-700 rounded-2xl p-4 shadow-md bg-gray-900 relative">
-      {/* Logo */}
       <div className="w-24 h-24 relative mr-4 flex-shrink-0">
         {faction.logo ? (
           <Image
@@ -23,25 +22,23 @@ export default function FactionCard({ faction }) {
         )}
       </div>
 
-      {/* Content */}
       <div className="flex-1 pr-14">
-        <div className="flex justify-between items-start">
-          <h2 className="text-xl font-bold text-red-400">
+        <div className="flex justify-between items-start text-white">
+          <h2 className="text-xl font-bold ">
             {faction.faction_name}
           </h2>
-          <span className="text-orange-400 font-bold">
+          <span className=" font-bold">
             {faction.alignment}
           </span>
         </div>
 
-        <p className="text-blue-400 font-semibold">
+        <p className=" font-semibold">
           {faction.faction_motto}
         </p>
 
-        <p className="text-green-400 text-sm mt-2">{faction.primary}</p>
+        <p className=" text-sm mt-2">{faction.primary}</p>
       </div>
 
-      {/* Button */}
       <Link
         href={`/factions/${faction.faction_name
           .toLowerCase()
