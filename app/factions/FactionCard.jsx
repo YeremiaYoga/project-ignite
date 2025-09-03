@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Book } from "lucide-react";
 
 export default function FactionCard({ faction }) {
   return (
@@ -24,29 +24,38 @@ export default function FactionCard({ faction }) {
 
       <div className="flex-1 pr-14">
         <div className="flex justify-between items-start text-white">
-          <h2 className="text-xl font-bold ">
-            {faction.faction_name}
-          </h2>
-          <span className=" font-bold">
-            {faction.alignment}
-          </span>
+          <h2 className="text-xl font-bold ">{faction.faction_name}</h2>
+          <span className=" font-bold">{faction.alignment}</span>
         </div>
 
-        <p className=" font-semibold">
-          {faction.faction_motto}
-        </p>
+        <p className=" font-semibold">{faction.faction_motto}</p>
 
         <p className=" text-sm mt-2">{faction.primary}</p>
       </div>
 
-      <Link
-        href={`/factions/${faction.faction_name
-          .toLowerCase()
-          .replace(/\s+/g, "-")}`}
-        className="absolute top-1/2 right-4 -translate-y-1/2 border border-gray-600 rounded-xl w-10 h-10 flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition"
-      >
-        <Plus size={20} />
-      </Link>
+      <div className="absolute top-1/2 right-4 -translate-y-1/2 flex flex-col gap-2">
+        <Link
+          href={`/factions/${faction.faction_name
+            .toLowerCase()
+            .replace(/['"]/g, "")
+            .replace(/\s+/g, "_")
+            .replace(/[^a-z0-9_]/g, "")}`}
+          className="border border-gray-600 rounded-xl w-10 h-10 flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition"
+        >
+          <Plus size={20} />
+        </Link>
+
+        <Link
+          href={`/factions/${faction.faction_name
+            .toLowerCase()
+            .replace(/['"]/g, "")
+            .replace(/\s+/g, "_")
+            .replace(/[^a-z0-9_]/g, "")}`}
+          className="border border-gray-600 rounded-xl w-10 h-10 flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition"
+        >
+          <Book size={20} />
+        </Link>
+      </div>
     </div>
   );
 }

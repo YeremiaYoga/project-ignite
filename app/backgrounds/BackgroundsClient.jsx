@@ -8,7 +8,6 @@ import options from "@/data/bgoptions.json";
 
 const { tagsOptions, skillsOptions } = options;
 
-
 export default function BackgroundsClient({ backgrounds }) {
   const [search, setSearch] = useState("");
   const [sourceCategory, setSourceCategory] = useState("");
@@ -94,7 +93,6 @@ export default function BackgroundsClient({ backgrounds }) {
     <div className="p-6 space-y-6 max-w-6xl mx-auto w-full">
       <h1 className="text-3xl font-bold text-gray-100">Backgrounds</h1>
 
-      {/* Search + Filter Button */}
       <div className="flex items-center justify-between bg-gray-900 border border-gray-700 rounded-lg shadow px-3 py-2">
         <input
           type="text"
@@ -111,10 +109,8 @@ export default function BackgroundsClient({ backgrounds }) {
         </button>
       </div>
 
-      {/* List */}
       <BackgroundList backgrounds={filtered} />
 
-      {/* Filter Modal */}
       {showFilter && (
         <div className="fixed inset-0 bg-black/70 bg-opacity-60 flex items-center justify-center z-50 ">
           <div className="bg-gray-900 p-6 rounded-lg w-full max-w-sm sm:max-w-2xl border border-gray-700">
@@ -123,22 +119,6 @@ export default function BackgroundsClient({ backgrounds }) {
             </h2>
 
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-              {/* <input
-                type="text"
-                placeholder="Source Category"
-                className="w-full p-2 border rounded bg-gray-800 text-gray-100 border-gray-600"
-                value={sourceCategory}
-                onChange={(e) => setSourceCategory(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="Source"
-                className="w-full p-2 border rounded bg-gray-800 text-gray-100 border-gray-600"
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-              /> */}
-
-              {/* Skills */}
               <div>
                 <p className="text-gray-300 mb-2">Skills:</p>
                 <div className="flex flex-wrap gap-2">

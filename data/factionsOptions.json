@@ -1,0 +1,31 @@
+{
+  "groupTypeOptions": [
+    { "value": "Major", "label": "Major" },
+    { "value": "Minor", "label": "Minor" },
+    { "value": "Unknown", "label": "Unknown" }
+  ],
+  "legalStandingOptions": [
+    { "value": "Legal", "label": "Legal" },
+    { "value": "Illegal", "label": "Illegal" },
+    { "value": "Unknown", "label": "Unknown" }
+  ],
+  "ownershipOptions": [
+    { "value": "Private Company", "label": "Private Company" },
+    { "value": "Government Own", "label": "Government Own" },
+    { "value": "Religious Own", "label": "Religious Own" },
+    { "value": "Family Own", "label": "Family Own" },
+    { "value": "Unknown", "label": "Unknown" }
+  ],
+  "goalOptions": [
+    { "value": "Profit", "label": "Profit" },
+    { "value": "Power", "label": "Power" },
+    { "value": "Knowledge", "label": "Knowledge" },
+    { "value": "Faith", "label": "Faith" },
+    { "value": "Survival", "label": "Survival" },
+    { "value": "Control", "label": "Control" },
+    { "value": "Chaos", "label": "Chaos" },
+    { "value": "Protection", "label": "Protection" },
+    { "value": "Balance", "label": "Balance" },
+    { "value": "Unknown", "label": "Unknown" }
+  ]
+}
