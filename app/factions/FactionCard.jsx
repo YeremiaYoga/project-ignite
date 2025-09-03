@@ -10,7 +10,9 @@ export default function FactionCard({ faction }) {
       <div className="w-24 h-24 relative mr-4 flex-shrink-0">
         {faction.logo ? (
           <Image
-            src={faction.logo}
+            src={
+              faction.logo.startsWith("/") ? faction.logo : `/${faction.logo}` 
+            }
             alt={`${faction.faction_name} logo`}
             fill
             className="object-contain rounded-lg"
