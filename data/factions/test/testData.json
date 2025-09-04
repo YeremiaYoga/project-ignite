@@ -58,5 +58,6 @@
   "main_base": "Orange Corral, Delstainvia",
   "founding_date": "Unknown, but believed to be around the end of the Age of Calamity",
   "membership": "Numbers unknown, but believed to be over 10 million",
-  "goal": ["Profit"]
+  "goal": ["Profit"],
+  "history" :"text"
 }

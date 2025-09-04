@@ -31,6 +31,11 @@ export default function FactionDetailPage() {
             {faction.main_philosophy}
           </p>
 
+          <h2 className="text-sm font-semibold mb-2 md:text-xl">History</h2>
+          <p className="leading-relaxed mb-6 text-[10px] md:text-base">
+            {faction.history}
+          </p>
+
           <h2 className="text-sm font-semibold mb-2 md:text-xl">Primary</h2>
           <p className="leading-relaxed mb-6 text-[10px] md:text-base">
             {faction.primary}
@@ -152,6 +157,11 @@ export default function FactionDetailPage() {
 
             <dt className="font-semibold col-span-2 text-right">Symbol</dt>
             <dd className="col-span-3 break-words">{faction.symbol}</dd>
+
+            <dt className="font-semibold col-span-2 text-right">
+              Main Pantheon
+            </dt>
+            <dd className="col-span-3 break-words">{faction.main_patheon}</dd>
 
             <dt className="font-semibold col-span-2 text-right">Ranks</dt>
             <dd className="col-span-3 whitespace-pre-line break-words">

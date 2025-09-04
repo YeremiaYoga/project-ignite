@@ -220,17 +220,15 @@ export default function ClassFeatures({ classId }) {
                                       sub.list.length > 0 && (
                                         <ul className="list-disc list-inside text-zinc-300 space-y-1">
                                           {sub.list.map((item, i) => (
-                                            <li key={i}>
-                                              <p
-                                                key={i}
-                                                dangerouslySetInnerHTML={{
-                                                  __html: linkifyText(
-                                                    item,
-                                                    "universalLink classesLink"
-                                                  ),
-                                                }}
-                                              />
-                                            </li>
+                                            <li
+                                              key={i}
+                                              dangerouslySetInnerHTML={{
+                                                __html: linkifyText(
+                                                  item,
+                                                  "universalLink classesLink"
+                                                ),
+                                              }}
+                                            ></li>
                                           ))}
                                         </ul>
                                       )}

@@ -44,14 +44,12 @@ export default function FeatureContent({ content, level }) {
               className="list-disc list-inside text-zinc-300 space-y-2"
             >
               {item.items.map((li, i) => (
-                <li key={i}>
-                  {" "}
-                  <p
-                    dangerouslySetInnerHTML={{
-                      __html: linkifyText(li, "universalLink classesLink"),
-                    }}
-                  />
-                </li>
+                <li
+                  key={i}
+                  dangerouslySetInnerHTML={{
+                    __html: linkifyText(li, "universalLink classesLink"),
+                  }}
+                ></li>
               ))}
             </ul>
           );
