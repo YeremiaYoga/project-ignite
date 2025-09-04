@@ -20,17 +20,6 @@ export default function FactionDetailPage() {
 
   return (
     <main className="p-4 md:p-8 max-w-6xl mx-auto text-gray-200">
-      {faction.logo && (
-        <div className="w-32 h-32 relative mb-4">
-          <Image
-            src={`/${faction.logo}`}
-            alt={`${faction.faction_name} logo`}
-            fill
-            className="object-contain"
-          />
-        </div>
-      )}
-
       <h1 className="text-xl md:text-3xl font-bold mb-4">
         {faction.faction_name}
       </h1>
@@ -131,6 +120,19 @@ export default function FactionDetailPage() {
           <h2 className="md:text-lg font-bold border-b border-gray-700 pb-2 mb-4 text-sm">
             Faction Overview
           </h2>
+          <div className="flex justify-center">
+            {faction.logo && (
+              <div className="w-32 h-32 relative mb-4 ">
+                <Image
+                  src={`/${faction.logo}`}
+                  alt={`${faction.faction_name} logo`}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            )}
+          </div>
+
           <dl className="grid grid-cols-5 gap-x-4 gap-y-2 text-[8px] md:text-sm">
             <dt className="font-semibold col-span-2 text-right">Group Type</dt>
             <dd className="col-span-3 break-words">{faction.group_type}</dd>
