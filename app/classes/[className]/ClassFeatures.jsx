@@ -146,7 +146,7 @@ export default function ClassFeatures({ classId }) {
                   subclass={activeSubclasses}
                 />
 
-                {feature.title.toLowerCase().includes("specialist") && (
+                {feature.content?.some((item) => item.type === "subclass") && (
                   <div className="mt-4 space-y-4">
                     {subclassFeatures.length > 0 ? (
                       subclassFeatures.map((subFeat, idx) => (
