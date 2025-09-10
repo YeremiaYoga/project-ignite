@@ -179,6 +179,18 @@ export default function ClassFeatures({ classId }) {
                           {subFeat.table && (
                             <FeatureTable table={subFeat.table} />
                           )}
+                          {subFeat.description2 && (
+                            <div className="text-zinc-300 whitespace-pre-line">
+                              <p
+                                dangerouslySetInnerHTML={{
+                                  __html: linkifyText(
+                                    subFeat.description2,
+                                    "universalLink classesLink"
+                                  ),
+                                }}
+                              />
+                            </div>
+                          )}
                           {subFeat.note && (
                             <div className="text-sm text-zinc-500 italic mt-2">
                               <p

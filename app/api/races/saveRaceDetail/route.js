@@ -15,13 +15,12 @@ export async function POST(request) {
       );
     }
 
-    console.log(formData);
     const folderName = raceName
       .toLowerCase()
       .replace(/\s+/g, "_")
       .replace(/-/g, "_");
     const formattedRaceNameForImage = raceName.replace(/[\s-]+/g, "_");
-    console.log(folderName);
+
     const raceDir = path.join(process.cwd(), "data", "races", folderName);
     await fs.mkdir(raceDir, { recursive: true });
 
@@ -48,24 +47,25 @@ export async function POST(request) {
       imageUrl = `/assets/races/${folderName}/${imageFileName}`;
     }
 
-    let features = [];
+    let traits = [];
     try {
-      const rawFeatures = formData.get("features") || "[]";
-      features = JSON.parse(rawFeatures);
+      const rawTraits = formData.get("traits") || "[]";
+      console.log(rawTraits);
+      traits = JSON.parse(rawTraits);
+      console.log(traits);
     } catch {
-      features = [];
+      traits = [];
     }
 
-    features = features
-      .map((feature) => ({
-        title: feature.title || "",
-        description: feature.description || undefined,
-        table: feature.table || undefined,
-        list: feature.list || undefined,
+    traits = traits
+      .map((trait) => ({
+        title: trait.title || "",
+        description: trait.description || undefined,
+        table: trait.table || undefined,
+        list: trait.list || undefined,
       }))
       .filter(
-        (feature) =>
-          feature.title || feature.description || feature.table || feature.list
+        (trait) => trait.title || trait.description || trait.table || trait.list
       );
 
     const dataToSave = {
@@ -82,7 +82,7 @@ export async function POST(request) {
       image: imageUrl,
       details: formData.get("details") || "",
       tales_details: formData.get("tales_details") || "",
-      features,
+      features: traits,
     };
 
     const fileName = `${folderName}Detail.json`;

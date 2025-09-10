@@ -1,0 +1,14 @@
+{
+  "name": "Orc",
+  "creature_type": "Humanoid",
+  "size": "Medium (about 6–7 feet tall)",
+  "speed": "30 feet",
+  "asi": "",
+  "source": "",
+  "age": "",
+  "languages": "",
+  "image": "",
+  "details": "",
+  "tales_details": "Legacy\tLevel 1\tLevel 3\tLevel 5\r\nAbyssal\tYou have Resistance to Poison damage. You also know the Poison Spray cantrip.\tRay of Sickness\tHold Person\r\nChthonic\tYou have Resistance to Necrotic damage. You also know the Chill Touch cantrip.\tFalse Life\tRay of Enfeeblement\r\nInfernal\tYou have Resistance to Fire damage. You also know the Fire Bolt cantrip.\tHellish Rebuke\tDarkness\r\n",
+  "features": []
+}

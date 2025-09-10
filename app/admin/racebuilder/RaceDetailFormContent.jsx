@@ -21,6 +21,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
   const [traitTitles, setTraitTitles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     setFormData((prev) => ({ ...prev, name: selectedFolder }));
@@ -67,29 +68,43 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
       const formDataUpload = new FormData();
 
       for (const [key, value] of Object.entries(formData)) {
-        formDataUpload.append(key, value);
+        if (
+          typeof value === "object" &&
+          value !== null &&
+          !(value instanceof File)
+        ) {
+          formDataUpload.append(key, JSON.stringify(value));
+        } else {
+          formDataUpload.append(key, value);
+        }
       }
 
       if (imageFile) {
         formDataUpload.append("image", imageFile);
       }
 
-      console.log(formDataUpload);
       const response = await fetch("/api/races/saveRaceDetail", {
         method: "POST",
         body: formDataUpload,
       });
 
-      if (response.ok) {
-        const dataSaved = await response.json();
-        if (onSubmit) onSubmit(dataSaved);
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        alert(`failed ${errorData.message || response.statusText}`);
+        throw new Error(errorData.message || response.statusText);
       }
+
+      const dataSaved = await response.json();
+      if (onSubmit) onSubmit(dataSaved);
+
+      setNotification({ type: "success", message: "Race detail saved successfully.!" });
+      setTimeout(() => setNotification(null), 2000);
     } catch (error) {
       console.error("Terjadi kesalahan saat menyimpan detail ras:", error);
-      alert("Terjadi kesalahan saat menyimpan detail ras.");
+      setNotification({
+        type: "error",
+        message: "Gagal menyimpan detail ras.",
+      });
+      setTimeout(() => setNotification(null), 2000);
     } finally {
       setIsLoading(false);
     }
@@ -100,6 +115,16 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
       onSubmit={handleSubmit}
       className="bg-gray-900 p-6 rounded-2xl shadow-lg space-y-4 text-white"
     >
+      {notification && (
+        <div
+          className={`fixed top-20 right-4 px-4 py-2 rounded shadow-lg text-white ${
+            notification.type === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+
       <input type="hidden" name="name" value={formData.name} />
 
       <div>

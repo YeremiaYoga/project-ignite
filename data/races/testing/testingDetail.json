@@ -1,31 +1,19 @@
 {
-  "name": "testing",
-  "creature_type": "test creature type",
-  "size": "test size",
-  "speed": "test speed",
-  "asi": "test asi",
-  "source": "test source",
-  "image": "https://heraldenterimentmedia.my.id/Race/Testing/Testing-Main.webp",
-  "details": "detail testing",
+  "name": "Testing",
+  "creature_type": "Humanoid",
+  "size": "123",
+  "speed": "123",
+  "asi": "123",
+  "source": "123",
+  "age": "123",
+  "languages": "123",
+  "image": "",
+  "details": "123",
+  "tales_details": "123",
   "features": [
     {
       "title": "testing1",
-      "description": "deskripsi",
-      "table": {
-        "headers": ["header 1", "header 2"],
-        "rows": [["123", "123"]]
-      }
-    },
-    {
-      "title": "testing2",
-      "table": {
-        "headers": ["123"],
-        "rows": [["123"]]
-      }
-    },
-    {
-      "title": "testing3",
-      "list": ["123", "1234", "453"]
+      "description": "123"
     }
   ]
 }

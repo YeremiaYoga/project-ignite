@@ -181,7 +181,6 @@ Vermillion. You gain an additional use of your Blood Maledict feature. However, 
         level: 7,
         title: "Strange Metabolism",
         description: `When you reach 7th level, your body begins to adapt to toxins and venoms, ignoring their corrupting effects. You gain immunity to poison damage and the poisoned condition.
-
 Additionally, you can trigger a burst of adrenaline that lets you temporarily resist the negative effects of a mutagen. As a bonus action, you can ignore the negative side effect of one mutagen affecting you for 1 minute. Once you do so, you can't do so again until you finish a long rest.`,
       },
       {
@@ -206,7 +205,97 @@ You can use this feature a number of times equal to your Hemocraft modifier (min
     key: "profane-soul",
     name: "Order of the Profane Soul",
     source: "BH2022",
-    features: [],
+    features: [
+      {
+        level: 3,
+        title: "",
+        description: `Blood hunters belonging to the Order of the Profane Soul have pushed the limits of hemocraft for use against some of the most terrifying creatures corrupting the world. Ancient fiends and cruel magic-users have long counted on their ability to meld into the background and escape those who hunt them, vanishing into noble courts without a trace, or bending the minds of the most stalwart warriors with but a glance. So the blood hunters who founded this order trusted to their resilience as they delved into the same well of corrupting arcane knowledge, making pacts with lesser evils to better combat the greater threats. And though they might have traded a part of themselves for their power, the members of this order know the benefits of that power far outweigh the price.`,
+      },
+      {
+        level: 3,
+        title: "Otherworldly Patron",
+        description: `When you reach 3rd level, you strike a bargain with an otherworldly being of your choice:`,
+        list: [
+          "The Archfey, the Fiend, or the Great Old One, detailed in the Player's Handbook",
+          "The Undying, from Sword Coast Adventurer's Guide",
+          "The Celestial or the Hexblade, from Xanathar's Guide to Everything",
+          "The Fathomless or the Genie, from Tasha's Cauldron of Everything",
+          "The Undead, from Van Richten's Guide to Ravenloft",
+        ],
+        description: `The choice you make augments some of your subclass features, as noted below.`,
+      },
+      {
+        level: 3,
+        title: "Pact Magic",
+        description: `When you reach 3rd level, you can augment your combat techniques with the ability to cast spells. See chapter 10 of the Player's Handbook for the general rules of spell casting and chapter 11 of the Player's Handbook for the Warlock spell list.
+Cantrips. You learn two cantrips of your choice from the Warlock spell list. You learn an additional warlock cantrip of your choice at 10th level.
+Spell Slots. The Profane Soul Spellcasting table shows how many spell slots you have. The table also shows what the level of those slots is; all of your spell slots are the same level. To cast one of your Warlock spells of 1st level or higher, you must expend a spell slot. You regain all expended spell slots when you finish a short or long rest.
+For example, when you are 8th level, you have two 2nd-level spell slots. To cast the 1st-level spell witch bolt, you must spend one of those slots, and you cast it as a 2nd-level spell.
+Spells Known of 1st Level and Higher. At 3rd level, you know two 1st-level spells of your choice from the Warlock spell list.
+The Spells Known column of the Profane Soul table shows when you learn more Warlock spells of your choice of 1st level and higher. A spell you choose must be of a level no higher than what's shown in the table's Slot Level column for your level. When you reach 11th level, for example, you learn a new warlock spell, which can be 1st, 2nd, or 3rd level.
+Additionally, when you gain a level in this class and order, you can choose one of the warlock spells you know and replace it with another spell from the warlock spell list, which also must be of a level for which you have spell slots.
+Spellcasting Ability. Your chosen Hemocraft ability (Intelligence or Wisdom) is your spellcasting ability for your warlock spells, so you use your Hemocraft ability whenever a spell refers to your spellcasting ability. In addition, you use your Hemocraft modifier when setting the saving throw DC for a warlock spell you cast and when making an attack roll with one.
+Spell save DC = 8 + Intelligence or Wisdom modifier (your choice) + Proficiency Bonus
+Spell attack modifier = Intelligence or Wisdom modifier (your choice) + Proficiency Bonus`,
+      },
+      {
+        level: 3,
+        title: "Rite Focus",
+        description: `Starting at 3rd level, your weapon becomes a conduit for the power of your pact with your chosen patron. While you have an active crimson rite, you can use your weapon as a spellcasting focus for your warlock spells, and you gain a specific benefit based on your chosen pact.
+The Archfey. When you damage a creature with a weapon for which you have an active crimson rite, that creature glows with faint light until the end of your next turn. For the duration, the creature gains no benefit from any cover or from being invisible.
+The Celestial. As a bonus action, you expend one use of your Blood Maledict feature to heal one creature you can see within 60 feet of you. That creature regains a number of hit points equal to one roll of your hemocraft die + your Hemocraft modifier (minimum of +1).
+The Fathomless. You can breathe underwater. Additionally, once per turn when you damage a creature with a weapon for which you have an active crimson rite, you can reduce that creature's speed by 10 feet until the start of your next turn.
+The Fiend. While using the Rite of the Flame, if you roll a 1 or 2 on a damage die when you roll the extra damage from the rite, you can reroll the die and choose which roll to use.
+The Genie. As a bonus action, you expend a use of your Blood Maledict feature to give yourself a flying speed of 30 feet, which lasts for a number of rounds equal to your Hemocraft modifier (minimum of 1 round).
+The Great Old One. When you score a critical hit against a creature, that creature and any other creatures of your choice within 10 feet of it are frightened of you until the end of your next turn.
+The Hexblade. When you successfully target a creature with a blood curse, the next time you hit that creature with an attack while the curse is in effect, the attack deals additional damage equal to your proficiency modifier.
+The Undead. When you take necrotic damage, you can use your reaction to halve that damage. In addition, your appearance changes to reflect some aspect of your patron while you have any crimson rite active.
+The Undying. When you reduce a hostile creature of at least mild threat (DM's discretion) to 0 hit points, you regain a number of hit points equal to one roll of your hemocraft die.`,
+      },
+      {
+        level: 7,
+        title: "Mystic Frenzy",
+        description: `Starting at 7th level, when you use your action to cast a cantrip, you can immediately make one weapon attack as a bonus action.`,
+      },
+      {
+        level: 7,
+        title: "Revealed Arcana",
+        description: `At 7th level, your patron grants you the use of a distinctive spell based on your pact. You cast this spell using any pact magic spell slot, and can't do so again until you finish a long rest.
+The Archfey. You can cast blur.
+The Celestial. You can cast lesser restoration.
+The Fathomless. You can cast gust of wind.
+The Fiend. You can cast scorching ray.
+The Genie. You can cast phantasmal force.
+The Great Old One. You can cast detect thoughts.
+The Hexblade. You can cast branding smite.
+The Undead. You can cast blindness/deafness.
+The Undying. You can cast silence.`,
+      },
+      {
+        level: 11,
+        title: "Brand of the Sapping Scar",
+        description: `Upon reaching 11th level, your Brand of Castigation feature digs dark arcane scars into your target, leaving them vulnerable to your magic. A creature branded by you has disadvantage on saving throws against your warlock spells.`,
+      },
+      {
+        level: 15,
+        title: "Unsealed Arcana",
+        description: `At 15th level, your patron grants you the use of an additional spell based on your pact. You cast this spell without expending a spell slot, and can't do so again until you finish a long rest.
+The Archfey. You can cast slow.
+The Celestial. You can cast revivify.
+The Fathomless. You can cast lightning bolt.
+The Fiend. You can cast fireball.
+The Genie. You can cast protection from energy.
+The Great Old One. You can cast haste.
+The Hexblade. You can cast blink.
+The Undead. You can cast speak with dead.
+The Undying. You can cast bestow curse.`,
+      },
+      {
+        level: 18,
+        title: "Blood Curse of the Souleater",
+        description: `Starting at 18th level, you learn to siphon the life energy from your fallen prey. You gain the Blood Curse of the Souleater for your Blood Maledict feature. This doesn't count against your number of blood curses known.`,
+      },
+    ],
   },
 ];
 

@@ -1,0 +1,11 @@
+{
+  "name": "Orc",
+  "source": "Player's Handbook",
+  "description": "Orcs are equipped with gifts to help them wander great plains, vast caverns, and churning seas.",
+  "traits": [
+    "Adrenaline Rush",
+    "Darkvision",
+    "Relentless Endurance"
+  ],
+  "image": "/assets/races/orc/orc.png"
+}

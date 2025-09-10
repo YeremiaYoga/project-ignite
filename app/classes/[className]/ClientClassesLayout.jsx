@@ -19,6 +19,7 @@ const classList = [
   "sorcerer",
   "warlock",
   "wizard",
+  "illrigger",
 ];
 
 export default function ClientClassesLayout({ children, currentClass }) {

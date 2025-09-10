@@ -116,7 +116,7 @@ const barbarianFeatures = [
       },
       {
         type: "subclass",
-        value: "No Subclasses Included",
+        value: "No Subclass Selected",
       },
     ],
   },
@@ -187,6 +187,10 @@ const barbarianFeatures = [
         type: "paragraph",
         value:
           "You gain a feature from your chosen subclass. (None selected here.)",
+      },
+      {
+        type: "subclass",
+        value: "No Subclass Selected",
       },
     ],
   },
@@ -260,6 +264,10 @@ const barbarianFeatures = [
         value:
           "You gain another feature from your subclass. (None selected here.)",
       },
+      {
+        type: "subclass",
+        value: "No Subclass Selected",
+      },
     ],
   },
   {
@@ -323,6 +331,10 @@ const barbarianFeatures = [
         type: "paragraph",
         value:
           "You gain another feature from your subclass. (None selected here.)",
+      },
+      {
+        type: "subclass",
+        value: "No Subclass Selected",
       },
     ],
   },

@@ -19,6 +19,7 @@ const classList = [
   "wizard",
   "artificer",
   "blood_hunter",
+  "illrigger",
 ];
 
 const classInfo = {
@@ -147,6 +148,15 @@ const classInfo = {
     primaryAbility: "Strength or Dexterity, & Intelligence or Wisdom",
     hitDie: "d10",
     savingThrows: ["Dexterity", "Intelligence"],
+  },
+  illrigger: {
+    title: "Illrigger",
+    description:
+      "Knight, assassin, mages, and terror commandos of Hell, illriggers command the battlefield, disrupt enemy factions, and carry out their archdevil's infernal will.",
+    icon: "/assets/classIcon/blood_hunter_icon.webp",
+    primaryAbility: "Strength or Dexterity",
+    hitDie: "d10",
+    savingThrows: ["Constitution", "Charisma"],
   },
 };
 

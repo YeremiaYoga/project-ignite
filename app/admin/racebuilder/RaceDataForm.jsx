@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function RaceDataForm() {
   const [raceName, setRaceName] = useState("");
@@ -10,6 +10,17 @@ export default function RaceDataForm() {
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (message || error) {
+      const timer = setTimeout(() => {
+        setMessage("");
+        setError("");
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [message, error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,6 +67,13 @@ export default function RaceDataForm() {
       className="space-y-4 mx-auto"
       encType="multipart/form-data"
     >
+      {message && (
+        <div className="bg-green-500 text-white p-2 rounded-md fixed top-20 right-4">{message}</div>
+      )}
+      {error && (
+        <div className="bg-red-500 text-white p-2 rounded-md fixed top-20 right-4">{error}</div>
+      )}
+
       <div>
         <label className="block font-semibold mb-1">Race Name</label>
         <input
@@ -112,7 +130,7 @@ export default function RaceDataForm() {
 
       <button
         type="submit"
-        className="w-full bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600 transition"
+        className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition"
       >
         Save Race
       </button>
