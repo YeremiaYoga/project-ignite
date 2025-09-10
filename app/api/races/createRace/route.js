@@ -3,6 +3,11 @@ import path from "path";
 
 export async function POST(req) {
   try {
+    const cleanString = (str) => {
+      if (typeof str !== "string") return str;
+
+      return str.replace(/^[_\s]+|[_\s]+$/g, "");
+    };
     const formData = await req.formData();
 
     const raceName = formData.get("raceName");
@@ -21,6 +26,7 @@ export async function POST(req) {
     }
 
     const raceNameLower = raceName
+      .trim()
       .toLowerCase()
       .replace(/\s+/g, "_")
       .replace(/-/g, "_");
@@ -51,8 +57,8 @@ export async function POST(req) {
 
     const filePath = path.join(dataDir, `${raceNameLower}Data.json`);
     const data = {
-      name: raceName,
-      source: handbook,
+      name: cleanString(raceName),
+      source: cleanString(handbook),
       description,
       traits,
       image: imageUrl,

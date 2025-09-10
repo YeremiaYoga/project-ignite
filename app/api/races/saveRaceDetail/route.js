@@ -50,9 +50,7 @@ export async function POST(request) {
     let traits = [];
     try {
       const rawTraits = formData.get("traits") || "[]";
-      console.log(rawTraits);
       traits = JSON.parse(rawTraits);
-      console.log(traits);
     } catch {
       traits = [];
     }
@@ -68,6 +66,14 @@ export async function POST(request) {
         (trait) => trait.title || trait.description || trait.table || trait.list
       );
 
+    let details = [];
+    try {
+      const rawDetails = formData.get("details") || "[]";
+      details = JSON.parse(rawDetails);
+    } catch {
+      details = [];
+    }
+
     const dataToSave = {
       name: raceName
         .replace(/_/g, " ")
@@ -80,7 +86,7 @@ export async function POST(request) {
       age: formData.get("age") || "",
       languages: formData.get("languages") || "",
       image: imageUrl,
-      details: formData.get("details") || "",
+      details: details,
       tales_details: formData.get("tales_details") || "",
       features: traits,
     };

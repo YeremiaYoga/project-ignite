@@ -18,15 +18,17 @@ export default function RaceDetail({ data }) {
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-shrink-0 order-1 lg:order-2 flex justify-center items-center">
             <div className="relative w-full max-w-[500px]">
-              <Image
-                src={data.image}
-                alt={data.name}
-                width={0}
-                height={0}
-                sizes="100vw"
-                className="rounded-lg w-full h-auto object-contain"
-                priority
-              />
+              {data.image && (
+                <Image
+                  src={data.image}
+                  alt={data.name}
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  className="rounded-lg w-full h-auto object-contain"
+                  priority
+                />
+              )}
             </div>
           </div>
 
@@ -65,19 +67,85 @@ export default function RaceDetail({ data }) {
               </p>
             </div>
 
-            <p
-              className="text-gray-200 whitespace-pre-line "
-              dangerouslySetInnerHTML={{
-                __html: linkifyText(
-                  talesMode ? data.tales_details : data.details,
-                  "universalLink"
-                ),
-              }}
-            />
+            <div className="text-gray-200">
+              {/* {talesMode && data.tales_details && (
+                <div className="mb-6">
+                  <p
+                    className="whitespace-pre-line"
+                    dangerouslySetInnerHTML={{
+                      __html: linkifyText(data.tales_details, "universalLink"),
+                    }}
+                  />
+                  <hr className="my-4 h-0.5 border-t-0 bg-gray-600 opacity-50" />
+                </div>
+              )} */}
+
+              {data.details &&
+                data.details.map((detail, index) => {
+                  if (detail.type === "description" && detail.content) {
+                    return (
+                      <p
+                        key={index}
+                        className="whitespace-pre-line mb-4"
+                        dangerouslySetInnerHTML={{
+                          __html: linkifyText(detail.content, "universalLink"),
+                        }}
+                      />
+                    );
+                  }
+
+                  if (detail.type === "table" && detail.table) {
+                    return (
+                      <div key={index} className="overflow-x-auto mb-4">
+                        <table className="min-w-full table-auto border-collapse border border-gray-600">
+                          <thead className="bg-gray-800">
+                            <tr>
+                              {detail.table.headers.map((header, hIndex) => (
+                                <th
+                                  key={hIndex}
+                                  className="px-4 py-2 border-b-2 border-gray-600 text-left text-sm font-semibold text-gray-400"
+                                >
+                                  {header}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="bg-gray-900">
+                            {detail.table.rows.map((row, rIndex) => (
+                              <tr key={rIndex}>
+                                {row.map((cell, cIndex) => (
+                                  <td
+                                    key={cIndex}
+                                    className="px-4 py-2 border-b border-gray-700 text-sm"
+                                  >
+                                    {cell}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  }
+
+                  if (detail.type === "list" && detail.list) {
+                    return (
+                      <ul key={index} className="list-disc list-inside mb-4">
+                        {detail.list.map((item, lIndex) => (
+                          <li key={lIndex} className="text-sm">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  }
+                  return null;
+                })}
+            </div>
           </div>
         </div>
       </section>
-
       <section
         key={data.name.toLowerCase() + "_traits"}
         id={data.name.toLowerCase() + "_traits"}

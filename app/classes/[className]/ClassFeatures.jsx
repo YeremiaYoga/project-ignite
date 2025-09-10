@@ -95,7 +95,7 @@ export default function ClassFeatures({ classId }) {
             const imageSrc = `/assets/subclassIcon/${classId}/${sub.key.replace(
               /-/g,
               "_"
-            )}_icon.png`;
+            )}_icon.webp`;
             const displayName = sub.key
               .split("-")
               .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

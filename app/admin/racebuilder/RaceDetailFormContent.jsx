@@ -8,9 +8,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     name: selectedFolder || "",
     asi: "",
     speed: "",
-    size: "",
-    creature_type: "",
-    details: "",
+    details: [],
     tales_details: "",
     source: "",
     age: "",
@@ -27,7 +25,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
     setFormData((prev) => ({ ...prev, name: selectedFolder }));
     if (!selectedFolder) {
       setTraitTitles([]);
-      setFormData((prev) => ({ ...prev, traits: [] }));
+      setFormData((prev) => ({ ...prev, traits: [], details: [] }));
       return;
     }
 
@@ -37,9 +35,18 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
         const titles = Array.isArray(data?.traits) ? data.traits : [];
         setTraitTitles(titles);
 
+        const loadedDetails = Array.isArray(data?.details) ? data.details : [];
+
         setFormData((prev) => {
           const nextTraits = titles.map((_, i) => prev.traits[i] ?? {});
-          return { ...prev, traits: nextTraits };
+          return {
+            ...prev,
+            traits: nextTraits,
+            details:
+              loadedDetails.length > 0
+                ? loadedDetails
+                : [{ type: "description", content: "" }],
+          };
         });
       })
       .catch((err) => console.error("Error fetching race data:", err));
@@ -50,6 +57,44 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
       const next = [...prev.traits];
       next[idx] = { ...value, title: title };
       return { ...prev, traits: next };
+    });
+  };
+
+  const addDetailBlock = (type) => {
+    setFormData((prev) => ({
+      ...prev,
+      details: [...prev.details, { type, content: "" }],
+    }));
+  };
+
+  const removeDetailBlock = (index) => {
+    setFormData((prev) => {
+      const nextDetails = prev.details.filter((_, i) => i !== index);
+      return { ...prev, details: nextDetails };
+    });
+  };
+
+  const updateDetailBlock = (index, newContent) => {
+    setFormData((prev) => {
+      const nextDetails = [...prev.details];
+      nextDetails[index] = { ...nextDetails[index], content: newContent };
+      return { ...prev, details: nextDetails };
+    });
+  };
+
+  const updateDetailTable = (index, newTable) => {
+    setFormData((prev) => {
+      const nextDetails = [...prev.details];
+      nextDetails[index] = { ...nextDetails[index], table: newTable };
+      return { ...prev, details: nextDetails };
+    });
+  };
+
+  const updateDetailList = (index, newList) => {
+    setFormData((prev) => {
+      const nextDetails = [...prev.details];
+      nextDetails[index] = { ...nextDetails[index], list: newList };
+      return { ...prev, details: nextDetails };
     });
   };
 
@@ -96,7 +141,10 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
       const dataSaved = await response.json();
       if (onSubmit) onSubmit(dataSaved);
 
-      setNotification({ type: "success", message: "Race detail saved successfully.!" });
+      setNotification({
+        type: "success",
+        message: "Race detail saved successfully.!",
+      });
       setTimeout(() => setNotification(null), 2000);
     } catch (error) {
       console.error("Terjadi kesalahan saat menyimpan detail ras:", error);
@@ -143,7 +191,6 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
         "speed",
         "asi",
         "source",
-        "details",
         "tales_details",
         "age",
         "languages",
@@ -152,7 +199,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
           <label className="block mb-1 font-medium capitalize">
             {field.replace(/_/g, " ")}
           </label>
-          {field === "details" || field === "tales_details" ? (
+          {field === "tales_details" ? (
             <textarea
               name={field}
               value={formData[field]}
@@ -175,6 +222,184 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
           )}
         </div>
       ))}
+
+      <div className="mt-6">
+        <h3 className="font-semibold text-lg mb-3">Details</h3>
+        <div className="space-y-4">
+          {formData.details.map((detail, index) => (
+            <div key={index} className="bg-gray-800 p-4 rounded-md">
+              <div className="flex justify-between items-center mb-2">
+                <label className="block font-medium capitalize">
+                  {detail.type.replace(/_/g, " ")}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => removeDetailBlock(index)}
+                  className="text-red-500 hover:text-red-600 font-bold"
+                  aria-label="Remove detail block"
+                >
+                  &times;
+                </button>
+              </div>
+
+              {detail.type === "description" && (
+                <textarea
+                  value={detail.content}
+                  onChange={(e) => updateDetailBlock(index, e.target.value)}
+                  rows="4"
+                  className="w-full px-3 py-2 rounded-md bg-gray-700 border border-gray-600"
+                />
+              )}
+
+              {detail.type === "table" && (
+                <div className="mb-3">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {detail.table?.headers?.map((h, i) => (
+                      <input
+                        key={i}
+                        type="text"
+                        value={h}
+                        onChange={(e) => {
+                          const newHeaders = detail.table.headers.map(
+                            (val, idx) => (idx === i ? e.target.value : val)
+                          );
+                          const newRows = detail.table.rows.map((row) => {
+                            const newRow = [...row];
+                            if (!newRow[i]) newRow[i] = "";
+                            return newRow;
+                          });
+                          updateDetailTable(index, {
+                            headers: newHeaders,
+                            rows: newRows,
+                          });
+                        }}
+                        className="px-2 py-1 rounded bg-gray-700 border border-gray-600"
+                        placeholder={`Header ${i + 1}`}
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newHeaders = [
+                          ...(detail.table?.headers || []),
+                          "",
+                        ];
+                        const newRows = detail.table?.rows?.map((row) => [
+                          ...row,
+                          "",
+                        ]) || [[""]];
+                        updateDetailTable(index, {
+                          headers: newHeaders,
+                          rows: newRows,
+                        });
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 px-2 rounded text-sm"
+                    >
+                      + Header
+                    </button>
+                  </div>
+                  {detail.table?.rows?.map((row, rIdx) => (
+                    <div key={rIdx} className="flex flex-wrap gap-2 mb-2">
+                      {row.map((cell, cIdx) => (
+                        <input
+                          key={cIdx}
+                          type="text"
+                          value={cell}
+                          onChange={(e) => {
+                            const newRows = detail.table.rows.map((r, ri) =>
+                              ri === rIdx
+                                ? r.map((c, ci) =>
+                                    ci === cIdx ? e.target.value : c
+                                  )
+                                : r
+                            );
+                            updateDetailTable(index, {
+                              headers: detail.table.headers,
+                              rows: newRows,
+                            });
+                          }}
+                          className="px-2 py-1 rounded bg-gray-700 border border-gray-600"
+                          placeholder={`R${rIdx + 1}C${cIdx + 1}`}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const colCount = detail.table?.headers?.length || 0;
+                      const newRows = [
+                        ...(detail.table?.rows || []),
+                        Array(colCount).fill(""),
+                      ];
+                      updateDetailTable(index, {
+                        headers: detail.table.headers,
+                        rows: newRows,
+                      });
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 px-2 rounded text-sm"
+                  >
+                    + Row
+                  </button>
+                </div>
+              )}
+
+              {detail.type === "list" && (
+                <div>
+                  {detail.list?.map((item, i) => (
+                    <input
+                      key={i}
+                      type="text"
+                      value={item}
+                      onChange={(e) => {
+                        const newList = detail.list.map((it, idx) =>
+                          idx === i ? e.target.value : it
+                        );
+                        updateDetailList(index, newList);
+                      }}
+                      className="w-full px-3 py-1 rounded-md bg-gray-700 border border-gray-600 mb-1"
+                      placeholder={`List Item ${i + 1}`}
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newList = [...(detail.list || []), ""];
+                      updateDetailList(index, newList);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 px-2 rounded text-sm"
+                  >
+                    + Item
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-4 hidden">
+          <button
+            type="button"
+            onClick={() => addDetailBlock("description")}
+            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md font-semibold text-sm"
+          >
+            Add Description
+          </button>
+          <button
+            type="button"
+            onClick={() => addDetailBlock("table")}
+            className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-md font-semibold text-sm"
+          >
+            Add Table
+          </button>
+          <button
+            type="button"
+            onClick={() => addDetailBlock("list")}
+            className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-md font-semibold text-sm"
+          >
+            Add List
+          </button>
+        </div>
+      </div>
 
       {traitTitles.length > 0 && (
         <div className="mt-6">

@@ -107,7 +107,7 @@ export default function ClientClassesLayout({ children, currentClass }) {
               const imageSrc = `/assets/subclassIcon/${currentClass}/${sub.key.replace(
                 /-/g,
                 "_"
-              )}_icon.png`;
+              )}_icon.webp`;
               const displayName = sub.key
                 .split("-")
                 .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
