@@ -1,0 +1,35 @@
+{
+  "name": "Testing",
+  "creature_type": "qwe",
+  "size": "qwe",
+  "speed": "qwe",
+  "asi": "qwe",
+  "source": "qwe",
+  "age": "qwe",
+  "languages": "qwe",
+  "image": "/assets/races/testing/testing_main.jpg",
+  "details": [
+    {
+      "type": "description",
+      "content": "qwe"
+    }
+  ],
+  "tales_details": "qwe",
+  "features": [
+    {
+      "title": "1",
+      "description": "qwe"
+    },
+    {
+      "title": "2",
+      "table": {
+        "headers": ["qwe", "qwe"],
+        "rows": [["qwe", "qwe"]]
+      }
+    },
+    {
+      "title": "3",
+      "list": ["qwe", "qwe"]
+    }
+  ]
+}

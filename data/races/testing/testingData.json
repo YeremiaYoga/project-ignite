@@ -1,0 +1,11 @@
+{
+  "name": "testing",
+  "source": "123",
+  "description": "123",
+  "traits": [
+    "1",
+    "2",
+    "3"
+  ],
+  "image": "/assets/races/testing/testing.png"
+}

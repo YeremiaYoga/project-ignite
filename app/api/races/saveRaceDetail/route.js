@@ -36,15 +36,19 @@ export async function POST(request) {
     let imageUrl = "";
     const uploadedFile = formData.get("image");
 
-    if (uploadedFile instanceof File) {
-      const ext = path.extname(uploadedFile.name) || ".webp";
-      const imageFileName = `${formattedRaceNameForImage}_main${ext}`;
-      const imagePath = path.join(raceImageDir, imageFileName);
+    const ext =
+      uploadedFile instanceof File
+        ? path.extname(uploadedFile.name) || ".webp"
+        : ".webp";
 
+    const imageFileName = `${formattedRaceNameForImage}_main${ext}`;
+    const imagePath = path.join(raceImageDir, imageFileName);
+
+    imageUrl = `/assets/races/${folderName}/${imageFileName}`;
+
+    if (uploadedFile instanceof File) {
       const buffer = Buffer.from(await uploadedFile.arrayBuffer());
       await fs.writeFile(imagePath, buffer);
-
-      imageUrl = `/assets/races/${folderName}/${imageFileName}`;
     }
 
     let traits = [];

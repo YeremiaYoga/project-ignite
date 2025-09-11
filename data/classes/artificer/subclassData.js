@@ -323,11 +323,8 @@ You can use your arcane firearm as a spellcasting focus for your artificer spell
         level: 3,
         title: "Steel Defender",
         description: `By 3rd level, your tinkering has borne you a faithful companion, a Steel Defender. It is friendly to you and your companions and obeys your commands. See this creature’s game statistics in the Steel Defender stat block, which uses your proficiency bonus (PB) in several places.
-
 In combat, the defender shares your initiative count, but it takes its turn immediately after yours. It can move and use its reaction on its own, but the only action it takes on its turn is the Dodge action, unless you take a bonus action on your turn to command it to take another action. That action can be one in its stat block or some other action. If you are incapacitated, the defender can take any action of its choice, not just Dodge.
-
 If the mending spell is cast on it, it regains 2d6 hit points. If it has died within the last hour, you can use your smith’s tools as an action to revive it, provided you are within 5 feet of it. The defender returns to life after 1 minute with all its hit points restored.
-
 At the end of a long rest, you can create a new Steel Defender if you have your smith’s tools with you. If you already have a Steel Defender from this feature, the first one immediately perishes. The defender also perishes if you die.`,
       },
       {

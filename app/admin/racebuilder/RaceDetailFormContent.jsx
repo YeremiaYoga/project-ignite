@@ -376,7 +376,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
             </div>
           ))}
         </div>
-        <div className="flex gap-2 mt-4 hidden">
+        <div className="flex gap-2 mt-4 ">
           <button
             type="button"
             onClick={() => addDetailBlock("description")}
@@ -394,7 +394,7 @@ export default function RaceDetailFormContent({ selectedFolder, onSubmit }) {
           <button
             type="button"
             onClick={() => addDetailBlock("list")}
-            className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-md font-semibold text-sm"
+            className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-md font-semibold text-sm hidden"
           >
             Add List
           </button>

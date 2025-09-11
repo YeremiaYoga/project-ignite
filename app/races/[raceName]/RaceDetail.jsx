@@ -68,7 +68,7 @@ export default function RaceDetail({ data }) {
             </div>
 
             <div className="text-gray-200">
-              {/* {talesMode && data.tales_details && (
+              {talesMode && data.tales_details && (
                 <div className="mb-6">
                   <p
                     className="whitespace-pre-line"
@@ -78,7 +78,7 @@ export default function RaceDetail({ data }) {
                   />
                   <hr className="my-4 h-0.5 border-t-0 bg-gray-600 opacity-50" />
                 </div>
-              )} */}
+              )}
 
               {data.details &&
                 data.details.map((detail, index) => {
