@@ -257,7 +257,7 @@ Starting when you choose this path at 3rd level, your rage instills you with the
       {
         name: "Rules Tip: Forced Movement",
         level: 3,
-        notes: `Usually when one creature moves out of a hostile creature's reach, the hostile creature can use its reaction to make an opportunity attack. However, forced movement—such as being pushed by a Path of the Juggernaut barbarian's Thunderous Blows feature—doesn't provoke opportunity attacks.
+        note: `Usually when one creature moves out of a hostile creature's reach, the hostile creature can use its reaction to make an opportunity attack. However, forced movement—such as being pushed by a Path of the Juggernaut barbarian's Thunderous Blows feature—doesn't provoke opportunity attacks.
 Likewise, a juggernaut barbarian's Hurricane Strike feature allows an ally to make a melee weapon attack as a reaction only if the foe ends its forced movement within 5 feet of the ally. If a foe is pushed through other spaces within 5 feet of your allies, those allies can't make normal opportunity attacks against the foe.`,
       },
       {
