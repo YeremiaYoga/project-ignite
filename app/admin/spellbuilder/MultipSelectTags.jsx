@@ -9,7 +9,7 @@ const MultiSelectTags = ({
 }) => {
   return (
     <div className="my-4">
-      <label className="block text-sm font-medium mb-1">{label}</label>
+      <label className="block text-sm font-medium">{label}</label>
       <div className="flex flex-wrap gap-2 mb-2">
         {selected.map((item) => {
           const displayLabel =

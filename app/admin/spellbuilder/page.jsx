@@ -11,7 +11,7 @@ export default function SpellBuilderPage() {
     source: "",
     school: "",
     casting_time: "",
-    measurement: "feet",
+    range: "feet",
     area: "",
     components: [],
     duration: "",
@@ -23,7 +23,8 @@ export default function SpellBuilderPage() {
     saving_throw: [],
     material: "",
     classes: [],
-    additional_classes: "",
+    optional_classes: [],
+    subclasses: [],
     species: "",
     feats: "",
     other_options_features: "",
@@ -150,18 +151,13 @@ export default function SpellBuilderPage() {
       .map((item) => item.trim())
       .filter(Boolean);
 
-  const formatWithExpPrefix = (value) => {
-    const trimmedValue = value.trim();
-    return trimmedValue !== "" ? `Exp : ${trimmedValue}` : "";
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = {
       ...form,
       level: parseInt(form.level),
-      range: parseInt(form.range),
+      distance: parseInt(form.distance),
       short_source: form.short_source,
       source: form.source,
       area: form.area,
@@ -171,7 +167,8 @@ export default function SpellBuilderPage() {
       saving_throw: form.saving_throw,
       classes: form.classes,
 
-      additional_classes: toArray(form.additional_classes),
+      optional_classes: toArray(form.optional_classes),
+      subclasses: toArray(form.subclasses),
       species: toArray(form.species),
       feats: toArray(form.feats),
       other_options_features: toArray(form.other_options_features),
@@ -183,7 +180,7 @@ export default function SpellBuilderPage() {
     });
 
     if (res.ok) {
-      alert("Spell berhasil dibuat!");
+      alert("Spell created!");
       setForm(initialForm);
     } else {
       alert("Gagal membuat file.");
@@ -191,10 +188,10 @@ export default function SpellBuilderPage() {
   };
 
   return (
-    <main className="max-w-6xl w-full mx-auto px-4 py-10 text-white bg-gray-900 min-h-screen m-5">
+    <main className="max-w-5xl w-full mx-auto px-4 py-10 text-white bg-gray-900 min-h-screen m-5">
       <h1 className="text-3xl font-bold mb-6 text-center">Spell Builder</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1  gap-4">
           {[
             { name: "image", label: "Image Url" },
             { name: "name", label: "Name" },
@@ -207,20 +204,15 @@ export default function SpellBuilderPage() {
             },
             { name: "short_source", label: "Short Source" },
             { name: "source", label: "Source" },
-            { name: "school", label: "School" },
             { name: "casting_time", label: "Casting Time" },
-            { name: "measurement", label: "Measurement" },
-            { name: "range", label: "range", type: "number" },
+            { name: "distance", label: "Distance", type: "number" },
+            { name: "range", label: "Range" },
             { name: "area", label: "Area" },
-
             { name: "material", label: "Material Component" },
             { name: "duration", label: "Duration" },
             { name: "damage_dice", label: "Damage Dice" },
             { name: "damage_level", label: "Damage Increase per Level" },
-            {
-              name: "additional_classes",
-              label: "Additional Classes (comma-separated)",
-            },
+            { name: "subclasses", label: "Subclasses (comma-separated)" },
             { name: "species", label: "Species (comma-separated)" },
             { name: "feats", label: "Feats (comma-separated)" },
             {
@@ -245,7 +237,7 @@ export default function SpellBuilderPage() {
             </div>
           ))}
         </div>
-        <div>
+        <div className="my-4">
           <div>
             <label htmlFor="school" className="block text-sm font-medium mb-1">
               School
@@ -268,7 +260,7 @@ export default function SpellBuilderPage() {
             </select>
           </div>
 
-          <div>
+          <div className="my-4">
             <label
               htmlFor="casting_time"
               className="block text-sm font-medium mb-1"
@@ -293,7 +285,7 @@ export default function SpellBuilderPage() {
             </select>
           </div>
 
-          <div>
+          <div className="my-4">
             <label htmlFor="range" className="block text-sm font-medium mb-1">
               Range Exp
             </label>
@@ -319,6 +311,13 @@ export default function SpellBuilderPage() {
             selected={form.classes}
             onSelect={(value) => handleAddItem("classes", value)}
             onDeselect={(value) => handleRemoveItem("classes", value)}
+          />
+          <MultiSelectTags
+            label="Optional/Variant Classes: "
+            options={classOptions}
+            selected={form.optional_classes}
+            onSelect={(value) => handleAddItem("optional_classes", value)}
+            onDeselect={(value) => handleRemoveItem("optional_classes", value)}
           />
           <MultiSelectTags
             label="Saving Throw"

@@ -1,0 +1,35 @@
+{
+  "name": "tewt",
+  "level": 3,
+  "short_source": "tet",
+  "source": "asd",
+  "school": "dasd",
+  "casting_time": "asda",
+  "measurement": "self",
+  "area": "as",
+  "components": [
+    "V",
+    "S",
+    "M"
+  ],
+  "duration": "asd",
+  "concentration": false,
+  "ritual": false,
+  "damage_type": [],
+  "damage_dice": "asd",
+  "damage_level": "",
+  "saving_throw": [],
+  "material": "test",
+  "classes": [],
+  "additional_classes": [
+    "asd"
+  ],
+  "species": [],
+  "feats": [
+    "asd"
+  ],
+  "other_options_features": [],
+  "description": "",
+  "higher_level": "",
+  "range": null
+}

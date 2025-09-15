@@ -1,4 +1,3 @@
-// app/api/spellbuilder/route.js
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
@@ -17,7 +16,9 @@ export async function POST(request) {
   }
 
   const filename = `${name.replace(/\s+/g, "_")}.json`;
-  const dirPath = path.join(process.cwd(), "data", "spells", level);
+
+  const folderName = level === "0" ? "cantrips" : level;
+  const dirPath = path.join(process.cwd(), "data", "spells", folderName);
 
   try {
     await mkdir(dirPath, { recursive: true });

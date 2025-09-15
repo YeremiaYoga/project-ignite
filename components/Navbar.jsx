@@ -5,6 +5,7 @@ import { Menu, X, CircleUserRound } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
 import { useTalesMode } from "@/context/TalesModeContext";
+import Image from "next/image";
 import {
   SignedIn,
   SignedOut,
@@ -43,7 +44,6 @@ export default function Navbar() {
     setColors(storedColors);
     applyCSSVariables(storedColors);
 
-    // talesMode dari cookie
     const storedTales = Cookies.get("ignite-tales-mode");
     setTalesMode(storedTales === "true");
   }, []);
@@ -127,8 +127,21 @@ export default function Navbar() {
           )}
         </div>
 
-        <Link href="/" className="text-xl font-bold text-white">
-          Project Ignite
+        <Link href="/" className="flex items-stretch space-x-2 p-2">
+          <Image
+            src="/assets/ignite_logo.webp"
+            alt="Ignite Logo"
+            width={44}
+            height={44}
+            className="object-contain"
+          />
+
+          <div className="flex flex-col leading-none">
+            <span className="text-xl font-bold">Project Ignite</span>
+            <span className="text-xs text-teal-400 self-end p-(-2)">
+              Firefly
+            </span>
+          </div>
         </Link>
 
         <div className="relative" ref={menuRef}>
