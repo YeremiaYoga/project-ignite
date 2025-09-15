@@ -34,7 +34,7 @@ export default function DetailSpells({ spell }) {
           <p className="mt-2 text-sm tracking-wide">
             <strong>Casting Time</strong> : {spell.casting_time}
             <br />
-            <strong>Range</strong>: {spell.range} {spell.measurement}
+            <strong>Range</strong>: {spell.distance} {spell.range}
             {spell.area && ` (${spell.area})`}
             <br />
             <strong>Components</strong>: {spell.components || "-"}

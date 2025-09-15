@@ -1,0 +1,72 @@
+{
+  "classOptions": [
+    { "label": "Artificer", "value": "artificer" },
+    { "label": "Barbarian", "value": "barbarian" },
+    { "label": "Bard", "value": "bard" },
+    { "label": "Blood hunter", "value": "blood-hunter" },
+    { "label": "Cleric", "value": "cleric" },
+    { "label": "Druid", "value": "druid" },
+    { "label": "Fighter", "value": "fighter" },
+    { "label": "Monk", "value": "monk" },
+    { "label": "Paladin", "value": "paladin" },
+    { "label": "Ranger", "value": "ranger" },
+    { "label": "Rogue", "value": "rogue" },
+    { "label": "Sorcerer", "value": "sorcerer" },
+    { "label": "Warlock", "value": "warlock" },
+    { "label": "Wizard", "value": "wizard" }
+  ],
+
+  "savingThrowOptions": [
+    { "label": "Strength", "value": "str" },
+    { "label": "Dexterity", "value": "dex" },
+    { "label": "Constitution", "value": "con" },
+    { "label": "Intelligence", "value": "int" },
+    { "label": "Wisdom", "value": "wis" },
+    { "label": "Charisma", "value": "cha" }
+  ],
+
+  "componentOptions": [
+    { "label": "Verbal", "value": "V" },
+    { "label": "Somatic", "value": "S" },
+    { "label": "Material", "value": "M" }
+  ],
+
+  "damageTypeOptions": [
+    { "label": "Acid", "value": "acid" },
+    { "label": "Bludgeoning", "value": "bludgeoning" },
+    { "label": "Cold", "value": "cold" },
+    { "label": "Fire", "value": "fire" },
+    { "label": "Force", "value": "force" },
+    { "label": "Lightning", "value": "lightning" },
+    { "label": "Necrotic", "value": "necrotic" },
+    { "label": "Piercing", "value": "piercing" },
+    { "label": "Poison", "value": "poison" },
+    { "label": "Psychic", "value": "psychic" },
+    { "label": "Radiant", "value": "radiant" },
+    { "label": "Slashing", "value": "slashing" },
+    { "label": "Thunder", "value": "thunder" }
+  ],
+
+  "schoolOptions": [
+    "Abjuration",
+    "Conjuration",
+    "Divination",
+    "Enchantment",
+    "Evocation",
+    "Illusion",
+    "Necromancy",
+    "Transmutation"
+  ],
+
+  "castingTimeOptions": [
+    "Action",
+    "Bonus Action",
+    "Reaction",
+    "Round",
+    "Minute",
+    "Hour",
+    "Special"
+  ],
+
+  "rangeOptions": ["Self", "Touch", "Point", "Area", "Special"]
+}

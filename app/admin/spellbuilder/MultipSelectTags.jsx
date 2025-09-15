@@ -37,7 +37,7 @@ const MultiSelectTags = ({
         className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <option value="" disabled>
-          Pilih {label}
+          Select {label}
         </option>
         {options
           .filter((opt) => !selected.includes(opt.value))

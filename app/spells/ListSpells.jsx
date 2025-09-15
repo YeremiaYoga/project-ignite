@@ -77,8 +77,8 @@ export default function ListSpells({ spells, onSelect, selectedSpell }) {
         aVal = getCastingTimeValue(a.casting_time);
         bVal = getCastingTimeValue(b.casting_time);
       } else if (sortKey === "range") {
-        aVal = getRangeValue(a.range);
-        bVal = getRangeValue(b.range);
+        aVal = getRangeValue(a.distance);
+        bVal = getRangeValue(b.distance);
       } else {
         aVal = (a[sortKey] ?? "").toString().toLowerCase();
         bVal = (b[sortKey] ?? "").toString().toLowerCase();
@@ -157,7 +157,7 @@ export default function ListSpells({ spells, onSelect, selectedSpell }) {
                 )}
               </td>
               <td className="px-1 py-1 italic whitespace-normal break-words">
-                {spell.range} {spell.measurement || ""}
+                {spell.distance} {spell.range || ""}
                 {spell.area ? ` (${spell.area})` : ""}
               </td>
             </tr>

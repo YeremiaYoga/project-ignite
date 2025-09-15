@@ -129,19 +129,13 @@ export default function Navbar() {
 
         <Link href="/" className="flex items-stretch space-x-2 p-2">
           <Image
-            src="/assets/ignite_logo.webp"
+            src="/assets/project_ignite_logo.webp"
             alt="Ignite Logo"
-            width={44}
-            height={44}
-            className="object-contain"
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="h-10 w-auto object-contain" // h-10 = tinggi 40px
           />
-
-          <div className="flex flex-col leading-none">
-            <span className="text-xl font-bold">Project Ignite</span>
-            <span className="text-xs text-teal-400 self-end p-(-2)">
-              Firefly
-            </span>
-          </div>
         </Link>
 
         <div className="relative" ref={menuRef}>

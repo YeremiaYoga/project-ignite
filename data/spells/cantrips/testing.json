@@ -1,0 +1,56 @@
+{
+  "name": "testing",
+  "level": 0,
+  "short_source": 123,
+  "source": 1123,
+  "school": "Abjuration",
+  "casting_time": "Bonus Action",
+  "distance": 123,
+  "range": "feet",
+  "area": 123,
+  "components": [
+    "S"
+  ],
+  "duration": 123,
+  "concentration": true,
+  "ritual": false,
+  "damage_type": [
+    "psychic"
+  ],
+  "damage_dice": 123,
+  "damage_level": 123,
+  "saving_throw": [
+    "dex"
+  ],
+  "material": 123,
+  "classes": [
+    "paladin"
+  ],
+  "optional_classes": [
+    "blood-hunter"
+  ],
+  "subclasses": [
+    "123",
+    "qwe"
+  ],
+  "species": [
+    "qwe",
+    "123"
+  ],
+  "feats": [
+    "qwe",
+    "123"
+  ],
+  "other_options_features": [
+    "123",
+    "qwe"
+  ],
+  "description": "sdqw",
+  "higher_level": "dqwd",
+  "range_exp": "Point",
+  "backgrounds": [
+    "qwe",
+    "asdfer"
+  ],
+  "image": "/assets/spells/testing/testing_img.png"
+}
