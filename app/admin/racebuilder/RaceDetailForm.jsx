@@ -41,14 +41,15 @@ export default function RaceDetailForm() {
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            setIsOpen(e.target.value.length > 0);
+            setIsOpen(true);
             setSelectedFolder("");
           }}
+          onClick={() => setIsOpen(true)}
           placeholder="Choose Race"
           className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {isOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-gray-800 rounded-md shadow-lg border border-gray-700">
+          <div className="absolute z-10 w-full mt-1 bg-gray-800 rounded-md shadow-lg border border-gray-700 max-h-60 overflow-y-auto">
             {filteredFolders.length === 0 ? (
               <div className="px-3 py-2 text-gray-400">No races found.</div>
             ) : (
