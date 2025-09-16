@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import MultiSelectTags from "./MultipSelectTags";
 import MultipleInput from "./MultipleInput";
+
 import spellsOptions from "@/data/spellsOptions.json";
 
 export default function SpellBuilderPage() {
@@ -43,6 +44,8 @@ export default function SpellBuilderPage() {
   const [spells, setSpells] = useState([]);
   const [selectedLevel, setSelectedLevel] = useState("");
   const [selectedSpell, setSelectedSpell] = useState("");
+  const [reviewMode, setReviewMode] = useState(false);
+  const [originalName, setOriginalName] = useState("");
 
   const {
     classOptions,
@@ -133,29 +136,28 @@ export default function SpellBuilderPage() {
         .then((r) => r.json())
         .then((data) => {
           setForm({ ...initialForm, ...data });
+          setOriginalName(data.name); // simpan nama lama
         })
         .catch(console.error);
     }
   }, [mode, selectedLevel, selectedSpell]);
 
-  const handleSubmit = async (e) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault();
+    setReviewMode(true);
+  };
 
-    const normalized = {
-      ...form,
-      level: parseInt(form.level || "0"),
-      distance: form.distance ? parseInt(form.distance, 10) : undefined,
-      optional_classes: ensureArray(form.optional_classes),
-      subclasses: ensureArray(form.subclasses),
-      species: ensureArray(form.species),
-      feats: ensureArray(form.feats),
-      other_options_features: ensureArray(form.other_options_features),
-    };
+  const handleSave = async () => {
+    const normalized = { ...form, level: parseInt(form.level || "0") };
 
-    const hasFile = normalized.image instanceof File;
+    const method = mode === "edit" ? "PUT" : "POST";
+    const url =
+      mode === "edit"
+        ? `/api/spellbuilder?originalName=${encodeURIComponent(originalName)}`
+        : "/api/spellbuilder";
+
     let res;
-
-    if (hasFile) {
+    if (normalized.image instanceof File) {
       const fd = new FormData();
       Object.entries(normalized).forEach(([k, v]) => {
         if (v === undefined || v === null) return;
@@ -163,11 +165,10 @@ export default function SpellBuilderPage() {
         else if (Array.isArray(v)) fd.append(k, JSON.stringify(v));
         else fd.append(k, String(v));
       });
-
-      res = await fetch("/api/spellbuilder", { method: "POST", body: fd });
+      res = await fetch(url, { method, body: fd });
     } else {
-      res = await fetch("/api/spellbuilder", {
-        method: "POST",
+      res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(normalized),
       });
@@ -176,6 +177,8 @@ export default function SpellBuilderPage() {
     if (res.ok) {
       alert("Spell saved!");
       setForm(initialForm);
+      setReviewMode(false);
+      setMode("new");
     } else {
       alert("Gagal menyimpan spell.");
     }
@@ -243,7 +246,7 @@ export default function SpellBuilderPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium mb-1">Image</label>
           <input
@@ -514,6 +517,153 @@ export default function SpellBuilderPage() {
           Save Spell
         </button>
       </form>
+      {reviewMode && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-gray-900 p-6 rounded-2xl shadow-2xl max-w-4xl w-full text-white">
+            <h2 className="text-2xl font-bold mb-6 text-center">
+              Review Spell
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto pr-2 text-sm">
+              <div className="space-y-2">
+                <p>
+                  <strong>Name:</strong> {form.name}
+                </p>
+                <p>
+                  <strong>Level:</strong> {form.level}
+                </p>
+                <p>
+                  <strong>School:</strong> {form.school}
+                </p>
+                <p>
+                  <strong>Casting Time:</strong> {form.casting_time}
+                </p>
+                <p>
+                  <strong>Range:</strong> {form.range} {form.range_exp}{" "}
+                  {form.distance ? `(${form.distance} ft)` : ""}
+                </p>
+                <p>
+                  <strong>Area:</strong> {form.area}
+                </p>
+                <p>
+                  <strong>Duration:</strong> {form.duration}
+                </p>
+                <p>
+                  <strong>Concentration:</strong>{" "}
+                  {form.concentration ? "Yes" : "No"}
+                </p>
+                <p>
+                  <strong>Ritual:</strong> {form.ritual ? "Yes" : "No"}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p>
+                  <strong>Short Source:</strong> {form.short_source}
+                </p>
+                <p>
+                  <strong>Source:</strong> {form.source}
+                </p>
+                <p>
+                  <strong>Damage Type:</strong> {form.damage_type.join(", ")}
+                </p>
+                <p>
+                  <strong>Damage Dice:</strong> {form.damage_dice}
+                </p>
+                <p>
+                  <strong>Damage Level:</strong> {form.damage_level}
+                </p>
+                <p>
+                  <strong>Saving Throw:</strong> {form.saving_throw.join(", ")}
+                </p>
+                <p>
+                  <strong>Material:</strong> {form.material}
+                </p>
+                <p>
+                  <strong>Components:</strong> {form.components.join(", ")}
+                </p>
+              </div>
+
+              <div className="col-span-2 space-y-2">
+                <p>
+                  <strong>Classes:</strong> {form.classes.join(", ")}
+                </p>
+                <p>
+                  <strong>Optional Classes:</strong>{" "}
+                  {form.optional_classes.join(", ")}
+                </p>
+                <p>
+                  <strong>Subclasses:</strong> {form.subclasses.join(", ")}
+                </p>
+                <p>
+                  <strong>Species:</strong> {form.species.join(", ")}
+                </p>
+                <p>
+                  <strong>Feats:</strong> {form.feats.join(", ")}
+                </p>
+                <p>
+                  <strong>Other Options / Features:</strong>{" "}
+                  {form.other_options_features.join(", ")}
+                </p>
+                <p>
+                  <strong>Backgrounds:</strong> {form.backgrounds.join(", ")}
+                </p>
+              </div>
+
+              <div className="col-span-2">
+                <p className="font-semibold">Description:</p>
+                <p className="text-gray-300 whitespace-pre-line">
+                  {form.description}
+                </p>
+              </div>
+
+              {form.higher_level && (
+                <div className="col-span-2">
+                  <p className="font-semibold">Higher Level:</p>
+                  <p className="text-gray-300 whitespace-pre-line">
+                    {form.higher_level}
+                  </p>
+                </div>
+              )}
+
+              {form.image && (
+                <div className="col-span-2 flex flex-col items-center mt-4">
+                  <p className="font-semibold mb-2">Image Preview:</p>
+                  <img
+                    src={
+                      form.image instanceof File
+                        ? URL.createObjectURL(form.image)
+                        : form.image
+                    }
+                    alt="Spell"
+                    className="max-h-60 rounded-lg border border-gray-700 shadow-md"
+                  />
+                  {form.image instanceof File && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      {form.image.name}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-4 mt-6">
+              <button
+                onClick={handleSave}
+                className="px-5 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-medium shadow"
+              >
+                ✅ Confirm Save
+              </button>
+              <button
+                onClick={() => setReviewMode(false)}
+                className="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium shadow"
+              >
+                ❌ Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

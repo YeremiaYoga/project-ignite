@@ -1,0 +1,79 @@
+{
+  "name": "Hertha",
+  "full_name": "Hertha",
+  "creator_name": "Candle",
+  "creator_email":"candle@gmail.com",
+  "art": "assets/file.svg",
+  "main_theme": "Must be www.youtube.com/ link",
+
+  "race": "Human",
+  "subrace": "",
+  "main_affiliation": "The Alastor Organization",
+  "alligment": "Lawful Evil",
+  "titles": [
+    "The Leader of Alastor Organization",
+    "the Saviour of Many",
+    "The Lady of String",
+    "The Holder of Jurisdiction"
+  ],
+  "place_of_resident": ["Orange Corral,Delstainvia"],
+  "follower": ["Talia The Weaver"],
+  "signature_object": ["Smoking devices like cigarettes or pipe"],
+  "signature_weapon": ["magical infuse hand which allow spell casting", "bow"],
+
+  "fighthing_style": "spell-caster",
+  "battle_rating": 20,
+  "voice_style": "soft spoken woman",
+
+  "main_personality_trait": "narcissist",
+  "detailed_personality": [
+    "Knowledge seeking",
+    "Manipulative",
+    "Uncaring",
+    "self-centered",
+    "racist"
+  ],
+  "personality_type": ["ruler", "Magician"],
+  "fears_&_weaknesses": [
+    "The fear of beging seen as like another person in the world",
+    "the fear of being unable to accomplish anything that is worthy",
+    "fear of being beaten by anyone, especially someone who she deem to be lower than her"
+  ],
+
+  "occupation/role": ["President of Alastor Organization", "A Scholar"],
+  "previous_occupation/role": [
+    "The Head of the Alastor Family",
+    "A member of the Intelligentsia Guild"
+  ],
+  "Notable Accomplishments": [
+    "Helping several people with illness through the Alastor Organization",
+    "Acccepted as a part of a Intelligentsia Guild"
+  ],
+
+  "status": "Dead",
+  "birth_year": "1597",
+  "birth_year_type": "AC",
+  "death_year": "1625",
+  "death_year_type": "AC",
+  "birth_location": "Orange Corral, Delstainvia",
+
+  "appearance": "Appearance Style",
+  "notable_details": "A Fancy Jewel",
+  "backstory": "bla-bla",
+
+  "allies": [""],
+  "friends": [""],
+  "enemies": ["The Holy Order", "The Adventurer’s Guild"],
+  "alive_family_member": [""],
+  "dead_family_member": ["Alastor (Father)", "Claire Pferch (Mother)"],
+  "Subordinates": [""],
+
+  "Notable_Quotes": "If you wish for anyone to like you. You need to pretend, afterall no one like the truth~",
+  "Quotes_from_Others": [
+    [
+      "A woman who will truely make you believe that she is normal, but you can tell that she was never normal",
+      "Amelia Dayhearth"
+    ],
+    ["the most beautiful  woman that ever exist", "George Verärgerung"]
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "name": "ascvca",
+  "level": 9,
+  "short_source": "asc",
+  "source": "asc",
+  "school": "Enchantment",
+  "casting_time": "Bonus Action",
+  "distance": 123,
+  "range": "feet",
+  "area": "asc",
+  "components": [
+    "M",
+    "S",
+    "V"
+  ],
+  "duration": "as",
+  "concentration": false,
+  "ritual": false,
+  "damage_type": [
+    "bludgeoning"
+  ],
+  "damage_dice": "sca",
+  "damage_level": "ac",
+  "saving_throw": [
+    "dex",
+    "str",
+    "con",
+    "int",
+    "wis",
+    "cha"
+  ],
+  "material": "asca",
+  "classes": [
+    "barbarian"
+  ],
+  "optional_classes": [
+    "cleric"
+  ],
+  "subclasses": [
+    "123",
+    "qwe"
+  ],
+  "species": [],
+  "feats": [],
+  "other_options_features": [],
+  "description": "asda",
+  "higher_level": "asd",
+  "range_exp": "Point",
+  "backgrounds": [],
+  "image": ""
+}
