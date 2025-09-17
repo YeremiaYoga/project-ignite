@@ -1,0 +1,11 @@
+{
+  "name": "Aarakocra",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "A winged people who originated on the Elemental Plane of Air, aarakocra soar through the sky wherever they wander.",
+  "traits": [
+    "Flight",
+    "Talons",
+    "Wind Caller"
+  ],
+  "image": "/assets/races/aarakocra/aarakocra.webp"
+}

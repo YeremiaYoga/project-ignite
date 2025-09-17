@@ -2,7 +2,7 @@
   "name": "Hertha",
   "full_name": "Hertha",
   "creator_name": "Candle",
-  "creator_email":"candle@gmail.com",
+  "creator_email": "candle@gmail.com",
   "art": "assets/file.svg",
   "main_theme": "Must be www.youtube.com/ link",
 
@@ -21,7 +21,7 @@
   "signature_object": ["Smoking devices like cigarettes or pipe"],
   "signature_weapon": ["magical infuse hand which allow spell casting", "bow"],
 
-  "fighthing_style": "spell-caster",
+  "fighting_style": "spell-caster",
   "battle_rating": 20,
   "voice_style": "soft spoken woman",
 
@@ -34,18 +34,18 @@
     "racist"
   ],
   "personality_type": ["ruler", "Magician"],
-  "fears_&_weaknesses": [
+  "fears_weaknesses": [
     "The fear of beging seen as like another person in the world",
     "the fear of being unable to accomplish anything that is worthy",
     "fear of being beaten by anyone, especially someone who she deem to be lower than her"
   ],
 
-  "occupation/role": ["President of Alastor Organization", "A Scholar"],
-  "previous_occupation/role": [
+  "occupation_role": ["President of Alastor Organization", "A Scholar"],
+  "previous_occupation_role": [
     "The Head of the Alastor Family",
     "A member of the Intelligentsia Guild"
   ],
-  "Notable Accomplishments": [
+  "notable_accomplishments": [
     "Helping several people with illness through the Alastor Organization",
     "Acccepted as a part of a Intelligentsia Guild"
   ],
@@ -61,19 +61,22 @@
   "notable_details": "A Fancy Jewel",
   "backstory": "bla-bla",
 
-  "allies": [""],
-  "friends": [""],
+  "allies": [],
+  "friends": [],
   "enemies": ["The Holy Order", "The Adventurer’s Guild"],
-  "alive_family_member": [""],
+  "alive_family_member": [],
   "dead_family_member": ["Alastor (Father)", "Claire Pferch (Mother)"],
-  "Subordinates": [""],
+  "subordinates": [],
 
-  "Notable_Quotes": "If you wish for anyone to like you. You need to pretend, afterall no one like the truth~",
-  "Quotes_from_Others": [
-    [
-      "A woman who will truely make you believe that she is normal, but you can tell that she was never normal",
-      "Amelia Dayhearth"
-    ],
-    ["the most beautiful  woman that ever exist", "George Verärgerung"]
+  "notable_quotes": "If you wish for anyone to like you. You need to pretend, afterall no one like the truth~",
+  "quotes_from_others": [
+    {
+      "quote": "A woman who will truely make you believe that she is normal, but you can tell that she was never normal",
+      "author": "Amelia Dayhearth"
+    },
+    {
+      "quote": "the most beautiful woman that ever exist",
+      "author": "George Verärgerung"
+    }
   ]
 }

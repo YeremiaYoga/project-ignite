@@ -1,0 +1,12 @@
+{
+  "name": "Harengon",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Harengons are blessed with a little fey luck, and they often find themselves a few fortunate feet away from dangers during adventures.",
+  "traits": [
+    "Hare-Trigger",
+    "Leporine Senses",
+    "Lucky Footwork",
+    "Rabbit Hop"
+  ],
+  "image": "/assets/races/harengon/harengon.webp"
+}

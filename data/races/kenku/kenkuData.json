@@ -1,0 +1,11 @@
+{
+  "name": "kenku",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Whatever their true origin, kenku are most often found in the Shadowfell and the Material Plane, and they tend to have the coloration typical of ravens.",
+  "traits": [
+    "Expert Duplication",
+    "Kenku Recall",
+    "Mimicry"
+  ],
+  "image": "/assets/races/kenku/kenku.webp"
+}

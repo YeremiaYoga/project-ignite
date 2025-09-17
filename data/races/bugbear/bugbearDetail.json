@@ -1,0 +1,44 @@
+{
+  "name": "Bugbear",
+  "creature_type": "Humanoid. You are also considered a goblinoid for any prerequisite or effect that requires you to be a goblinoid.",
+  "size": "Medium",
+  "speed": "30 feet",
+  "asi": "",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "age": "Up to 80 years ; Mature at 16 years old",
+  "languages": "You can speak, read, and write common and one other language",
+  "image": "/assets/races/bugbear/bugbear_main.png",
+  "details": [
+    {
+      "type": "description",
+      "content": "Neither bugs nor bears, bugbears are the hulking cousins of goblins and hobgoblins. With roots in the Feywild, early bugbears resided in hidden places, in hard-to-reach and shadowed spaces. Long ago and from out of the corner of your eye, they came to the Material Plane, urged to spread throughout the multiverse by the conquering god Maglubiyet. Centuries later, they still bear a fey gift for lurking just out of sight, and many of them have sneaked away from that god's influence.\n\nThey are long of limb and covered in coarse hair, with wedge-shaped ears and pointed teeth. Despite their formidable build, bugbears are quiet skulkers, thanks to a fey magic that allows them to hide in spaces seemingly too small for them."
+    }
+  ],
+  "tales_details": "A",
+  "features": [
+    {
+      "title": "Darkvision",
+      "description": "You can see in dim light within 60 feet of you as if it were bright light and in darkness as if it were dim light. You discern colors in that darkness only as shades of gray."
+    },
+    {
+      "title": "Fey Ancestry",
+      "description": "You have advantage on saving throws you make to avoid or end the charmed condition on yourself."
+    },
+    {
+      "title": "Long-Limbed",
+      "description": "When you make a melee attack on your turn, your reach for it is 5 feet greater than normal."
+    },
+    {
+      "title": "Powerful Build",
+      "description": "You count as one size larger when determining your carrying capacity and the weight you can push, drag, or lift."
+    },
+    {
+      "title": "Sneaky",
+      "description": "You are proficient in the Stealth skill. In addition, without squeezing, you can move through and stop in a space large enough for a Small creature."
+    },
+    {
+      "title": "Surprise Attack",
+      "description": "If you hit a creature with an attack roll, the creature takes an extra 2d6 damage if it hasn't taken a turn yet in the current combat."
+    }
+  ]
+}

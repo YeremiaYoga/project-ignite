@@ -1,0 +1,12 @@
+{
+  "name": "Deep Gnome",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Deep gnomes, or svirfneblin, are natives of the Underdark and are suffused with that subterranean realm’s magic.",
+  "traits": [
+    "Darkvision",
+    "Gift of the Svirfneblin",
+    "Gnomish Magic Resistance",
+    "Svirfneblin Camouflage"
+  ],
+  "image": "/assets/races/deep_gnome/deep_gnome.webp"
+}

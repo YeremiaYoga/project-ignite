@@ -1,0 +1,11 @@
+{
+  "name": "fire_genasi",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Descended from efreet, the genies of the Elemental Plane of Fire, fire genasi channel the flamboyant and often destructive nature of flame.",
+  "traits": [
+    "Darkvision",
+    "Fire Resistance",
+    "Reach to the Blaze"
+  ],
+  "image": "/assets/races/fire_genasi/fire_genasi.webp"
+}

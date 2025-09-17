@@ -1,0 +1,11 @@
+{
+  "name": "kobold",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Some of the smallest draconic creatures in the multiverse, kobolds display their draconic ancestry in the glint of their scales and in their roars.",
+  "traits": [
+    "Darkvision",
+    "Draconic Cry",
+    "Kobold Legacy"
+  ],
+  "image": "/assets/races/kobold/kobold.webp"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Dwarf",
+  "source": "Player’s Handbook",
+  "description": "Dwarves were raised from the earth in the elder days by a deity of the forge.",
+  "traits": [
+    "Darkvision",
+    "Dwarven Resilience",
+    "Dwarven Toughness",
+    "Stonecunning"
+  ],
+  "image": "/assets/races/dwarf/dwarf.webp"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "githyanki",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Githyanki complement their physical prowess with psionic might, instilled in them by mind flayers and cultivated over eons in the Astral Plane.",
+  "traits": [
+    "Astral Knowledge",
+    "Githyanki Psionics",
+    "Psychic Resilience"
+  ],
+  "image": "/assets/races/githyanki/githyanki.webp"
+}

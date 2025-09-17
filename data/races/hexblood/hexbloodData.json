@@ -1,0 +1,12 @@
+{
+  "name": "Hexblood",
+  "source": "Van Richten’s Guide to Ravenloft",
+  "description": "Hexbloods are mortals touched by hag magic, bearing strange marks and fey gifts that set them apart from others.",
+  "traits": [
+    "Ancestral Legacy",
+    "Darkvision",
+    "Eerie Token",
+    "Hex Magic"
+  ],
+  "image": "/assets/races/hexblood/hexblood.webp"
+}

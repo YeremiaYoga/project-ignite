@@ -1,0 +1,36 @@
+{
+  "name": "Satyr",
+  "creature_type": "Fey",
+  "size": "Medium (about 6-7 feet tall)",
+  "speed": "30 feet",
+  "asi": "",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "age": "Up to 80 years ; Mature at 18 years old. Satyrs mature and age at about the same rate as Humans.",
+  "languages": "You can speak, read, and write common and one other language",
+  "image": "/assets/races/satyr/satyr_main.png",
+  "details": [
+    {
+      "type": "description",
+      "content": "Originating in the Feywild—a realm of pure emotion-satyrs thrive on the energy of merriment. They resemble elves but have goatlike legs, cloven hooves, and ram or goat horns. The magic of the fey realm has given them an innate ability to perform, to delight, and to resist magical intrusion. While they're usually found in the Feywild, satyrs do wander to other planes of existence, most often to the Material Plane. There they seek to bring a bit of their home plane's splendor to other worlds."
+    }
+  ],
+  "tales_details": "A",
+  "features": [
+    {
+      "title": "Ram",
+      "description": "You can use your head and horns to make unarmed strikes. When you hit with them, the strike deals 1d6 + your Strength modifier bludgeoning damage, instead of the bludgeoning damage normal for an unarmed strike."
+    },
+    {
+      "title": "Magic Resistance",
+      "description": "You have advantage on saving throws against spells."
+    },
+    {
+      "title": "Mirthful Leaps",
+      "description": "Whenever you make a long jump or a high jump, you can roll a d8 and add the number rolled to the number of feet you cover, even when making a standing jump. This extra distance costs movement as usual."
+    },
+    {
+      "title": "Reveler",
+      "description": "As an embodiment of revelry, you have proficiency in the Performance and Persuasion skills, and you have proficiency with one musical instrument of your choice."
+    }
+  ]
+}

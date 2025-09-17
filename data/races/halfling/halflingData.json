@@ -1,0 +1,12 @@
+{
+  "name": "Halfling",
+  "source": "Player’s Handbook",
+  "description": "Halflings possess a brave and adventurous spirit that leads them on journeys of discovery.",
+  "traits": [
+    "Brave",
+    "Halfling Nimbleness",
+    "Luck",
+    "Naturally Stealthy"
+  ],
+  "image": "/assets/races/halfling/halfling.webp"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Disembodied",
+  "source": "Grim Hollow: Player’s Guide",
+  "description": "Most Disembodied retain a touch of the ethereal magic that marks them as creatures of two worlds",
+  "traits": [
+    "Magical Fortification",
+    "Master of Distraction",
+    "Out of Phase",
+    "Ethereal Fade",
+    "Inured to the Elements",
+    "Magical Insight",
+    "Magical Savvy",
+    "Magical Savant"
+  ],
+  "image": "/assets/races/disembodied/disembodied.webp"
+}

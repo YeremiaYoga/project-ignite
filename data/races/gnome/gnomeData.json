@@ -1,0 +1,11 @@
+{
+  "name": "Gnome",
+  "source": "Player’s Handbook",
+  "description": "Gnomes are magical folk created by gods of invention, illusions, and life underground.",
+  "traits": [
+    "Darkvision",
+    "Gnomish Cunning",
+    "Gnomish Lineage"
+  ],
+  "image": "/assets/races/gnome/gnome.webp"
+}

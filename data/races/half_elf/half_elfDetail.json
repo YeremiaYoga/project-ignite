@@ -1,25 +1,24 @@
 {
   "name": "Half Elf",
   "creature_type": "Humanoid",
-  "size": "Medium (5 to 6 feet tall)",
+  "size": "Medium",
   "speed": "30 feet",
-  "asi": "Charisma +2; Choose any other two unique +1",
-  "source": "Player's Handbook",
-  "age": "Half-elves mature at the same rate humans do and reach adulthood around the age of 20. They live much longer than humans, however, often exceeding 180 years.",
+  "asi": "",
+  "source": "Player's Handbook 2014",
+  "age": "Up to 180 years ; Mature at 20 years old",
   "languages": "You can speak, read, and write Common, Elvish, and one extra language of your choice.",
-  "image": "/assets/races/half_elf/half_elf_main.webp",
-  "tales_details": "Tales Detail Half Elf",
+  "image": "/assets/races/half_elf/half_elf_main.png",
   "details": [
     {
       "type": "description",
-      "content": "half elf"
+      "content": "Walking in two worlds but truly belonging to neither, half-elves combine what some say are the best qualities of their elf and human parents: human curiosity, inventiveness, and ambition tempered by the refined senses, love of nature, and artistic tastes of the elves. Some half-elves live among humans, set apart by their emotional and physical differences, watching friends and loved ones age while time barely touches them. Others live with the elves, growing to adulthood while their peers continue to live as children, growing restless in the timeless elven realms. Many half-elves, unable to fit into either society, choose lives of solitary wandering or join with other misfits and outcasts in the adventuring life.\n\nOf Two Worlds\nTo humans, half-elves look like elves, and to elves, they look human. In height, they're on par with both parents, though they're neither as slender as elves nor as broad as humans. They range from under 5 feet to about 6 feet tall, and from 100 to 180 pounds, with men only slightly taller and heavier than women. Half-elf men do have facial hair, and sometimes grow beards to mask their elven ancestry. Half-elven coloration and features lie, somewhere between their human and elf parents, and thus show a variety even more pronounced than that found among either race. They tend to have the eyes of their elven parents.\n\nDiplomats or Wanderers\nHalf-elves have no lands of their own, though they are welcome in human cities and somewhat less welcome in elven forests. In large cities in regions where elves and humans interact often, half-elves are sometimes numerous enough to form small communities of their own. They enjoy the company of other half-elves, the only people who truly understand what it is to live between these two worlds.\n\nIn most parts of the world, though, half-elves are uncommon enough that one might live for years without meeting another. Some prefer to avoid company altogether, wandering the wilds as foresters, hunters, or adventurers and visiting civilization only rarely. Like elves, they are driven by the wanderlust that comes of their longevity. Others, in contrast, throw themselves into the thick of society, putting their charisma and social skills to great use in diplomatic roles or as swindlers.\n\nHalf-Elf Names\nHalf-elves use either human or elven naming conventions. As if to emphasize that they don't really fit in to either society, half-elves raised among humans are often given elven names, and those raised among elves often take human names.\n\nExcellent Ambassadors\nMany half-elves learn at an early age to get along with everyone, defusing hostility and finding common ground. As a race, they have elven grace without elven aloofness and human energy without human boorishness. They often make excellent ambassadors and go-betweens (except between elves and humans, since each side suspects the half-elf of favoring the other)."
     }
   ],
-
+  "tales_details": "A",
   "features": [
     {
       "title": "Darkvision",
-      "description": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.\n"
+      "description": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."
     },
     {
       "title": "Fey Ancestry",
@@ -27,7 +26,7 @@
     },
     {
       "title": "Skill Versatility",
-      "description": "You gain proficiency in two skills of your choice.\n"
+      "description": "You gain proficiency in two skills of your choice."
     }
   ]
 }

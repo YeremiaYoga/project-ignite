@@ -1,0 +1,12 @@
+{
+  "name": "Satyr",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Originating in the Feywild—a realm of pure emotion— satyrs thrive on the energy of merriment.",
+  "traits": [
+    "Ram",
+    "Magic Resistance",
+    "Mirthful Leaps",
+    "Reveler"
+  ],
+  "image": "/assets/races/satyr/satyr.webp"
+}

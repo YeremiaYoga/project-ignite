@@ -1,0 +1,12 @@
+{
+  "name": "Air Genasi",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Embodying many of the airy traits of their otherworldly ancestors, air genasi can draw upon their connection to the winds.",
+  "traits": [
+    "Darkvision",
+    "Unending Breath",
+    "Lightning Resistance",
+    "Mingle with the Wind"
+  ],
+  "image": "/assets/races/air_genasi/air_genasi.webp"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "hobgoblin",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Hobgoblins trace their origins to the ancient courts of the Feywild, where they first appeared with their goblin and bugbear kin.",
+  "traits": [
+    "Goblinoid",
+    "Darkvision",
+    "Fey Ancestry",
+    "Fey Gift",
+    "Fortune from the Many"
+  ],
+  "image": "/assets/races/hobgoblin/hobgoblin.webp"
+}

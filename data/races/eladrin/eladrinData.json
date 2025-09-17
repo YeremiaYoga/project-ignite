@@ -1,0 +1,13 @@
+{
+  "name": "Eladrin",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Eladrin are elves of the Feywild, a realm of perilous beauty and boundless magic.",
+  "traits": [
+    "Darkvision",
+    "Fey Ancestry",
+    "Fey Step",
+    "Keen Senses",
+    "Trance"
+  ],
+  "image": "/assets/races/eladrin/eladrin.webp"
+}

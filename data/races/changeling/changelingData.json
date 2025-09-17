@@ -1,0 +1,11 @@
+{
+  "name": "changeling",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "For some changelings, a new face is only a disguise. For other changelings, a new face may reveal an aspect of their soul.",
+  "traits": [
+    "Fey",
+    "Changeling Instincts",
+    "Shapechanger"
+  ],
+  "image": "/assets/races/changeling/changeling.webp"
+}

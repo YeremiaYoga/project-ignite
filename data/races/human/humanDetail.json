@@ -1,0 +1,32 @@
+{
+  "name": "Human",
+  "creature_type": "Humanoid",
+  "size": "Medium (about 4-7 feet tall) or Small (about 2-4 feet tall), chosen when you select this species",
+  "speed": "30 feet",
+  "asi": "",
+  "source": "Player's Handbook",
+  "age": "Up to 80 years ; Mature at 18 years old",
+  "languages": "You can speak, read, and write common and one other language",
+  "image": "/assets/races/human/human_main.png",
+  "details": [
+    {
+      "type": "description",
+      "content": "Found throughout the multiverse, humans are as varied as they are numerous, and they endeavor to achieve as much as they can in the years they are given. Their ambition and resourcefulness are commended, respected, and feared on many worlds.\n\nHumans are as diverse in appearance as the people of Earth, and they have many gods. Scholars dispute the origin of humanity, but one of the earliest known human gatherings is said to have occurred in Sigil, the torus-shaped city at the center of the multiverse and the place where the Common language was born. From there, humans could have spread to every part of the multiverse, bringing the City of Doors' cosmopolitanism with them."
+    }
+  ],
+  "tales_details": "A",
+  "features": [
+    {
+      "title": "Resourceful",
+      "description": "You gain Heroic Inspiration whenever you finish a Long Rest."
+    },
+    {
+      "title": "Skillful",
+      "description": "You gain proficiency in one skill of your choice."
+    },
+    {
+      "title": "Versatile",
+      "description": "You gain an Origin feat of your choice."
+    }
+  ]
+}

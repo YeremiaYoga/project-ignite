@@ -16,8 +16,8 @@ export default function RaceDetail({ data }) {
         className="scroll-mt-100"
       >
         <div className="flex flex-col lg:flex-row gap-6">
-          <div className="flex-shrink-0 order-1 lg:order-2 flex justify-center items-center">
-            <div className="relative w-full max-w-[500px]">
+          <div className="flex-shrink-0 order-1 lg:order-2 flex justify-center ">
+            <div className="relative w-full max-w-[400px]">
               {data.image && (
                 <Image
                   src={data.image}

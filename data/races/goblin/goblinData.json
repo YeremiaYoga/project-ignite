@@ -1,0 +1,13 @@
+{
+  "name": "Goblin",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Many goblins pursue their own destinies, escaping the plots of both archfey and gods.",
+  "traits": [
+    "Goblinoid",
+    "Darkvision",
+    "Fey Ancestry",
+    "Fury of the Small",
+    "Nimble Escape"
+  ],
+  "image": "/assets/races/goblin/goblin.webp"
+}

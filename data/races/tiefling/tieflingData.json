@@ -1,0 +1,11 @@
+{
+  "name": "Tiefling",
+  "source": "Player’s Handbook",
+  "description": "Tieflings are either born in the Lower Planes or have fiendish ancestors who originated there.",
+  "traits": [
+    "Darkvision",
+    "Fiendish Legacy",
+    "Otherworldly Presence"
+  ],
+  "image": "/assets/races/tiefling/tiefling.webp"
+}

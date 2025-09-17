@@ -1,0 +1,10 @@
+{
+  "name": "Fairy",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Infused with the magic of the Feywild, most fairies look like Small elves with insectile wings, but each fairy has a special physical characteristic that sets the fairy apart.",
+  "traits": [
+    "Fairy Magic",
+    "Flight"
+  ],
+  "image": "/assets/races/fairy/fairy.webp"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "Githzerai",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Eons of cultivating their mental powers within the endless chaos of Limbo have imbued githzerai with the ability to shape psionic energy to protect themselves and probe minds.",
+  "traits": [
+    "Githzerai Psionics",
+    "Mental Discipline",
+    "Psychic Resilience"
+  ],
+  "image": "/assets/races/githzerai/githzerai.webp"
+}

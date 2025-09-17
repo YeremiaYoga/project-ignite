@@ -1,0 +1,11 @@
+{
+  "name": "Goliath",
+  "source": "Player’s Handbook",
+  "description": "Goliaths are distant descendants of giants and seek heights above those reached by their ancestors.",
+  "traits": [
+    "Giant Ancestry",
+    "Large Form",
+    "Powerful Build"
+  ],
+  "image": "/assets/races/goliath/goliath.webp"
+}

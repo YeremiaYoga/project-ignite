@@ -1,0 +1,11 @@
+{
+  "name": "earth_genasi",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Tracing their ancestry to dao, the genies of the Elemental Plane of Earth, earth genasi inherit dao’s steadfast strength and control over earth.\r\n",
+  "traits": [
+    "Darkvision",
+    "Earth Walk",
+    "Merge with Stone"
+  ],
+  "image": "/assets/races/earth_genasi/earth_genasi.webp"
+}

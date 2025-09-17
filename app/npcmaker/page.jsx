@@ -49,7 +49,7 @@ export default function NPCMakerPage() {
         </button>
       </div>
 
-      {/* Later you can render the list of NPCs here */}
+ 
       {npcs.length === 0 ? (
         <p className="text-gray-400 text-center">No NPCs created yet.</p>
       ) : (

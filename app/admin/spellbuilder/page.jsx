@@ -264,7 +264,7 @@ export default function SpellBuilderPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { name: "name", label: "Name" },
-            { name: "level", label: "Level", type: "number", min: 0, max: 9 },
+            { name: "level", label: "Level (level 0 = Cantrips)", type: "number", min: 0, max: 9 },
             { name: "short_source", label: "Short Source" },
             { name: "source", label: "Source" },
           ].map(({ name, label, type = "text", min, max }) => (

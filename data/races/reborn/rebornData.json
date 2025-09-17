@@ -1,0 +1,11 @@
+{
+  "name": "Reborn",
+  "source": "Van Richten’s Guide to Ravenloft",
+  "description": "Reborn are those returned from death, lingering between life and the grave, sustained by fragments of memory and will.",
+  "traits": [
+    "Ancestral Legacy",
+    "Deathless Nature",
+    "Knowledge from a Past Life"
+  ],
+  "image": "/assets/races/reborn/reborn.webp"
+}

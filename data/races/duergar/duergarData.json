@@ -1,0 +1,13 @@
+{
+  "name": "duergar",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Duergar are dwarves whose ancestors were transformed by centuries living in the deepest places of the Underdark.\r\n",
+  "traits": [
+    "Dwarf",
+    "Darkvision",
+    "Duergar Magic",
+    "Dwarven Resilience",
+    "Psionic Fortitude"
+  ],
+  "image": "/assets/races/duergar/duergar.webp"
+}

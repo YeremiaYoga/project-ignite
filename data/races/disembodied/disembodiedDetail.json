@@ -1,0 +1,52 @@
+{
+  "name": "Disembodied",
+  "creature_type": "Humanoid",
+  "size": "Your size is Small or Medium, as you determine.",
+  "speed": "30 feet.",
+  "asi": "",
+  "source": "Grim Hollow: Player’s Guide",
+  "age": "The Disembodied mature at a much slower rate than the Humanoids they once were, with their life expectancy doubled or even tripled.",
+  "languages": "",
+  "image": "/assets/races/disembodied/disembodied_main.png",
+  "details": [
+    {
+      "type": "description",
+      "content": "To allow one’s mind to touch the planes is the ultimate dream of many an arcane spellcaster, and nowhere has that dream come closer to reality than in the lost city of Ulmyr’s Gate. Founded in the Bürach Empire by a group of ambitious wizards who chafed under the limitations imposed upon them by government bureaucracy, Ulmyr’s Gate boasted free study for all mages who sought sanctuary within its walls. The Great College dedicated to magical study in the city quickly became a sanctum for mages of all disciplines from across Etharis, creating a golden age of magic within its walls.\n\nThat golden age came crashing down in a single night, when the founding mages of Ulmyr’s Gate attempted an ambitious ritual intended to part the veil and create a permanent portal to the Ethereal Plane. Instead, their magic tore a gaping rift in the fabric of reality, and in an instant the entire city was tipped into the void between worlds. Ulmyr’s Gate and all its citizens were presumed destroyed. The incident triggered another inquisition against hubristic arcanists who tampered in things mortals were not meant to know. Then, life in the empire went on.\n\nYears later, stories began to surface of frightening apparitions sighted in the region where Ulmyr’s Gate once stood. These haunting folk seemed oddly blurred or indistinct. Witnesses reporting that they would vanish as suddenly as they appeared. Gradually, it became clear that these poor souls were the survivors of the Ethereal Rift, now trapped between worlds and trying to retain their tenuous grasp on the Material Plane.\n\nThose residents of lost Ulmyr’s Gate who have mustered the strength to return to the world have been named the disembodied by the sages who have studied them. These rare individuals have left or fled their former home, crossing through the Ethereal Rift to roam the mortal world. Though they resemble the people they once were, they are both more and less—creatures of two realms, often haunted by memories of the city’s destruction, of which they rarely if ever speak."
+    }
+  ],
+  "tales_details": "",
+  "features": [
+    {
+      "title": "Magical Fortification",
+      "description": "The more that magic threatens you, the more your resilience to it increases. Choose an ability score: Strength, Dexterity, Constitution, Intelligence, Wisdom, or Charisma. You have Advantage on saving throws using that ability score against spells and other magical effects."
+    },
+    {
+      "title": "Master of Distraction",
+      "description": "You draw your foes’ attention to you, intending it to be the last diversion they ever see. As an Influence action, you put on a tactical display (bravado, cowardice, confusion, or some other tactic) that gets your enemies’ attention. Until the end of your next turn, any attack on an enemy within 10 feet of you that could see you when you took the Influence action, is made with Advantage. You can use this feature a number of times equal to your Proficiency Bonus, regaining all expended uses when you finish a Long Rest."
+    },
+    {
+      "title": "Out of Phase",
+      "description": "Your corporeal presence shifts and fades, softening your enemies’ ability to harm you. As a Bonus Action, for 1 minute, all creatures have Disadvantage on attack rolls against you, and you can move through other creature’s spaces without treating them as Difficult Terrain. You can use this feature a number of times equal to your Proficiency Bonus, regaining all expended uses when you finish a Long Rest."
+    },
+    {
+      "title": "Ethereal Fade",
+      "description": "Shifting away from the mortal world lets you move through and observe that world unseen. As a Magic action, you fade from the Material Plane into the Ethereal Plane for 1 minute. While you remain in this state, you can’t interact with the Material Plane, and effects on the Material Plane can’t affect you, including spells and creatures. You can move and hear as normal, and you see everything in shades of gray. When the effect ends, you reappear in the Material Plane in the closest unoccupied space to where you faded from. You can end the effect early as a Bonus Action. You regain the use of this feature again when you finish a Long Rest."
+    },
+    {
+      "title": "Inured to the Elements",
+      "description": "Even beneath scorching sun and in freezing cold, you hold yourself strong. You have Advantage on Constitution saving throws made to resist the effects of extreme cold or extreme heat."
+    },
+    {
+      "title": "Magical Insight",
+      "description": "Magic is power in the right hands, and those hands are yours. You have proficiency in the Arcana skill."
+    },
+    {
+      "title": "Magical Savvy",
+      "description": "Whether through intensive study or the innate touch of magic in your blood, you have the ability to invoke magical spells. You learn the Dancing Lights cantrip, which you cast using the associated ability score: Intelligence for Wizard spells, Wisdom for Cleric and Druid spells, and Charisma for Bard, Sorcerer, and Warlock spells. If the spell appears on multiple spell lists, choose one to determine the spellcasting attribute for that spell."
+    },
+    {
+      "title": "Magical Savant",
+      "description": "You learn the Level 1 spell Feather Fall. You can cast it once without expending a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. If you have levels in the associated spellcasting class, you always have this spell prepared, and it doesn’t count against the number of spells you can prepare each day."
+    }
+  ]
+}

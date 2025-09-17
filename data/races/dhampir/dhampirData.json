@@ -1,0 +1,13 @@
+{
+  "name": "Dhampir",
+  "source": "Van Richten’s Guide to Ravenloft",
+  "description": "Poised between the worlds of the living and the dead, dhampirs retain their grip on life yet are endlessly tested by vicious hungers.",
+  "traits": [
+    "Ancestral Legacy",
+    "Darkvision",
+    "Deathless Nature",
+    "Spider Climb",
+    "Vampiric Bite"
+  ],
+  "image": "/assets/races/dhampir/dhampir.webp"
+}

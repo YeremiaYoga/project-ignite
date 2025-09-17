@@ -1,0 +1,14 @@
+{
+  "name": "bugbear",
+  "source": "Mordenkainen Presents: Monsters of the Multiverse",
+  "description": "Despite their formidable build, bugbears are quiet skulkers, thanks to a fey magic that allows them to hide in spaces seemingly too small for them.",
+  "traits": [
+    "Darkvision",
+    "Fey Ancestry",
+    "Long-Limbed",
+    "Powerful Build",
+    "Sneaky",
+    "Surprise Attack"
+  ],
+  "image": "/assets/races/bugbear/bugbear.webp"
+}
