@@ -11,8 +11,52 @@ export default function CreateCharacterPage() {
   const [currentStep, setCurrentStep] = useState(0);
 
   const [formData, setFormData] = useState({
-    step1: { name: "", race: "" },
-    step2: { hair: "", eyes: "" },
+    step1: {
+      name: "",
+      fullname: "",
+      art: "",
+      token_art: "",
+      creator_name: "",
+      creator_email: "",
+      randomid: "",
+      race: "",
+      sub_race: "",
+      background: "",
+      character_type: "",
+      allignment: "",
+      status: "",
+      birth_year: "",
+      birth_year_type: "",
+      death_year: "",
+      death_year_type: "",
+      birth_place: "",
+      gender: "",
+      pronoun: "",
+      height: {
+        feet: "",
+        inch: "",
+        centimeter: "",
+      },
+      weight: {
+        pounds: "",
+        kilogram: "",
+      },
+      skin_colour: "",
+      hair: "",
+    },
+
+    step2: {
+      backstory: "",
+      wayfarer: "",
+      titles: [],
+      detailed_personality: [],
+      personality_traits: "",
+      voice_style: "",
+      main_personality: "",
+      hair: "",
+      eyes: "",
+    },
+
     step3: { origin: "", story: "" },
     step4: { strength: "", magic: "" },
     step5: { notes: "" },
@@ -51,7 +95,6 @@ export default function CreateCharacterPage() {
     <main className="max-w-6xl w-full mx-auto px-4 py-8 text-white  min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-center">Create Character</h1>
 
-      {/* Step indicator */}
       <div className="flex justify-center mb-6 gap-2">
         {steps.map((s, idx) => (
           <div
@@ -67,17 +110,16 @@ export default function CreateCharacterPage() {
         ))}
       </div>
 
-      {/* Render Step */}
       <div className=" p-6 rounded-lg shadow mb-6">
         <CurrentComponent
           data={formData[steps[currentStep].key]}
+          allData={formData} // ⬅️ kirim semua step
           onChange={(field, value) =>
             handleChange(steps[currentStep].key, field, value)
           }
         />
       </div>
 
-      {/* Navigation */}
       <div className="flex justify-between">
         <button
           onClick={prevStep}
