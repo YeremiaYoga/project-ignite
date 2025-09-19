@@ -1,0 +1,35 @@
+{
+  "name": "1234567",
+  "fullname": "",
+  "art": "",
+  "token_art": "",
+  "creator_name": "",
+  "creator_email": "",
+  "randomid": "tH52Bd1BhwjX",
+  "race": "",
+  "subrace": "",
+  "background": "",
+  "character_type": "",
+  "allignment": "",
+  "status": "",
+  "birth_year": "",
+  "birth_year_type": "",
+  "death_year": "",
+  "death_year_type": "",
+  "birth_place": "",
+  "gender": "",
+  "pronoun": "",
+  "height": {
+    "feet": 0,
+    "inch": 0,
+    "centimeter": 0
+  },
+  "weight": {
+    "pounds": 0,
+    "kilogram": 0
+  },
+  "skin_colour": "",
+  "hair": "",
+  "wiki_visibility": true,
+  "sub_race": ""
+}

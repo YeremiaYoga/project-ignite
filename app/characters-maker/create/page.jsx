@@ -25,7 +25,7 @@ export default function CreateCharacterPage() {
       creator_email: "",
       randomid: "",
       race: "",
-      sub_race: "",
+      subrace: "",
       background: "",
       character_type: "",
       allignment: "",
