@@ -42,10 +42,6 @@ export default function CreateCharacterPage() {
       skin_colour: "",
       hair: "",
       wiki_visibility: true,
-      previous_economical_standing: "",
-      current_last_economical_standing: "",
-      social_classes: "",
-      randomid: "",
     },
     step2: {
       backstory: "",
