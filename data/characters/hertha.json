@@ -9,7 +9,7 @@
   "randomid": "1234567890",
 
   "race": "Human",
-  "sub-race": "",
+  "subrace": "",
   "background": "Noble",
 
   "character_type": "NPC",
@@ -25,80 +25,79 @@
   "gender": "Female",
   "pronoun": "She/Her",
   "height": {
-    "feet":5,
-    "inch":1,
-    "centimeter":0},
+    "feet": 5,
+    "inch": 1,
+    "centimeter": 0
+  },
   "weight": {
-    "pounds":120,
-    "kilogram":0},
+    "pounds": 120,
+    "kilogram": 0
+  },
   "skin_colour": "White pale skin",
   "hair": "Silver blonde hair",
 
-
-  "backstory":"bla-bla",
-  "voice_style":"soft-spoken woman",
-  "wayfarer": [
-    "Talia The Weaver"
-   ],
-  "personality_traits":[
-      "Ruler",
-      "Magician"
-  ],
-  "main_personality":"narcissist",
-  "detailed_personality":[
+  "backstory": "bla-bla",
+  "voice_style": "soft-spoken woman",
+  "wayfarer": ["Talia The Weaver"],
+  "personality_traits": ["Ruler", "Magician"],
+  "main_personality": "narcissist",
+  "detailed_personality": [
     "Knowledge seeking",
     "Manipulative",
     "Uncaring",
     "self-centered",
     "racist"
   ],
+  "previous_economical_standing": "Rich",
+  "current_last_economical_standing": "Rich",
+  "social_classes": "Noble",
 
   "titles": [
-   {
+    {
       "name": "The Leader of Alastor Organization",
       "from": "From her being the leader of the Alastor Organization after her father's death which give forward the rule of the Alastor Organization towards her as she is the first child of Alastor"
-   },
-   {
+    },
+    {
       "name": "The Saviour of Many",
       "from": "From her helping out the people who are sick and hungry through her generous donation which is done through the Alastor Organization"
-   },
-   {
+    },
+    {
       "name": "The Lady of String",
       "from": "This was given by anyone who truely know the lady herself, as her actions of manuplating and tricking people to like her, make her seem like a puppet master with strings. While everyone else is her puppet. She would like to believe that anyway as she sees everyone as simple toys play with to fulfill her wishes and dreams."
-   },
-   {
+    },
+    {
       "name": "The Holder of Jurisdiction",
       "from": "She behold the rune of Jurisdiction which is a powerful rune that no one really knows the capibility of controling other people's will or mind. Although not much is known about it as she like to keep things hidden away from people."
-   }
+    }
   ],
 
   "fear_weakness_visibility": true,
   "fear_weakness": [
     {
-       "fear_weak":"The fear of being seen as like another person in the world",
-       "from": "Because she does not like to be seen as another person, like a normal person who is unable to do anything. She prefer being seen by other people as she always live in the center stage and wish to stay it in forever."
+      "fear_weak": "The fear of being seen as like another person in the world",
+      "from": "Because she does not like to be seen as another person, like a normal person who is unable to do anything. She prefer being seen by other people as she always live in the center stage and wish to stay it in forever."
     },
     {
-       "fear_weak":"The fear of being unable to accomplish anything that is worthy",
-       "from": "In her entire life, she sees herself as perfect so it does make any sense why she would not able to win. She must win to make herself perfect like everytime before. No matter the cost"
+      "fear_weak": "The fear of being unable to accomplish anything that is worthy",
+      "from": "In her entire life, she sees herself as perfect so it does make any sense why she would not able to win. She must win to make herself perfect like everytime before. No matter the cost"
     },
     {
-       "fear_weak":"Fear of being beaten by anyone, especially someone who she deem to be lower than her",
-       "from": "She hates the idea of someone to win over her. Even more if that person is seen as lower than her and not someone that she sees as a rival or some sort of pontentional rival which she can try to be beat. With her high self standard and being profen wrong about someone capability would only make her even more angrier."
+      "fear_weak": "Fear of being beaten by anyone, especially someone who she deem to be lower than her",
+      "from": "She hates the idea of someone to win over her. Even more if that person is seen as lower than her and not someone that she sees as a rival or some sort of pontentional rival which she can try to be beat. With her high self standard and being profen wrong about someone capability would only make her even more angrier."
     }
-   ],
-   
-   "motivation_visibility": true,
-   "motivation": [
-      {
-         "motivation": "",
-         "from": "",
-         "how": ""
-      },
-      {
-         "motivation": "",
-         "from": "",
-         "how": ""
-      }
-   ]
+  ],
+
+  "motivation_visibility": true,
+  "motivation": [
+    {
+      "motivation": "",
+      "from": "",
+      "how": ""
+    },
+    {
+      "motivation": "",
+      "from": "",
+      "how": ""
+    }
+  ]
 }

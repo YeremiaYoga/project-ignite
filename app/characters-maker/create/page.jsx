@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Step1 from "./Step1.jsx";
 import Step2 from "./Step2.jsx";
 import Step3 from "./Step3.jsx";
@@ -8,7 +9,11 @@ import Step4 from "./Step4.jsx";
 import Step5 from "./Step5.jsx";
 
 export default function CreateCharacterPage() {
-  const [currentStep, setCurrentStep] = useState(0);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialStep = parseInt(searchParams.get("step") || "0", 10);
+  const [currentStep, setCurrentStep] = useState(initialStep);
 
   const [formData, setFormData] = useState({
     step1: {
@@ -32,19 +37,16 @@ export default function CreateCharacterPage() {
       birth_place: "",
       gender: "",
       pronoun: "",
-      height: {
-        feet: "",
-        inch: "",
-        centimeter: "",
-      },
-      weight: {
-        pounds: "",
-        kilogram: "",
-      },
+      height: { feet: "", inch: "", centimeter: "" },
+      weight: { pounds: "", kilogram: "" },
       skin_colour: "",
       hair: "",
+      wiki_visibility: true,
+      previous_economical_standing: "",
+      current_last_economical_standing: "",
+      social_classes: "",
+      randomid: "",
     },
-
     step2: {
       backstory: "",
       wayfarer: "",
@@ -53,10 +55,10 @@ export default function CreateCharacterPage() {
       personality_traits: "",
       voice_style: "",
       main_personality: "",
-      hair: "",
-      eyes: "",
+      previous_economical_standing: "",
+      current_last_economical_standing: "",
+      social_classes: "",
     },
-
     step3: { origin: "", story: "" },
     step4: { strength: "", magic: "" },
     step5: { notes: "" },
@@ -77,29 +79,50 @@ export default function CreateCharacterPage() {
     }));
   };
 
-  const nextStep = () => {
-    if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
-  };
-  const prevStep = () => {
-    if (currentStep > 0) setCurrentStep(currentStep - 1);
+  const goToStep = (step) => {
+    if (step >= 0 && step < steps.length) {
+      setCurrentStep(step);
+      router.push(`/characters-maker/create?step=${step}`, { scroll: false });
+    }
   };
 
-  const handleSubmit = () => {
-    console.log("Final JSON:", formData);
-    alert("Character saved! Check console.");
+  const nextStep = () => goToStep(currentStep + 1);
+  const prevStep = () => goToStep(currentStep - 1);
+
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch("/api/characters/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData.step1,
+        }),
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        alert("Character saved ");
+      } else {
+        alert("Error saving character: " + result.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save character.");
+    }
   };
 
   const CurrentComponent = steps[currentStep].component;
 
   return (
-    <main className="max-w-6xl w-full mx-auto px-4 py-8 text-white  min-h-screen">
+    <main className="max-w-6xl w-full mx-auto px-4 py-8 text-white min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-center">Create Character</h1>
 
       <div className="flex justify-center mb-6 gap-2">
         {steps.map((s, idx) => (
           <div
             key={s.key}
-            className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${
+            onClick={() => goToStep(idx)}
+            className={`cursor-pointer w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${
               idx === currentStep
                 ? "bg-blue-600 text-white"
                 : "bg-gray-700 text-gray-300"
@@ -110,10 +133,10 @@ export default function CreateCharacterPage() {
         ))}
       </div>
 
-      <div className=" p-6 rounded-lg shadow mb-6">
+      <div className="p-6 rounded-lg shadow mb-6">
         <CurrentComponent
           data={formData[steps[currentStep].key]}
-          allData={formData} // ⬅️ kirim semua step
+          allData={formData}
           onChange={(field, value) =>
             handleChange(steps[currentStep].key, field, value)
           }
@@ -133,21 +156,30 @@ export default function CreateCharacterPage() {
           Previous
         </button>
 
-        {currentStep === steps.length - 1 ? (
+        <div className="flex gap-2">
           <button
             onClick={handleSubmit}
             className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
           >
-            Finish
+            Save
           </button>
-        ) : (
-          <button
-            onClick={nextStep}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded shadow"
-          >
-            Next
-          </button>
-        )}
+
+          {currentStep === steps.length - 1 ? (
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
+            >
+              Finish
+            </button>
+          ) : (
+            <button
+              onClick={nextStep}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded shadow"
+            >
+              Next
+            </button>
+          )}
+        </div>
       </div>
     </main>
   );

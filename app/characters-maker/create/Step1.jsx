@@ -4,14 +4,36 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import InputField from "./InputField";
+import Cookies from "js-cookie";
+import { Eye, EyeOff, Clipboard } from "lucide-react";
+
 export default function Step1({ data, onChange }) {
   const [artPreview, setArtPreview] = useState(null);
   const [tokenPreview, setTokenPreview] = useState(null);
   const [raceOptions, setRaceOptions] = useState([]);
   const [backgroundOptions, setBackgroundOptions] = useState([]);
   const { user } = useUser();
+  const [talesMode, setTalesMode] = useState(false);
+  const [wikiVisible, setWikiVisible] = useState(true);
+  const [charId, setCharId] = useState("");
   const creatorName = user?.fullName || user?.username || "";
   const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
+
+  useEffect(() => {
+    const mode = Cookies.get("ignite-tales-mode");
+    setTalesMode(mode === "true");
+  }, []);
+  useEffect(() => {
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let randomId = "";
+    for (let i = 0; i < 12; i++) {
+      randomId += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setCharId(randomId);
+    onChange("randomid", randomId);
+    onChange("wiki_visibility", true);
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -32,6 +54,14 @@ export default function Step1({ data, onChange }) {
 
     fetchData();
   }, []);
+
+  const toggleWikiVisibility = () => {
+    onChange("wiki_visibility", !data.wiki_visibility);
+  };
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(charId);
+    alert("ID copied to clipboard!");
+  };
 
   const handleFile = (file, type) => {
     if (!file) return;
@@ -125,6 +155,25 @@ export default function Step1({ data, onChange }) {
           </div>
         </div>
         <div>
+          <div className="flex items-center justify-between mb-2 text-sm font-medium text-gray-200">
+            <div className="flex items-center gap-2">
+              <span className="truncate max-w-[140px]">{data.randomid}</span>
+              <button onClick={copyToClipboard}>
+                <Clipboard className="w-4 h-4 text-gray-400 hover:text-gray-200" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button onClick={toggleWikiVisibility}>
+                {data.wiki_visibility ? (
+                  <Eye className="w-4 h-4 0" />
+                ) : (
+                  <EyeOff className="w-4 h-4 " />
+                )}
+              </button>
+            </div>
+          </div>
+
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
             {artPreview ? (
               <Image
@@ -140,7 +189,8 @@ export default function Step1({ data, onChange }) {
           </div>
           <div className="text-center mt-2">Art</div>
         </div>
-        <div>
+
+        <div className="mt-7">
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
             {tokenPreview ? (
               <Image
@@ -163,7 +213,7 @@ export default function Step1({ data, onChange }) {
         <div className="space-y-4">
           <InputField
             label="Race"
-            type="selectSearch" // <-- ganti menjadi selectSearch
+            type="selectSearch"
             value={data.race}
             onChange={(val) => onChange("race", val)}
             placeholder={raceOptions.length ? "Select Race" : "Loading..."}
@@ -211,9 +261,7 @@ export default function Step1({ data, onChange }) {
 
       <hr className="border-gray-700" />
 
-      {/* Status + Bio */}
       <div className="grid grid-cols-5 gap-6">
-        {/* Status */}
         <div className="space-y-4 col-span-2">
           <InputField
             label="Status"
@@ -228,39 +276,84 @@ export default function Step1({ data, onChange }) {
             <div className="flex gap-2 items-end">
               <input
                 type="number"
-                value={data.birthYear || ""}
-                onChange={(e) => onChange("birthYear", e.target.value)}
+                value={data.birth_year || ""}
+                onChange={(e) => onChange("birth_year", e.target.value)}
                 className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
               />
-              <input
-                type="text"
-                placeholder="Era"
-                className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-              />
+
+              {talesMode ? (
+                <select
+                  value={data.birth_year_type || ""}
+                  onChange={(e) => onChange("birth_year_type", e.target.value)}
+                  className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+              focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                >
+                  <option value="">Select</option>
+                  <option value="AC">AC (After Calamity)</option>
+                  <option value="CE">CE (Calamity Era)</option>
+                  <option value="AV">AV (After Vallarian)</option>
+                  <option value="AL">AL (After Liberation)</option>
+                  <option value="AF">AF (After Lament of the Fallen) </option>
+                  <option value="BC">BC (Before Chronicles)</option>
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={data.birth_year_type || ""}
+                  onChange={(e) => onChange("birth_year_type", e.target.value)}
+                  placeholder="Type"
+                  className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+              focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                />
+              )}
             </div>
           </div>
 
-          {data.status === "Dead" && (
+          {(data.status === "Dead" || data.status === "Unknown") && (
             <div>
               <label className="block text-sm font-medium mb-1">
-                Death Year
+                {data.status === "Unknown"
+                  ? "Presume Death Year"
+                  : "Death Year"}
               </label>
               <div className="flex gap-2 items-end">
                 <input
                   type="number"
-                  value={data.deathYear || ""}
-                  onChange={(e) => onChange("deathYear", e.target.value)}
+                  value={data.death_year || ""}
+                  onChange={(e) => onChange("death_year", e.target.value)}
                   className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                 />
-                <input
-                  type="text"
-                  placeholder="Era"
-                  className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                />
+                {talesMode ? (
+                  <select
+                    value={data.death_year_type || ""}
+                    onChange={(e) =>
+                      onChange("death_year_type", e.target.value)
+                    }
+                    className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  >
+                    <option value="">Select</option>
+                    <option value="AC">AC (After Calamity)</option>
+                    <option value="CE">CE (Calamity Era)</option>
+                    <option value="AV">AV (After Vallarian)</option>
+                    <option value="AL">AL (After Liberation)</option>
+                    <option value="AF">AF (After Lament of the Fallen)</option>
+                    <option value="BC">BC (Before Chronicles)</option>
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={data.death_year_type || ""}
+                    onChange={(e) =>
+                      onChange("death_year_type", e.target.value)
+                    }
+                    placeholder="Type"
+                    className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  />
+                )}
               </div>
             </div>
           )}
@@ -271,15 +364,14 @@ export default function Step1({ data, onChange }) {
             </label>
             <input
               type="text"
-              value={data.birthPlace || ""}
-              onChange={(e) => onChange("birthPlace", e.target.value)}
+              value={data.birth_place || ""}
+              onChange={(e) => onChange("birth_place", e.target.value)}
               className="w-full h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
         focus:ring-2 focus:ring-blue-500 outline-none text-sm"
             />
           </div>
         </div>
 
-        {/* Gender + Physical */}
         <div className="space-y-4 col-span-3">
           <div className="grid grid-cols-2 gap-4 items-start">
             <InputField
@@ -299,31 +391,54 @@ export default function Step1({ data, onChange }) {
                     <input
                       type="number"
                       placeholder="Feet"
-                      value={data.heightFeet || ""}
-                      onChange={(e) => onChange("heightFeet", e.target.value)}
-                      className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                      value={data.height?.feet || ""}
+                      min={0}
+                      onChange={(e) =>
+                        onChange("height", {
+                          ...data.height,
+                          feet: e.target.value,
+                        })
+                      }
+                      className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
                     <input
                       type="number"
-                      placeholder="Inches"
-                      value={data.heightInches || ""}
-                      onChange={(e) => onChange("heightInches", e.target.value)}
-                      className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                      placeholder="Inch"
+                      value={data.height?.inch || ""}
+                      min={0}
+                      max={11}
+                      onChange={(e) =>
+                        onChange("height", {
+                          ...data.height,
+                          inch: e.target.value,
+                        })
+                      }
+                      className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
                   </div>
                 ) : (
                   <input
                     type="number"
                     placeholder="Cm"
-                    value={data.heightCm || ""}
-                    onChange={(e) => onChange("heightCm", e.target.value)}
-                    className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                    value={data.height?.centimeter || ""}
+                    onChange={(e) =>
+                      onChange("height", {
+                        ...data.height,
+                        centimeter: e.target.value,
+                      })
+                    }
+                    className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
                 )}
+
                 <select
                   value={data.heightUnit || ""}
                   onChange={(e) => onChange("heightUnit", e.target.value)}
-                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-xs"
+                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+        focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
                   <option value="">M/I</option>
                   <option value="metric">Cm</option>
@@ -353,21 +468,40 @@ export default function Step1({ data, onChange }) {
               <label className="block text-sm font-medium mb-1">Weight</label>
               <div className="flex gap-2 items-end">
                 <input
-                  type="text"
+                  type="number"
                   placeholder={data.weightUnit === "imperial" ? "Lb" : "Kg"}
                   value={
                     data.weightUnit === "imperial"
-                      ? data.weight?.pounds || ""
-                      : data.weight?.kilogram || ""
+                      ? data.weight?.pounds ?? ""
+                      : data.weight?.kilogram ?? ""
                   }
-                  onChange={(e) => onChange("weight", e.target.value)}
-                  className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const newWeight =
+                      data.weightUnit === "imperial"
+                        ? { ...(data.weight || {}), pounds: val }
+                        : { ...(data.weight || {}), kilogram: val };
+                    onChange("weight", newWeight);
+                  }}
+                  className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+        focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                 />
 
                 <select
                   value={data.weightUnit || ""}
-                  onChange={(e) => onChange("weightUnit", e.target.value)}
-                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-xs"
+                  onChange={(e) => {
+                    const unit = e.target.value;
+
+                    const newWeight =
+                      unit === "imperial"
+                        ? { pounds: data.weight?.pounds ?? "", kilogram: "" }
+                        : { pounds: "", kilogram: data.weight?.kilogram ?? "" };
+
+                    onChange("weightUnit", unit);
+                    onChange("weight", newWeight);
+                  }}
+                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+        focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
                   <option value="">M/I</option>
                   <option value="metric">Kg</option>

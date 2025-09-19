@@ -30,7 +30,6 @@ export default function InputField({
     setIsOpen(false);
   };
 
-  // Close dropdown if click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -55,7 +54,7 @@ export default function InputField({
             onChange={(e) => {
               setQuery(e.target.value);
               setIsOpen(true);
-              onChange(""); // reset value saat ketik
+              onChange("");
             }}
             onClick={() => setIsOpen(true)}
             placeholder={placeholder || "Search..."}
@@ -73,7 +72,7 @@ export default function InputField({
                   {filteredOptions.map((opt) => (
                     <li
                       key={opt.value ?? opt}
-                      className="px-3 py-2 cursor-pointer hover:bg-gray-700"
+                      className="px-3 py-2 cursor-pointer hover:bg-gray-700 capitalize"
                       onClick={() => handleSelect(opt)}
                     >
                       {opt.label
@@ -114,11 +113,81 @@ export default function InputField({
         >
           <option value="">{placeholder || "Please select"}</option>
           {options.map((opt) => (
-            <option key={opt.value ?? opt} value={opt.value ?? opt}>
+            <option
+              key={opt.value ?? opt}
+              value={opt.value ?? opt}
+              className="capitalize"
+            >
               {opt.label ?? opt}
             </option>
           ))}
         </select>
+      ) : type === "selectImage" ? (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            disabled={disabled}
+            className={`w-full flex items-center gap-2 p-2 rounded-md border text-left
+      ${
+        disabled
+          ? "bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed opacity-60"
+          : "bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+      }`}
+          >
+            {value ? (
+              <>
+                {options.find((o) => (o.value ?? o) === value)?.image && (
+                  <img
+                    src={options.find((o) => (o.value ?? o) === value).image}
+                    alt={
+                      options.find((o) => (o.value ?? o) === value).label ??
+                      value
+                    }
+                    className="w-5 h-5 rounded"
+                  />
+                )}
+                <span>
+                  {options.find((o) => (o.value ?? o) === value)?.label ??
+                    value}
+                </span>
+              </>
+            ) : (
+              <span className="text-gray-400">
+                {placeholder || "Please select"}
+              </span>
+            )}
+          </button>
+
+          {isOpen && (
+            <div
+              className="absolute z-10 mt-1 bg-gray-800 border border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto
+                 w-64"
+            >
+              {options.map((opt) => (
+                <div
+                  key={opt.value ?? opt}
+                  onClick={() => {
+                    onChange(opt.value ?? opt);
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-700"
+                >
+                  {opt.image && (
+                    <img
+                      src={opt.image}
+                      alt={opt.label ?? opt}
+                      className="w-8 h-8 rounded"
+                    />
+                  )}
+                  <span className="text-base font-medium">
+                    {opt.label ?? opt}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       ) : type === "buttonGroup" ? (
         <div className="flex gap-2">
           {options.map((opt) => (

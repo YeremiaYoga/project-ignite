@@ -2,6 +2,7 @@
 import { useState } from "react";
 import InputField from "./InputField.jsx";
 import MultipleInput from "@/components/MultipleInput.jsx";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Step2({ data, allData, onChange }) {
   const step2 = data || {};
@@ -21,53 +22,57 @@ export default function Step2({ data, allData, onChange }) {
     "Creator",
   ];
 
+  const allTraitsWithImages = allTraits.map((trait) => ({
+    value: trait.toLowerCase(),
+    label: trait,
+    image: `/assets/personality_icon/${trait.toLowerCase()}.webp`,
+  }));
+
   return (
     <div className="p-6 max-w-6xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-9">
-          <InputField
-            label="Nickname"
-            type="text"
-            value={allData?.step1?.name || ""}
-            onChange={() => {}}
-            disabled
-          />
+        <div className="col-span-9 flex items-center">
+          <p className="text-lg font-semibold">
+            {allData?.step1?.name || "Unknown"}'s Profile
+          </p>
         </div>
 
-        <div className="col-span-3">
-          <label className="block text-sm font-medium mb-1">
-            Personality Traits
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <InputField
-              type="select"
-              value={step2.personality_traits?.[0] || ""}
-              onChange={(val) => {
-                const updated = [...(step2.personality_traits || [])];
-                updated[0] = val;
-                onChange("personality_traits", updated);
-              }}
-              options={allTraits.filter(
-                (t) => t !== step2.personality_traits?.[1]
-              )}
-              placeholder="Trait"
-            />
+        {allData?.step1?.character_type === "NPC" && (
+          <div className="col-span-3">
+            <label className="block text-sm font-medium mb-1">
+              Personality Traits
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <InputField
+                type="selectImage"
+                value={step2.personality_traits?.[0] || ""}
+                onChange={(val) => {
+                  const updated = [...(step2.personality_traits || [])];
+                  updated[0] = val;
+                  onChange("personality_traits", updated);
+                }}
+                options={allTraitsWithImages.filter(
+                  (t) => t.value !== step2.personality_traits?.[1]
+                )}
+                placeholder="Select Trait"
+              />
 
-            <InputField
-              type="select"
-              value={step2.personality_traits?.[1] || ""}
-              onChange={(val) => {
-                const updated = [...(step2.personality_traits || [])];
-                updated[1] = val;
-                onChange("personality_traits", updated);
-              }}
-              options={allTraits.filter(
-                (t) => t !== step2.personality_traits?.[0]
-              )}
-              placeholder="Trait"
-            />
+              <InputField
+                type="selectImage"
+                value={step2.personality_traits?.[1] || ""}
+                onChange={(val) => {
+                  const updated = [...(step2.personality_traits || [])];
+                  updated[1] = val;
+                  onChange("personality_traits", updated);
+                }}
+                options={allTraitsWithImages.filter(
+                  (t) => t.value !== step2.personality_traits?.[0]
+                )}
+                placeholder="Select Trait"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="col-span-9">
           <InputField
@@ -76,26 +81,80 @@ export default function Step2({ data, allData, onChange }) {
             value={step2.backstory || ""}
             onChange={(val) => onChange("backstory", val)}
             placeholder="Write backstory here..."
-            rows={14}
+            rows={18}
           />
         </div>
 
         <div className="col-span-3 space-y-4">
-          <InputField
-            label="Voice Style"
-            type="textarea"
-            value={step2.voice_style || ""}
-            onChange={(val) => onChange("voice_style", val)}
-            placeholder="Enter voice style"
-            rows={4}
-          />
-
+          {allData?.step1?.character_type === "NPC" && (
+            <InputField
+              label="Voice Style"
+              value={step2.voice_style || ""}
+              onChange={(val) => onChange("voice_style", val)}
+              placeholder="Enter voice style"
+              rows={4}
+            />
+          )}
           <InputField
             label="Main Personality"
-            type="textarea"
             value={step2.main_personality || ""}
             onChange={(val) => onChange("main_personality", val)}
             placeholder="Enter main personality"
+          />
+          <InputField
+            label="Previous Economical Standing"
+            type="select"
+            value={data.previous_economical_standing}
+            onChange={(val) => onChange("previous_economical_standing", val)}
+            placeholder="Select Economical Standing"
+            options={[
+              "Poor/Subsistence",
+              "Modest/Working Class",
+              "Middle-Class/Comfortable",
+              "Wealthy/Affluent",
+              "Rich / Prosperous",
+              "Opulent / Lavish",
+            ]}
+          />
+          <InputField
+            label="Current Economical Standing"
+            type="select"
+            value={data.current_last_economical_standing}
+            onChange={(val) =>
+              onChange("current_last_economical_standing", val)
+            }
+            placeholder="Select Economical Standing"
+            options={[
+              "Poor/Subsistence",
+              "Modest/Working Class",
+              "Middle-Class/Comfortable",
+              "Wealthy/Affluent",
+              "Rich / Prosperous",
+              "Opulent / Lavish",
+            ]}
+          />
+          <InputField
+            label="Social Classes"
+            type="select"
+            value={data.social_classes}
+            onChange={(val) => onChange("social_classes", val)}
+            placeholder="Select Sosial Classes"
+            options={[
+              "Slave/Serf",
+              "Criminal/Outlaw",
+              "Exile/Outcast",
+              "Marginalized",
+              "Commoners/Workers",
+              "Merchants/Artisans",
+              "Military/Officials",
+              "Clergy/Priest",
+              "Scholars/Intelligentsia",
+              "Politician",
+              "Knight / Dame",
+              "Nobility/Large Land Owner",
+              "High Nobility/Elite",
+              "Rulers/Sovereigns",
+            ]}
           />
         </div>
 
@@ -154,12 +213,15 @@ export default function Step2({ data, allData, onChange }) {
                   !step2.fear_weakness_visibility
                 )
               }
-              className={`w-4 h-4 rounded-sm transform rotate-45 ${
-                step2.fear_weakness_visibility ? "bg-red-600" : "bg-gray-600"
-              }`}
-            />
+              className="text-gray-400 hover:text-white"
+            >
+              {step2.fear_weakness_visibility ? (
+                <Eye size={18} />
+              ) : (
+                <EyeOff size={18} />
+              )}
+            </button>
           </div>
-
           <MultipleInput
             labels=""
             label="Fear or Weakness"
@@ -180,15 +242,25 @@ export default function Step2({ data, allData, onChange }) {
             <button
               type="button"
               onClick={() =>
-                onChange("motivation_visible", !step2.motivation_visible)
+                onChange("motivation_visibility", !step2.motivation_visibility)
               }
-              className={`w-4 h-4 rounded-sm transform rotate-45 ${
-                step2.motivation_visible ? "bg-red-600" : "bg-gray-600"
-              }`}
-            />
+              className="text-gray-400 hover:text-white"
+            >
+              {step2.motivation_visibility ? (
+                <Eye size={18} />
+              ) : (
+                <EyeOff size={18} />
+              )}
+            </button>
           </div>
-
-      
+          <MultipleInput
+            labels=""
+            label="Motivation Item"
+            type="object"
+            fields={["motivation", "from", "how"]}
+            items={[{ motivation: "", from: "", how: "" }]}
+            onChange={(vals) => onChange("motivation", vals)}
+          />
         </div>
       </div>
     </div>
