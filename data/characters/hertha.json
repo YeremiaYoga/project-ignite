@@ -1,15 +1,16 @@
 {
   "name": "Hertha",
-  "fullname": "Hertha",
-  "art": "asset/character.png",
-  "token_art": "asset/character.png",
+  "full_name": "Hertha",
+  "art": "asset/character/art/art.png",
+  "token_art": "asset/character/art/token.png",
+  "wiki_visibility": false,
 
   "creator_name": "Candle",
   "creator_email": "Candle@gmail.com",
   "randomid": "1234567890",
 
   "race": "Human",
-  "subrace": "",
+  "sub-race": "",
   "background": "Noble",
 
   "character_type": "NPC",
@@ -36,6 +37,7 @@
   "skin_colour": "White pale skin",
   "hair": "Silver blonde hair",
 
+  "backstory_visibiliy": true,
   "backstory": "bla-bla",
   "voice_style": "soft-spoken woman",
   "wayfarer": ["Talia The Weaver"],
@@ -48,9 +50,11 @@
     "self-centered",
     "racist"
   ],
+
   "previous_economical_standing": "Rich",
-  "current_last_economical_standing": "Rich",
-  "social_classes": "Noble",
+  "current_economical_standing": "Rich",
+  "previous_social_classes": "Noble",
+  "current_social_classes": "Noble",
 
   "titles": [
     {
@@ -71,18 +75,18 @@
     }
   ],
 
-  "fear_weakness_visibility": true,
-  "fear_weakness": [
+  "fear/weakness_visibility": true,
+  "fear/weakness": [
     {
-      "fear_weak": "The fear of being seen as like another person in the world",
+      "fear/weak": "The fear of being seen as like another person in the world",
       "from": "Because she does not like to be seen as another person, like a normal person who is unable to do anything. She prefer being seen by other people as she always live in the center stage and wish to stay it in forever."
     },
     {
-      "fear_weak": "The fear of being unable to accomplish anything that is worthy",
+      "fear/weak": "The fear of being unable to accomplish anything that is worthy",
       "from": "In her entire life, she sees herself as perfect so it does make any sense why she would not able to win. She must win to make herself perfect like everytime before. No matter the cost"
     },
     {
-      "fear_weak": "Fear of being beaten by anyone, especially someone who she deem to be lower than her",
+      "fear/weak": "Fear of being beaten by anyone, especially someone who she deem to be lower than her",
       "from": "She hates the idea of someone to win over her. Even more if that person is seen as lower than her and not someone that she sees as a rival or some sort of pontentional rival which she can try to be beat. With her high self standard and being profen wrong about someone capability would only make her even more angrier."
     }
   ],
@@ -90,14 +94,181 @@
   "motivation_visibility": true,
   "motivation": [
     {
-      "motivation": "",
-      "from": "",
-      "how": ""
+      "motivation": "To become a goddess, as reaching",
+      "from": "Because God didn't give me oreo cookies when I ask it",
+      "how": "They use the ability of 'yes'"
     },
     {
-      "motivation": "",
-      "from": "",
-      "how": ""
+      "motivation": "To weave influence and control others like threads in a tapestry, shaping events to her design.",
+      "from": "A deep belief that order and power must be maintained through subtle manipulation.",
+      "how": "Through charm, persuasion, and carefully hidden schemes behind a mask of elegance."
+    }
+  ],
+
+  "appearance_visibility": true,
+  "appearance": "She has long silvery-white hair tied back with a large ribbon, pale skin like porcelain, and sharp red-orange eyes that seem both alluring and unsettling. Dressed in a flowing black kimono adorned with gold embroidery, she carries herself with grace and authority, often holding a long pipe that trails with smoke. Her presence is elegant, commanding, and timeless, as though untouched by age.",
+  "notable_details": [
+    "Aura of control and confidence",
+    "Often seen with her smoking pipe",
+    "Red-orange gaze that feels hypnotic or intimidating",
+    "Gold-embroidered kimono, suggesting wealth or mystical rank",
+    "A faint, knowing smile that implies hidden schemes",
+    "Timeless beauty"
+  ],
+  "main_resident": "City of Orange Corral,Delstainvia",
+  "other_resident": [
+    "Ravenhan,Delstainvia",
+    "The Great City of Maple,Mondral",
+    "The City of Everwinter,Delstainvia",
+    "Aurum (The Floathing Islands of Alvavia),Alvavia"
+  ],
+  "nationality": "Delstainvian",
+  "main_theme": "Must be www.youtube.com/ link",
+  "main_theme_ogg": "asset/character/music/character_main_theme.ogg",
+  "main_combat_theme": "Must be www.youtube.com/ link",
+  "main_combat_theme_ogg": "asset/character/music/character_combat_theme.ogg",
+  "hobbies_visibility": true,
+  "hobbies": [
+    "Manipulating admirers or dream seeker for her own game",
+    "Telling her friends and companion how to play the system of manuplating other",
+    "Giving away gold and silvers towards donation for her own Alastor Organization",
+    "Obsessing over legacy"
+  ],
+  "signature_object": [
+    "Smoking devices like cigarettes or pipe",
+    "golden black or golden red Shan (扇)"
+  ],
+  "signature_weapon": ["magical infuse hand which allow spell casting", "bow"],
+
+  "current_occupation": ["President of Alastor Organization", "A Scholar"],
+  "previous_occupation": [
+    "The Head of the Alastor Family",
+    "A member of the Intelligentsia Guild"
+  ],
+  "connection_towards_events": [
+    {
+      "name": "The Orange Corral Incident 1623 AC",
+      "connection": ""
+    }
+  ],
+
+  "family": [
+    {
+      "name": "Alastor",
+      "status": "Dead",
+      "relationship": "Father",
+      "id_link": "13456789012",
+      "notes": "The founder of the Alastor Organization"
+    },
+    {
+      "name": "Elia Ravenstone",
+      "status": "Dead",
+      "relationship": "Mother",
+      "id_link": "123456789012",
+      "notes": "Died during childbirth of her second child"
+    },
+    {
+      "name": "???",
+      "status": "Alive",
+      "relationship": "Husband",
+      "id_link": "123456789012",
+      "notes": "You know the rule and so do I"
+    }
+  ],
+  "allies": [
+    {
+      "name": "???",
+      "status": "Unknown",
+      "relationship": "-",
+      "id_link": "-",
+      "notes": "???"
+    }
+  ],
+  "friends": [
+    {
+      "name": "Amelia Dayheart",
+      "status": "Unknown",
+      "relationship": "Best Friends",
+      "id-link": "-",
+      "notes": "And they were just roommates"
+    }
+  ],
+  "enemies": [
+    {
+      "name": "Amelia Dayheart",
+      "status": "Unknown",
+      "relationship": "Rival",
+      "id-link": "-",
+      "notes": "And they were just roommates"
+    }
+  ],
+  "subordinates": [
+    {
+      "name": "Amelia Dayheart",
+      "status": "Unknown",
+      "relationship": "Worker",
+      "id-link": "-",
+      "notes": "And they were just roommates"
+    }
+  ],
+  "affiliations": [
+    {
+      "name": "Adventurer's Guild",
+      "status": "Existing",
+      "relationship": "Enemies",
+      "id-link": "-",
+      "notes": "Adventurer's Guild is investigating her actions"
+    }
+  ],
+  "spesial_relationship": [
+    {
+      "name": "Amelia Dayheart",
+      "status": "Unknown",
+      "relationship": "Worker",
+      "id-link": "-",
+      "notes": "And they were just roommates"
+    }
+  ],
+
+  "combat_value": 0,
+  "combat_style": "Healer (Temporary Hit Point Healer)",
+  "vision": "Darkvision-60",
+  "damage_combat_type": "Psychic",
+  "str": 10,
+  "dex": 10,
+  "con": 10,
+  "int": 10,
+  "wis": 10,
+  "cha": 10,
+  "skill_prof": [
+    {
+      "name": "religion",
+      "value": 1
+    },
+    {
+      "name": "investigation",
+      "value": 2
+    },
+    {
+      "name": "history",
+      "value": 3
+    }
+  ],
+
+  "notable_accomplishments": [
+    "Helping several people with illness through the Alastor Organization",
+    "Acccepted as a part of a Intelligentsia Guild",
+    "Leading the Alastor Organization towards the path of science and magic, instend of just being a donation/charity organization"
+  ],
+  "notable_quotes": "If you wish for anyone to like you. You need to pretend, afterall no one like the truth~",
+  "quotes_from_others": [
+    {
+      "quote": "A woman who will truely make you believe that she is normal, but you can tell that she was never normal",
+      "author": "Amelia Dayhearth"
+    },
+    {
+      "quote": "the most beautiful woman that ever exist",
+      "author": "George Verärgerung"
     }
   ]
 }

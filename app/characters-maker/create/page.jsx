@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Cookies from "js-cookie";
 import Step1 from "./Step1.jsx";
 import Step2 from "./Step2.jsx";
 import Step3 from "./Step3.jsx";
@@ -15,6 +16,7 @@ export default function CreateCharacterPage() {
   const initialStep = parseInt(searchParams.get("step") || "0", 10);
   const [currentStep, setCurrentStep] = useState(initialStep);
 
+  const [talesMode, setTalesMode] = useState(false);
   const [formData, setFormData] = useState({
     step1: {
       name: "",
@@ -41,25 +43,37 @@ export default function CreateCharacterPage() {
       weight: { pounds: "", kilogram: "" },
       skin_colour: "",
       hair: "",
-      wiki_visibility: true,
+      wiki_visibility: false,
     },
     step2: {
+      backstory_visibiliy: false,
       backstory: "",
-      wayfarer: "",
-      titles: [],
-      detailed_personality: [],
-      personality_traits: "",
       voice_style: "",
+      wayfarer: "",
+      personality_traits: [],
       main_personality: "",
+      detailed_personality: [],
+      titles: [],
+      fear_weakness_visibility: false,
+      fear_weakness: [],
+      motivation_visibility: false,
+      motivation: [],
       previous_economical_standing: "",
       current_last_economical_standing: "",
-      social_classes: "",
+      previous_social_classes: "",
+      current_social_classes: "",
+      backstory_visibiliy: false,
     },
     step3: { origin: "", story: "" },
     step4: { strength: "", magic: "" },
     step5: { notes: "" },
   });
 
+  useEffect(() => {
+    const mode = Cookies.get("ignite-tales-mode");
+    setTalesMode(mode === "true");
+  }, []);
+  const isNameFilled = () => formData.step1.name.trim() !== "";
   const steps = [
     { title: "Step 1", component: Step1, key: "step1" },
     { title: "Step 2", component: Step2, key: "step2" },
@@ -82,22 +96,49 @@ export default function CreateCharacterPage() {
     }
   };
 
-  const nextStep = () => goToStep(currentStep + 1);
+  const nextStep = () => {
+    if (!isNameFilled()) {
+      alert("Name is required.");
+      return;
+    }
+    goToStep(currentStep + 1);
+  };
   const prevStep = () => goToStep(currentStep - 1);
 
   const handleSubmit = async () => {
+    if (!isNameFilled()) {
+      alert("Name is required.");
+      return;
+    }
     try {
+      const formDataToSend = new FormData();
+
+      const mergedData = {
+        ...formData.step1,
+        // ...formData.step2,
+        // ...formData.step3,
+        // ...formData.step4,
+        // ...formData.step5,
+      };
+
+      formDataToSend.append("data", JSON.stringify(mergedData));
+
+      if (mergedData.art instanceof File) {
+        formDataToSend.append("art", mergedData.art);
+      }
+
+      if (mergedData.token_art instanceof File) {
+        formDataToSend.append("token_art", mergedData.token_art);
+      }
+
       const res = await fetch("/api/characters/save", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData.step1,
-        }),
+        body: formDataToSend,
       });
 
       const result = await res.json();
       if (result.success) {
-        alert("Character saved ");
+        alert("Character saved!");
       } else {
         alert("Error saving character: " + result.error);
       }
@@ -136,6 +177,7 @@ export default function CreateCharacterPage() {
           onChange={(field, value) =>
             handleChange(steps[currentStep].key, field, value)
           }
+          mode={talesMode}
         />
       </div>
 

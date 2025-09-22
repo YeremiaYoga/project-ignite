@@ -1,11 +1,11 @@
 {
-  "name": "asdfghjkl",
+  "name": "",
   "fullname": "",
-  "art": "",
-  "token_art": "",
+  "art": "/assets/characters/Unknown/Unknown_art.webp",
+  "token_art": "/assets/characters/Unknown/Unknown_token_art.webp",
   "creator_name": "",
   "creator_email": "",
-  "randomid": "yhv2FNIzynyF",
+  "randomid": "uIt4qcA67iZj",
   "race": "",
   "subrace": "",
   "background": "",
@@ -20,13 +20,13 @@
   "gender": "",
   "pronoun": "",
   "height": {
-    "feet": 0,
-    "inch": 0,
-    "centimeter": 0
+    "feet": "",
+    "inch": "",
+    "centimeter": ""
   },
   "weight": {
-    "pounds": 0,
-    "kilogram": 0
+    "pounds": "",
+    "kilogram": ""
   },
   "skin_colour": "",
   "hair": "",

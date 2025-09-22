@@ -14,7 +14,6 @@ export default function Step1({ data, onChange }) {
   const [backgroundOptions, setBackgroundOptions] = useState([]);
   const { user } = useUser();
   const [talesMode, setTalesMode] = useState(false);
-  const [wikiVisible, setWikiVisible] = useState(true);
   const [charId, setCharId] = useState("");
   const creatorName = user?.fullName || user?.username || "";
   const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
@@ -32,16 +31,26 @@ export default function Step1({ data, onChange }) {
     }
     setCharId(randomId);
     onChange("randomid", randomId);
-    onChange("wiki_visibility", true);
+    // onChange("wiki_visibility", false);
   }, []);
-
+  const formatRace = (str) =>
+    str
+      .replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
   useEffect(() => {
     async function fetchData() {
       try {
         const resRaces = await fetch("/api/races/getAllRace");
         if (!resRaces.ok) throw new Error("Failed to fetch races");
         const races = await resRaces.json();
-        setRaceOptions(races.map((r) => ({ label: r, value: r })));
+
+        setRaceOptions(
+          races.map((r) => ({
+            label: formatRace(r),
+            value: formatRace(r),
+          }))
+        );
 
         const resBackgrounds = await fetch("/api/backgrounds/getAllBackground");
         if (!resBackgrounds.ok) throw new Error("Failed to fetch backgrounds");
@@ -70,15 +79,17 @@ export default function Step1({ data, onChange }) {
     reader.onloadend = () => {
       if (type === "art") {
         setArtPreview(reader.result);
-        onChange("art", file.name);
+        onChange("art", file); 
       }
       if (type === "token") {
         setTokenPreview(reader.result);
-        onChange("token_art", file.name);
+        onChange("token_art", file); 
       }
     };
     reader.readAsDataURL(file);
   };
+
+
 
   return (
     <div className="p-6 max-w-5xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
@@ -113,7 +124,7 @@ export default function Step1({ data, onChange }) {
               <span className="font-medium">Art :</span>
               <div className="flex items-center gap-3 ml-auto">
                 <span className="text-gray-300 text-sm truncate max-w-[200px]">
-                  {data.artFile ? data.artFile.name : "No file chosen"}
+                  {data.art ? data.art.name  : "No file chosen"}
                 </span>
                 <label className="cursor-pointer px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
                   Upload
@@ -135,7 +146,7 @@ export default function Step1({ data, onChange }) {
               <span className="font-medium">Token :</span>
               <div className="flex items-center gap-3 ml-auto">
                 <span className="text-gray-300 text-sm truncate max-w-[200px]">
-                  {data.tokenFile ? data.tokenFile.name : "No file chosen"}
+                  {data.token_art ? data.token_art.name : "No file chosen"}
                 </span>
 
                 <label className="cursor-pointer px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { X } from "lucide-react";
 
 export default function MultipleInput({
   labels = "Items",
@@ -46,15 +47,20 @@ export default function MultipleInput({
   };
 
   return (
-    <div className="my-4">
+    <div className="my-2">
       {labels && (
         <label className="block text-sm font-medium mb-2">{labels}</label>
       )}
 
       {entries.map((item, index) => (
-        <div key={index} className="flex items-center space-x-2 mb-2 border p-2 rounded-lg border-gray-400">
+        <div
+          key={index}
+          className={`flex items-center mb-2  ${
+            type === "object" ? "rounded-lg border bg-gray-800 border-gray-600" : ""
+          }`}
+        >
           {type === "object" ? (
-            <div className="flex-1 flex flex-col gap-2">
+            <div className="flex-1 flex flex-col gap-2 p-2">
               {fields.map((f) => (
                 <input
                   key={f}
@@ -62,7 +68,7 @@ export default function MultipleInput({
                   placeholder={f.charAt(0).toUpperCase() + f.slice(1)}
                   value={item[f] || ""}
                   onChange={(e) => updateItem(index, f, e.target.value)}
-                  className="w-full p-2 rounded bg-gray-700 border border-gray-600"
+                  className="w-full p-2 rounded bg-gray-800 border border-gray-600"
                 />
               ))}
             </div>
@@ -70,7 +76,7 @@ export default function MultipleInput({
             <select
               value={item}
               onChange={(e) => updateItem(index, e.target.value)}
-              className="flex-1 p-2 rounded bg-gray-700 border border-gray-600"
+              className="flex-1 p-2 rounded-lg border bg-gray-800 border-gray-600"
             >
               <option value="">Select {label}</option>
               {selectOptions.map((opt) => (
@@ -85,16 +91,19 @@ export default function MultipleInput({
               placeholder={label}
               value={item}
               onChange={(e) => updateItem(index, e.target.value)}
-              className="flex-1 p-2 rounded bg-gray-700 border border-gray-600"
+              className="flex-1 p-2 rounded-lg border bg-gray-800 border-gray-600"
             />
           )}
-          <button
-            type="button"
-            onClick={() => removeItem(index)}
-            className="px-2 py-1 bg-red-500 text-white rounded"
-          >
-            x
-          </button>
+
+          <div className="flex justify-center items-center px-1">
+            <button
+              type="button"
+              onClick={() => removeItem(index)}
+              className="p-1 rounded-full bg-red-500 text-white hover:bg-red-600"
+            >
+              <X size={14} />
+            </button>
+          </div>
         </div>
       ))}
 

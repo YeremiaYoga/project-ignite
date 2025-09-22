@@ -22,6 +22,32 @@ export default function Step2({ data, allData, onChange }) {
     "Creator",
   ];
 
+  const economicalOptions = [
+    "Poor/Subsistence",
+    "Modest/Working Class",
+    "Middle-Class/Comfortable",
+    "Wealthy/Affluent",
+    "Rich / Prosperous",
+    "Opulent / Lavish",
+  ];
+
+  const socialClassOptions = [
+    "Slave/Serf",
+    "Criminal/Outlaw",
+    "Exile/Outcast",
+    "Marginalized",
+    "Commoners/Workers",
+    "Merchants/Artisans",
+    "Military/Officials",
+    "Clergy/Priest",
+    "Scholars/Intelligentsia",
+    "Politician",
+    "Knight / Dame",
+    "Nobility/Large Land Owner",
+    "High Nobility/Elite",
+    "Rulers/Sovereigns",
+  ];
+
   const allTraitsWithImages = allTraits.map((trait) => ({
     value: trait.toLowerCase(),
     label: trait,
@@ -75,13 +101,29 @@ export default function Step2({ data, allData, onChange }) {
         )}
 
         <div className="col-span-9">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-sm font-medium">Backstory</label>
+            <button
+              type="button"
+              onClick={() =>
+                onChange("backstory_visibiliy", !step2.backstory_visibiliy)
+              }
+              className="text-gray-400 hover:text-white"
+            >
+              {step2.backstory_visibiliy ? (
+                <Eye size={18} />
+              ) : (
+                <EyeOff size={18} />
+              )}
+            </button>
+          </div>
           <InputField
-            label="Backstory"
+            label=""
             type="textarea"
             value={step2.backstory || ""}
             onChange={(val) => onChange("backstory", val)}
             placeholder="Write backstory here..."
-            rows={18}
+            rows={22}
           />
         </div>
 
@@ -107,14 +149,7 @@ export default function Step2({ data, allData, onChange }) {
             value={data.previous_economical_standing}
             onChange={(val) => onChange("previous_economical_standing", val)}
             placeholder="Select Economical Standing"
-            options={[
-              "Poor/Subsistence",
-              "Modest/Working Class",
-              "Middle-Class/Comfortable",
-              "Wealthy/Affluent",
-              "Rich / Prosperous",
-              "Opulent / Lavish",
-            ]}
+            options={economicalOptions}
           />
           <InputField
             label="Current Economical Standing"
@@ -124,39 +159,27 @@ export default function Step2({ data, allData, onChange }) {
               onChange("current_last_economical_standing", val)
             }
             placeholder="Select Economical Standing"
-            options={[
-              "Poor/Subsistence",
-              "Modest/Working Class",
-              "Middle-Class/Comfortable",
-              "Wealthy/Affluent",
-              "Rich / Prosperous",
-              "Opulent / Lavish",
-            ]}
+            options={economicalOptions}
           />
           <InputField
-            label="Social Classes"
+            label="Previous Social Classes"
             type="select"
-            value={data.social_classes}
-            onChange={(val) => onChange("social_classes", val)}
+            value={data.previous_social_classes}
+            onChange={(val) => onChange("previous_social_classes", val)}
             placeholder="Select Sosial Classes"
-            options={[
-              "Slave/Serf",
-              "Criminal/Outlaw",
-              "Exile/Outcast",
-              "Marginalized",
-              "Commoners/Workers",
-              "Merchants/Artisans",
-              "Military/Officials",
-              "Clergy/Priest",
-              "Scholars/Intelligentsia",
-              "Politician",
-              "Knight / Dame",
-              "Nobility/Large Land Owner",
-              "High Nobility/Elite",
-              "Rulers/Sovereigns",
-            ]}
+            options={socialClassOptions}
+          />
+          <InputField
+            label="Current Social Classes"
+            type="select"
+            value={data.current_social_classes}
+            onChange={(val) => onChange("current_social_classes", val)}
+            placeholder="Select Sosial Classes"
+            options={socialClassOptions}
           />
         </div>
+
+        <hr className="col-span-12 border-t border-gray-700 my-2" />
 
         <div className="col-span-12 grid grid-cols-12 gap-4 items-start">
           <div className="col-span-3">
@@ -201,6 +224,8 @@ export default function Step2({ data, allData, onChange }) {
             />
           </div>
         </div>
+
+        <hr className="col-span-12 border-t border-gray-700 my-2" />
 
         <div className="col-span-6">
           <div className="flex items-center justify-between mb-1">

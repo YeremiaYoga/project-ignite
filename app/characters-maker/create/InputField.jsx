@@ -105,18 +105,21 @@ export default function InputField({
           onChange={(e) => !disabled && onChange(e.target.value)}
           disabled={disabled}
           className={`w-full p-3 rounded-lg border text-sm outline-none
-            ${
-              disabled
-                ? "bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed opacity-60"
-                : "bg-gray-800 border-gray-700 focus:ring-2 focus:ring-blue-500"
-            }`}
+    ${
+      disabled
+        ? "bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed opacity-60"
+        : "bg-gray-800 border-gray-700 focus:ring-2 focus:ring-blue-500"
+    }`}
         >
           <option value="">{placeholder || "Please select"}</option>
           {options.map((opt) => (
             <option
               key={opt.value ?? opt}
               value={opt.value ?? opt}
-              className="capitalize"
+              disabled={opt.disabled}
+              className={`capitalize ${
+                opt.disabled ? "text-gray-400 font-semibold" : ""
+              }`}
             >
               {opt.label ?? opt}
             </option>

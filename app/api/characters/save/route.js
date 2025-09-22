@@ -3,7 +3,14 @@ import path from "path";
 
 export async function POST(req) {
   try {
-    const body = await req.json();
+    const formData = await req.formData();
+    const rawData = formData.get("data");
+    const body = rawData ? JSON.parse(rawData) : {};
+
+
+    const artFile = formData.get("art");
+    const tokenFile = formData.get("token_art");
+
 
     const template = {
       name: "",
@@ -26,25 +33,29 @@ export async function POST(req) {
       birth_place: "",
       gender: "",
       pronoun: "",
-      height: { feet: 0, inch: 0, centimeter: 0 },
-      weight: { pounds: 0, kilogram: 0 },
+      height: { feet: "", inch: "", centimeter: "" },
+      weight: { pounds: "", kilogram: "" },
       skin_colour: "",
       hair: "",
-      wiki_visibility: true,
-      //   backstory: "",
-      //   voice_style: "",
-      //   wayfarer: [],
-      //   personality_traits: [],
-      //   main_personality: "",
-      //   detailed_personality: [],
-      //   titles: [],
-      //   fear_weakness_visibility: true,
-      //   fear_weakness: [],
-      //   motivation_visibility: true,
-      //   motivation: [],
-      //   previous_economical_standing: "",
-      //   current_last_economical_standing: "",
-      //   social_classes: "",
+      wiki_visibility: false,
+
+      // backstory_visibiliy: false,
+      // backstory: "",
+      // voice_style: "",
+      // wayfarer: "",
+      // personality_traits: [],
+      // main_personality: "",
+      // detailed_personality: [],
+      // titles: [],
+      // fear_weakness_visibility: false,
+      // fear_weakness: [],
+      // motivation_visibility: false,
+      // motivation: [],
+      // previous_economical_standing: "",
+      // current_last_economical_standing: "",
+      // previous_social_classes: "",
+      // current_social_classes: "",
+      // backstory_visibiliy: false,
     };
 
     let mergedData = {
@@ -54,43 +65,62 @@ export async function POST(req) {
       weight: { ...template.weight, ...body.weight },
     };
 
-    let feet = parseFloat(mergedData.height.feet) || 0;
-    let inch = parseFloat(mergedData.height.inch) || 0;
-    let cm = parseFloat(mergedData.height.centimeter) || 0;
+    // --- Konversi height ---
+    const feet = parseFloat(mergedData.height.feet) || 0;
+    const inch = parseFloat(mergedData.height.inch) || 0;
+    const cm = parseFloat(mergedData.height.centimeter) || 0;
 
     if (feet || inch) {
-      cm = Math.round((feet * 12 + inch) * 2.54);
+      mergedData.height.centimeter = Math.round((feet * 12 + inch) * 2.54);
     } else if (cm) {
       const totalInches = cm / 2.54;
-      feet = Math.floor(totalInches / 12);
-      inch = Math.round(totalInches % 12);
+      mergedData.height.feet = Math.floor(totalInches / 12);
+      mergedData.height.inch = Math.round(totalInches % 12);
     }
 
-    mergedData.height = {
-      feet: feet,
-      inch: inch,
-      centimeter: cm,
-    };
-
-    let pounds = parseFloat(mergedData.weight.pounds) || 0;
-    let kg = parseFloat(mergedData.weight.kilogram) || 0;
+    // --- Konversi weight ---
+    const pounds = parseFloat(mergedData.weight.pounds) || 0;
+    const kg = parseFloat(mergedData.weight.kilogram) || 0;
 
     if (pounds) {
-      kg = +(pounds * 0.453592).toFixed(1);
+      mergedData.weight.kilogram = +(pounds * 0.453592).toFixed(1);
     } else if (kg) {
-      pounds = +(kg / 0.453592).toFixed(1);
+      mergedData.weight.pounds = +(kg / 0.453592).toFixed(1);
     }
 
-    mergedData.weight = {
-      pounds: pounds,
-      kilogram: kg,
-    };
-
+    // --- Buat folder ---
     const characterName = mergedData.name?.trim() || "Unknown";
     const folderName = characterName.replace(/\s+/g, "_");
+
     const baseDir = path.join(process.cwd(), "data", "characters", folderName);
     await fs.mkdir(baseDir, { recursive: true });
 
+    const publicDir = path.join(
+      process.cwd(),
+      "public",
+      "assets",
+      "characters",
+      folderName
+    );
+    await fs.mkdir(publicDir, { recursive: true });
+
+    // --- Simpan file art ---
+    if (artFile && artFile instanceof File) {
+      const buffer = Buffer.from(await artFile.arrayBuffer());
+      const artPath = path.join(publicDir, `${folderName}_art.webp`);
+      await fs.writeFile(artPath, buffer);
+      mergedData.art = `/assets/characters/${folderName}/${folderName}_art.webp`;
+    }
+
+    // --- Simpan file token art ---
+    if (tokenFile && tokenFile instanceof File) {
+      const buffer = Buffer.from(await tokenFile.arrayBuffer());
+      const tokenPath = path.join(publicDir, `${folderName}_token_art.webp`);
+      await fs.writeFile(tokenPath, buffer);
+      mergedData.token_art = `/assets/characters/${folderName}/${folderName}_token_art.webp`;
+    }
+
+    // --- Simpan JSON ---
     const filePath = path.join(baseDir, `${characterName}Data.json`);
     await fs.writeFile(filePath, JSON.stringify(mergedData, null, 2), "utf-8");
 
