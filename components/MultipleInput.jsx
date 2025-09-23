@@ -11,12 +11,13 @@ export default function MultipleInput({
   type = "string", // "string" | "object"
   fields = ["name"], // hanya untuk type object
   selectOptions = null, // hanya untuk single field select
+  columns = 1, // jumlah kolom untuk object fields
 }) {
   const [entries, setEntries] = useState(
     items.length
       ? items
       : type === "object"
-      ? [Object.fromEntries(fields.map((f) => [f, ""]))]
+      ? [Object.fromEntries(fields.map((f) => [f, ""]))] // buat objek kosong sesuai fields
       : [""]
   );
 
@@ -56,11 +57,17 @@ export default function MultipleInput({
         <div
           key={index}
           className={`flex items-center mb-2  ${
-            type === "object" ? "rounded-lg border bg-gray-800 border-gray-600" : ""
+            type === "object"
+              ? "rounded-lg border  border-gray-600"
+              : ""
           }`}
         >
           {type === "object" ? (
-            <div className="flex-1 flex flex-col gap-2 p-2">
+            <div
+              className={`flex-1 grid gap-2 p-2 ${
+                columns === 2 ? "grid-cols-2" : "grid-cols-1"
+              }`}
+            >
               {fields.map((f) => (
                 <input
                   key={f}
@@ -110,7 +117,7 @@ export default function MultipleInput({
       <button
         type="button"
         onClick={addItem}
-        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        className="px-2 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
       >
         Add {label}
       </button>

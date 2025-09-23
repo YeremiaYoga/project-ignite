@@ -64,7 +64,27 @@ export default function CreateCharacterPage() {
       current_social_classes: "",
       backstory_visibiliy: false,
     },
-    step3: { origin: "", story: "" },
+    step3: {
+      appearance_visibility: false,
+      appearance: "",
+      main_theme: "",
+      main_theme_ogg: "",
+      combat_theme: "",
+      combat_theme_ogg: "",
+      nationality: "",
+      main_resident: {
+        resident: "",
+        country: "",
+      },
+      notable_details: [],
+      current_occupation: [],
+      previous_occupation: [],
+      other_resident: [],
+      hobbies_visibility: false,
+      hobbies: [],
+      signature_object: [],
+      signature_weapon: [],
+    },
     step4: { strength: "", magic: "" },
     step5: { notes: "" },
   });
@@ -110,27 +130,47 @@ export default function CreateCharacterPage() {
       alert("Name is required.");
       return;
     }
+
     try {
       const formDataToSend = new FormData();
 
+      // Gabung data step1-3
       const mergedData = {
         ...formData.step1,
-        // ...formData.step2,
-        // ...formData.step3,
+        ...formData.step2,
+        ...formData.step3,
         // ...formData.step4,
         // ...formData.step5,
       };
 
-      formDataToSend.append("data", JSON.stringify(mergedData));
+      // Buat salinan tanpa file (biar JSON.stringify aman)
+      const { art, token_art, main_theme_ogg, combat_theme_ogg, ...jsonData } =
+        mergedData;
 
-      if (mergedData.art instanceof File) {
-        formDataToSend.append("art", mergedData.art);
+      // Append data JSON
+      formDataToSend.append("data", JSON.stringify(jsonData));
+
+      // Append file art
+      if (art instanceof File) {
+        formDataToSend.append("art", art);
       }
 
-      if (mergedData.token_art instanceof File) {
-        formDataToSend.append("token_art", mergedData.token_art);
+      // Append token_art
+      if (token_art instanceof File) {
+        formDataToSend.append("token_art", token_art);
       }
 
+      // Append main_theme_ogg
+      if (main_theme_ogg instanceof File) {
+        formDataToSend.append("main_theme_ogg", main_theme_ogg);
+      }
+
+      // Append combat_theme_ogg
+      if (combat_theme_ogg instanceof File) {
+        formDataToSend.append("combat_theme_ogg", combat_theme_ogg);
+      }
+
+      // Kirim ke API
       const res = await fetch("/api/characters/save", {
         method: "POST",
         body: formDataToSend,

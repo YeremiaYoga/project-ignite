@@ -7,11 +7,11 @@ export async function POST(req) {
     const rawData = formData.get("data");
     const body = rawData ? JSON.parse(rawData) : {};
 
-
     const artFile = formData.get("art");
     const tokenFile = formData.get("token_art");
 
-
+    const mainThemeFile = formData.get("main_theme_ogg");
+    const combatThemeFile = formData.get("combat_theme_ogg");
     const template = {
       name: "",
       fullname: "",
@@ -39,23 +39,42 @@ export async function POST(req) {
       hair: "",
       wiki_visibility: false,
 
-      // backstory_visibiliy: false,
-      // backstory: "",
-      // voice_style: "",
-      // wayfarer: "",
-      // personality_traits: [],
-      // main_personality: "",
-      // detailed_personality: [],
-      // titles: [],
-      // fear_weakness_visibility: false,
-      // fear_weakness: [],
-      // motivation_visibility: false,
-      // motivation: [],
-      // previous_economical_standing: "",
-      // current_last_economical_standing: "",
-      // previous_social_classes: "",
-      // current_social_classes: "",
-      // backstory_visibiliy: false,
+      backstory_visibiliy: false,
+      backstory: "",
+      voice_style: "",
+      wayfarer: "",
+      personality_traits: [],
+      main_personality: "",
+      detailed_personality: [],
+      titles: [],
+      fear_weakness_visibility: false,
+      fear_weakness: [],
+      motivation_visibility: false,
+      motivation: [],
+      previous_economical_standing: "",
+      current_last_economical_standing: "",
+      previous_social_classes: "",
+      current_social_classes: "",
+
+      appearance_visibility: false,
+      appearance: "",
+      main_theme: "",
+      main_theme_ogg: "",
+      combat_theme: "",
+      combat_theme_ogg: "",
+      nationality: "",
+      main_resident: {
+        resident: "",
+        country: "",
+      },
+      notable_details: [],
+      current_occupation: [],
+      previous_occupation: [],
+      other_resident: [],
+      hobbies_visibility: false,
+      hobbies: [],
+      signature_object: [],
+      signature_weapon: [],
     };
 
     let mergedData = {
@@ -118,6 +137,28 @@ export async function POST(req) {
       const tokenPath = path.join(publicDir, `${folderName}_token_art.webp`);
       await fs.writeFile(tokenPath, buffer);
       mergedData.token_art = `/assets/characters/${folderName}/${folderName}_token_art.webp`;
+    }
+
+    // --- Simpan main_theme_ogg ---
+    if (mainThemeFile && mainThemeFile instanceof File) {
+      const buffer = Buffer.from(await mainThemeFile.arrayBuffer());
+      const mainThemePath = path.join(
+        publicDir,
+        `${folderName}_main_theme.ogg`
+      );
+      await fs.writeFile(mainThemePath, buffer);
+      mergedData.main_theme_ogg = `/assets/characters/${folderName}/${folderName}_main_theme.ogg`;
+    }
+
+    // --- Simpan combat_theme_ogg ---
+    if (combatThemeFile && combatThemeFile instanceof File) {
+      const buffer = Buffer.from(await combatThemeFile.arrayBuffer());
+      const combatThemePath = path.join(
+        publicDir,
+        `${folderName}_combat_theme.ogg`
+      );
+      await fs.writeFile(combatThemePath, buffer);
+      mergedData.combat_theme_ogg = `/assets/characters/${folderName}/${folderName}_combat_theme.ogg`;
     }
 
     // --- Simpan JSON ---

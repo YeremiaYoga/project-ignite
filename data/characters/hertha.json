@@ -115,7 +115,10 @@
     "A faint, knowing smile that implies hidden schemes",
     "Timeless beauty"
   ],
-  "main_resident": "City of Orange Corral,Delstainvia",
+  "main_resident": {
+    "resident": "Orange Corral, Delstainvia",
+    "country": "Delstainvia"
+  },
   "other_resident": [
     "Ravenhan,Delstainvia",
     "The Great City of Maple,Mondral",
@@ -125,8 +128,8 @@
   "nationality": "Delstainvian",
   "main_theme": "Must be www.youtube.com/ link",
   "main_theme_ogg": "asset/character/music/character_main_theme.ogg",
-  "main_combat_theme": "Must be www.youtube.com/ link",
-  "main_combat_theme_ogg": "asset/character/music/character_combat_theme.ogg",
+  "combat_theme": "Must be www.youtube.com/ link",
+  "combat_theme_ogg": "asset/character/music/character_combat_theme.ogg",
   "hobbies_visibility": true,
   "hobbies": [
     "Manipulating admirers or dream seeker for her own game",

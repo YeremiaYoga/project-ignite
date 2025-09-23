@@ -125,7 +125,7 @@ export default function Step3({ data, allData, onChange, mode }) {
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    onChange("main_theme_file", file);
+                    onChange("main_theme_ogg", file);
                   }
                 }}
                 className="hidden"
@@ -142,7 +142,7 @@ export default function Step3({ data, allData, onChange, mode }) {
             </div>
 
             <p className="mt-1 text-xs text-gray-400 flex justify-end">
-              {data.main_theme_file ? data.main_theme_file.name : "\u00A0"}
+              {data.main_theme_ogg ? data.main_theme_ogg.name : "\u00A0"}
             </p>
           </div>
 
@@ -166,7 +166,7 @@ export default function Step3({ data, allData, onChange, mode }) {
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    onChange("combat_theme_file", file);
+                    onChange("combat_theme_ogg", file);
                   }
                 }}
                 className="hidden"
@@ -182,7 +182,7 @@ export default function Step3({ data, allData, onChange, mode }) {
               </label>
             </div>
             <p className="mt-1 text-xs text-gray-400 flex justify-end">
-              {data.combat_theme_file ? data.combat_theme_file.name : "\u00A0"}
+              {data.combat_theme_ogg ? data.combat_theme_ogg.name : "\u00A0"}
             </p>
           </div>
 
@@ -190,7 +190,7 @@ export default function Step3({ data, allData, onChange, mode }) {
             label="Nationality"
             type="select"
             value={step3.nationality || ""}
-            onChange={(val) => handleChange("nationality", val)}
+            onChange={(val) => onChange("nationality", val)}
             placeholder="Select Nationality"
             options={nationalityOptions}
           />
