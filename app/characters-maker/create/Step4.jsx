@@ -3,7 +3,14 @@ import InputField from "./InputField.jsx";
 import RelationshipSection from "./RelationshipSection.jsx";
 import MultipleInput from "@/components/MultipleInput.jsx";
 import { Upload, X } from "lucide-react";
-
+import {
+  familyOptions,
+  alliesOptions,
+  friendsOptions,
+  enemiesOptions,
+  subordinatesOptions,
+  affiliationsOptions,
+} from "../characterOptions";
 export default function Step4({ data, allData, onChange }) {
   const step4 = data || {};
   return (
@@ -22,11 +29,11 @@ export default function Step4({ data, allData, onChange }) {
               Connection Towards Events
             </label>
 
-            {(data.connections && data.connections.length > 0
-              ? data.connections
+            {(data.connection_towards_events && data.connection_towards_events.length > 0
+              ? data.connection_towards_events
               : [
                   {
-                    event_name: "",
+                    name: "",
                     id_event: "",
                     connection: "",
                     connection_notes: "",
@@ -40,10 +47,10 @@ export default function Step4({ data, allData, onChange }) {
                 <button
                   type="button"
                   onClick={() => {
-                    const updated = (data.connections || []).filter(
+                    const updated = (data.connection_towards_events || []).filter(
                       (_, i) => i !== idx
                     );
-                    onChange("connections", updated);
+                    onChange("connection_towards_events", updated);
                   }}
                   className="absolute -top-3 -right-3 p-1 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-md"
                 >
@@ -54,11 +61,11 @@ export default function Step4({ data, allData, onChange }) {
                   <div className="col-span-2">
                     <InputField
                       label=""
-                      value={conn.event_name || ""}
+                      value={conn.name || ""}
                       onChange={(val) => {
-                        const updated = [...(data.connections || [])];
-                        updated[idx] = { ...conn, event_name: val };
-                        onChange("connections", updated);
+                        const updated = [...(data.connection_towards_events || [])];
+                        updated[idx] = { ...conn, name: val };
+                        onChange("connection_towards_events", updated);
                       }}
                       placeholder="Enter Event Name"
                     />
@@ -68,9 +75,9 @@ export default function Step4({ data, allData, onChange }) {
                       label=""
                       value={conn.id_event || ""}
                       onChange={(val) => {
-                        const updated = [...(data.connections || [])];
+                        const updated = [...(data.connection_towards_events || [])];
                         updated[idx] = { ...conn, id_event: val };
-                        onChange("connections", updated);
+                        onChange("connection_towards_events", updated);
                       }}
                       placeholder="Enter ID Event"
                     />
@@ -84,9 +91,9 @@ export default function Step4({ data, allData, onChange }) {
                       label=""
                       value={conn.connection || ""}
                       onChange={(val) => {
-                        const updated = [...(data.connections || [])];
+                        const updated = [...(data.connection_towards_events || [])];
                         updated[idx] = { ...conn, connection: val };
-                        onChange("connections", updated);
+                        onChange("connection_towards_events", updated);
                       }}
                       options={[
                         "Direct/Fully Involved",
@@ -107,9 +114,9 @@ export default function Step4({ data, allData, onChange }) {
                       label=""
                       value={conn.connection_notes || ""}
                       onChange={(val) => {
-                        const updated = [...(data.connections || [])];
+                        const updated = [...(data.connection_towards_events || [])];
                         updated[idx] = { ...conn, connection_notes: val };
-                        onChange("connections", updated);
+                        onChange("connection_towards_events", updated);
                       }}
                       placeholder="Enter Notes"
                     />
@@ -122,12 +129,12 @@ export default function Step4({ data, allData, onChange }) {
               type="button"
               className="mt-2 px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm"
               onClick={() =>
-                onChange("connections", [
-                  ...(data.connections && data.connections.length > 0
-                    ? data.connections
+                onChange("connection_towards_events", [
+                  ...(data.connection_towards_events && data.connection_towards_events.length > 0
+                    ? data.connection_towards_events
                     : []),
                   {
-                    event_name: "",
+                    name: "",
                     id_event: "",
                     connection: "",
                     connection_notes: "",
@@ -172,7 +179,7 @@ export default function Step4({ data, allData, onChange }) {
         keyName="family"
         data={data}
         onChange={onChange}
-        relationshipOptions={["Father", "Mother", "Son", "Daughter"]}
+        relationshipOptions={familyOptions}
       />
 
       <RelationshipSection
@@ -180,35 +187,35 @@ export default function Step4({ data, allData, onChange }) {
         keyName="allies"
         data={data}
         onChange={onChange}
-        relationshipOptions={["Father", "Mother", "Son", "Daughter"]}
+        relationshipOptions={alliesOptions}
       />
       <RelationshipSection
         title="Friends"
         keyName="friends"
         data={data}
         onChange={onChange}
-        relationshipOptions={["Father", "Mother", "Son", "Daughter"]}
+        relationshipOptions={friendsOptions}
       />
       <RelationshipSection
         title="Enemies"
         keyName="enemies"
         data={data}
         onChange={onChange}
-        relationshipOptions={["Father", "Mother", "Son", "Daughter"]}
+        relationshipOptions={enemiesOptions}
       />
       <RelationshipSection
         title="Subordinates"
         keyName="subordinates"
         data={data}
         onChange={onChange}
-        relationshipOptions={["Father", "Mother", "Son", "Daughter"]}
+        relationshipOptions={subordinatesOptions}
       />
       <RelationshipSection
         title="Affiliations"
         keyName="affiliations"
         data={data}
         onChange={onChange}
-        relationshipOptions={["Father", "Mother", "Son", "Daughter"]}
+        relationshipOptions={affiliationsOptions}
       />
 
       <RelationshipSection

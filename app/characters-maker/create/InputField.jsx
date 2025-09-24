@@ -138,6 +138,24 @@ export default function InputField({
             </option>
           ))}
         </select>
+      ) : type === "selectButton" ? (
+        <div className="flex gap-2">
+          {options.map((opt) => (
+            <button
+              key={opt.value ?? opt}
+              type="button"
+              onClick={() => !disabled && onChange(opt.value ?? opt)}
+              className={`flex-1 px-3 py-2 rounded-md border text-sm text-center ${
+                value === (opt.value ?? opt)
+                  ? "bg-blue-600 text-white border-blue-500"
+                  : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
+              } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+              disabled={disabled}
+            >
+              {opt.label ?? opt}
+            </button>
+          ))}
+        </div>
       ) : (
         <input
           type={type}

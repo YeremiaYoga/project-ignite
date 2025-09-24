@@ -85,7 +85,19 @@ export default function CreateCharacterPage() {
       signature_object: [],
       signature_weapon: [],
     },
-    step4: { strength: "", magic: "" },
+    step4: {
+      notable_accomplishments: [],
+      connection_towards_events: [],
+      notable_quotes: "",
+      quotes_from_others: [],
+      family: [],
+      allies: [],
+      friends: [],
+      enemies: [],
+      subordinates: [],
+      affiliations: [],
+      spesial_relationship: [],
+    },
     step5: { notes: "" },
   });
 
@@ -139,38 +151,26 @@ export default function CreateCharacterPage() {
         ...formData.step1,
         ...formData.step2,
         ...formData.step3,
-        // ...formData.step4,
+        ...formData.step4,
         // ...formData.step5,
       };
 
-      // Buat salinan tanpa file (biar JSON.stringify aman)
       const { art, token_art, main_theme_ogg, combat_theme_ogg, ...jsonData } =
         mergedData;
-
-      // Append data JSON
       formDataToSend.append("data", JSON.stringify(jsonData));
-
-      // Append file art
       if (art instanceof File) {
         formDataToSend.append("art", art);
       }
-
-      // Append token_art
       if (token_art instanceof File) {
         formDataToSend.append("token_art", token_art);
       }
-
-      // Append main_theme_ogg
       if (main_theme_ogg instanceof File) {
         formDataToSend.append("main_theme_ogg", main_theme_ogg);
       }
-
-      // Append combat_theme_ogg
       if (combat_theme_ogg instanceof File) {
         formDataToSend.append("combat_theme_ogg", combat_theme_ogg);
       }
 
-      // Kirim ke API
       const res = await fetch("/api/characters/save", {
         method: "POST",
         body: formDataToSend,
@@ -189,6 +189,61 @@ export default function CreateCharacterPage() {
   };
 
   const CurrentComponent = steps[currentStep].component;
+  const stepKey = steps[currentStep].key;
+  const stepData = formData[stepKey];
+
+  // Ganti bagian render komponen Step
+  const renderStepContent = () => {
+    const stepKey = steps[currentStep].key;
+    const stepData = formData[stepKey];
+
+    if (stepKey === "step5") {
+      const type = formData.step1.character_type;
+
+      if (!type) {
+        return (
+          <div className="text-center text-red-400 font-semibold">
+            Please select character type first.
+          </div>
+        );
+      }
+
+      if (type.toLowerCase() === "player") {
+        return (
+          <div className="w-full h-[60vh] flex flex-col items-center justify-center bg-black/80 rounded-lg p-6">
+            <p className="text-lg md:text-xl font-semibold text-gray-200 text-center mb-6">
+              The Character Builder for Player Character will be released Q1
+              2026
+            </p>
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
+            >
+              Save
+            </button>
+          </div>
+        );
+      }
+
+      return (
+        <CurrentComponent
+          data={stepData}
+          allData={formData}
+          onChange={(field, value) => handleChange(stepKey, field, value)}
+          mode={talesMode}
+        />
+      );
+    }
+
+    return (
+      <CurrentComponent
+        data={stepData}
+        allData={formData}
+        onChange={(field, value) => handleChange(stepKey, field, value)}
+        mode={talesMode}
+      />
+    );
+  };
 
   return (
     <main className="max-w-6xl w-full mx-auto px-4 py-8 text-white min-h-screen">
@@ -210,16 +265,7 @@ export default function CreateCharacterPage() {
         ))}
       </div>
 
-      <div className="p-6 rounded-lg shadow mb-6">
-        <CurrentComponent
-          data={formData[steps[currentStep].key]}
-          allData={formData}
-          onChange={(field, value) =>
-            handleChange(steps[currentStep].key, field, value)
-          }
-          mode={talesMode}
-        />
-      </div>
+      <div className="p-6 rounded-lg shadow mb-6">{renderStepContent()}</div>
 
       <div className="flex justify-between">
         <button

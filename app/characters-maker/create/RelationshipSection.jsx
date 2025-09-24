@@ -3,11 +3,18 @@
 import InputField from "./InputField";
 import { Upload, X } from "lucide-react";
 
-const STATUS_OPTIONS = [
-  { value: "Alive", label: "Alive" },
-  { value: "Dead", label: "Dead" },
-  { value: "Unknown", label: "Unknown" },
-];
+export const STATUS_OPTIONS = {
+  general: [
+    { value: "Alive", label: "Alive" },
+    { value: "Dead", label: "Dead" },
+    { value: "Unknown", label: "Unknown" },
+  ],
+  affiliation: [
+    { value: "Active", label: "Active" },
+    { value: "Unknown", label: "Unknown" },
+    { value: "Inactive", label: "Inactive" },
+  ],
+};
 
 export default function RelationshipSection({
   title,
@@ -61,17 +68,19 @@ export default function RelationshipSection({
             <div className="col-span-2">
               <InputField
                 type="select"
-                placeholder="Status"
+                placeholder="Select Status"
                 value={member.status || ""}
-                options={STATUS_OPTIONS}
+                options={
+                  keyName === "affiliations"
+                    ? STATUS_OPTIONS.affiliation
+                    : STATUS_OPTIONS.general
+                }
                 onChange={(val) => handleUpdate(index, "status", val)}
               />
             </div>
             <div className="col-span-3">
               <InputField
-                type={
-                  keyName === "spesial_relationship" ? "text" : "selectSearch"
-                }
+                type={keyName === "spesial_relationship" ? "text" : "select"}
                 placeholder="Relationship"
                 value={member.relationship || ""}
                 options={

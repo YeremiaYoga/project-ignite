@@ -141,9 +141,12 @@ export default function Step3({ data, allData, onChange, mode }) {
               </label>
             </div>
 
-            <p className="mt-1 text-xs text-gray-400 flex justify-end">
-              {data.main_theme_ogg ? data.main_theme_ogg.name : "\u00A0"}
-            </p>
+            <div className="flex justify-end items-center gap-2 mt-2">
+              <p className="text-xs text-gray-400">
+                {data.main_theme_ogg ? data.main_theme_ogg.name : "\u00A0"}
+              </p>
+              <p className="text-xs text-gray-400">(OGG File Only)</p>
+            </div>
           </div>
 
           <div>
@@ -181,9 +184,13 @@ export default function Step3({ data, allData, onChange, mode }) {
                 <Upload className="w-5 h-5 text-white" />
               </label>
             </div>
-            <p className="mt-1 text-xs text-gray-400 flex justify-end">
-              {data.combat_theme_ogg ? data.combat_theme_ogg.name : "\u00A0"}
-            </p>
+
+            <div className="flex justify-end items-center gap-2 mt-2">
+              <p className="text-xs text-gray-400">
+                {data.combat_theme_ogg ? data.combat_theme_ogg.name : "\u00A0"}
+              </p>
+              <p className="text-xs text-gray-400">(OGG File Only)</p>
+            </div>
           </div>
 
           <InputField

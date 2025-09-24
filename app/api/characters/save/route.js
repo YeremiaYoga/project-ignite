@@ -75,6 +75,18 @@ export async function POST(req) {
       hobbies: [],
       signature_object: [],
       signature_weapon: [],
+
+      notable_accomplishments: [],
+      connection_towards_events: [],
+      notable_quotes: "",
+      quotes_from_others: [],
+      family: [],
+      allies: [],
+      friends: [],
+      enemies: [],
+      subordinates: [],
+      affiliations: [],
+      spesial_relationship: [],
     };
 
     let mergedData = {

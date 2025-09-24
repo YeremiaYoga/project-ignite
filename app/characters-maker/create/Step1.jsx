@@ -262,7 +262,7 @@ export default function Step1({ data, onChange }) {
 
           <InputField
             label="Character Type"
-            type="buttonGroup"
+            type="selectButton"
             value={data.character_type}
             onChange={(val) => onChange("character_type", val)}
             options={["Player", "NPC"]}
@@ -276,7 +276,7 @@ export default function Step1({ data, onChange }) {
         <div className="space-y-4 col-span-2">
           <InputField
             label="Status"
-            type="buttonGroup"
+            type="selectButton"
             value={data.status}
             onChange={(val) => onChange("status", val)}
             options={["Alive", "Unknown", "Dead"]}
