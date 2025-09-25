@@ -8,11 +8,16 @@ export default function Step5({ data, allData, onChange }) {
   const baseValuesFor = (combatValue) => {
     const val = parseInt(combatValue, 10) || 0;
 
-    if (val === 0) {
-      return [10, 10, 10, 10, 10, 10];
-    }
+    let data = combatValueOptions.find((r) => r.value == val);
 
-    return [15, 14, 13, 12, 10, 8];
+    if (data && data.baseValues) {
+      return data.baseValues;
+    }
+    // if (val === 0) {
+    //   return [10, 10, 10, 10, 10, 10];
+    // }
+
+    // return [15, 14, 13, 12, 10, 8];
   };
   const baseValues = baseValuesFor(step5.combat_value);
 
@@ -102,14 +107,17 @@ export default function Step5({ data, allData, onChange }) {
         <div className="bg-gray-800 rounded-xl p-4 flex flex-col items-center shadow-md">
           {step5.combat_value ? (
             <>
-              <p className="text-xs text-gray-400 mb-2">
-                (Value Base On Combat Value)
-              </p>
+              <p className="text-lg ">Ability Score</p>
               <div className="flex gap-3 font-bold text-lg">
                 {baseValues.map((val, idx) => (
                   <span key={idx}>{val}</span>
                 ))}
               </div>
+              <p className="text-lg my-2">(PB : +2)</p>
+
+              <p className="text-xs text-gray-400 mb-2">
+                (Value Base On Combat Value)
+              </p>
             </>
           ) : (
             <p className="text-xs text-gray-500 italic">
@@ -121,9 +129,27 @@ export default function Step5({ data, allData, onChange }) {
         <div className="bg-gray-800 rounded-xl p-4 flex flex-col items-center shadow-md">
           {step5.combat_value ? (
             <>
-              <p className="text-xs text-gray-400 mb-2">Skill Points Left</p>
+              <p className="text-xs text-gray-400 mb-1">Skill Points Left</p>
               <div className="text-3xl font-bold">
                 {maxSkillPoints - (step5.usedSkillPoints || 0)}/{maxSkillPoints}
+              </div>
+              <hr className="w-full border-t border-gray-400 my-2" />
+              <div className="grid grid-cols-3 mt-2 gap-1">
+                <div className="flex flex-col items-center text-[9px] text-center">
+                  {skillIcons.filled}
+                  <span className="mt-1">Proficient</span>
+                  <span>(Cost: 3)</span>
+                </div>
+                <div className="flex flex-col items-center text-[9px] text-center">
+                  {skillIcons.half}
+                  <span className="mt-1">Half Proficient</span>
+                  <span>(Cost: 1)</span>
+                </div>
+                <div className="flex flex-col items-center text-[9px] text-center">
+                  {skillIcons.center}
+                  <span className="mt-1">Expertise</span>
+                  <span>(Cost: 9)</span>
+                </div>
               </div>
             </>
           ) : (
@@ -142,7 +168,9 @@ export default function Step5({ data, allData, onChange }) {
           >
             <div
               className="relative w-40 h-40 bg-center bg-no-repeat bg-contain"
-              style={{ backgroundImage: "url('/Ability_score.webp')" }}
+              style={{
+                backgroundImage: `url("../assets/abilityScore_icon/${attr.key}_ability_score.webp")`,
+              }}
             >
               <div className="absolute inset-x-0 top-1/3 text-center text-lg font-bold text-white">
                 {calcModifier(step5[attr.key])}
