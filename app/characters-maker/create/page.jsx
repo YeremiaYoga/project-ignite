@@ -98,7 +98,25 @@ export default function CreateCharacterPage() {
       affiliations: [],
       spesial_relationship: [],
     },
-    step5: { notes: "" },
+    step5: {
+      combat_value: 0,
+      vision: "",
+      disposition: "",
+      damage_type: "",
+      str: 0,
+      dex: 0,
+      con: 0,
+      int: 0,
+      wis: 0,
+      cha: 0,
+      size: {
+        general: "",
+        vtt_size: "",
+      },
+      creature_type: "",
+      personality_combat_style: "",
+      skill_prof: [],
+    },
   });
 
   useEffect(() => {

@@ -10,7 +10,7 @@ export default function InputField({
   rows = 4,
   options = [],
   disabled = false,
-  hint = "", // 👉 hint baru
+  hint = "", // hint untuk label
 }) {
   const [query, setQuery] = useState(value || "");
   const [isOpen, setIsOpen] = useState(false);
@@ -155,6 +155,54 @@ export default function InputField({
               {opt.label ?? opt}
             </button>
           ))}
+        </div>
+      ) : type === "selectImage" ? (
+        <div className="relative w-full min-w-[120px]">
+          <div
+            className="border rounded-md p-2 bg-gray-800 text-white cursor-pointer flex items-center gap-2 w-full"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {value ? (
+              <div className="flex items-center gap-2">
+                <img
+                  src={options.find((o) => o.value === value)?.image}
+                  className="w-6 h-6 object-cover rounded"
+                />
+                <span className="text-xs">
+                  {options.find((o) => o.value === value)?.label}
+                </span>
+              </div>
+            ) : (
+              <span className="text-gray-400 text-xs">
+                {placeholder || "Select"}
+              </span>
+            )}
+          </div>
+
+          {isOpen && (
+            <div className="absolute z-10 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto w-full">
+              {options.map((opt) => (
+                <div
+                  key={opt.value}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 hover:bg-gray-700 cursor-pointer ${
+                    value === opt.value
+                      ? "bg-gray-700 border-l-2 border-blue-500"
+                      : ""
+                  }`}
+                >
+                  <img
+                    src={opt.image}
+                    className="w-6 h-6 object-cover rounded"
+                  />
+                  <span className="text-xs text-gray-200">{opt.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <input

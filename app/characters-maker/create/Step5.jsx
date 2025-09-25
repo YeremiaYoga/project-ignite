@@ -1,25 +1,75 @@
 "use client";
 import InputField from "./InputField.jsx";
-import { attributesOptions, combatValueOptions } from "../characterOptions";
+import {
+  attributesOptions,
+  combatValueOptions,
+  sizeOptions,
+  creatureTypeOptions,
+  personalityCombatStyleOptions,
+} from "../characterOptions";
+
+import { useState } from "react";
 
 export default function Step5({ data, allData, onChange }) {
   const step5 = data || {};
 
+  const personalityOptionsWithDesc = personalityCombatStyleOptions.map(
+    (opt) => ({
+      label: `${opt.label} (${opt.description})`,
+      value: opt.label,
+    })
+  );
+
+  const damageTypes = [
+    "Acid",
+    "Cold",
+    "Fire",
+    "Force",
+    "Lightning",
+    "Necrotic",
+    "Physic",
+    "Physical",
+    "Poison",
+    "Radiant",
+    "Thunder",
+  ];
+
+  const damageTypesWithImages = damageTypes.map((type) => ({
+    value: type.toLowerCase(),
+    label: type,
+    image: `/assets/damageType_icon/${type.toLowerCase()}.webp`,
+  }));
+
   const baseValuesFor = (combatValue) => {
     const val = parseInt(combatValue, 10) || 0;
-
-    let data = combatValueOptions.find((r) => r.value == val);
-
-    if (data && data.baseValues) {
-      return data.baseValues;
-    }
-    // if (val === 0) {
-    //   return [10, 10, 10, 10, 10, 10];
-    // }
-
-    // return [15, 14, 13, 12, 10, 8];
+    const data = combatValueOptions.find((r) => r.value == val);
+    return data?.baseValues || [];
   };
+
+  // penampung fixed
+  const [assignedValues, setAssignedValues] = useState({
+    str: 0,
+    dex: 0,
+    con: 0,
+    int: 0,
+    wis: 0,
+    cha: 0,
+  });
+
   const baseValues = baseValuesFor(step5.combat_value);
+
+  const usedValues = Object.values(assignedValues).filter(Boolean);
+
+  let availableValues = [...baseValues];
+
+  usedValues.forEach((val) => {
+    const idx = availableValues.indexOf(val);
+    if (idx !== -1) {
+      availableValues.splice(idx, 1);
+    }
+    console.log(availableValues);
+    console.log(assignedValues);
+  });
 
   const maxSkillPoints = Number(step5.combat_value) || 0;
   const usedSkillPoints = step5.usedSkillPoints || 0;
@@ -27,6 +77,7 @@ export default function Step5({ data, allData, onChange }) {
   const calcModifier = (val) => {
     if (!val || isNaN(val)) return 0;
     const mod = Math.floor((val - 10) / 2);
+    console.log(mod);
     return mod > 0 ? `+${mod}` : mod;
   };
 
@@ -47,19 +98,166 @@ export default function Step5({ data, allData, onChange }) {
     ),
   };
 
-  const getSkillState = (skill) => {
-    return step5.skills?.[skill] || "empty";
+  const getSkillState = (skillName) => {
+    const skill = step5.skill_prof?.find((s) => s.name === skillName);
+    if (!skill) return "empty"; // default
+    switch (skill.value) {
+      case 0:
+        return "empty";
+      case 0.5:
+        return "half";
+      case 1:
+        return "filled";
+      case 2:
+        return "center";
+      default:
+        return "empty";
+    }
   };
 
-  const handleSkillClick = (skill) => {
-    const current = getSkillState(skill);
-    const nextIndex = (cycle.indexOf(current) + 1) % cycle.length;
-    const next = cycle[nextIndex];
+  const handleSkillClick = (skillName) => {
+    const currentState = getSkillState(skillName);
 
-    onChange("skills", {
-      ...step5.skills,
-      [skill]: next,
-    });
+    // hitung sisa skill point
+    const usedPointsExcludingThis = (step5.skill_prof || []).reduce(
+      (acc, s) => {
+        if (s.name === skillName) return acc;
+        const state = (() => {
+          switch (s.value) {
+            case 0:
+              return "empty";
+            case 0.5:
+              return "half";
+            case 1:
+              return "filled";
+            case 2:
+              return "center";
+            default:
+              return "empty";
+          }
+        })();
+        return acc + (skillCost[state] || 0);
+      },
+      0
+    );
+
+    const remainingPoints = maxSkillPoints - usedPointsExcludingThis;
+
+    if (remainingPoints <= 0) {
+      return;
+    }
+
+    let cycle;
+    if (remainingPoints >= 9) cycle = ["empty", "half", "filled", "center"];
+    else if (remainingPoints >= 3) cycle = ["empty", "half", "filled"];
+    else cycle = ["empty", "half"];
+
+    const currentIndex = cycle.indexOf(currentState);
+    const nextIndex = (currentIndex + 1) % cycle.length;
+    const nextState = cycle[nextIndex];
+
+    const nextValue = { empty: 0, half: 0.5, filled: 1, center: 2 }[nextState];
+
+    let newSkillProf;
+    const existingIndex = step5.skill_prof.findIndex(
+      (s) => s.name === skillName
+    );
+    if (existingIndex !== -1) {
+      newSkillProf = [...step5.skill_prof];
+      newSkillProf[existingIndex].value = nextValue;
+    } else {
+      newSkillProf = [
+        ...(step5.skill_prof || []),
+        { name: skillName, value: nextValue },
+      ];
+    }
+
+    const newUsedPoints = newSkillProf.reduce((acc, s) => {
+      const state = (() => {
+        switch (s.value) {
+          case 0:
+            return "empty";
+          case 0.5:
+            return "half";
+          case 1:
+            return "filled";
+          case 2:
+            return "center";
+          default:
+            return "empty";
+        }
+      })();
+      return acc + (skillCost[state] || 0);
+    }, 0);
+
+    onChange("skill_prof", newSkillProf);
+    onChange("usedSkillPoints", newUsedPoints);
+  };
+
+  const calcPB = (combatValue) => {
+    const val = Number(combatValue) || 0;
+    if (val >= 0 && val <= 9) return "+2";
+    if (val >= 10 && val <= 17) return "+3";
+    if (val >= 18 && val <= 25) return "+4";
+    if (val >= 26 && val <= 33) return "+5";
+    if (val >= 34 && val <= 40) return "+6";
+    return "+0";
+  };
+
+  const getPB = (combatValue) => {
+    const val = Number(combatValue) || 0;
+    if (val >= 0 && val <= 9) return 2;
+    if (val >= 10 && val <= 17) return 3;
+    if (val >= 18 && val <= 25) return 4;
+    if (val >= 26 && val <= 33) return 5;
+    if (val >= 34 && val <= 40) return 6;
+    return 0;
+  };
+
+  const calcSkillValue = (abilityKey, skill) => {
+    console.log(abilityKey);
+    const abilityValue = assignedValues.hasOwnProperty(abilityKey)
+      ? assignedValues[abilityKey]
+      : step5[abilityKey];
+
+      console.log(abilityValue)
+
+    const abilityMod = calcModifier(abilityValue);
+
+    const pb = getPB(step5.combat_value);
+    const profState = getSkillState(skill);
+    let profValue = 0;
+
+    switch (profState) {
+      case "filled":
+        profValue = 1;
+        break;
+      case "half":
+        profValue = 0.5;
+        break;
+      case "center":
+        profValue = 2;
+        break;
+      default:
+        profValue = 0;
+    }
+    console.log(abilityMod);
+    console.log(pb);
+    console.log(profValue);
+    const total = Number(abilityMod) + pb * profValue;
+
+    return total >= 0 ? `+${total}` : `${total}`;
+  };
+
+  const skillCost = {
+    empty: 0,
+    half: 1,
+    filled: 3,
+    center: 9,
+  };
+
+  const calcUsedSkillPoints = (skill_prof = []) => {
+    return skill_prof.reduce((acc, s) => acc + (s.value || 0), 0);
   };
 
   return (
@@ -69,17 +267,20 @@ export default function Step5({ data, allData, onChange }) {
           <label className="text-sm font-semibold mb-2">Combat Value</label>
           <InputField
             type="number"
-            value={step5.combat_value || ""}
+            value={step5.combat_value !== undefined ? step5.combat_value : ""}
             onChange={(val) => {
-              if (val >= 0 && val <= 40) {
-                onChange("combat_value", val);
+              const numberVal = Number(val);
+              if (numberVal >= 0 && numberVal <= 40) {
+                onChange("combat_value", numberVal);
+                onChange("skill_prof", []);
                 onChange("usedSkillPoints", 0);
               }
             }}
             placeholder="0"
           />
+
           <p className="text-xs text-gray-400 mt-2">
-            {step5.combat_value
+            {step5.combat_value !== undefined && step5.combat_value !== null
               ? combatValueOptions.find(
                   (r) => r.value === Number(step5.combat_value)
                 )?.label
@@ -105,7 +306,7 @@ export default function Step5({ data, allData, onChange }) {
         </div>
 
         <div className="bg-gray-800 rounded-xl p-4 flex flex-col items-center shadow-md">
-          {step5.combat_value ? (
+          {step5.combat_value !== undefined && step5.combat_value !== null ? (
             <>
               <p className="text-lg ">Ability Score</p>
               <div className="flex gap-3 font-bold text-lg">
@@ -113,7 +314,7 @@ export default function Step5({ data, allData, onChange }) {
                   <span key={idx}>{val}</span>
                 ))}
               </div>
-              <p className="text-lg my-2">(PB : +2)</p>
+              <p className="text-lg my-2">(PB: {calcPB(step5.combat_value)})</p>
 
               <p className="text-xs text-gray-400 mb-2">
                 (Value Base On Combat Value)
@@ -127,7 +328,7 @@ export default function Step5({ data, allData, onChange }) {
         </div>
 
         <div className="bg-gray-800 rounded-xl p-4 flex flex-col items-center shadow-md">
-          {step5.combat_value ? (
+          {step5.combat_value !== undefined && step5.combat_value !== null ? (
             <>
               <p className="text-xs text-gray-400 mb-1">Skill Points Left</p>
               <div className="text-3xl font-bold">
@@ -172,60 +373,81 @@ export default function Step5({ data, allData, onChange }) {
                 backgroundImage: `url("../assets/abilityScore_icon/${attr.key}_ability_score.webp")`,
               }}
             >
-              <div className="absolute inset-x-0 top-1/3 text-center text-lg font-bold text-white">
-                {calcModifier(step5[attr.key])}
+              <div className="absolute inset-x-0 top-1/3 text-center text-lg font-bold text-white mt-2 ml-1">
+                {calcModifier(assignedValues[attr.key] ?? step5[attr.key])}
               </div>
 
               <div className="absolute inset-x-0 bottom-1/4 flex justify-center ml-1 -mb-1.5">
                 <select
-                  value={step5[attr.key] || ""}
-                  onChange={(e) => onChange(attr.key, e.target.value)}
-                  className=" text-[12px] text-center text-white  rounded-sm appearance-none cursor-pointer"
+                  value={assignedValues[attr.key] || ""}
+                  onChange={(e) => {
+                    const newVal = parseInt(e.target.value, 10);
+                    setAssignedValues((prev) => ({
+                      ...prev,
+                      [attr.key]: newVal,
+                    }));
+                  }}
+                  className="text-[12px] text-center text-white rounded-sm appearance-none cursor-pointer"
                 >
                   <option value="" disabled hidden>
                     -
                   </option>
-                  {step5.combat_value !== undefined &&
-                    step5.combat_value !== "" &&
-                    baseValuesFor(step5.combat_value).map((val, idx) => (
-                      <option
-                        key={idx}
-                        value={val}
-                        className="bg-gray-800 text-white"
-                      >
-                        {val}
-                      </option>
-                    ))}
+
+                  {assignedValues[attr.key] && (
+                    <option
+                      value={assignedValues[attr.key]}
+                      className="bg-gray-800 text-white"
+                    >
+                      {assignedValues[attr.key]}
+                    </option>
+                  )}
+
+                  {availableValues.map((val, idx) => (
+                    <option
+                      key={`${val}-${idx}`}
+                      value={val}
+                      className="bg-gray-800 text-white"
+                    >
+                      {val}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
+            {attr.skills.map((skill) => {
+              const current = getSkillState(skill);
+              const nextIndex = (cycle.indexOf(current) + 1) % cycle.length;
+              const next = cycle[nextIndex];
 
-            {attr.skills.length > 0 && (
-              <ul className="pb-3 px-2 text-xs space-y-1 text-left text-gray-400 w-full">
-                {attr.skills.map((skill) => (
-                  <li
-                    key={skill}
-                    className="flex items-center gap-2 cursor-pointer hover:text-white"
-                    onClick={() => handleSkillClick(skill)}
-                  >
-                    {skillIcons[getSkillState(skill)]}
-                    <span>{skill}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+              return (
+                <li
+                  key={`${attr.key}-${skill}`}
+                  className="flex justify-between items-center gap-2 px-2 py-1 rounded w-full cursor-pointer hover:bg-gray-700"
+                  onClick={() => handleSkillClick(skill)}
+                >
+                  <div className="flex items-center gap-2">
+                    {skillIcons[current]}
+                    <span className="text-sm">{skill}</span>
+                  </div>
+
+                  <span className="text-sm font-semibold">
+                    {calcSkillValue(attr.key, skill)}
+                  </span>
+                </li>
+              );
+            })}
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-        <div className="bg-gray-800 rounded-xl p-4  shadow-md">
+        <div className="bg-gray-800 rounded-xl p-4 shadow-md">
           <InputField
+            type="selectImage"
             label="Damage Type"
-            type="select"
-            value={step5.damageType || ""}
-            onChange={(val) => onChange("damageType", val)}
-            options={["Fire", "Cold", "Lightning", "Poison", "Radiant"]}
+            value={step5.damage_type || ""}
+            onChange={(val) => onChange("damage_type", val)}
+            options={damageTypesWithImages}
             placeholder="Select Damage"
           />
         </div>
@@ -252,7 +474,7 @@ export default function Step5({ data, allData, onChange }) {
             type="select"
             value={step5.disposition || ""}
             onChange={(val) => onChange("disposition", val)}
-            options={["Good", "Neutral", "Evil"]}
+            options={["Friendly", "Nuetral", "Hostile", "Unknown"]}
             placeholder="Select Disposition"
           />
         </div>
@@ -262,9 +484,16 @@ export default function Step5({ data, allData, onChange }) {
           <InputField
             label="Size"
             type="select"
-            value={step5.size || "Medium"}
-            onChange={(val) => onChange("size", val)}
-            options={["Medium"]}
+            value={step5.size?.vtt_size || "med"}
+            onChange={(val) =>
+              onChange("size", {
+                ...step5.size,
+                vtt_size: val,
+                general:
+                  sizeOptions.find((s) => s.vtt === val)?.label || "Medium",
+              })
+            }
+            options={sizeOptions.map((s) => ({ label: s.label, value: s.vtt }))}
             placeholder="Select Type"
           />
         </div>
@@ -275,7 +504,7 @@ export default function Step5({ data, allData, onChange }) {
             type="select"
             value={step5.creature_type || "Humanoid"}
             onChange={(val) => onChange("creature_type", val)}
-            options={["Humanoid"]}
+            options={creatureTypeOptions}
             placeholder="Select Type"
           />
         </div>
@@ -286,7 +515,7 @@ export default function Step5({ data, allData, onChange }) {
             type="select"
             value={step5.personality_combat_style || ""}
             onChange={(val) => onChange("personality_combat_style", val)}
-            options={[]}
+            options={personalityCombatStyleOptions}
             placeholder="Select Personality Combat Style"
           />
         </div>
