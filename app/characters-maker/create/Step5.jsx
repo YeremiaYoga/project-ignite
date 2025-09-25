@@ -229,6 +229,40 @@ export default function Step5({ data, allData, onChange }) {
           />
         </div>
       </div>
+      <div className="grid grid-cols-10 gap-6">
+        <div className="bg-gray-800 rounded-xl p-4 shadow-md col-span-3">
+          <InputField
+            label="Size"
+            type="select"
+            value={step5.size || "Medium"}
+            onChange={(val) => onChange("size", val)}
+            options={["Medium"]}
+            placeholder="Select Type"
+          />
+        </div>
+
+        <div className="bg-gray-800 rounded-xl p-4  shadow-md col-span-2">
+          <InputField
+            label="Creature Type"
+            type="select"
+            value={step5.creature_type || "Humanoid"}
+            onChange={(val) => onChange("creature_type", val)}
+            options={["Humanoid"]}
+            placeholder="Select Type"
+          />
+        </div>
+
+        <div className="bg-gray-800 rounded-xl p-4  shadow-md col-span-5">
+          <InputField
+            label="Personality Combat Style"
+            type="select"
+            value={step5.personality_combat_style || ""}
+            onChange={(val) => onChange("personality_combat_style", val)}
+            options={[]}
+            placeholder="Select Personality Combat Style"
+          />
+        </div>
+      </div>
     </div>
   );
 }
