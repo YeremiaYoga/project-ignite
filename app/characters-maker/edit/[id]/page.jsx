@@ -40,7 +40,7 @@ export default function EditCharacterPage() {
       try {
         const res = await fetch(`/api/characters/getOne?id=${characterId}`);
         const data = await res.json();
-        if (data) setFormData({}); 
+        if (data) setFormData(data); 
       } catch (err) {
         console.error("Failed to fetch character:", err);
       } finally {
@@ -119,7 +119,6 @@ export default function EditCharacterPage() {
     <main className="max-w-6xl w-full mx-auto px-4 py-8 text-white min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-center">Edit Character</h1>
 
-      {/* Step navigation */}
       <div className="flex justify-center mb-6 gap-2">
         {steps.map((s, idx) => (
           <div
@@ -136,7 +135,6 @@ export default function EditCharacterPage() {
         ))}
       </div>
 
-      {/* Step form */}
       <div className="p-6 rounded-lg shadow mb-6">
         <CurrentComponent
           data={formData}
@@ -146,7 +144,6 @@ export default function EditCharacterPage() {
         />
       </div>
 
-      {/* Navigation */}
       <div className="flex justify-between">
         <button
           onClick={prevStep}
