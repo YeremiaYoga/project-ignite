@@ -322,105 +322,135 @@ export const creatureTypeOptions = [
 ];
 
 export const personalityCombatStyleOptions = [
+  { label: "-Aggressive Types-", value: "", disabled: true },
   {
-    label: "Brutal",
-    description: "Overwhelms foes with raw power, no finesse.",
+    label: "Brutal → Overwhelms foes with raw power, no finesse.",
+    value: "Brutal → Overwhelms foes with raw power, no finesse.",
   },
   {
-    label: "Savage",
-    description: "Animalistic, tears into enemies without restraint.",
+    label: "Savage → Animalistic, tears into enemies without restraint.",
+    value: "Savage → Animalistic, tears into enemies without restraint.",
   },
   {
-    label: "Berserker",
-    description: "Grows stronger the longer they fight, reckless.",
+    label: "Berserker → Grows stronger the longer they fight, reckless.",
+    value: "Berserker → Grows stronger the longer they fight, reckless.",
   },
   {
-    label: "Relentless",
-    description: "Pursues one target until it falls, ignoring others.",
+    label: "Relentless → Pursues one target until it falls, ignoring others.",
+    value: "Relentless → Pursues one target until it falls, ignoring others.",
   },
   {
-    label: "Opportunist",
-    description: "Attacks when the enemy is weakest or distracted.",
-  },
-
-  {
-    label: "Protective",
-    description: "Prioritizes defending allies over striking back.",
-  },
-  { label: "Guardian", description: "Stands ground and absorbs punishment." },
-  {
-    label: "Calculated",
-    description: "Waits for openings, punishes mistakes.",
-  },
-  {
-    label: "Patient",
-    description: "Prefers counterattacks and conserving energy.",
-  },
-  { label: "Warden", description: "Controls space, denying enemy movement." },
-
-  { label: "Chaotic", description: "Random attack patterns, unpredictable." },
-  {
-    label: "Unstable",
-    description: "Fluctuates between passive and violent outbursts.",
-  },
-  {
-    label: "Sadistic",
-    description: "Draws out fights, enjoys tormenting foes.",
-  },
-  {
-    label: "Deceptive",
-    description: "Feigns weakness or tricks enemies before striking.",
-  },
-  {
-    label: "Erratic",
-    description: "Moves and fights in ways that defy logic.",
+    label: "Opportunist → Attacks when the enemy is weakest or distracted.",
+    value: "Opportunist → Attacks when the enemy is weakest or distracted.",
   },
 
+  { label: "-Defensive / Controlled Types-", value: "", disabled: true },
   {
-    label: "Tactician",
-    description: "Plans several moves ahead, uses allies efficiently.",
+    label: "Protective → Prioritizes defending allies over striking back.",
+    value: "Protective → Prioritizes defending allies over striking back.",
   },
   {
-    label: "Commander",
-    description: "Directs the battlefield, buffs allies, controls flow.",
+    label: "Guardian → Stands ground and absorbs punishment.",
+    value: "Guardian → Stands ground and absorbs punishment.",
   },
-  { label: "Hunter", description: "Tracks and isolates prey before striking." },
-  { label: "Duelist", description: "Seeks one-on-one combat, ignores others." },
   {
-    label: "Disruptor",
-    description: "Targets spellcasters, healers, or support first.",
+    label: "Calculated → Waits for openings, punishes mistakes.",
+    value: "Calculated → Waits for openings, punishes mistakes.",
+  },
+  {
+    label: "Patient → Prefers counterattacks and conserving energy.",
+    value: "Patient → Prefers counterattacks and conserving energy.",
+  },
+  {
+    label: "Warden → Controls space, denying enemy movement.",
+    value: "Warden → Controls space, denying enemy movement.",
   },
 
+  { label: "-Chaotic / Unstable Types-", value: "", disabled: true },
   {
-    label: "Fearmonger",
-    description: "Uses intimidation and aura effects to weaken morale.",
+    label: "Chaotic → Random attack patterns, unpredictable.",
+    value: "Chaotic → Random attack patterns, unpredictable.",
   },
   {
-    label: "Hexer",
-    description: "Weakens enemies with curses before closing in.",
+    label: "Unstable → Fluctuates between passive and violent outbursts.",
+    value: "Unstable → Fluctuates between passive and violent outbursts.",
   },
   {
-    label: "Fanatical",
-    description: "Fights with religious or ideological fervor.",
+    label: "Sadistic → Draws out fights, enjoys tormenting foes.",
+    value: "Sadistic → Draws out fights, enjoys tormenting foes.",
   },
   {
-    label: "Bloodthirsty",
-    description: "Grows stronger the more blood is spilled.",
+    label: "Deceptive → Feigns weakness or tricks enemies before striking.",
+    value: "Deceptive → Feigns weakness or tricks enemies before striking.",
   },
-  { label: "Stoic", description: "Silent, unshaken, fights with eerie calm." },
+  {
+    label: "Erratic → Moves and fights in ways that defy logic.",
+    value: "Erratic → Moves and fights in ways that defy logic.",
+  },
 
-  { label: "Ambusher", description: "Prefers surprise strikes and ambushes." },
+  { label: "-Tactical / Strategic Types-", value: "", disabled: true },
   {
-    label: "Shadowstalker",
-    description: "Strikes from stealth, melts back into cover.",
+    label: "Tactician → Plans several moves ahead, uses allies efficiently.",
+    value: "Tactician → Plans several moves ahead, uses allies efficiently.",
   },
   {
-    label: "Illusionist",
-    description: "Confuses enemies with tricks and misdirection.",
+    label: "Commander → Directs the battlefield, buffs allies, controls flow.",
+    value: "Commander → Directs the battlefield, buffs allies, controls flow.",
   },
   {
-    label: "Hit-and-Run",
-    description: "Strikes quickly, then retreats to regroup.",
+    label: "Hunter → Tracks and isolates prey before striking.",
+    value: "Hunter → Tracks and isolates prey before striking.",
   },
-  { label: "Manipulator", description: "Uses enemies against each other." },
+  {
+    label: "Duelist → Seeks one-on-one combat, ignores others.",
+    value: "Duelist → Seeks one-on-one combat, ignores others.",
+  },
+  {
+    label: "Disruptor → Targets spellcasters, healers, or support first.",
+    value: "Disruptor → Targets spellcasters, healers, or support first.",
+  },
+
+  { label: "-Supernatural / Thematic Types-", value: "", disabled: true },
+  {
+    label: "Fearmonger → Uses intimidation and aura effects to weaken morale.",
+    value: "Fearmonger → Uses intimidation and aura effects to weaken morale.",
+  },
+  {
+    label: "Hexer → Weakens enemies with curses before closing in.",
+    value: "Hexer → Weakens enemies with curses before closing in.",
+  },
+  {
+    label: "Fanatical → Fights with religious or ideological fervor.",
+    value: "Fanatical → Fights with religious or ideological fervor.",
+  },
+  {
+    label: "Bloodthirsty → Grows stronger the more blood is spilled.",
+    value: "Bloodthirsty → Grows stronger the more blood is spilled.",
+  },
+  {
+    label: "Stoic → Silent, unshaken, fights with eerie calm.",
+    value: "Stoic → Silent, unshaken, fights with eerie calm.",
+  },
+
+  { label: "-Trickster Types-", value: "", disabled: true },
+  {
+    label: "Ambusher → Prefers surprise strikes and ambushes.",
+    value: "Ambusher → Prefers surprise strikes and ambushes.",
+  },
+  {
+    label: "Shadowstalker → Strikes from stealth, melts back into cover.",
+    value: "Shadowstalker → Strikes from stealth, melts back into cover.",
+  },
+  {
+    label: "Illusionist → Confuses enemies with tricks and misdirection.",
+    value: "Illusionist → Confuses enemies with tricks and misdirection.",
+  },
+  {
+    label: "Hit-and-Run → Strikes quickly, then retreats to regroup.",
+    value: "Hit-and-Run → Strikes quickly, then retreats to regroup.",
+  },
+  {
+    label: "Manipulator → Uses enemies against each other.",
+    value: "Manipulator → Uses enemies against each other.",
+  },
 ];

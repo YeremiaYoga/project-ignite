@@ -13,13 +13,6 @@ import { useState } from "react";
 export default function Step5({ data, allData, onChange }) {
   const step5 = data || {};
 
-  const personalityOptionsWithDesc = personalityCombatStyleOptions.map(
-    (opt) => ({
-      label: `${opt.label} (${opt.description})`,
-      value: opt.label,
-    })
-  );
-
   const damageTypes = [
     "Acid",
     "Cold",
@@ -46,7 +39,6 @@ export default function Step5({ data, allData, onChange }) {
     return data?.baseValues || [];
   };
 
-  // penampung fixed
   const [assignedValues, setAssignedValues] = useState({
     str: 0,
     dex: 0,
@@ -72,7 +64,6 @@ export default function Step5({ data, allData, onChange }) {
   });
 
   const maxSkillPoints = Number(step5.combat_value) || 0;
-  const usedSkillPoints = step5.usedSkillPoints || 0;
 
   const calcModifier = (val) => {
     if (!val || isNaN(val)) return 0;
@@ -220,7 +211,7 @@ export default function Step5({ data, allData, onChange }) {
       ? assignedValues[abilityKey]
       : step5[abilityKey];
 
-      console.log(abilityValue)
+    console.log(abilityValue);
 
     const abilityMod = calcModifier(abilityValue);
 
@@ -256,10 +247,6 @@ export default function Step5({ data, allData, onChange }) {
     center: 9,
   };
 
-  const calcUsedSkillPoints = (skill_prof = []) => {
-    return skill_prof.reduce((acc, s) => acc + (s.value || 0), 0);
-  };
-
   return (
     <div className="p-6 max-w-6xl mx-auto bg-gray-900 text-gray-100 space-y-8 rounded-xl shadow-xl">
       <div className="grid grid-cols-4 gap-6">
@@ -272,8 +259,25 @@ export default function Step5({ data, allData, onChange }) {
               const numberVal = Number(val);
               if (numberVal >= 0 && numberVal <= 40) {
                 onChange("combat_value", numberVal);
+
                 onChange("skill_prof", []);
                 onChange("usedSkillPoints", 0);
+
+                onChange("str", 0);
+                onChange("dex", 0);
+                onChange("con", 0);
+                onChange("int", 0);
+                onChange("wis", 0);
+                onChange("cha", 0);
+
+                setAssignedValues({
+                  str: 0,
+                  dex: 0,
+                  con: 0,
+                  int: 0,
+                  wis: 0,
+                  cha: 0,
+                });
               }
             }}
             placeholder="0"
@@ -386,6 +390,7 @@ export default function Step5({ data, allData, onChange }) {
                       ...prev,
                       [attr.key]: newVal,
                     }));
+                    onChange(attr.key, newVal);
                   }}
                   className="text-[12px] text-center text-white rounded-sm appearance-none cursor-pointer"
                 >
@@ -480,17 +485,16 @@ export default function Step5({ data, allData, onChange }) {
         </div>
       </div>
       <div className="grid grid-cols-10 gap-6">
-        <div className="bg-gray-800 rounded-xl p-4 shadow-md col-span-3">
+        <div className="bg-gray-800 rounded-xl p-4  shadow-md col-span-3">
           <InputField
             label="Size"
             type="select"
             value={step5.size?.vtt_size || "med"}
             onChange={(val) =>
               onChange("size", {
-                ...step5.size,
-                vtt_size: val,
                 general:
                   sizeOptions.find((s) => s.vtt === val)?.label || "Medium",
+                vtt_size: val,
               })
             }
             options={sizeOptions.map((s) => ({ label: s.label, value: s.vtt }))}

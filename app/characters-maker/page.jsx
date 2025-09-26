@@ -1,22 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Copy } from "lucide-react";
 
 export default function CharactersMakerPage() {
   const router = useRouter();
   const { isSignedIn } = useUser();
-
   const [characters, setCharacters] = useState([]);
 
-  const handleCreate = () => {
-    router.push("/characters-maker/create");
-  };
+  useEffect(() => {
+    const fetchChars = async () => {
+      try {
+        const res = await fetch("/api/characters/getAll");
+        const data = await res.json();
+        setCharacters(data);
+      } catch (err) {
+        console.error("Failed to fetch characters:", err);
+      }
+    };
+    fetchChars();
+  }, []);
 
-  const handleEdit = (id) => {
-    router.push(`/characters-maker/edit/${id}`);
-  };
+  const handleCreate = () => router.push("/characters-maker/create");
+  const handleEdit = (id) => router.push(`/characters-maker/edit/${id}`);
 
   if (!isSignedIn) {
     return (
@@ -37,10 +45,10 @@ export default function CharactersMakerPage() {
   }
 
   return (
-    <main className="max-w-6xl w-full mx-auto px-4 py-8 text-white bg-gray-900 min-h-screen">
+    <main className="max-w-7xl w-full mx-auto px-4 py-8 text-white bg-gray-900 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-center">Characters Maker</h1>
 
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-6">
         <button
           onClick={handleCreate}
           className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
@@ -52,22 +60,65 @@ export default function CharactersMakerPage() {
       {characters.length === 0 ? (
         <p className="text-gray-400 text-center">No characters created yet.</p>
       ) : (
-        <ul className="space-y-2">
-          {characters.map((char, idx) => (
-            <li
-              key={idx}
-              className="flex justify-between items-center p-3 bg-gray-800 rounded"
+        <div className="grid grid-cols-3 gap-6">
+          {characters.map((char) => (
+            <div
+              key={char.randomid}
+              className="flex  bg-gray-800 rounded shadow p-2"
             >
-              <span>{char.name}</span>
-              <button
-                onClick={() => handleEdit(idx)}
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-              >
-                Edit
-              </button>
-            </li>
+              <div className="flex items-center">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-600 flex-shrink-0">
+                  {char.token_art ? (
+                    <img
+                      src={char.token_art}
+                      alt={char.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src="/assets/example_token.png"
+                      alt={char.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+                <div className="ml-5">
+                  <h2 className="text-xl font-bold">{char.name}</h2>
+                  <p className="text-sm text-gray-400 flex items-center gap-2">
+                    {char.randomid ?? "UnknownID"}
+                    <Copy
+                      size={16}
+                      className="cursor-pointer hover:text-white"
+                      onClick={() =>
+                        navigator.clipboard.writeText(char.randomid ?? "")
+                      }
+                    />
+                  </p>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      className="flex-1 px-3 py-2 bg-blue-600 rounded text-sm opacity-50 cursor-not-allowed "
+                      disabled
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => handleEdit(char.randomid)}
+                      className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="flex-1 px-3 py-2 bg-red-600 rounded text-sm opacity-50 cursor-not-allowed "
+                      disabled
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </main>
   );

@@ -170,7 +170,7 @@ export default function CreateCharacterPage() {
         ...formData.step2,
         ...formData.step3,
         ...formData.step4,
-        // ...formData.step5,
+        ...formData.step5,
       };
 
       const { art, token_art, main_theme_ogg, combat_theme_ogg, ...jsonData } =
