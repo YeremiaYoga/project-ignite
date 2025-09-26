@@ -110,10 +110,10 @@ export default function CreateCharacterPage() {
       wis: 0,
       cha: 0,
       size: {
-        general: "",
-        vtt_size: "",
+        general: "Medium",
+        vtt_size: "med",
       },
-      creature_type: "",
+      creature_type: "Humanoid",
       personality_combat_style: "",
       skill_prof: [],
     },
