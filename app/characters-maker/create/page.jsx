@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import Cookies from "js-cookie";
 import Step1 from "./Step1.jsx";
 import Step2 from "./Step2.jsx";
@@ -15,8 +16,10 @@ export default function CreateCharacterPage() {
 
   const initialStep = parseInt(searchParams.get("step") || "0", 10);
   const [currentStep, setCurrentStep] = useState(initialStep);
-
+ const { user } = useUser();
   const [talesMode, setTalesMode] = useState(false);
+  const creatorName = user?.fullName || user?.username || "";
+  const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
   const [formData, setFormData] = useState({
     step1: {
       name: "",

@@ -1,3 +1,24 @@
+export const alignmentOptions = [
+  { label: "Good :", value: "", disabled: true },
+  { label: "Lawful Good", value: "Lawful Good" },
+  { label: "Neutral Good", value: "Neutral Good" },
+  { label: "Chaotic Good", value: "Chaotic Good" },
+
+  { label: "Neutral :", value: "", disabled: true },
+  { label: "Lawful Neutral", value: "Lawful Neutral" },
+  { label: "True Neutral", value: "True Neutral" },
+  { label: "Chaotic Neutral", value: "Chaotic Neutral" },
+
+  { label: "Evil :", value: "", disabled: true },
+  { label: "Lawful Evil", value: "Lawful Evil" },
+  { label: "Neutral Evil", value: "Neutral Evil" },
+  { label: "Chaotic Evil", value: "Chaotic Evil" },
+
+  { label: "Other :", value: "", disabled: true },
+  { label: "Unknown", value: "Unknown" },
+  { label: "Unaligned", value: "Unaligned" },
+];
+
 export const familyOptions = [
   { label: "Main Family :", value: "", disabled: true },
   { label: "Father", value: "Father" },
@@ -191,8 +212,8 @@ export const subordinatesOptions = [
 
 export const affiliationsOptions = [
   { label: "Political Affiliations :", value: "", disabled: true },
-  { label: "Faction", value: "Faction" },
-  { label: "Guild", value: "Guild" },
+  { label: "Founder", value: "Founder" },
+  { label: "Commander", value: "Commander" },
   { label: "Party", value: "Party" },
   { label: "Clan", value: "Clan" },
   { label: "Tribe", value: "Tribe" },
@@ -453,4 +474,47 @@ export const personalityCombatStyleOptions = [
     label: "Manipulator → Uses enemies against each other.",
     value: "Manipulator → Uses enemies against each other.",
   },
+];
+
+export const countryOptions = [
+  { label: "Vallarian Nationality :", value: "", disabled: true },
+  { label: "Mondralia", value: "Mondralia" },
+  { label: "Delstainvia", value: "Delstainvia" },
+  { label: "Istegria", value: "Istegria" },
+  { label: "Alvavia", value: "Alvavia" },
+  { label: "Kastugaria", value: "Kastugaria" },
+  { label: "Kolgardia", value: "Kolgardia" },
+  { label: "Magusvia", value: "Magusvia" },
+  { label: "Prospero", value: "Prospero" },
+  { label: "Tansarha", value: "Tansarha" },
+  { label: "Titanfall Isles :", value: "", disabled: true },
+  { label: "The Titanfall Isle", value: "The Titanfall Isle" },
+  { label: "The Isle of Dragons", value: "The Isle of Dragons" },
+  { label: "Light & Shadow Isle", value: "Light & Shadow Isle" },
+  { label: "Isle of Thorns", value: "Isle of Thorns" },
+  { label: "Isle of Acheron", value: "Isle of Acheron" },
+  { label: "Isle of Wild-Beast", value: "Isle of Wild-Beast" },
+  { label: "Isle of Snow-Warmth", value: "Isle of Snow-Warmth" },
+  { label: "Isle of Cinder", value: "Isle of Cinder" },
+  { label: "Mythos Isle", value: "Mythos Isle" },
+  { label: "Septuagint Isle", value: "Isle of Ouranós" },
+  { label: "Isle of Septuagint", value: "Septuagint Isle" },
+  { label: "Isle of Wyvern", value: "Isle of Wyvern" },
+  { label: "Fomorians Fang", value: "Fomorians Fang" },
+  { label: "Multiversal :", value: "", disabled: true },
+  { label: "Material Plane (Terra)", value: "Material Plane (Terra)" },
+  { label: "Elemental Plane of Water", value: "Elemental Plane of Water" },
+  { label: "Elemental Plane of Air", value: "Elemental Plane of Air" },
+  { label: "Elemental Plane of Fire", value: "Elemental Plane of Fire" },
+  { label: "Elemental Plane of Earth", value: "Elemental Plane of Earth" },
+  { label: "Feywild", value: "Feywild" },
+  { label: "Shadowfell", value: "Shadowfell" },
+  { label: "Celestia (Elysium)", value: "Celestia (Elysium)" },
+  { label: "The Nine Hells", value: "The Nine Hells" },
+  { label: "Other Nationality :", value: "", disabled: true },
+  { label: "Non-National", value: "Non-National" },
+  { label: "Demi-plane", value: "Demi-plane" },
+  { label: "Other Planes", value: "Other Planes" },
+  { label: "Astral Planes", value: "Astral Planes" },
+  { label: "Unknown", value: "Unknown" },
 ];

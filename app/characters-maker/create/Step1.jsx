@@ -6,6 +6,7 @@ import { useUser } from "@clerk/nextjs";
 import InputField from "./InputField";
 import Cookies from "js-cookie";
 import { Eye, EyeOff, Clipboard } from "lucide-react";
+import { countryOptions, alignmentOptions } from "../characterOptions";
 
 export default function Step1({ data, onChange }) {
   const [artPreview, setArtPreview] = useState(null);
@@ -17,6 +18,13 @@ export default function Step1({ data, onChange }) {
   const [charId, setCharId] = useState("");
   const creatorName = user?.fullName || user?.username || "";
   const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
+
+  const [unit, setUnit] = useState({
+    heightUnit: "imperial",
+    height: { feet: "", inch: "", centimeter: "" },
+    weightUnit: "imperial",
+    weight: { kg: "", lbs: "" },
+  });
 
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
@@ -79,17 +87,15 @@ export default function Step1({ data, onChange }) {
     reader.onloadend = () => {
       if (type === "art") {
         setArtPreview(reader.result);
-        onChange("art", file); 
+        onChange("art", file);
       }
       if (type === "token") {
         setTokenPreview(reader.result);
-        onChange("token_art", file); 
+        onChange("token_art", file);
       }
     };
     reader.readAsDataURL(file);
   };
-
-
 
   return (
     <div className="p-6 max-w-5xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
@@ -111,20 +117,20 @@ export default function Step1({ data, onChange }) {
             label="Nickname"
             value={data.name}
             onChange={(val) => onChange("name", val)}
-            placeholder="Please Input The Character Nickname"
+            placeholder="Please input your character’s nickname"
           />
           <InputField
             label="Full Name"
             value={data.fullname}
             onChange={(val) => onChange("fullname", val)}
-            placeholder="Please Input The Character Fullname"
+            placeholder="Please input your character’s full name"
           />
           <div>
             <div className="flex items-center gap-4 text-sm">
               <span className="font-medium">Art :</span>
               <div className="flex items-center gap-3 ml-auto">
                 <span className="text-gray-300 text-sm truncate max-w-[200px]">
-                  {data.art ? data.art.name  : "No file chosen"}
+                  {data.art ? data.art.name : "No file chosen"}
                 </span>
                 <label className="cursor-pointer px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
                   Upload
@@ -173,16 +179,6 @@ export default function Step1({ data, onChange }) {
                 <Clipboard className="w-4 h-4 text-gray-400 hover:text-gray-200" />
               </button>
             </div>
-
-            <div className="flex items-center gap-2">
-              <button onClick={toggleWikiVisibility}>
-                {data.wiki_visibility ? (
-                  <Eye className="w-4 h-4 0" />
-                ) : (
-                  <EyeOff className="w-4 h-4 " />
-                )}
-              </button>
-            </div>
           </div>
 
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
@@ -201,7 +197,19 @@ export default function Step1({ data, onChange }) {
           <div className="text-center mt-2">Art</div>
         </div>
 
-        <div className="mt-7">
+        <div className="">
+          <div className="flex items-center justify-end mb-2 text-sm font-medium text-gray-200">
+            <div className="flex items-center gap-2">
+              Wiki-Visibility :
+              <button onClick={toggleWikiVisibility}>
+                {data.wiki_visibility ? (
+                  <Eye className="w-4 h-4 0" />
+                ) : (
+                  <EyeOff className="w-4 h-4 " />
+                )}
+              </button>
+            </div>
+          </div>
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
             {tokenPreview ? (
               <Image
@@ -246,18 +254,7 @@ export default function Step1({ data, onChange }) {
             value={data.alignment}
             onChange={(val) => onChange("alignment", val)}
             placeholder="Please Choose Your Alignment"
-            options={[
-              { label: "Lawful Good", value: "Lawful Good" },
-              { label: "Neutral Good", value: "Neutral Good" },
-              { label: "Chaotic Good", value: "Chaotic Good" },
-              { label: "Lawful Neutral", value: "Lawful Neutral" },
-              { label: "True Neutral", value: "True Neutral" },
-              { label: "Chaotic Neutral", value: "Chaotic Neutral" },
-              { label: "Lawful Evil", value: "Lawful Evil" },
-              { label: "Neutral Evil", value: "Neutral Evil" },
-              { label: "Chaotic Evil", value: "Chaotic Evil" },
-              { label: "Unknown", value: "Unknown" },
-            ]}
+            options={alignmentOptions}
           />
 
           <InputField
@@ -369,7 +366,33 @@ export default function Step1({ data, onChange }) {
             </div>
           )}
 
-          <div>
+          <div className="flex  gap-4">
+            <InputField
+              label="Birth Place"
+              value={data.subrace}
+              onChange={(val) => onChange("subrace", val)}
+              placeholder=""
+            />
+            {talesMode ? (
+              <InputField
+                label="Birth Country"
+                type="select"
+                value={data.gender}
+                onChange={(val) => onChange("gender", val)}
+                placeholder="Select Country"
+                options={countryOptions}
+              />
+            ) : (
+              <InputField
+                label="Birth Country"
+                value={data.subrace}
+                onChange={(val) => onChange("subrace", val)}
+                placeholder=""
+              />
+            )}
+          </div>
+
+          {/* <div>
             <label className="block text-sm font-medium mb-1">
               Birth Place
             </label>
@@ -380,7 +403,7 @@ export default function Step1({ data, onChange }) {
               className="w-full h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
         focus:ring-2 focus:ring-blue-500 outline-none text-sm"
             />
-          </div>
+          </div> */}
         </div>
 
         <div className="space-y-4 col-span-3">
@@ -397,7 +420,7 @@ export default function Step1({ data, onChange }) {
             <div>
               <label className="block text-sm font-medium mb-1">Height</label>
               <div className="flex gap-2 items-end">
-                {data.heightUnit === "imperial" ? (
+                {unit.heightUnit === "imperial" ? (
                   <div className="flex gap-2 flex-1">
                     <input
                       type="number"
@@ -446,14 +469,17 @@ export default function Step1({ data, onChange }) {
                 )}
 
                 <select
-                  value={data.heightUnit || ""}
-                  onChange={(e) => onChange("heightUnit", e.target.value)}
+                  value={unit.heightUnit || ""}
+                  onChange={(e) =>
+                    setUnit((prev) => ({ ...prev, heightUnit: e.target.value }))
+                  }
                   className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
         focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
-                  <option value="">M/I</option>
                   <option value="metric">Cm</option>
-                  <option value="imperial">Ft/In</option>
+                  <option value="imperial" selected>
+                    Ft/In
+                  </option>
                 </select>
               </div>
             </div>
@@ -480,16 +506,16 @@ export default function Step1({ data, onChange }) {
               <div className="flex gap-2 items-end">
                 <input
                   type="number"
-                  placeholder={data.weightUnit === "imperial" ? "Lb" : "Kg"}
+                  placeholder={unit.weightUnit === "imperial" ? "Lb" : "Kg"}
                   value={
-                    data.weightUnit === "imperial"
+                    unit.weightUnit === "imperial"
                       ? data.weight?.pounds ?? ""
                       : data.weight?.kilogram ?? ""
                   }
                   onChange={(e) => {
                     const val = e.target.value;
                     const newWeight =
-                      data.weightUnit === "imperial"
+                      unit.weightUnit === "imperial"
                         ? { ...(data.weight || {}), pounds: val }
                         : { ...(data.weight || {}), kilogram: val };
                     onChange("weight", newWeight);
@@ -514,9 +540,10 @@ export default function Step1({ data, onChange }) {
                   className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
         focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
-                  <option value="">M/I</option>
+                  <option value="imperial" selected>
+                    Lb
+                  </option>
                   <option value="metric">Kg</option>
-                  <option value="imperial">Lb</option>
                 </select>
               </div>
             </div>
