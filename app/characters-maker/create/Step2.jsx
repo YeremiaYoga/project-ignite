@@ -3,52 +3,15 @@ import { useState } from "react";
 import InputField from "./InputField.jsx";
 import MultipleInput from "@/components/MultipleInput.jsx";
 import { Eye, EyeOff } from "lucide-react";
-
+import {
+  allTraitsOptions,
+  economicalOptions,
+  socialClassOptions,
+} from "../characterOptions";
 export default function Step2({ data, allData, onChange }) {
   const step2 = data || {};
 
-  const allTraits = [
-    "Innocent",
-    "Sage",
-    "Explorer",
-    "Outlaw",
-    "Magician",
-    "Hero",
-    "Lover",
-    "Jester",
-    "Everyman",
-    "Caregiver",
-    "Ruler",
-    "Creator",
-  ];
-
-  const economicalOptions = [
-    "Poor/Subsistence",
-    "Modest/Working Class",
-    "Middle-Class/Comfortable",
-    "Wealthy/Affluent",
-    "Rich / Prosperous",
-    "Opulent / Lavish",
-  ];
-
-  const socialClassOptions = [
-    "Slave/Serf",
-    "Criminal/Outlaw",
-    "Exile/Outcast",
-    "Marginalized",
-    "Commoners/Workers",
-    "Merchants/Artisans",
-    "Military/Officials",
-    "Clergy/Priest",
-    "Scholars/Intelligentsia",
-    "Politician",
-    "Knight / Dame",
-    "Nobility/Large Land Owner",
-    "High Nobility/Elite",
-    "Rulers/Sovereigns",
-  ];
-
-  const allTraitsWithImages = allTraits.map((trait) => ({
+  const allTraitsWithImages = allTraitsOptions.map((trait) => ({
     value: trait.toLowerCase(),
     label: trait,
     image: `/assets/personality_icon/${trait.toLowerCase()}.webp`,

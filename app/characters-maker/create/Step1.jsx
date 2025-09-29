@@ -174,7 +174,7 @@ export default function Step1({ data, onChange }) {
         <div>
           <div className="flex items-center justify-between mb-2 text-sm font-medium text-gray-200">
             <div className="flex items-center gap-2">
-              <span className="truncate max-w-[140px]">{data.randomid}</span>
+              <span className="truncate max-w-[140px]">UUID : {data.randomid}</span>
               <button onClick={copyToClipboard}>
                 <Clipboard className="w-4 h-4 text-gray-400 hover:text-gray-200" />
               </button>
@@ -369,41 +369,30 @@ export default function Step1({ data, onChange }) {
           <div className="flex  gap-4">
             <InputField
               label="Birth Place"
-              value={data.subrace}
-              onChange={(val) => onChange("subrace", val)}
+              value={data.birth_place}
+              onChange={(val) => onChange("birth_place", val)}
               placeholder=""
             />
             {talesMode ? (
               <InputField
                 label="Birth Country"
                 type="select"
-                value={data.gender}
-                onChange={(val) => onChange("gender", val)}
+                value={data.birth_place}
+                onChange={(val) => onChange("gender", birth_place)}
                 placeholder="Select Country"
                 options={countryOptions}
               />
             ) : (
               <InputField
                 label="Birth Country"
-                value={data.subrace}
-                onChange={(val) => onChange("subrace", val)}
+                value={data.birth_country}
+                onChange={(val) => onChange("birth_country", val)}
                 placeholder=""
               />
             )}
           </div>
 
-          {/* <div>
-            <label className="block text-sm font-medium mb-1">
-              Birth Place
-            </label>
-            <input
-              type="text"
-              value={data.birth_place || ""}
-              onChange={(e) => onChange("birth_place", e.target.value)}
-              className="w-full h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-            />
-          </div> */}
+     
         </div>
 
         <div className="space-y-4 col-span-3">

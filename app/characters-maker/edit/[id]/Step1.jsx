@@ -6,10 +6,14 @@ import { useUser } from "@clerk/nextjs";
 import InputField from "@/components/InputField";
 import Cookies from "js-cookie";
 import { Eye, EyeOff, Clipboard } from "lucide-react";
+import {
+  countryOptions,
+  alignmentOptions,
+} from "@/app/characters-maker/characterOptions";
 
 export default function Step1({ data, allData, onChange }) {
-  const [artPreview, setArtPreview] = useState(null);
-  const [tokenPreview, setTokenPreview] = useState(null);
+  const [artPreview, setArtPreview] = useState(data?.art || null);
+  const [tokenPreview, setTokenPreview] = useState(data?.token_art || null);
   const [raceOptions, setRaceOptions] = useState([]);
   const [backgroundOptions, setBackgroundOptions] = useState([]);
   const { user } = useUser();
@@ -17,8 +21,13 @@ export default function Step1({ data, allData, onChange }) {
   const [charId, setCharId] = useState("");
   const creatorName = user?.fullName || user?.username || "";
   const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
-  console.log(data);
 
+  const [unit, setUnit] = useState({
+    heightUnit: "imperial",
+    height: { feet: "", inch: "", centimeter: "" },
+    weightUnit: "imperial",
+    weight: { kg: "", lbs: "" },
+  });
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
     setTalesMode(mode === "true");
@@ -69,8 +78,8 @@ export default function Step1({ data, allData, onChange }) {
     const reader = new FileReader();
     reader.onloadend = () => {
       if (type === "art") {
-        setArtPreview(reader.result);
-        onChange("art", file);
+        setArtPreview(reader.result); // tampilkan preview
+        onChange("art", file); // simpan ke form state
       }
       if (type === "token") {
         setTokenPreview(reader.result);
@@ -157,23 +166,14 @@ export default function Step1({ data, allData, onChange }) {
         <div>
           <div className="flex items-center justify-between mb-2 text-sm font-medium text-gray-200">
             <div className="flex items-center gap-2">
-              <span className="truncate max-w-[140px]">{data.randomid}</span>
+              <span className="truncate max-w-[140px]">
+                UUID : {data.randomid}
+              </span>
               <button onClick={copyToClipboard}>
                 <Clipboard className="w-4 h-4 text-gray-400 hover:text-gray-200" />
               </button>
             </div>
-
-            <div className="flex items-center gap-2">
-              <button onClick={toggleWikiVisibility}>
-                {data.wiki_visibility ? (
-                  <Eye className="w-4 h-4 0" />
-                ) : (
-                  <EyeOff className="w-4 h-4 " />
-                )}
-              </button>
-            </div>
           </div>
-
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
             {artPreview ? (
               <Image
@@ -190,7 +190,19 @@ export default function Step1({ data, allData, onChange }) {
           <div className="text-center mt-2">Art</div>
         </div>
 
-        <div className="mt-7">
+        <div className="">
+          <div className="flex items-center justify-end mb-2 text-sm font-medium text-gray-200">
+            <div className="flex items-center gap-2">
+              Wiki-Visibility :
+              <button onClick={toggleWikiVisibility}>
+                {data.wiki_visibility ? (
+                  <Eye className="w-4 h-4 0" />
+                ) : (
+                  <EyeOff className="w-4 h-4 " />
+                )}
+              </button>
+            </div>
+          </div>
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
             {tokenPreview ? (
               <Image
@@ -235,18 +247,7 @@ export default function Step1({ data, allData, onChange }) {
             value={data.alignment}
             onChange={(val) => onChange("alignment", val)}
             placeholder="Please Choose Your Alignment"
-            options={[
-              { label: "Lawful Good", value: "Lawful Good" },
-              { label: "Neutral Good", value: "Neutral Good" },
-              { label: "Chaotic Good", value: "Chaotic Good" },
-              { label: "Lawful Neutral", value: "Lawful Neutral" },
-              { label: "True Neutral", value: "True Neutral" },
-              { label: "Chaotic Neutral", value: "Chaotic Neutral" },
-              { label: "Lawful Evil", value: "Lawful Evil" },
-              { label: "Neutral Evil", value: "Neutral Evil" },
-              { label: "Chaotic Evil", value: "Chaotic Evil" },
-              { label: "Unknown", value: "Unknown" },
-            ]}
+            options={alignmentOptions}
           />
 
           <InputField
@@ -358,17 +359,30 @@ export default function Step1({ data, allData, onChange }) {
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Birth Place
-            </label>
-            <input
-              type="text"
-              value={data.birth_place || ""}
-              onChange={(e) => onChange("birth_place", e.target.value)}
-              className="w-full h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          <div className="flex  gap-4">
+            <InputField
+              label="Birth Place"
+              value={data.birth_place}
+              onChange={(val) => onChange("birth_place", val)}
+              placeholder=""
             />
+            {talesMode ? (
+              <InputField
+                label="Birth Country"
+                type="select"
+                value={data.birth_place}
+                onChange={(val) => onChange("gender", birth_place)}
+                placeholder="Select Country"
+                options={countryOptions}
+              />
+            ) : (
+              <InputField
+                label="Birth Country"
+                value={data.birth_country}
+                onChange={(val) => onChange("birth_country", val)}
+                placeholder=""
+              />
+            )}
           </div>
         </div>
 
@@ -386,7 +400,7 @@ export default function Step1({ data, allData, onChange }) {
             <div>
               <label className="block text-sm font-medium mb-1">Height</label>
               <div className="flex gap-2 items-end">
-                {data.heightUnit === "imperial" ? (
+                {unit.heightUnit === "imperial" ? (
                   <div className="flex gap-2 flex-1">
                     <input
                       type="number"
@@ -435,14 +449,17 @@ export default function Step1({ data, allData, onChange }) {
                 )}
 
                 <select
-                  value={data.heightUnit || ""}
-                  onChange={(e) => onChange("heightUnit", e.target.value)}
+                  value={unit.heightUnit || ""}
+                  onChange={(e) =>
+                    setUnit((prev) => ({ ...prev, heightUnit: e.target.value }))
+                  }
                   className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
         focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
-                  <option value="">M/I</option>
                   <option value="metric">Cm</option>
-                  <option value="imperial">Ft/In</option>
+                  <option value="imperial" selected>
+                    Ft/In
+                  </option>
                 </select>
               </div>
             </div>
@@ -469,16 +486,16 @@ export default function Step1({ data, allData, onChange }) {
               <div className="flex gap-2 items-end">
                 <input
                   type="number"
-                  placeholder={data.weightUnit === "imperial" ? "Lb" : "Kg"}
+                  placeholder={unit.weightUnit === "imperial" ? "Lb" : "Kg"}
                   value={
-                    data.weightUnit === "imperial"
+                    unit.weightUnit === "imperial"
                       ? data.weight?.pounds ?? ""
                       : data.weight?.kilogram ?? ""
                   }
                   onChange={(e) => {
                     const val = e.target.value;
                     const newWeight =
-                      data.weightUnit === "imperial"
+                      unit.weightUnit === "imperial"
                         ? { ...(data.weight || {}), pounds: val }
                         : { ...(data.weight || {}), kilogram: val };
                     onChange("weight", newWeight);
@@ -503,9 +520,10 @@ export default function Step1({ data, allData, onChange }) {
                   className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
         focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
-                  <option value="">M/I</option>
+                  <option value="imperial" selected>
+                    Lb
+                  </option>
                   <option value="metric">Kg</option>
-                  <option value="imperial">Lb</option>
                 </select>
               </div>
             </div>

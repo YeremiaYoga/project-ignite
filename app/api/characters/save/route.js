@@ -31,6 +31,7 @@ export async function POST(req) {
       death_year: "",
       death_year_type: "",
       birth_place: "",
+      birth_country: "",
       gender: "",
       pronoun: "",
       height: { feet: "", inch: "", centimeter: "" },

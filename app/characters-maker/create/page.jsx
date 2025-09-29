@@ -16,18 +16,19 @@ export default function CreateCharacterPage() {
 
   const initialStep = parseInt(searchParams.get("step") || "0", 10);
   const [currentStep, setCurrentStep] = useState(initialStep);
- const { user } = useUser();
+  const { user, isSignedIn, isLoaded } = useUser();
   const [talesMode, setTalesMode] = useState(false);
   const creatorName = user?.fullName || user?.username || "";
   const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
+
   const [formData, setFormData] = useState({
     step1: {
       name: "",
       fullname: "",
       art: "",
       token_art: "",
-      creator_name: "",
-      creator_email: "",
+      creator_name: creatorName,
+      creator_email: creatorEmail,
       randomid: "",
       race: "",
       subrace: "",
@@ -40,6 +41,7 @@ export default function CreateCharacterPage() {
       death_year: "",
       death_year_type: "",
       birth_place: "",
+      birth_country: "",
       gender: "",
       pronoun: "",
       height: { feet: "", inch: "", centimeter: "" },
@@ -135,6 +137,19 @@ export default function CreateCharacterPage() {
     { title: "Step 5", component: Step5, key: "step5" },
   ];
 
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.replace("/characters-maker"); 
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  if (!isLoaded) {
+    return <div className="text-center text-white">Loading...</div>;
+  }
+
+  if (!isSignedIn) {
+    return null; 
+  }
   const handleChange = (stepKey, field, value) => {
     setFormData((prev) => ({
       ...prev,

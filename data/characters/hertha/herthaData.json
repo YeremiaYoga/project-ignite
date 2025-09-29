@@ -1,8 +1,8 @@
 {
   "name": "Hertha",
   "full_name": "Hertha",
-  "art": "asset/character/art/art.png",
-  "token_art": "asset/character/art/token.png",
+  "art": "/asset/character/art/art.png",
+  "token_art": "/asset/character/art/token.png",
   "wiki_visibility": false,
 
   "creator_name": "Candle",
@@ -51,10 +51,10 @@
     "racist"
   ],
 
-  "previous_economical_standing": "Rich",
-  "current_economical_standing": "Rich",
-  "previous_social_classes": "Noble",
-  "current_social_classes": "Noble",
+  "previous_economical_standing": "Rich/Prosperous",
+  "current_economical_standing": "Rich/Prosperous",
+  "previous_social_classes": "Nobility/Large Land Owner",
+  "current_social_classes": "Nobility/Large Land Owner",
 
   "titles": [
     {
@@ -75,18 +75,18 @@
     }
   ],
 
-  "fear/weakness_visibility": true,
-  "fear/weakness": [
+  "fear_weakness_visibility": true,
+  "fear_weakness": [
     {
-      "fear/weak": "The fear of being seen as like another person in the world",
+      "fear_weak": "The fear of being seen as like another person in the world",
       "from": "Because she does not like to be seen as another person, like a normal person who is unable to do anything. She prefer being seen by other people as she always live in the center stage and wish to stay it in forever."
     },
     {
-      "fear/weak": "The fear of being unable to accomplish anything that is worthy",
+      "fear_weak": "The fear of being unable to accomplish anything that is worthy",
       "from": "In her entire life, she sees herself as perfect so it does make any sense why she would not able to win. She must win to make herself perfect like everytime before. No matter the cost"
     },
     {
-      "fear/weak": "Fear of being beaten by anyone, especially someone who she deem to be lower than her",
+      "fear_weak": "Fear of being beaten by anyone, especially someone who she deem to be lower than her",
       "from": "She hates the idea of someone to win over her. Even more if that person is seen as lower than her and not someone that she sees as a rival or some sort of pontentional rival which she can try to be beat. With her high self standard and being profen wrong about someone capability would only make her even more angrier."
     }
   ],
