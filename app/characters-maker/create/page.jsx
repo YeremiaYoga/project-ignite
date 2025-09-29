@@ -21,6 +21,18 @@ export default function CreateCharacterPage() {
   const creatorName = user?.fullName || user?.username || "";
   const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
 
+  useEffect(() => {
+    if (isLoaded && isSignedIn && user) {
+      setFormData((prev) => ({
+        ...prev,
+        step1: {
+          ...prev.step1,
+          creator_name: user.fullName || user.username || "",
+          creator_email: user.primaryEmailAddress?.emailAddress || "",
+        },
+      }));
+    }
+  }, [isLoaded, isSignedIn, user]);
   const [formData, setFormData] = useState({
     step1: {
       name: "",
@@ -124,6 +136,7 @@ export default function CreateCharacterPage() {
     },
   });
 
+  console.log(formData);
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
     setTalesMode(mode === "true");
@@ -139,7 +152,7 @@ export default function CreateCharacterPage() {
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.replace("/characters-maker"); 
+      router.replace("/characters-maker");
     }
   }, [isLoaded, isSignedIn, router]);
 
@@ -148,7 +161,7 @@ export default function CreateCharacterPage() {
   }
 
   if (!isSignedIn) {
-    return null; 
+    return null;
   }
   const handleChange = (stepKey, field, value) => {
     setFormData((prev) => ({
