@@ -615,3 +615,18 @@ export const countryOptions = [
   { label: "Astral Planes", value: "Astral Planes" },
   { label: "Unknown", value: "Unknown" },
 ];
+
+
+export const damageTypesWithImages = [
+  { value: "acid", label: "Acid", image: "/assets/damageType_icon/acid.webp" },
+  { value: "cold", label: "Cold", image: "/assets/damageType_icon/cold.webp" },
+  { value: "fire", label: "Fire", image: "/assets/damageType_icon/fire.webp" },
+  { value: "force", label: "Force", image: "/assets/damageType_icon/force.webp" },
+  { value: "lightning", label: "Lightning", image: "/assets/damageType_icon/lightning.webp" },
+  { value: "necrotic", label: "Necrotic", image: "/assets/damageType_icon/necrotic.webp" },
+  { value: "physic", label: "Physic", image: "/assets/damageType_icon/physic.webp" },
+  { value: "physical", label: "Physical", image: "/assets/damageType_icon/physical.webp" },
+  { value: "poison", label: "Poison", image: "/assets/damageType_icon/poison.webp" },
+  { value: "radiant", label: "Radiant", image: "/assets/damageType_icon/radiant.webp" },
+  { value: "thunder", label: "Thunder", image: "/assets/damageType_icon/thunder.webp" },
+];

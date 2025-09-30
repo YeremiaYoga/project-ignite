@@ -41,7 +41,7 @@ export default function CreateCharacterPage() {
       token_art: "",
       creator_name: creatorName,
       creator_email: creatorEmail,
-      randomid: "",
+      uuid: "",
       race: "",
       subrace: "",
       background: "",

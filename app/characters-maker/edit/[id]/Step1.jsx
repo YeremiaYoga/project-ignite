@@ -167,7 +167,7 @@ export default function Step1({ data, allData, onChange }) {
           <div className="flex items-center justify-between mb-2 text-sm font-medium text-gray-200">
             <div className="flex items-center gap-2">
               <span className="truncate max-w-[140px]">
-                UUID : {data.randomid}
+                UUID : {data.uuid}
               </span>
               <button onClick={copyToClipboard}>
                 <Clipboard className="w-4 h-4 text-gray-400 hover:text-gray-200" />

@@ -4,6 +4,8 @@ import Navbar from "@/components/Navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 import BackgroundProvider from "@/components/BackgroundProvider";
 import { TalesModeProvider } from "@/context/TalesModeContext";
+
+
 const convergence = Convergence({
   variable: "--font-convergence",
   weight: "400",

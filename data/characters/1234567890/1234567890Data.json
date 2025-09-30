@@ -1,28 +1,21 @@
 {
   "name": "Hertha",
   "full_name": "Hertha",
-  "art": "/asset/character/art/art.png",
-  "token_art": "/asset/character/art/token.png",
   "wiki_visibility": false,
-
   "creator_name": "Candle",
   "creator_email": "Candle@gmail.com",
   "randomid": "1234567890",
-
   "race": "Human",
   "sub-race": "",
   "background": "Noble",
-
   "character_type": "NPC",
   "allignment": "Lawful Nuetral",
-
   "status": "Dead",
   "birth_year": 1597,
   "birth_year_type": "AC",
   "death_year": "",
   "death_year_type": "AC",
   "birth_place": "Orange Corral, Delstainvia",
-
   "gender": "Female",
   "pronoun": "She/Her",
   "height": {
@@ -36,12 +29,16 @@
   },
   "skin_colour": "White pale skin",
   "hair": "Silver blonde hair",
-
   "backstory_visibiliy": true,
   "backstory": "bla-bla",
   "voice_style": "soft-spoken woman",
-  "wayfarer": ["Talia The Weaver"],
-  "personality_traits": ["Ruler", "Magician"],
+  "wayfarer": [
+    "Talia The Weaver"
+  ],
+  "personality_traits": [
+    "Ruler",
+    "Magician"
+  ],
   "main_personality": "narcissist",
   "detailed_personality": [
     "Knowledge seeking",
@@ -50,12 +47,10 @@
     "self-centered",
     "racist"
   ],
-
   "previous_economical_standing": "Rich/Prosperous",
   "current_economical_standing": "Rich/Prosperous",
   "previous_social_classes": "Nobility/Large Land Owner",
   "current_social_classes": "Nobility/Large Land Owner",
-
   "titles": [
     {
       "name": "The Leader of Alastor Organization",
@@ -74,7 +69,6 @@
       "from": "She behold the rune of Jurisdiction which is a powerful rune that no one really knows the capibility of controling other people's will or mind. Although not much is known about it as she like to keep things hidden away from people."
     }
   ],
-
   "fear_weakness_visibility": true,
   "fear_weakness": [
     {
@@ -90,7 +84,6 @@
       "from": "She hates the idea of someone to win over her. Even more if that person is seen as lower than her and not someone that she sees as a rival or some sort of pontentional rival which she can try to be beat. With her high self standard and being profen wrong about someone capability would only make her even more angrier."
     }
   ],
-
   "motivation_visibility": true,
   "motivation": [
     {
@@ -104,7 +97,6 @@
       "how": "Through charm, persuasion, and carefully hidden schemes behind a mask of elegance."
     }
   ],
-
   "appearance_visibility": true,
   "appearance": "She has long silvery-white hair tied back with a large ribbon, pale skin like porcelain, and sharp red-orange eyes that seem both alluring and unsettling. Dressed in a flowing black kimono adorned with gold embroidery, she carries herself with grace and authority, often holding a long pipe that trails with smoke. Her presence is elegant, commanding, and timeless, as though untouched by age.",
   "notable_details": [
@@ -127,9 +119,7 @@
   ],
   "nationality": "Delstainvian",
   "main_theme": "Must be www.youtube.com/ link",
-  "main_theme_ogg": "asset/character/music/character_main_theme.ogg",
   "combat_theme": "Must be www.youtube.com/ link",
-  "combat_theme_ogg": "asset/character/music/character_combat_theme.ogg",
   "hobbies_visibility": true,
   "hobbies": [
     "Manipulating admirers or dream seeker for her own game",
@@ -141,9 +131,14 @@
     "Smoking devices like cigarettes or pipe",
     "golden black or golden red Shan (扇)"
   ],
-  "signature_weapon": ["magical infuse hand which allow spell casting", "bow"],
-
-  "current_occupation": ["President of Alastor Organization", "A Scholar"],
+  "signature_weapon": [
+    "magical infuse hand which allow spell casting",
+    "bow"
+  ],
+  "current_occupation": [
+    "President of Alastor Organization",
+    "A Scholar"
+  ],
   "previous_occupation": [
     "The Head of the Alastor Family",
     "A member of the Intelligentsia Guild"
@@ -154,7 +149,6 @@
       "connection": ""
     }
   ],
-
   "family": [
     {
       "name": "Alastor",
@@ -232,7 +226,6 @@
       "notes": "And they were just roommates"
     }
   ],
-
   "combat_value": 20,
   "combat_style": "Healer (Temporary Hit Point Healer)",
   "vision": "Darkvision-60",
@@ -255,9 +248,12 @@
     {
       "name": "history",
       "value": 2
+    },
+    {
+      "name": "Arcana",
+      "value": 0.5
     }
   ],
-
   "notable_accomplishments": [
     "Helping several people with illness through the Alastor Organization",
     "Acccepted as a part of a Intelligentsia Guild",
@@ -273,5 +269,7 @@
       "quote": "the most beautiful woman that ever exist",
       "author": "George Verärgerung"
     }
-  ]
+  ],
+  "usedSkillPoints": 14,
+  "personality_combat_style": "Protective → Prioritizes defending allies over striking back."
 }

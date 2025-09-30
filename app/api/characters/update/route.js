@@ -15,12 +15,11 @@ export async function POST(req) {
 
     const baseDir = path.join(process.cwd(), "data", "characters", id);
 
-    // pastikan folder ada
     if (!fs.existsSync(baseDir)) {
       fs.mkdirSync(baseDir, { recursive: true });
     }
 
-    // handle file upload
+
     const fileFields = ["art", "token_art", "main_theme_ogg", "combat_theme_ogg"];
     for (const field of fileFields) {
       const file = formData.get(field);
@@ -28,11 +27,10 @@ export async function POST(req) {
         const buffer = Buffer.from(await file.arrayBuffer());
         const filePath = path.join(baseDir, file.name);
         fs.writeFileSync(filePath, buffer);
-        jsonData[field] = `/data/characters/${id}/${file.name}`; // simpan path file ke json
+        jsonData[field] = `/data/characters/${id}/${file.name}`; 
       }
     }
 
-    // simpan JSON
     const filePath = path.join(baseDir, `${id}Data.json`);
     fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), "utf-8");
 

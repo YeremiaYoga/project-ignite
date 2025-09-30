@@ -38,7 +38,7 @@ export default function Step1({ data, onChange }) {
       randomId += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     setCharId(randomId);
-    onChange("randomid", randomId);
+    onChange("uuid", randomId);
     // onChange("wiki_visibility", false);
   }, []);
   const formatRace = (str) =>
@@ -174,7 +174,7 @@ export default function Step1({ data, onChange }) {
         <div>
           <div className="flex items-center justify-between mb-2 text-sm font-medium text-gray-200">
             <div className="flex items-center gap-2">
-              <span className="truncate max-w-[140px]">UUID : {data.randomid}</span>
+              <span className="truncate max-w-[140px]">UUID : {data.uuid}</span>
               <button onClick={copyToClipboard}>
                 <Clipboard className="w-4 h-4 text-gray-400 hover:text-gray-200" />
               </button>

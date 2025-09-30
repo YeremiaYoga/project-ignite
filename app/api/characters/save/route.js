@@ -19,7 +19,7 @@ export async function POST(req) {
       token_art: "",
       creator_name: "",
       creator_email: "",
-      randomid: "",
+      uuid: "",
       race: "",
       subrace: "",
       background: "",
@@ -106,6 +106,10 @@ export async function POST(req) {
       creature_type: "",
       personality_combat_style: "",
       skill_prof: [],
+
+      rotation_stamp: 0,
+      stamp_type: 0,
+      rotation_sticker: 0,
     };
 
     let mergedData = {
@@ -115,7 +119,14 @@ export async function POST(req) {
       weight: { ...template.weight, ...body.weight },
     };
 
-    // --- Konversi height ---
+    mergedData.stamp_type = Math.floor(Math.random() * 40) + 1;
+    mergedData.rotation_stamp = parseFloat(
+      (Math.random() * 60 - 30).toFixed(1)
+    );
+    mergedData.rotation_sticker = parseFloat(
+      (Math.random() * 60 - 30).toFixed(1)
+    );
+
     const feet = parseFloat(mergedData.height.feet) || 0;
     const inch = parseFloat(mergedData.height.inch) || 0;
     const cm = parseFloat(mergedData.height.centimeter) || 0;
@@ -193,7 +204,8 @@ export async function POST(req) {
     }
 
     // --- Simpan JSON ---
-    const filePath = path.join(baseDir, `${characterName}Data.json`);
+    const safeName = characterName.trim().replace(/\s+/g, "_");
+    const filePath = path.join(baseDir, `${safeName}Data.json`);
     await fs.writeFile(filePath, JSON.stringify(mergedData, null, 2), "utf-8");
 
     return new Response(JSON.stringify({ success: true, path: filePath }), {

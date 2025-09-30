@@ -4,7 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser, SignedOut, SignInButton } from "@clerk/nextjs";
 import { Copy } from "lucide-react";
+import { IBM_Plex_Mono } from "next/font/google";
 
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400"],
+});
 export default function CharactersMakerPage() {
   const router = useRouter();
   const { isSignedIn } = useUser();
@@ -63,11 +68,27 @@ export default function CharactersMakerPage() {
         <div className="grid grid-cols-3 gap-6">
           {characters.map((char) => (
             <div
-              key={char.randomid}
-              className="flex  bg-gray-800 rounded shadow p-2"
+              key={char.uuid}
+              className="relative bg-no-repeat bg-cover w-[350px] h-[220px] flex flex-col justify-between p-4"
+              style={{
+                backgroundImage: "url('/assets/character_image.png')",
+              }}
             >
-              <div className="flex items-center">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-600 flex-shrink-0">
+              <div className="absolute top-4 right-5 flex items-center gap-1 text-sm text-gray-700">
+                <span className={`text-lg ${ibmPlexMono.className}`}>
+                  {char.uuid ?? "UnknownID"}
+                </span>
+                <Copy
+                  size={16}
+                  className="cursor-pointer hover:text-gray-900"
+                  onClick={() =>
+                    navigator.clipboard.writeText(char.uuid ?? "")
+                  }
+                />
+              </div>
+
+              <div className="absolute top-[27px] left-[11px] flex flex-col items-center w-[120px]">
+                <div className="w-[80px] h-[80px] rounded-full overflow-hidden">
                   {char.token_art ? (
                     <img
                       src={char.token_art}
@@ -82,39 +103,26 @@ export default function CharactersMakerPage() {
                     />
                   )}
                 </div>
-                <div className="ml-5">
-                  <h2 className="text-xl font-bold">{char.name}</h2>
-                  <p className="text-sm text-gray-400 flex items-center gap-2">
-                    {char.randomid ?? "UnknownID"}
-                    <Copy
-                      size={16}
-                      className="cursor-pointer hover:text-white"
-                      onClick={() =>
-                        navigator.clipboard.writeText(char.randomid ?? "")
-                      }
-                    />
-                  </p>
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      className="flex-1 px-3 py-2 bg-blue-600 rounded text-sm opacity-50 cursor-not-allowed "
-                      disabled
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => handleEdit(char.randomid)}
-                      className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="flex-1 px-3 py-2 bg-red-600 rounded text-sm opacity-50 cursor-not-allowed "
-                      disabled
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
+              </div>
+              <div className="absolute top-[110px] left-12">
+                <h2 className="mt-2 text-center text-2xl font-bold text-gray-800 w-full">
+                  {char.name}
+                </h2>
+              </div>
+
+              <div className="flex justify-center gap-3 mt-auto mb-2">
+                <button className="px-4 py-1 bg-blue-600 text-white rounded">
+                  View
+                </button>
+                <button
+                  onClick={() => handleEdit(char.randomid)}
+                  className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Edit
+                </button>
+                <button className="px-4 py-1 bg-red-600 text-white rounded">
+                  Delete
+                </button>
               </div>
             </div>
           ))}
