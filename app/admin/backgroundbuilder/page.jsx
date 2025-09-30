@@ -3,6 +3,7 @@
 import { useState } from "react";
 import optionsData from "@/data/bgoptions.json";
 import MultipleSelectInput from "./MultipleSelectInput";
+import { Languages } from "lucide-react";
 
 export default function BackgroundForm({ onSubmit }) {
   const [formData, setFormData] = useState({
@@ -13,8 +14,11 @@ export default function BackgroundForm({ onSubmit }) {
     feat: "",
     skill_proficiencies: [],
     tool_proficiencies: [],
+    languages: "",
     tags: [],
     equipment_options: {},
+    feature: "",
+    bg_image: null,
   });
 
   const handleChange = (field, value) => {
@@ -22,6 +26,13 @@ export default function BackgroundForm({ onSubmit }) {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({ ...prev, bg_image: file }));
+    }
   };
 
   const addUniqueValue = (field, value) => {
@@ -46,10 +57,22 @@ export default function BackgroundForm({ onSubmit }) {
     e.preventDefault();
 
     try {
+      const data = new FormData();
+      for (const key in formData) {
+        if (key === "bg_image" && formData.bg_image) {
+          data.append(key, formData.bg_image);
+        } else if (Array.isArray(formData[key])) {
+          formData[key].forEach((item) => data.append(key, item));
+        } else if (typeof formData[key] === "object") {
+          data.append(key, JSON.stringify(formData[key]));
+        } else {
+          data.append(key, formData[key]);
+        }
+      }
+
       const res = await fetch("/api/backgrounds/createBackgroundData", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: data,
       });
 
       const result = await res.json();
@@ -77,6 +100,22 @@ export default function BackgroundForm({ onSubmit }) {
         onSubmit={handleSubmit}
         className="bg-gray-900 p-6 rounded-lg shadow-lg w-full space-y-6"
       >
+        <div>
+          <label className="block mb-1 font-bold">Background Image:</label>
+          {formData.bg_image && (
+            <img
+              src={URL.createObjectURL(formData.bg_image)}
+              alt="Preview"
+              className="mt-2 w-48 h-48 object-cover rounded"
+            />
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="w-full p-2 rounded bg-gray-700"
+          />
+        </div>
         <input
           className="w-full p-2 rounded bg-gray-700"
           placeholder="Name"
@@ -92,7 +131,7 @@ export default function BackgroundForm({ onSubmit }) {
         />
 
         <textarea
-          className="w-full p-2 rounded bg-gray-700"
+          className="w-full h-40 p-2 rounded bg-gray-700"
           placeholder="Description"
           value={formData.description}
           onChange={(e) => handleChange("description", e.target.value)}
@@ -103,6 +142,20 @@ export default function BackgroundForm({ onSubmit }) {
           placeholder="Feat"
           value={formData.feat}
           onChange={(e) => handleChange("feat", e.target.value)}
+        />
+
+        <input
+          className="w-full p-2 rounded bg-gray-700 "
+          placeholder="Languages"
+          value={formData.languages}
+          onChange={(e) => handleChange("languages", e.target.value)}
+        />
+
+        <textarea
+          className="w-full h-40 p-2 rounded bg-gray-700"
+          placeholder="Feature"
+          value={formData.feature}
+          onChange={(e) => handleChange("feature", e.target.value)}
         />
 
         <MultipleSelectInput

@@ -70,7 +70,6 @@ function BackgroundRow({ bg }) {
               ),
             }}
           />
-          {/* {bg.description} */}
           <hr className="border-orange-500 my-2" />
 
           <p className="mb-1">
@@ -100,6 +99,11 @@ function BackgroundRow({ bg }) {
               : "—"}
           </p>
 
+          <p className="mb-1">
+            <span className="font-semibold">Languages: </span>
+            {bg.languages}
+          </p>
+
           <p>
             <span className="font-semibold">Equipment: </span>
             {Object.entries(bg.equipment_options).map(([key, val], idx) => (
@@ -115,6 +119,14 @@ function BackgroundRow({ bg }) {
               </span>
             ))}
           </p>
+          <hr className="border-orange-500 my-2" />
+
+          <p
+            className="mb-3 text-gray-200"
+            dangerouslySetInnerHTML={{
+              __html: linkifyText(bg.feature, ""),
+            }}
+          />
 
           <div className="mt-3">
             <Link href={`/backgrounds/${bg.name.replace(/\s+/g, "_")}`}>

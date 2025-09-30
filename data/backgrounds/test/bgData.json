@@ -4,6 +4,8 @@
   "description": "test",
   "ability_scores": ["Strength", "Constitution"],
   "feat": "test",
+  "languages": "common",
+  "feature": "testing feature name",
   "skill_proficiencies": ["Athletics"],
   "tool_proficiencies": ["test", "123"],
   "tags": ["Detection"],

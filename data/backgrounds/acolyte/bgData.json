@@ -7,6 +7,8 @@
   "skill_proficiencies": ["Insight", "Religion"],
   "tool_proficiencies": ["Calligrapher's Supplies"],
   "tags": [],
+  "languages": "common",
+  "feature": "testing feature name",
   "equipment_options": {
     "A": {
       "items": [

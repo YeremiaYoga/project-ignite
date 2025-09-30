@@ -1,37 +1,78 @@
-
+// app/api/backgrounds/createBackgroundData/route.js
 import { NextResponse } from "next/server";
-import { mkdir, writeFile } from "fs/promises";
+import formidable from "formidable";
+import fs from "fs";
 import path from "path";
 
-export async function POST(req) {
-  try {
-    const body = await req.json();
+export const config = {
+  api: {
+    bodyParser: false, 
+  },
+};
 
-    if (!body.name) {
-      return NextResponse.json(
-        { success: false, message: "Background name is required" },
-        { status: 400 }
-      );
-    }
+export async function POST(req) {
+  const form = new formidable.IncomingForm();
+
+  return new Promise((resolve, reject) => {
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        return resolve(
+          NextResponse.json({ success: false, message: err.message }, { status: 500 })
+        );
+      }
+
+      try {
+        const name = fields.name;
+        if (!name) {
+          return resolve(
+            NextResponse.json(
+              { success: false, message: "Background name is required" },
+              { status: 400 }
+            )
+          );
+        }
+
+        const folderName = name.toLowerCase().replace(/\s+/g, "_");
+        const folderPath = path.join(process.cwd(), "public", "assets", "backgrounds", folderName);
+
+  
+        fs.mkdirSync(folderPath, { recursive: true });
 
    
-    const folderName = body.name.toLowerCase().replace(/\s+/g, "_");
+        let imagePath = "";
+        if (files.bg_image) {
+          const oldPath = files.bg_image.filepath || files.bg_image.path;
+          const ext = path.extname(files.bg_image.originalFilename);
+          imagePath = `/assets/backgrounds/${folderName}/${folderName}_image${ext}`;
+          const savePath = path.join(folderPath, `${folderName}_image${ext}`);
 
-    const folderPath = path.join(process.cwd(), "data", "backgrounds", folderName);
-    const filePath = path.join(folderPath, "bgData.json");
-    await mkdir(folderPath, { recursive: true });
-    await writeFile(filePath, JSON.stringify(body, null, 2), "utf-8");
-    return NextResponse.json({
-      success: true,
-      message: "Background saved successfully",
-      folder: folderName,
-      file: "bgData.json",
-      data: body,
+          fs.copyFileSync(oldPath, savePath);
+        }
+
+
+        const bgData = {
+          ...fields,
+          bg_image: imagePath,
+        };
+
+ 
+        const jsonFilePath = path.join(folderPath, "bgData.json");
+        fs.writeFileSync(jsonFilePath, JSON.stringify(bgData, null, 2), "utf-8");
+
+        resolve(
+          NextResponse.json({
+            success: true,
+            message: "Background saved successfully",
+            folder: folderName,
+            file: "bgData.json",
+            data: bgData,
+          })
+        );
+      } catch (error) {
+        resolve(
+          NextResponse.json({ success: false, message: error.message }, { status: 500 })
+        );
+      }
     });
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
-  }
+  });
 }
