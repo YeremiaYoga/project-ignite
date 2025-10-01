@@ -19,6 +19,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showThemeColors, setShowThemeColors] = useState(false);
   const [talesMode, setTalesMode] = useState(false);
+
   const [colors, setColors] = useState({
     sub1: "#3b82f6",
     sub2: "#10b981",
@@ -32,7 +33,19 @@ export default function Navbar() {
   const mobileMenuRef = useRef(null);
 
   const { signOut } = useClerk();
-
+  useEffect(() => {
+    if (user) {
+      fetch("http://localhost:5000/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clerkId: user.id,
+          email: user.primaryEmailAddress?.emailAddress,
+          username: user.username || user.fullName,
+        }),
+      }).catch((err) => console.error("Failed to sync user:", err));
+    }
+  }, [user]);
   useEffect(() => {
     const storedColors = {
       sub1: Cookies.get("ignite-hyperlink-color-sub1") || "#3b82f6",
@@ -102,6 +115,23 @@ export default function Navbar() {
     Cookies.set("ignite-tales-mode", newValue.toString(), { expires: 365 });
   };
 
+  const fetchUserData = async () => {
+    if (!user) return;
+
+    try {
+      const res = await fetch(`http://localhost:5000/users/${user.id}`);
+      if (!res.ok) throw new Error("Failed to fetch user data");
+
+      const data = await res.json();
+      alert(
+        `User Data:\nID: ${data.user.id}\nClerk ID: ${data.user.clerk_id}\nEmail: ${data.user.email}\nUsername: ${data.user.username}\nCreated At: ${data.user.created_at}`
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching user data: " + err.message);
+    }
+  };
+
   return (
     <nav className="w-full border-b border-gray-800 bg-gray-800 shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 py-2 flex justify-between items-center relative">
@@ -158,15 +188,28 @@ export default function Navbar() {
               </SignedOut>
 
               <SignedIn>
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-800 dark:text-gray-200 truncate">
-                    {user?.fullName || user?.primaryEmailAddress?.emailAddress}
-                  </span>
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-800 dark:text-gray-200 truncate">
+                      {user?.fullName ||
+                        user?.primaryEmailAddress?.emailAddress}
+                    </span>
+                    <button
+                      onClick={() =>
+                        signOut(() => (window.location.href = "/"))
+                      }
+                      className="text-red-600 font-semibold hover:underline"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+
+                  {/* Button untuk fetch user data */}
                   <button
-                    onClick={() => signOut(() => (window.location.href = "/"))}
-                    className="text-red-600 font-semibold hover:underline"
+                    onClick={fetchUserData}
+                    className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
                   >
-                    Sign Out
+                    Show My Data
                   </button>
                 </div>
               </SignedIn>

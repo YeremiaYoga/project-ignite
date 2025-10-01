@@ -377,8 +377,8 @@ export default function Step1({ data, onChange }) {
               <InputField
                 label="Birth Country"
                 type="select"
-                value={data.birth_place}
-                onChange={(val) => onChange("gender", birth_place)}
+                value={data.birth_country}
+                onChange={(val) => onChange("birth_country", val)}
                 placeholder="Select Country"
                 options={countryOptions}
               />
