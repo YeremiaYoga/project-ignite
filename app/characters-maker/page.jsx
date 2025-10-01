@@ -12,21 +12,28 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 export default function CharactersMakerPage() {
   const router = useRouter();
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const [characters, setCharacters] = useState([]);
+  const username = user?.username || user?.fullName || user?.email;
 
   useEffect(() => {
     const fetchChars = async () => {
       try {
         const res = await fetch("/api/characters/getAll");
         const data = await res.json();
-        setCharacters(data);
+
+        const filtered = data.filter((char) => char.creator_name === username);
+
+        setCharacters(filtered);
       } catch (err) {
         console.error("Failed to fetch characters:", err);
       }
     };
-    fetchChars();
-  }, []);
+
+    if (username) {
+      fetchChars();
+    }
+  }, [username]);
 
   const handleCreate = () => router.push("/characters-maker/create");
   const handleEdit = (id) => router.push(`/characters-maker/edit/${id}`);
@@ -74,6 +81,7 @@ export default function CharactersMakerPage() {
                 backgroundImage: "url('/assets/character_image.png')",
               }}
             >
+              {/* UUID + Copy */}
               <div className="absolute top-4 right-5 flex items-center gap-1 text-sm text-gray-700">
                 <span className={`text-lg ${ibmPlexMono.className}`}>
                   {char.uuid ?? "UnknownID"}
@@ -81,12 +89,11 @@ export default function CharactersMakerPage() {
                 <Copy
                   size={16}
                   className="cursor-pointer hover:text-gray-900"
-                  onClick={() =>
-                    navigator.clipboard.writeText(char.uuid ?? "")
-                  }
+                  onClick={() => navigator.clipboard.writeText(char.uuid ?? "")}
                 />
               </div>
 
+              {/* Token art */}
               <div className="absolute top-[27px] left-[11px] flex flex-col items-center w-[120px]">
                 <div className="w-[80px] h-[80px] rounded-full overflow-hidden">
                   {char.token_art ? (
@@ -104,12 +111,32 @@ export default function CharactersMakerPage() {
                   )}
                 </div>
               </div>
+
+              {/* Nama */}
               <div className="absolute top-[110px] left-12">
                 <h2 className="mt-2 text-center text-2xl font-bold text-gray-800 w-full">
                   {char.name}
                 </h2>
               </div>
 
+              <div
+                className="absolute right-7 top-12"
+                style={{
+                  transform: `rotate(${char.rotation_stamp || 0}deg)`,
+                }}
+              >
+                <img
+                  src={
+                    char.stamp_type % 2 === 1
+                      ? "/assets/stamps/stamp_1.webp"
+                      : "/assets/stamps/stamp_2.webp"
+                  }
+                  alt="Stamp"
+                  className="w-10 h-auto"
+                />
+              </div>
+
+              {/* Buttons */}
               <div className="flex justify-center gap-3 mt-auto mb-2">
                 <button className="px-4 py-1 bg-blue-600 text-white rounded">
                   View
