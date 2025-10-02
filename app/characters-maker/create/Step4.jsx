@@ -220,7 +220,7 @@ export default function Step4({ data, allData, onChange }) {
 
       <RelationshipSection
         title="Special Relationship"
-        keyName="spesial_relationship"
+        keyName="special_relationship"
         data={data}
         onChange={onChange}
       />

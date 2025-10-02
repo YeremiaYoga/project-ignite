@@ -10,7 +10,7 @@ export default function InputField({
   rows = 4,
   options = [],
   disabled = false,
-  hint = "", 
+  hint = "",
 }) {
   const [query, setQuery] = useState(value || "");
   const [isOpen, setIsOpen] = useState(false);
@@ -82,9 +82,9 @@ export default function InputField({
                 <div className="px-3 py-2 text-gray-400">No results found.</div>
               ) : (
                 <ul>
-                  {filteredOptions.map((opt) => (
+                  {filteredOptions.map((opt, index) => (
                     <li
-                      key={opt.value ?? opt}
+                      key={index}
                       className="px-3 py-2 cursor-pointer hover:bg-gray-700 capitalize"
                       onClick={() => handleSelect(opt)}
                     >
@@ -125,9 +125,9 @@ export default function InputField({
     }`}
         >
           <option value="">{placeholder || "Please select"}</option>
-          {options.map((opt) => (
+          {options.map((opt, index) => (
             <option
-              key={opt.value ?? opt}
+              key={index}
               value={opt.value ?? opt}
               disabled={opt.disabled}
               className={`capitalize ${
@@ -140,9 +140,9 @@ export default function InputField({
         </select>
       ) : type === "selectButton" ? (
         <div className="flex gap-2">
-          {options.map((opt) => (
+          {options.map((opt, index) => (
             <button
-              key={opt.value ?? opt}
+              key={index}
               type="button"
               onClick={() => !disabled && onChange(opt.value ?? opt)}
               className={`flex-1 px-3 py-2 rounded-md border text-sm text-center ${
@@ -181,9 +181,9 @@ export default function InputField({
 
           {isOpen && (
             <div className="absolute z-10 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto w-full">
-              {options.map((opt) => (
+              {options.map((opt, index) => (
                 <div
-                  key={opt.value}
+                  key={index}
                   onClick={() => {
                     onChange(opt.value);
                     setIsOpen(false);

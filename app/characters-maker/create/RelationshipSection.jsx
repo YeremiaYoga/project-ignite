@@ -80,11 +80,11 @@ export default function RelationshipSection({
             </div>
             <div className="col-span-3">
               <InputField
-                type={keyName === "spesial_relationship" ? "text" : "select"}
+                type={keyName === "special_relationship" ? "text" : "select"}
                 placeholder="Relationship"
                 value={member.relationship || ""}
                 options={
-                  keyName === "spesial_relationship"
+                  keyName === "special_relationship"
                     ? []
                     : relationshipOptions.map((opt) =>
                         typeof opt === "string"

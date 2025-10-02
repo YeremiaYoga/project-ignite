@@ -69,11 +69,11 @@ export default function Step2({ data, allData, onChange }) {
             <button
               type="button"
               onClick={() =>
-                onChange("backstory_visibiliy", !step2.backstory_visibiliy)
+                onChange("backstory_visibility", !step2.backstory_visibility)
               }
               className="text-gray-400 hover:text-white"
             >
-              {step2.backstory_visibiliy ? (
+              {step2.backstory_visibility ? (
                 <Eye size={18} />
               ) : (
                 <EyeOff size={18} />
@@ -246,7 +246,11 @@ export default function Step2({ data, allData, onChange }) {
             label="Motivation Item"
             type="object"
             fields={["motivation", "from", "how"]}
-            items={[{ motivation: "", from: "", how: "" }]}
+            items={
+              step2.motivation && step2.motivation.length
+                ? step2.motivation
+                : [{ motivation: "", from: "", how: "" }]
+            }
             onChange={(vals) => onChange("motivation", vals)}
           />
         </div>

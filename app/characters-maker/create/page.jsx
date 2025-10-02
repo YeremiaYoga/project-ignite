@@ -18,6 +18,7 @@ export default function CreateCharacterPage() {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const { user, isSignedIn, isLoaded } = useUser();
   const [talesMode, setTalesMode] = useState(false);
+  const [apiMode, setApiMode] = useState(false);
   const creatorName = user?.fullName || user?.username || "";
   const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
 
@@ -46,11 +47,11 @@ export default function CreateCharacterPage() {
       subrace: "",
       background: "",
       character_type: "",
-      allignment: "",
+      alignment: "",
       status: "",
-      birth_year: "",
+      birth_year: 0,
       birth_year_type: "",
-      death_year: "",
+      death_year: 0,
       death_year_type: "",
       birth_place: "",
       birth_country: "",
@@ -63,7 +64,7 @@ export default function CreateCharacterPage() {
       wiki_visibility: false,
     },
     step2: {
-      backstory_visibiliy: false,
+      backstory_visibility: false,
       backstory: "",
       voice_style: "",
       wayfarer: "",
@@ -79,7 +80,7 @@ export default function CreateCharacterPage() {
       current_last_economical_standing: "",
       previous_social_classes: "",
       current_social_classes: "",
-      backstory_visibiliy: false,
+     
     },
     step3: {
       appearance_visibility: false,
@@ -113,7 +114,7 @@ export default function CreateCharacterPage() {
       enemies: [],
       subordinates: [],
       affiliations: [],
-      spesial_relationship: [],
+      special_relationship: [],
     },
     step5: {
       combat_value: 0,
@@ -140,6 +141,8 @@ export default function CreateCharacterPage() {
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
     setTalesMode(mode === "true");
+    const apimode = Cookies.get("ignite-api-mode");
+    setApiMode(apimode === "true");
   }, []);
   const isNameFilled = () => formData.step1.name.trim() !== "";
   const steps = [
@@ -195,7 +198,6 @@ export default function CreateCharacterPage() {
     try {
       const formDataToSend = new FormData();
 
-      // Gabung data step1-3
       const mergedData = {
         ...formData.step1,
         ...formData.step2,
@@ -236,12 +238,77 @@ export default function CreateCharacterPage() {
       alert("Failed to save character.");
     }
   };
+  const submitBackend = async () => {
+    if (!isNameFilled()) {
+      alert("Name is required.");
+      return;
+    }
+
+    try {
+      const formDataToSend = new FormData();
+
+      // Gabung semua step data
+      const mergedData = {
+        ...formData.step1,
+        ...formData.step2,
+        ...formData.step3,
+        ...formData.step4,
+        ...formData.step5,
+      };
+
+      // Pisahkan file
+      const { art, token_art, main_theme_ogg, combat_theme_ogg, ...jsonData } =
+        mergedData;
+
+  
+      // Append JSON data
+      formDataToSend.append("data", JSON.stringify(jsonData));
+
+      // Append file kalau ada
+      if (art instanceof File) {
+        formDataToSend.append("art", art);
+      }
+      if (token_art instanceof File) {
+        formDataToSend.append("token_art", token_art);
+      }
+      if (main_theme_ogg instanceof File) {
+        formDataToSend.append("main_theme_ogg", main_theme_ogg);
+      }
+      if (combat_theme_ogg instanceof File) {
+        formDataToSend.append("combat_theme_ogg", combat_theme_ogg);
+      }
+
+      // 🔑 arahkan ke backend (pakai apiMode kalau perlu)
+      const url = apiMode
+        ? `${process.env.NEXT_PUBLIC_API_URL}/characters/save`
+        : "/api/characters/save";
+
+      for (let [key, value] of formDataToSend.entries()) {
+  console.log(key, value);
+}
+      const res = await fetch(url, {
+        method: "POST",
+        body: formDataToSend,
+        credentials: "include", // biar cookie userId ikut
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        alert("Character saved!");
+        console.log("Saved character:", result);
+      } else {
+        alert("Error saving character: " + result.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save character.");
+    }
+  };
 
   const CurrentComponent = steps[currentStep].component;
   const stepKey = steps[currentStep].key;
   const stepData = formData[stepKey];
 
-  // Ganti bagian render komponen Step
   const renderStepContent = () => {
     const stepKey = steps[currentStep].key;
     const stepData = formData[stepKey];
@@ -265,7 +332,7 @@ export default function CreateCharacterPage() {
               2026
             </p>
             <button
-              onClick={handleSubmit}
+              onClick={apiMode ? submitBackend : handleSubmit}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
             >
               Save
@@ -331,7 +398,7 @@ export default function CreateCharacterPage() {
 
         <div className="flex gap-2">
           <button
-            onClick={handleSubmit}
+            onClick={apiMode ? submitBackend : handleSubmit}
             className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
           >
             Save
@@ -339,7 +406,7 @@ export default function CreateCharacterPage() {
 
           {currentStep === steps.length - 1 ? (
             <button
-              onClick={handleSubmit}
+              onClick={apiMode ? submitBackend : handleSubmit}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
             >
               Finish

@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 export default function MultipleInput({
   labels = "Items",
   label = "Item",
+  btnLabel = "Add",
   items = [],
   onChange,
   type = "string", // "string" | "object"
@@ -57,9 +58,7 @@ export default function MultipleInput({
         <div
           key={index}
           className={`flex items-center mb-2  ${
-            type === "object"
-              ? "rounded-lg border  border-gray-600"
-              : ""
+            type === "object" ? "rounded-lg border  border-gray-600" : ""
           }`}
         >
           {type === "object" ? (
@@ -119,7 +118,7 @@ export default function MultipleInput({
         onClick={addItem}
         className="px-2 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
       >
-        Add {label}
+        {btnLabel == "Add" || !btnLabel ? `Add ${label}` : btnLabel}
       </button>
     </div>
   );

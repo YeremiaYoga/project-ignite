@@ -7,75 +7,6 @@ import { nationalityOptions, countryOptions } from "../characterOptions";
 
 export default function Step3({ data, allData, onChange, mode }) {
   const step3 = data || {};
-  const toggleVisibility = (field) => {
-    onChange(field, !data[field]);
-  };
-
-  // const nationalityOptions = [
-  //   { label: "Vallarian Nationality :", value: "", disabled: true },
-  //   { label: "Mondralian", value: "Mondralian" },
-  //   { label: "Delstainvian", value: "Delstainvian" },
-  //   { label: "Istegrian", value: "Istegrian" },
-  //   { label: "Alvavian", value: "Alvavian" },
-  //   { label: "Kastugarian", value: "Kastugarian" },
-  //   { label: "Kolgardian", value: "Kolgardian" },
-  //   { label: "Magusvian", value: "Magusvian" },
-  //   { label: "Prosperian", value: "Prosperian" },
-  //   { label: "Tansarha", value: "Tansarha" },
-  //   { label: "Other Nationality :", value: "", disabled: true },
-  //   { label: "Non-National", value: "Non-National" },
-  //   { label: "Titanfall People", value: "Titanfall People" },
-  //   { label: "The Lost Isles People", value: "The Lost Isles People" },
-  //   { label: "Other Planes", value: "Other Planes" },
-  //   { label: "Astral Planes", value: "Astral Planes" },
-  //   { label: "Unknown", value: "Unknown" },
-  // ];
-
-  // const countryOptions = [
-  //   // Vallarian
-  //   { label: "Vallarian :", value: "", disabled: true },
-  //   { label: "Mondralian", value: "Mondralian" },
-  //   { label: "Delstainvia", value: "Delstainvia" },
-  //   { label: "Istegria", value: "Istegria" },
-  //   { label: "Alvavia", value: "Alvavia" },
-  //   { label: "Kastugar", value: "Kastugar" },
-  //   { label: "Kolgard", value: "Kolgard" },
-  //   { label: "Magusvia", value: "Magusvia" },
-  //   { label: "Prosperian", value: "Prosperian" },
-  //   { label: "Tansarha", value: "Tansarha" },
-
-  //   // Titanfall Isles (sementara di-comment, belum lengkap)
-  //   /*
-  // { label: "Titanfall Isles :", value: "", disabled: true },
-  // { label: "The Titanfall Isle", value: "The Titanfall Isle" },
-  // { label: "The Isle of Dragons", value: "The Isle of Dragons" },
-  // { label: "Light & Shadow Isle", value: "Light & Shadow Isle" },
-  // { label: "Isle of Thorns", value: "Isle of Thorns" },
-  // { label: "Isle of Acheron", value: "Isle of Acheron" },
-  // { label: "Isle of Wild-Beast", value: "Isle of Wild-Beast" },
-  // { label: "Isle of Snow-Warmth", value: "Isle of Snow-Warmth" },
-  // { label: "Isle of Cinder", value: "Isle of Cinder" },
-  // { label: "Mythos Isle", value: "Mythos Isle" },
-  // */
-
-  //   // Multiversal
-  //   { label: "Multiversal :", value: "", disabled: true },
-  //   { label: "Material Plane (Terra)", value: "Material Plane (Terra)" },
-  //   { label: "Elemental Plane of Water", value: "Elemental Plane of Water" },
-  //   { label: "Elemental Plane of Air", value: "Elemental Plane of Air" },
-  //   { label: "Elemental Plane of Fire", value: "Elemental Plane of Fire" },
-  //   { label: "Elemental Plane of Earth", value: "Elemental Plane of Earth" },
-  //   { label: "Feywild", value: "Feywild" },
-  //   { label: "Shadowfell", value: "Shadowfell" },
-  //   { label: "Celestia (Elysium)", value: "Celestia (Elysium)" },
-  //   { label: "The Nine Hells", value: "The Nine Hells" },
-
-  //   // Other
-  //   { label: "Other :", value: "", disabled: true },
-  //   { label: "Demiplane", value: "Demiplane" },
-  //   { label: "Astral Planes", value: "Astral Planes" },
-  //   { label: "Unknown", value: "Unknown" },
-  // ];
 
   return (
     <div className="p-6 max-w-6xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
@@ -117,7 +48,7 @@ export default function Step3({ data, allData, onChange, mode }) {
                 onChange={(e) => onChange("main_theme", e.target.value)}
                 className="flex-1 h-10 px-3 rounded-lg bg-gray-800 border border-gray-700 
                  focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                placeholder="Enter main theme"
+                placeholder="Enter Main Theme (www.youtube.com link)"
               />
 
               <input
@@ -161,7 +92,7 @@ export default function Step3({ data, allData, onChange, mode }) {
                 onChange={(e) => onChange("combat_theme", e.target.value)}
                 className="flex-1 h-10 px-3 rounded-lg bg-gray-800 border border-gray-700 
                  focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                placeholder="Enter combat theme"
+                placeholder="Enter Combat Theme (www.youtube.com link)"
               />
 
               <input
@@ -242,8 +173,9 @@ export default function Step3({ data, allData, onChange, mode }) {
       <div className="grid grid-cols-9 gap-4">
         <div className="col-span-3">
           <MultipleInput
-            labels="Notable Details"
-            label="Occupation"
+            labels="Notable details (Appearance)"
+            label="details of thou appearance (Exp : A very tall woman)"
+            btnLabel="Add Details"
             items={data.notable_details || [""]}
             onChange={(items) => onChange("notable_details", items)}
           />
@@ -310,7 +242,7 @@ export default function Step3({ data, allData, onChange, mode }) {
           />
         </div>
         <div className="col-span-2">
-          <label className="text-sm font-medium">Signature Weapon</label>
+          <label className="text-sm font-medium">Signature Weapon/Spellcasting Focus</label>
           <MultipleInput
             labels=""
             label="Weapon"

@@ -19,6 +19,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showThemeColors, setShowThemeColors] = useState(false);
   const [talesMode, setTalesMode] = useState(false);
+  const [apiMode, setApiMode] = useState(false);
 
   const [colors, setColors] = useState({
     sub1: "#3b82f6",
@@ -35,7 +36,7 @@ export default function Navbar() {
   const { signOut } = useClerk();
   useEffect(() => {
     if (user) {
-      fetch("http://localhost:5000/users/login", {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -43,7 +44,8 @@ export default function Navbar() {
           email: user.primaryEmailAddress?.emailAddress,
           username: user.username || user.fullName,
         }),
-      }).catch((err) => console.error("Failed to sync user:", err));
+        credentials: "include",
+      });
     }
   }, [user]);
   useEffect(() => {
@@ -59,6 +61,9 @@ export default function Navbar() {
 
     const storedTales = Cookies.get("ignite-tales-mode");
     setTalesMode(storedTales === "true");
+
+    const storedApiMode = Cookies.get("ignite-api-mode");
+    setApiMode(storedApiMode === "true");
   }, []);
 
   useEffect(() => {
@@ -115,11 +120,18 @@ export default function Navbar() {
     Cookies.set("ignite-tales-mode", newValue.toString(), { expires: 365 });
   };
 
+  const toggleApiMode = () => {
+    const newValue = !apiMode;
+    setApiMode(newValue);
+    Cookies.set("ignite-api-mode", newValue.toString(), { expires: 365 }); // ✅ simpan cookie
+  };
+
   const fetchUserData = async () => {
     if (!user) return;
-
     try {
-      const res = await fetch(`http://localhost:5000/users/${user.id}`);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`
+      );
       if (!res.ok) throw new Error("Failed to fetch user data");
 
       const data = await res.json();
@@ -204,17 +216,29 @@ export default function Navbar() {
                     </button>
                   </div>
 
-                  {/* Button untuk fetch user data */}
                   <button
                     onClick={fetchUserData}
                     className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
                   >
                     Show My Data
                   </button>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-700 dark:text-gray-100 font-semibold">
+                      API Mode
+                    </span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={apiMode}
+                        onChange={toggleApiMode}
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition"></div>
+                      <div className="absolute left-0.5 top-0.5 bg-white dark:bg-gray-300 h-5 w-5 rounded-full transition-transform peer-checked:translate-x-5"></div>
+                    </label>
+                  </div>
                 </div>
               </SignedIn>
-
-              {/* Tales Mode Slider */}
               <div className="flex items-center justify-between">
                 <span className="text-gray-700 dark:text-gray-100 font-semibold">
                   Tales Mode

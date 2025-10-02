@@ -3,28 +3,43 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser, SignedOut, SignInButton } from "@clerk/nextjs";
-import { Copy } from "lucide-react";
-import { IBM_Plex_Mono } from "next/font/google";
+import CharacterCard from "./CharacterCard";
+import Cookies from "js-cookie";
 
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400"],
-});
 export default function CharactersMakerPage() {
   const router = useRouter();
   const { isSignedIn, user } = useUser();
   const [characters, setCharacters] = useState([]);
+  const [apiMode, setApiMode] = useState(false);
   const username = user?.username || user?.fullName || user?.email;
-
+  useEffect(() => {
+    const mode = Cookies.get("ignite-api-mode");
+    setApiMode(mode === "true");
+  }, []);
   useEffect(() => {
     const fetchChars = async () => {
       try {
-        const res = await fetch("/api/characters/getAll");
+        let res;
+        if (apiMode) {
+          res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/characters/user`,
+            { credentials: "include" }
+          );
+        } else {
+          res = await fetch("/api/characters/getAll");
+        }
+
         const data = await res.json();
 
-        const filtered = data.filter((char) => char.creator_name === username);
-
-        setCharacters(filtered);
+        console.log(data);
+        if (!apiMode) {
+          const filtered = data.filter(
+            (char) => char.creator_name === username
+          );
+          setCharacters(filtered);
+        } else {
+          setCharacters(data);
+        }
       } catch (err) {
         console.error("Failed to fetch characters:", err);
       }
@@ -33,7 +48,7 @@ export default function CharactersMakerPage() {
     if (username) {
       fetchChars();
     }
-  }, [username]);
+  }, [username, apiMode]);
 
   const handleCreate = () => router.push("/characters-maker/create");
   const handleEdit = (id) => router.push(`/characters-maker/edit/${id}`);
@@ -74,84 +89,13 @@ export default function CharactersMakerPage() {
       ) : (
         <div className="grid grid-cols-3 gap-6">
           {characters.map((char) => (
-            <div
+            <CharacterCard
               key={char.uuid}
-              className="relative bg-no-repeat bg-cover w-[350px] h-[220px] flex flex-col justify-between p-4"
-              style={{
-                backgroundImage: "url('/assets/character_image.png')",
-              }}
-            >
-              {/* UUID + Copy */}
-              <div className="absolute top-4 right-5 flex items-center gap-1 text-sm text-gray-700">
-                <span className={`text-lg ${ibmPlexMono.className}`}>
-                  {char.uuid ?? "UnknownID"}
-                </span>
-                <Copy
-                  size={16}
-                  className="cursor-pointer hover:text-gray-900"
-                  onClick={() => navigator.clipboard.writeText(char.uuid ?? "")}
-                />
-              </div>
-
-              {/* Token art */}
-              <div className="absolute top-[27px] left-[11px] flex flex-col items-center w-[120px]">
-                <div className="w-[80px] h-[80px] rounded-full overflow-hidden">
-                  {char.token_art ? (
-                    <img
-                      src={char.token_art}
-                      alt={char.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src="/assets/example_token.png"
-                      alt={char.name}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Nama */}
-              <div className="absolute top-[110px] left-12">
-                <h2 className="mt-2 text-center text-2xl font-bold text-gray-800 w-full">
-                  {char.name}
-                </h2>
-              </div>
-
-              <div
-                className="absolute right-7 top-12"
-                style={{
-                  transform: `rotate(${char.rotation_stamp || 0}deg)`,
-                }}
-              >
-                <img
-                  src={
-                    char.stamp_type % 2 === 1
-                      ? "/assets/stamps/stamp_1.webp"
-                      : "/assets/stamps/stamp_2.webp"
-                  }
-                  alt="Stamp"
-                  className="w-10 h-auto"
-                />
-              </div>
-
-              {/* Buttons */}
-              <div className="flex justify-center gap-3 mt-auto mb-2">
-                <button className="px-4 py-1 bg-blue-600 text-white rounded">
-                  View
-                </button>
-                <button
-                  onClick={() => handleEdit(char.uuid)}
-                  className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Edit
-                </button>
-                <button className="px-4 py-1 bg-red-600 text-white rounded">
-                  Delete
-                </button>
-              </div>
-            </div>
+              char={char}
+              onEdit={(id) => handleEdit(id)}
+              onView={(id) => router.push(`/characters-maker/view/${id}`)}
+              onDelete={(id) => console.log("Delete character", id)}
+            />
           ))}
         </div>
       )}
