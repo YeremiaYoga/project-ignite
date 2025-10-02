@@ -142,7 +142,7 @@ export default function CharactersMakerPage() {
                   View
                 </button>
                 <button
-                  onClick={() => handleEdit(char.randomid)}
+                  onClick={() => handleEdit(char.uuid)}
                   className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700"
                 >
                   Edit

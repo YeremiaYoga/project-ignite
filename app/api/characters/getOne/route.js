@@ -16,7 +16,7 @@ function findCharacterById(baseDir, id) {
         const rawData = fs.readFileSync(fullPath, "utf-8");
         const data = JSON.parse(rawData);
 
-        if (data?.randomid === id) {
+        if (data?.uuid === id) {
           return data;
         }
       } catch (err) {
