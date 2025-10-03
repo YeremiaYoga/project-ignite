@@ -150,8 +150,11 @@ export async function POST(req) {
     }
 
     // --- Buat folder ---
+    const characterUuid = mergedData.uuid || "unknown_uuid";
     const characterName = mergedData.name?.trim() || "Unknown";
-    const folderName = characterName.replace(/\s+/g, "_");
+
+    // Folder berdasarkan UUID
+    const folderName = characterUuid;
 
     const baseDir = path.join(process.cwd(), "data", "characters", folderName);
     await fs.mkdir(baseDir, { recursive: true });
@@ -168,17 +171,17 @@ export async function POST(req) {
     // --- Simpan file art ---
     if (artFile && artFile instanceof File) {
       const buffer = Buffer.from(await artFile.arrayBuffer());
-      const artPath = path.join(publicDir, `${folderName}_art.webp`);
+      const artPath = path.join(publicDir, `${characterName}_art.webp`);
       await fs.writeFile(artPath, buffer);
-      mergedData.art = `/assets/characters/${folderName}/${folderName}_art.webp`;
+      mergedData.art = `/assets/characters/${folderName}/${characterName}_art.webp`;
     }
 
     // --- Simpan file token art ---
     if (tokenFile && tokenFile instanceof File) {
       const buffer = Buffer.from(await tokenFile.arrayBuffer());
-      const tokenPath = path.join(publicDir, `${folderName}_token_art.webp`);
+      const tokenPath = path.join(publicDir, `${characterName}_token_art.webp`);
       await fs.writeFile(tokenPath, buffer);
-      mergedData.token_art = `/assets/characters/${folderName}/${folderName}_token_art.webp`;
+      mergedData.token_art = `/assets/characters/${folderName}/${characterName}_token_art.webp`;
     }
 
     // --- Simpan main_theme_ogg ---
@@ -186,10 +189,10 @@ export async function POST(req) {
       const buffer = Buffer.from(await mainThemeFile.arrayBuffer());
       const mainThemePath = path.join(
         publicDir,
-        `${folderName}_main_theme.ogg`
+        `${characterName}_main_theme.ogg`
       );
       await fs.writeFile(mainThemePath, buffer);
-      mergedData.main_theme_ogg = `/assets/characters/${folderName}/${folderName}_main_theme.ogg`;
+      mergedData.main_theme_ogg = `/assets/characters/${folderName}/${characterName}_main_theme.ogg`;
     }
 
     // --- Simpan combat_theme_ogg ---
@@ -197,15 +200,14 @@ export async function POST(req) {
       const buffer = Buffer.from(await combatThemeFile.arrayBuffer());
       const combatThemePath = path.join(
         publicDir,
-        `${folderName}_combat_theme.ogg`
+        `${characterName}_combat_theme.ogg`
       );
       await fs.writeFile(combatThemePath, buffer);
-      mergedData.combat_theme_ogg = `/assets/characters/${folderName}/${folderName}_combat_theme.ogg`;
+      mergedData.combat_theme_ogg = `/assets/characters/${folderName}/${characterName}_combat_theme.ogg`;
     }
 
     // --- Simpan JSON ---
-    const safeName = characterName.trim().replace(/\s+/g, "_");
-    const filePath = path.join(baseDir, `${safeName}Data.json`);
+    const filePath = path.join(baseDir, `${folderName}Data.json`);
     await fs.writeFile(filePath, JSON.stringify(mergedData, null, 2), "utf-8");
 
     return new Response(JSON.stringify({ success: true, path: filePath }), {

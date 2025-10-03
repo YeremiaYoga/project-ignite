@@ -19,7 +19,9 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showThemeColors, setShowThemeColors] = useState(false);
   const [talesMode, setTalesMode] = useState(false);
-  const [apiMode, setApiMode] = useState(false);
+  const [localMode, setlocalMode] = useState(false);
+  const [showOtherOptions, setShowOtherOptions] = useState(false);
+  const localPassword = process.env.NEXT_PUBLIC_LOCAL_MODE_PASSWORD;
 
   const [colors, setColors] = useState({
     sub1: "#3b82f6",
@@ -62,8 +64,8 @@ export default function Navbar() {
     const storedTales = Cookies.get("ignite-tales-mode");
     setTalesMode(storedTales === "true");
 
-    const storedApiMode = Cookies.get("ignite-api-mode");
-    setApiMode(storedApiMode === "true");
+    const storedLocalMode = Cookies.get("ignite-local-mode");
+    setlocalMode(storedLocalMode === "true");
   }, []);
 
   useEffect(() => {
@@ -120,10 +122,20 @@ export default function Navbar() {
     Cookies.set("ignite-tales-mode", newValue.toString(), { expires: 365 });
   };
 
-  const toggleApiMode = () => {
-    const newValue = !apiMode;
-    setApiMode(newValue);
-    Cookies.set("ignite-api-mode", newValue.toString(), { expires: 365 }); // ✅ simpan cookie
+  const toggleLocalMode = () => {
+    const newValue = !localMode;
+
+    if (newValue) {
+      const input = prompt("Enter password to enable API Mode:");
+      if (input !== localPassword) {
+        alert("Incorrect password!");
+        return;
+      }
+    }
+
+    setlocalMode(newValue);
+    Cookies.set("ignite-local-mode", newValue.toString(), { expires: 365 });
+    window.location.reload();
   };
 
   const fetchUserData = async () => {
@@ -220,46 +232,60 @@ export default function Navbar() {
                     onClick={fetchUserData}
                     className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
                   >
-                    Show My Data
+                    Show Information
                   </button>
+                  <hr className="my-2 border-gray-300 dark:border-gray-700" />
                   <div className="flex items-center justify-between">
                     <span className="text-gray-700 dark:text-gray-100 font-semibold">
-                      API Mode
+                      Tales Mode
                     </span>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
                         className="sr-only peer"
-                        checked={apiMode}
-                        onChange={toggleApiMode}
+                        checked={talesMode}
+                        onChange={toggleTalesMode}
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600 transition"></div>
                       <div className="absolute left-0.5 top-0.5 bg-white dark:bg-gray-300 h-5 w-5 rounded-full transition-transform peer-checked:translate-x-5"></div>
                     </label>
                   </div>
+                  <button
+                    onClick={() => setShowOtherOptions(!showOtherOptions)}
+                    className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
+                  >
+                    {showOtherOptions ? "Back" : "Other Options"}
+                  </button>
+
+                  {showOtherOptions && (
+                    <div className="space-y-3 mt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700 dark:text-gray-100 font-semibold">
+                          Discovery Vault
+                        </span>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={localMode}
+                            onChange={toggleLocalMode}
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition"></div>
+                          <div className="absolute left-0.5 top-0.5 bg-white dark:bg-gray-300 h-5 w-5 rounded-full transition-transform peer-checked:translate-x-5"></div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </SignedIn>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-100 font-semibold">
-                  Tales Mode
-                </span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={talesMode}
-                    onChange={toggleTalesMode}
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600 transition"></div>
-                  <div className="absolute left-0.5 top-0.5 bg-white dark:bg-gray-300 h-5 w-5 rounded-full transition-transform peer-checked:translate-x-5"></div>
-                </label>
-              </div>
+
+              <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
               <button
                 onClick={() => setShowThemeColors(!showThemeColors)}
                 className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
               >
-                {showThemeColors ? "Back" : "Customize Theme"}
+                {showThemeColors ? "Back" : "Customize Background"}
               </button>
 
               {showThemeColors && (

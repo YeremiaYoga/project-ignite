@@ -18,7 +18,7 @@ export default function CreateCharacterPage() {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const { user, isSignedIn, isLoaded } = useUser();
   const [talesMode, setTalesMode] = useState(false);
-  const [apiMode, setApiMode] = useState(false);
+  const [localMode, setLocalMode] = useState(false);
   const creatorName = user?.fullName || user?.username || "";
   const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
 
@@ -80,7 +80,6 @@ export default function CreateCharacterPage() {
       current_last_economical_standing: "",
       previous_social_classes: "",
       current_social_classes: "",
-     
     },
     step3: {
       appearance_visibility: false,
@@ -141,8 +140,8 @@ export default function CreateCharacterPage() {
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
     setTalesMode(mode === "true");
-    const apimode = Cookies.get("ignite-api-mode");
-    setApiMode(apimode === "true");
+    const localMode = Cookies.get("ignite-local-mode");
+    setLocalMode(localMode === "true");
   }, []);
   const isNameFilled = () => formData.step1.name.trim() !== "";
   const steps = [
@@ -247,7 +246,6 @@ export default function CreateCharacterPage() {
     try {
       const formDataToSend = new FormData();
 
-      // Gabung semua step data
       const mergedData = {
         ...formData.step1,
         ...formData.step2,
@@ -256,15 +254,11 @@ export default function CreateCharacterPage() {
         ...formData.step5,
       };
 
-      // Pisahkan file
       const { art, token_art, main_theme_ogg, combat_theme_ogg, ...jsonData } =
         mergedData;
 
-  
-      // Append JSON data
       formDataToSend.append("data", JSON.stringify(jsonData));
 
-      // Append file kalau ada
       if (art instanceof File) {
         formDataToSend.append("art", art);
       }
@@ -278,18 +272,16 @@ export default function CreateCharacterPage() {
         formDataToSend.append("combat_theme_ogg", combat_theme_ogg);
       }
 
-      // 🔑 arahkan ke backend (pakai apiMode kalau perlu)
-      const url = apiMode
+      const url = !localMode
         ? `${process.env.NEXT_PUBLIC_API_URL}/characters/save`
         : "/api/characters/save";
 
       for (let [key, value] of formDataToSend.entries()) {
-  console.log(key, value);
-}
+      }
       const res = await fetch(url, {
         method: "POST",
         body: formDataToSend,
-        credentials: "include", // biar cookie userId ikut
+        credentials: "include",
       });
 
       const result = await res.json();
@@ -332,7 +324,7 @@ export default function CreateCharacterPage() {
               2026
             </p>
             <button
-              onClick={apiMode ? submitBackend : handleSubmit}
+              onClick={!localMode ? submitBackend : handleSubmit}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
             >
               Save
@@ -398,7 +390,7 @@ export default function CreateCharacterPage() {
 
         <div className="flex gap-2">
           <button
-            onClick={apiMode ? submitBackend : handleSubmit}
+            onClick={!localMode ? submitBackend : handleSubmit}
             className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
           >
             Save
@@ -406,7 +398,7 @@ export default function CreateCharacterPage() {
 
           {currentStep === steps.length - 1 ? (
             <button
-              onClick={apiMode ? submitBackend : handleSubmit}
+              onClick={!localMode ? submitBackend : handleSubmit}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
             >
               Finish
