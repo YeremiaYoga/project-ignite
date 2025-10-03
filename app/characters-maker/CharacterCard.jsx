@@ -147,6 +147,7 @@ export default function CharacterCard({
             <button
               onClick={() => onDelete?.(char.uuid)}
               className="px-4 py-1 bg-red-600 text-white rounded"
+              disabled
             >
               Delete
             </button>
