@@ -1,0 +1,82 @@
+{
+  "name": "Harmonic Virtuoso",
+  "version": 1,
+  "img": "asset/icons/magic/life/heart-hand-gold-green.webp",
+
+  "good": true,
+  "neutral": true,
+  "evil": true,
+  "unknown": true,
+
+  "role": "support",
+  "hp_scale": 5,
+  "cv_minimum": 0,
+  "cv_flat_cost": 0,
+  "cv_percent_cost": 0,
+  "ac_calc": "10 + Dexterity modifier",
+  "intivative_bonus": 0,
+  "description": "Support Unit/n/n",
+
+  "abilities": [
+    {
+      "visibility": true,
+      "type": "Basic",
+      "name": "Harmonic Unstring",
+      "cost": "Action",
+      "additional_cost": "",
+      "type_ability": ["Debuff"],
+      "img": "asset/icons/magic/control/fear-fright-monster-grin-green.webp",
+      "description": "You are able to choose one creature within 60ft that you can see. The targeted creature must make a Wisdom saving throw. On a failure, the creature gains Harmonic Unstring, which lasts until the end of your next turn. The creature's next attack will have disadvantage while having Harmonic Unstring."
+    },
+    {
+      "visibility": true,
+      "type": "Skill",
+      "name": "Melody of Restoration",
+      "cost": "Action",
+      "additional_cost": "",
+      "type_ability": ["Healing"],
+      "img": "asset/icons/magic/control/orb-web-hold.webp",
+      "description": "You choose one creature that you can see within 60ft of you, and heal them for d4s equal to your Proficiency Bonus. You can use this ability a number of times equal to your combat value per long rest."
+    },
+    {
+      "visibility": true,
+      "type": "Talent",
+      "name": "Combat Redeployment",
+      "cost": "Bonus Action",
+      "additional_cost": "bla-bla",
+      "type_ability": ["Support"],
+      "img": "asset/icon/location",
+      "description": "After using her Basic ATK, Bronya's next action will be Advanced Forward by 30%."
+    },
+    {
+      "visibility": true,
+      "type": "Ultimate",
+      "name": "The Belobog March",
+      "cost": "Special",
+      "additional_cost": "bla-bla",
+      "type_ability": ["Support"],
+      "img": "asset/icon/location",
+      "description": "Increases the ATK of all allies by 55%, and increases their CRIT DMG equal to 16% of Bronya's CRIT DMG plus 20% for 2 turns."
+    },
+    {
+      "visibility": true,
+      "type": "Passive",
+      "name": "Leading the Way",
+      "cost": "Passive",
+      "additional_cost": "",
+      "type_ability": ["Support"],
+      "img": "asset/icon/location",
+      "description": "When Bronya is on the field, all allies deal 10% more DMG."
+    },
+    {
+      "visibility": true,
+      "type": "Technique",
+      "name": "Banner of Command",
+      "cost": "Reaction",
+      "additional_cost": "bla-bla",
+      "type_ability": ["Healing"],
+      "img": "asset/icon/location",
+      "description": "After using Bronya's Technique, at the start of the next battle, all allies' ATK increases by 15% for 2 turns."
+    }
+  ]
+}

@@ -1,16 +1,18 @@
-// components/AbilityCard.jsx
-import { Shield } from "lucide-react"; // contoh icon
+// src/incumbency/AbilityCard.jsx
+import React from "react";
 
-export default function AbilityCard({ icon: Icon, title, type, description }) {
+export default function AbilityCard({ name, type, cost, type_ability, img, description }) {
   return (
-    <div className="flex gap-3 p-3 bg-gray-900 rounded-lg border border-gray-700">
-      <div className="flex-shrink-0">
-        <Icon className="w-8 h-8 text-green-400" />
-      </div>
-      <div>
-        <h4 className="font-semibold text-gray-100 text-sm">{title}</h4>
-        <p className="text-xs text-gray-400">{type}</p>
-        <p className="mt-1 text-sm text-gray-300">{description}</p>
+    <div className="flex items-start gap-3 mb-4">
+      <img src={img} alt={name} className="w-10 h-10 rounded-md shadow-md border border-gray-600" />
+      <div className="flex flex-col">
+        <h3 className="text-lg font-semibold text-gray-200">
+          {name}
+        </h3>
+        <p className="text-sm text-gray-400 italic">
+          ─ {type} • {cost} • {type_ability.join(" • ")}
+        </p>
+        <p className="text-gray-300 mt-1 text-sm leading-relaxed">{description}</p>
       </div>
     </div>
   );
