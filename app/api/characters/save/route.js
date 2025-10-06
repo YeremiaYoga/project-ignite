@@ -115,12 +115,10 @@ export async function POST(req) {
       weight: { ...template.weight, ...body.weight },
     };
 
-    // random props
     mergedData.stamp_type = Math.floor(Math.random() * 40) + 1;
     mergedData.rotation_stamp = parseFloat((Math.random() * 60 - 30).toFixed(1));
     mergedData.rotation_sticker = parseFloat((Math.random() * 60 - 30).toFixed(1));
 
-    // height convert
     const feet = parseFloat(mergedData.height.feet) || 0;
     const inch = parseFloat(mergedData.height.inch) || 0;
     const cm = parseFloat(mergedData.height.centimeter) || 0;
@@ -132,7 +130,6 @@ export async function POST(req) {
       mergedData.height.inch = Math.round(totalInches % 12);
     }
 
-    // weight convert
     const pounds = parseFloat(mergedData.weight.pounds) || 0;
     const kg = parseFloat(mergedData.weight.kilogram) || 0;
     if (pounds) {
@@ -141,7 +138,6 @@ export async function POST(req) {
       mergedData.weight.pounds = +(kg / 0.453592).toFixed(1);
     }
 
-    // --- Directories ---
     const uuid = mergedData.uuid || "unknown_uuid";
     const dataDir = path.join(process.cwd(), "data", "characters", uuid);
     await fs.mkdir(dataDir, { recursive: true });
@@ -149,16 +145,14 @@ export async function POST(req) {
     const publicDir = path.join(process.cwd(), "public", "assets", "characters", uuid);
     await fs.mkdir(publicDir, { recursive: true });
 
-    // helper: hapus lama + simpan file
     async function saveFixed(file, fixedName) {
       const abs = path.join(publicDir, fixedName);
-      try { await fs.unlink(abs); } catch {} // hapus lama
+      try { await fs.unlink(abs); } catch {} 
       const buffer = Buffer.from(await file.arrayBuffer());
       await fs.writeFile(abs, buffer);
       return `/assets/characters/${uuid}/${fixedName}`;
     }
 
-    // Simpan file dengan nama fixed
     if (artFile && artFile instanceof File) {
       mergedData.art = await saveFixed(artFile, "art_image.webp");
     }
@@ -172,7 +166,6 @@ export async function POST(req) {
       mergedData.combat_theme_ogg = await saveFixed(combatThemeFile, "combat_theme.ogg");
     }
 
-    // simpan JSON metadata
     const jsonPath = path.join(dataDir, `${uuid}Data.json`);
     await fs.writeFile(jsonPath, JSON.stringify(mergedData, null, 2), "utf-8");
 
