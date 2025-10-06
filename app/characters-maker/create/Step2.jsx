@@ -8,6 +8,7 @@ import {
   economicalOptions,
   socialClassOptions,
 } from "../characterOptions";
+import RichTextEditor from "@/components/RichTextEditor";
 export default function Step2({ data, allData, onChange }) {
   const step2 = data || {};
 
@@ -80,12 +81,10 @@ export default function Step2({ data, allData, onChange }) {
               )}
             </button>
           </div>
-          <InputField
-            label=""
-            type="textarea"
-            value={step2.backstory || ""}
-            onChange={(val) => onChange("backstory", val)}
-            placeholder="Write backstory here..."
+          <RichTextEditor
+            value={step2.backstory || ""} 
+            onChange={(html) => onChange("backstory", html)}
+            placeholder="backstory"
             rows={22}
           />
         </div>

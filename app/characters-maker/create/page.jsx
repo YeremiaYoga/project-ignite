@@ -62,6 +62,10 @@ export default function CreateCharacterPage() {
       skin_colour: "",
       hair: "",
       wiki_visibility: false,
+
+      //dummy
+      weight_unit: "imperial",
+      height_unit: "imperial",
     },
     step2: {
       backstory_visibility: false,
@@ -136,7 +140,7 @@ export default function CreateCharacterPage() {
     },
   });
 
-  console.log(formData);
+
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
     setTalesMode(mode === "true");

@@ -22,7 +22,7 @@ export default function Step1({ data, onChange }) {
   const [unit, setUnit] = useState({
     heightUnit: "imperial",
     height: { feet: "", inch: "", centimeter: "" },
-    weightUnit: "imperial",
+    weight_unit: "imperial",
     weight: { kg: "", lbs: "" },
   });
 
@@ -391,8 +391,6 @@ export default function Step1({ data, onChange }) {
               />
             )}
           </div>
-
-     
         </div>
 
         <div className="space-y-4 col-span-3">
@@ -409,7 +407,7 @@ export default function Step1({ data, onChange }) {
             <div>
               <label className="block text-sm font-medium mb-1">Height</label>
               <div className="flex gap-2 items-end">
-                {unit.heightUnit === "imperial" ? (
+                {data.height_unit === "imperial" ? (
                   <div className="flex gap-2 flex-1">
                     <input
                       type="number"
@@ -458,17 +456,13 @@ export default function Step1({ data, onChange }) {
                 )}
 
                 <select
-                  value={unit.heightUnit || ""}
-                  onChange={(e) =>
-                    setUnit((prev) => ({ ...prev, heightUnit: e.target.value }))
-                  }
+                  value={data.height_unit || ""}
+                  onChange={(e) => onChange("height_unit", e.target.value)}
                   className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-xs"
+  focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
                   <option value="metric">Cm</option>
-                  <option value="imperial" selected>
-                    Ft/In
-                  </option>
+                  <option value="imperial">Ft/In</option>
                 </select>
               </div>
             </div>
@@ -495,16 +489,16 @@ export default function Step1({ data, onChange }) {
               <div className="flex gap-2 items-end">
                 <input
                   type="number"
-                  placeholder={unit.weightUnit === "imperial" ? "Lb" : "Kg"}
+                  placeholder={data.weight_unit === "imperial" ? "Lb" : "Kg"}
                   value={
-                    unit.weightUnit === "imperial"
+                    data.weight_unit === "imperial"
                       ? data.weight?.pounds ?? ""
                       : data.weight?.kilogram ?? ""
                   }
                   onChange={(e) => {
                     const val = e.target.value;
                     const newWeight =
-                      unit.weightUnit === "imperial"
+                      data.weight_unit === "imperial"
                         ? { ...(data.weight || {}), pounds: val }
                         : { ...(data.weight || {}), kilogram: val };
                     onChange("weight", newWeight);
@@ -514,7 +508,7 @@ export default function Step1({ data, onChange }) {
                 />
 
                 <select
-                  value={data.weightUnit || ""}
+                  value={data.weight_unit || ""}
                   onChange={(e) => {
                     const unit = e.target.value;
 
@@ -523,15 +517,13 @@ export default function Step1({ data, onChange }) {
                         ? { pounds: data.weight?.pounds ?? "", kilogram: "" }
                         : { pounds: "", kilogram: data.weight?.kilogram ?? "" };
 
-                    onChange("weightUnit", unit);
+                    onChange("weight_unit", unit);
                     onChange("weight", newWeight);
                   }}
                   className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
         focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
-                  <option value="imperial" selected>
-                    Lb
-                  </option>
+                  <option value="imperial">Lb</option>
                   <option value="metric">Kg</option>
                 </select>
               </div>
