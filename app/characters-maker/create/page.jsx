@@ -140,7 +140,6 @@ export default function CreateCharacterPage() {
     },
   });
 
-
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
     setTalesMode(mode === "true");
@@ -233,6 +232,7 @@ export default function CreateCharacterPage() {
       const result = await res.json();
       if (result.success) {
         alert("Character saved!");
+        router.replace("/characters-maker");
       } else {
         alert("Error saving character: " + result.error);
       }
@@ -292,6 +292,7 @@ export default function CreateCharacterPage() {
       if (res.ok) {
         alert("Character saved!");
         console.log("Saved character:", result);
+        router.replace("/characters-maker");
       } else {
         alert("Error saving character: " + result.error);
       }

@@ -421,7 +421,7 @@ export default function Step1({ data, onChange }) {
                         })
                       }
                       className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
                     <input
                       type="number"
@@ -436,7 +436,7 @@ export default function Step1({ data, onChange }) {
                         })
                       }
                       className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
                   </div>
                 ) : (
@@ -451,15 +451,22 @@ export default function Step1({ data, onChange }) {
                       })
                     }
                     className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
                 )}
 
                 <select
                   value={data.height_unit || ""}
-                  onChange={(e) => onChange("height_unit", e.target.value)}
+                  onChange={(e) => {
+                    const newUnit = e.target.value;
+
+                    onChange("height_unit", newUnit);
+
+                    const newHeight = { feet: "", inch: "", centimeter: "" };
+                    onChange("height", newHeight);
+                  }}
                   className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-  focus:ring-2 focus:ring-blue-500 outline-none text-xs"
+      focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
                   <option value="metric">Cm</option>
                   <option value="imperial">Ft/In</option>

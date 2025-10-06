@@ -1,6 +1,8 @@
 import { promises as fs } from "fs";
 import path from "path";
 
+export const runtime = "nodejs";
+
 export async function POST(req) {
   try {
     const formData = await req.formData();
@@ -9,9 +11,9 @@ export async function POST(req) {
 
     const artFile = formData.get("art");
     const tokenFile = formData.get("token_art");
-
     const mainThemeFile = formData.get("main_theme_ogg");
     const combatThemeFile = formData.get("combat_theme_ogg");
+
     const template = {
       name: "",
       fullname: "",
@@ -64,10 +66,7 @@ export async function POST(req) {
       combat_theme: "",
       combat_theme_ogg: "",
       nationality: "",
-      main_resident: {
-        resident: "",
-        country: "",
-      },
+      main_resident: { resident: "", country: "" },
       notable_details: [],
       current_occupation: [],
       previous_occupation: [],
@@ -99,10 +98,7 @@ export async function POST(req) {
       int: 0,
       wis: 0,
       cha: 0,
-      size: {
-        general: "",
-        vtt_size: "",
-      },
+      size: { general: "", vtt_size: "" },
       creature_type: "",
       personality_combat_style: "",
       skill_prof: [],
@@ -119,18 +115,15 @@ export async function POST(req) {
       weight: { ...template.weight, ...body.weight },
     };
 
+    // random props
     mergedData.stamp_type = Math.floor(Math.random() * 40) + 1;
-    mergedData.rotation_stamp = parseFloat(
-      (Math.random() * 60 - 30).toFixed(1)
-    );
-    mergedData.rotation_sticker = parseFloat(
-      (Math.random() * 60 - 30).toFixed(1)
-    );
+    mergedData.rotation_stamp = parseFloat((Math.random() * 60 - 30).toFixed(1));
+    mergedData.rotation_sticker = parseFloat((Math.random() * 60 - 30).toFixed(1));
 
+    // height convert
     const feet = parseFloat(mergedData.height.feet) || 0;
     const inch = parseFloat(mergedData.height.inch) || 0;
     const cm = parseFloat(mergedData.height.centimeter) || 0;
-
     if (feet || inch) {
       mergedData.height.centimeter = Math.round((feet * 12 + inch) * 2.54);
     } else if (cm) {
@@ -139,84 +132,59 @@ export async function POST(req) {
       mergedData.height.inch = Math.round(totalInches % 12);
     }
 
-    // --- Konversi weight ---
+    // weight convert
     const pounds = parseFloat(mergedData.weight.pounds) || 0;
     const kg = parseFloat(mergedData.weight.kilogram) || 0;
-
     if (pounds) {
       mergedData.weight.kilogram = +(pounds * 0.453592).toFixed(1);
     } else if (kg) {
       mergedData.weight.pounds = +(kg / 0.453592).toFixed(1);
     }
 
-    // --- Buat folder ---
-    const characterUuid = mergedData.uuid || "unknown_uuid";
-    const characterName = mergedData.name?.trim() || "Unknown";
+    // --- Directories ---
+    const uuid = mergedData.uuid || "unknown_uuid";
+    const dataDir = path.join(process.cwd(), "data", "characters", uuid);
+    await fs.mkdir(dataDir, { recursive: true });
 
-    // Folder berdasarkan UUID
-    const folderName = characterUuid;
-
-    const baseDir = path.join(process.cwd(), "data", "characters", folderName);
-    await fs.mkdir(baseDir, { recursive: true });
-
-    const publicDir = path.join(
-      process.cwd(),
-      "public",
-      "assets",
-      "characters",
-      folderName
-    );
+    const publicDir = path.join(process.cwd(), "public", "assets", "characters", uuid);
     await fs.mkdir(publicDir, { recursive: true });
 
-    // --- Simpan file art ---
+    // helper: hapus lama + simpan file
+    async function saveFixed(file, fixedName) {
+      const abs = path.join(publicDir, fixedName);
+      try { await fs.unlink(abs); } catch {} // hapus lama
+      const buffer = Buffer.from(await file.arrayBuffer());
+      await fs.writeFile(abs, buffer);
+      return `/assets/characters/${uuid}/${fixedName}`;
+    }
+
+    // Simpan file dengan nama fixed
     if (artFile && artFile instanceof File) {
-      const buffer = Buffer.from(await artFile.arrayBuffer());
-      const artPath = path.join(publicDir, `${characterName}_art.webp`);
-      await fs.writeFile(artPath, buffer);
-      mergedData.art = `/assets/characters/${folderName}/${characterName}_art.webp`;
+      mergedData.art = await saveFixed(artFile, "art_image.webp");
     }
-
-    // --- Simpan file token art ---
     if (tokenFile && tokenFile instanceof File) {
-      const buffer = Buffer.from(await tokenFile.arrayBuffer());
-      const tokenPath = path.join(publicDir, `${characterName}_token_art.webp`);
-      await fs.writeFile(tokenPath, buffer);
-      mergedData.token_art = `/assets/characters/${folderName}/${characterName}_token_art.webp`;
+      mergedData.token_art = await saveFixed(tokenFile, "token_image.webp");
     }
-
-    // --- Simpan main_theme_ogg ---
     if (mainThemeFile && mainThemeFile instanceof File) {
-      const buffer = Buffer.from(await mainThemeFile.arrayBuffer());
-      const mainThemePath = path.join(
-        publicDir,
-        `${characterName}_main_theme.ogg`
-      );
-      await fs.writeFile(mainThemePath, buffer);
-      mergedData.main_theme_ogg = `/assets/characters/${folderName}/${characterName}_main_theme.ogg`;
+      mergedData.main_theme_ogg = await saveFixed(mainThemeFile, "main_theme.ogg");
     }
-
-    // --- Simpan combat_theme_ogg ---
     if (combatThemeFile && combatThemeFile instanceof File) {
-      const buffer = Buffer.from(await combatThemeFile.arrayBuffer());
-      const combatThemePath = path.join(
-        publicDir,
-        `${characterName}_combat_theme.ogg`
-      );
-      await fs.writeFile(combatThemePath, buffer);
-      mergedData.combat_theme_ogg = `/assets/characters/${folderName}/${characterName}_combat_theme.ogg`;
+      mergedData.combat_theme_ogg = await saveFixed(combatThemeFile, "combat_theme.ogg");
     }
 
-    // --- Simpan JSON ---
-    const filePath = path.join(baseDir, `${folderName}Data.json`);
-    await fs.writeFile(filePath, JSON.stringify(mergedData, null, 2), "utf-8");
+    // simpan JSON metadata
+    const jsonPath = path.join(dataDir, `${uuid}Data.json`);
+    await fs.writeFile(jsonPath, JSON.stringify(mergedData, null, 2), "utf-8");
 
-    return new Response(JSON.stringify({ success: true, path: filePath }), {
+    return new Response(JSON.stringify({ success: true, data: mergedData }), {
       status: 200,
+      headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
     console.error("Save error:", err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
+      headers: { "Content-Type": "application/json" },
     });
   }
 }

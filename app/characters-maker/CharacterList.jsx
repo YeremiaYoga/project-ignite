@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import CharacterCard from "./CharacterCard";
@@ -10,42 +10,66 @@ export default function CharacterList({ username }) {
   const [characters, setCharacters] = useState([]);
   const [localMode, setLocalMode] = useState(false);
 
-  useEffect(() => {
-    const mode = Cookies.get("ignite-local-mode");
-    setLocalMode(mode);
-  }, []);
-
-  const fetchChars = async () => {
+  const fetchRemoteChars = useCallback(async () => {
     try {
-      let res;
-      if (!localMode) {
-        res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/characters/user`,
-          {
-            credentials: "include",
-          }
-        );
-      } else {
-        res = await fetch("/api/characters/getAll");
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/characters/user`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      setCharacters(data);
+    } catch (err) {
+      console.error("Failed to fetch remote characters:", err);
+    }
+  }, [setCharacters]);
+
+  const fetchLocalChars = useCallback(async () => {
+    try {
+      const res = await fetch("/api/characters/getAll");
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
 
       const data = await res.json();
 
-      if (localMode) {
-        const filtered = data.filter((char) => char.creator_name === username);
-        console.log(filtered);
-        setCharacters(filtered);
-      } else {
-        setCharacters(data);
-      }
+      const filtered = data.filter((char) => char.creator_name === username);
+      console.log(filtered);
+      setCharacters(filtered);
     } catch (err) {
-      console.error("Failed to fetch characters:", err);
+      console.error("Failed to fetch local characters:", err);
     }
-  };
+  }, [setCharacters, username]);
+
 
   useEffect(() => {
-    if (username) fetchChars();
-  }, [username, localMode]);
+    const modeFromCookie = Cookies.get("ignite-local-mode");
+
+    setLocalMode(modeFromCookie); 
+
+    const isLocalModeActive = modeFromCookie === "true";
+
+    if (isLocalModeActive) {
+      if (username) {
+        fetchLocalChars();
+      }
+    } else {
+      fetchRemoteChars();
+    }
+
+    console.log(
+      `Username: ${username}, Local Mode Active: ${isLocalModeActive}`
+    );
+
+  }, [username, setLocalMode, fetchLocalChars, fetchRemoteChars]);
+
 
   const handleEdit = (id) => router.push(`/characters-maker/edit/${id}`);
 
