@@ -109,7 +109,7 @@ export default function AbilityEditor({
                 label="Additional Cost"
                 value={data.additional_cost}
                 onChange={(v) => onChange("additional_cost", v)}
-                placeholder="e.g., spell slots, item charge, etc"
+                placeholder="cost"
               />
             </div>
 
