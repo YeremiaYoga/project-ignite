@@ -113,7 +113,7 @@ export default function IncumbencyBuilderPage() {
                 label="Name"
                 value={form.name}
                 onChange={(v) => updateField("name", v)}
-                placeholder="Harmonic Virtuoso"
+                placeholder="Name"
               />
 
               <InputField

@@ -160,7 +160,7 @@ export default function AbilityEditor({
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={onTagKeyDown}
-                  placeholder="type and press Enter or ,"
+                  placeholder="type and press Add"
                   className="flex-1 bg-transparent px-2 py-1 text-sm text-slate-200 outline-none"
                 />
                 <button
