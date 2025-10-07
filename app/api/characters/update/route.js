@@ -8,6 +8,7 @@ export async function POST(req) {
   try {
     const formData = await req.formData();
     const id = formData.get("id");
+
     if (!id) {
       return NextResponse.json({
         success: false,
@@ -15,10 +16,8 @@ export async function POST(req) {
       });
     }
 
-    // Menggunakan ID karakter untuk nama folder, tapi TIDAK untuk nama file
-    const jsonData = JSON.parse(formData.get("data") || "{}");
+    const incoming = JSON.parse(formData.get("data") || "{}");
 
-    // 1. Folder file (public)
     const assetsDir = path.join(
       process.cwd(),
       "public",
@@ -27,10 +26,20 @@ export async function POST(req) {
       id
     );
     fs.mkdirSync(assetsDir, { recursive: true });
-
-    // 2. Folder data JSON (server only)
     const dataDir = path.join(process.cwd(), "data", "characters", id);
     fs.mkdirSync(dataDir, { recursive: true });
+
+    const jsonPath = path.join(dataDir, `${id}Data.json`);
+    let oldData = {};
+    if (fs.existsSync(jsonPath)) {
+      try {
+        oldData = JSON.parse(fs.readFileSync(jsonPath, "utf-8") || "{}");
+      } catch {
+        oldData = {};
+      }
+    }
+
+    const merged = { ...oldData, ...incoming };
 
     const fileFields = [
       { field: "art", filename: "art_image" },
@@ -39,34 +48,47 @@ export async function POST(req) {
       { field: "combat_theme_ogg", filename: "combat_theme" },
     ];
 
-    for (const { field, filename: baseFilename } of fileFields) {
-      const file = formData.get(field);
-      if (file && typeof file === "object" && file.arrayBuffer) {
-        const ext = path.extname(file.name).toLowerCase();
+    for (const { field, filename: aliasKey } of fileFields) {
+      const upload = formData.get(field);
 
-        const filenameWithExt = `${baseFilename}${ext}`;
+      if (upload && typeof upload === "object" && upload.arrayBuffer) {
+        const ext = path.extname(upload.name || "").toLowerCase() || ".bin";
+        const fileBase = aliasKey;
+        const filenameWithExt = `${fileBase}${ext}`;
         const assetPath = path.join(assetsDir, filenameWithExt);
 
-        const oldFilePattern = `${baseFilename}.*`;
-        fs.readdirSync(assetsDir).forEach((fileInDir) => {
-          if (fileInDir.startsWith(baseFilename)) {
+        for (const f of fs.readdirSync(assetsDir)) {
+          if (f.startsWith(fileBase)) {
             try {
-              fs.unlinkSync(path.join(assetsDir, fileInDir));
+              fs.unlinkSync(path.join(assetsDir, f));
             } catch {}
           }
-        });
+        }
 
-        const buffer = Buffer.from(await file.arrayBuffer());
+        const buffer = Buffer.from(await upload.arrayBuffer());
         fs.writeFileSync(assetPath, buffer);
 
-        jsonData[field] = `/assets/characters/${id}/${filenameWithExt}`;
+        const publicPath = `/assets/characters/${id}/${filenameWithExt}`;
+
+        merged[field] = publicPath;
+        merged[aliasKey] = publicPath;
+      } else {
+        const oldPath =
+          merged[field] ??
+          merged[aliasKey] ??
+          oldData[field] ??
+          oldData[aliasKey];
+
+        if (oldPath) {
+          merged[field] = oldPath;
+          merged[aliasKey] = oldPath;
+        }
       }
     }
 
-    const jsonPath = path.join(dataDir, `${id}Data.json`);
-    fs.writeFileSync(jsonPath, JSON.stringify(jsonData, null, 2), "utf-8");
+    fs.writeFileSync(jsonPath, JSON.stringify(merged, null, 2), "utf-8");
 
-    return NextResponse.json({ success: true, data: jsonData });
+    return NextResponse.json({ success: true, data: merged });
   } catch (err) {
     console.error("Error updating character:", err);
     return NextResponse.json(

@@ -1,57 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CombatStyleCard from "./CombatStyleCard";
 
 export default function IncumbencyPage() {
-  const allStyles = [
-    {
-      name: "Harmonic Virtuoso",
-      role: "Support",
-      img: "/assets//foundry_vtt/icons/magic/life/heart-hand-gold-green.webp",
-      hp_scale: 5,
-      ac_calc: "10 + Dexterity modifier",
-      description:
-        "A gentle support who restores health and boosts allies through melodic magic or uplifting words.",
-      abilities: [
-        {
-          name: "Harmonic Unstring",
-          type: "Basic",
-          cost: "Action",
-          type_ability: ["Debuff"],
-          img: "/assets//foundry_vtt/icons/magic/control/fear-fright-monster-grin-green.webp",
-          description:
-            "You are able to choose one creature within 60ft that you can see. The targeted creature must make a Wisdom saving throw. On a failure, the creature gains Harmonic Unstring, which lasts until the end of your next turn. The creature's next attack will have disadvantage while having Harmonic Unstring.",
-        },
-        {
-          name: "Melody of Restoration",
-          type: "Skill",
-          cost: "Action",
-          type_ability: ["Healing"],
-          img: "/assets/foundry_vtt/icons/magic/control/orb-web-hold.webp",
-          description:
-            "You choose one creature that you can see within 60ft of you, and heal them for d4s equal to your Proficiency Bonus. You can use this ability a number of times equal to your combat value per long rest.",
-        },
-      ],
-    },
-  ];
-
   const [searchTerm, setSearchTerm] = useState("");
-  const [selected, setSelected] = useState(allStyles[0]);
+  const [selected, setSelected] = useState(null);
+  const [allIncumbency, setAllIncumbency] = useState([]);
 
-  const filtered = allStyles.filter((style) =>
-    style.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const fetchAllIncumbency = useCallback(async () => {
+    try {
+      const res = await fetch("/api/incumbency/getAllData", {
+        cache: "no-store",
+      });
+
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      console.log(data);
+
+      setAllIncumbency(Array.isArray(data) ? data : []);
+      if ((data?.length ?? 0) > 0) {
+        setSelected((prev) => prev ?? data[0]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch incumbency:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAllIncumbency();
+  }, [fetchAllIncumbency]);
+
+  const filtered = allIncumbency.filter((style) =>
+    (style.name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-[#050b26] flex text-white w-full max-w-6xl">
-      <aside className="w-1/3 max-w-[400px] border-r border-[#2a2f55] p-4 flex flex-col">
+      <aside className="w-1/3 max-w-[300px] border-r border-[#2a2f55] p-4 flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <input
             type="text"
             placeholder="Search"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            // onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 bg-[#0a1040] text-white placeholder-gray-400 border border-[#2a2f55] rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#6670ff]"
           />
           <button
@@ -69,20 +61,21 @@ export default function IncumbencyPage() {
               key={style.name}
               onClick={() => setSelected(style)}
               className={`p-3 rounded-md border border-[#2a2f55] cursor-pointer transition ${
-                selected.name === style.name
+                selected?.name === style.name
                   ? "bg-[#1c2b7a]"
                   : "bg-[#0a1040] hover:bg-[#101858]"
               }`}
             >
-              <div className="flex items-center gap-2">
-                {/* <img
-                  src={style.img}
+              <div className="flex items-center gap-3">
+                <img
+                  src={style.img || "/assets/default.png"}
                   alt={style.name}
-                  className="w-8 h-8 rounded-md border border-[#2a2f55]"
-                /> */}
-                <div>
+                  className="w-10 h-10 rounded-md object-cover border border-[#2a2f55]"
+                />
+
+                <div className="flex flex-col">
                   <p className="text-sm font-semibold">{style.name}</p>
-                  {/* <p className="text-xs text-gray-400">{style.role}</p> */}
+                  <p className="text-xs text-gray-400">{style.role}</p>
                 </div>
               </div>
             </div>
@@ -97,7 +90,11 @@ export default function IncumbencyPage() {
       </aside>
 
       <main className="flex-1 flex justify-center items-start p-10">
-        <CombatStyleCard data={selected} />
+        {selected ? (
+          <CombatStyleCard data={selected} />
+        ) : (
+          <p className="text-gray-400 text-lg">Select one</p>
+        )}
       </main>
     </div>
   );

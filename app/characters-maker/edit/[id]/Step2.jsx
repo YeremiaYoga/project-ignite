@@ -8,6 +8,7 @@ import {
   economicalOptions,
   socialClassOptions,
 } from "@/app/characters-maker/characterOptions";
+import RichTextEditor from "@/components/RichTextEditor";
 export default function data({ data, allData, onChange }) {
   const step2 = data || {};
 
@@ -71,23 +72,21 @@ export default function data({ data, allData, onChange }) {
             <button
               type="button"
               onClick={() =>
-                onChange("backstory_visibiliy", !data.backstory_visibiliy)
+                onChange("backstory_visibility", !data.backstory_visibility)
               }
               className="text-gray-400 hover:text-white"
             >
-              {data.backstory_visibiliy ? (
+              {data.backstory_visibility ? (
                 <Eye size={18} />
               ) : (
                 <EyeOff size={18} />
               )}
             </button>
           </div>
-          <InputField
-            label=""
-            type="textarea"
+          <RichTextEditor
             value={data.backstory || ""}
-            onChange={(val) => onChange("backstory", val)}
-            placeholder="Write backstory here..."
+            onChange={(html) => onChange("backstory", html)}
+            placeholder="backstory"
             rows={22}
           />
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Info } from "lucide-react";
+import { Info, Eye, EyeOff } from "lucide-react";
 
 export default function InputField({
   label,
@@ -10,7 +10,7 @@ export default function InputField({
   rows = 4,
   options = [],
   disabled = false,
-  hint = "", 
+  hint = "",
 }) {
   const [query, setQuery] = useState(value || "");
   const [isOpen, setIsOpen] = useState(false);
@@ -204,6 +204,24 @@ export default function InputField({
             </div>
           )}
         </div>
+      ) : type === "toggleIcon" ? (
+        <button
+          type="button"
+          onClick={() => !disabled && onChange(!value)}
+          aria-pressed={!!value}
+          title={value ? "Visible" : "Hidden"}
+          disabled={disabled}
+          className={`inline-flex items-center justify-center w-10 h-10 rounded-md border text-sm
+      ${disabled ? "opacity-60 cursor-not-allowed" : ""}
+      ${
+        value
+          ? "bg-emerald-600/20 border-emerald-700 text-emerald-200"
+          : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+      }`}
+        >
+          {value ? <Eye size={18} /> : <EyeOff size={18} />}
+          <span className="sr-only">Toggle visibility</span>
+        </button>
       ) : (
         <input
           type={type}

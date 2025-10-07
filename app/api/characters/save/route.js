@@ -116,8 +116,12 @@ export async function POST(req) {
     };
 
     mergedData.stamp_type = Math.floor(Math.random() * 40) + 1;
-    mergedData.rotation_stamp = parseFloat((Math.random() * 60 - 30).toFixed(1));
-    mergedData.rotation_sticker = parseFloat((Math.random() * 60 - 30).toFixed(1));
+    mergedData.rotation_stamp = parseFloat(
+      (Math.random() * 60 - 30).toFixed(1)
+    );
+    mergedData.rotation_sticker = parseFloat(
+      (Math.random() * 60 - 30).toFixed(1)
+    );
 
     const feet = parseFloat(mergedData.height.feet) || 0;
     const inch = parseFloat(mergedData.height.inch) || 0;
@@ -142,12 +146,20 @@ export async function POST(req) {
     const dataDir = path.join(process.cwd(), "data", "characters", uuid);
     await fs.mkdir(dataDir, { recursive: true });
 
-    const publicDir = path.join(process.cwd(), "public", "assets", "characters", uuid);
+    const publicDir = path.join(
+      process.cwd(),
+      "public",
+      "assets",
+      "characters",
+      uuid
+    );
     await fs.mkdir(publicDir, { recursive: true });
 
     async function saveFixed(file, fixedName) {
       const abs = path.join(publicDir, fixedName);
-      try { await fs.unlink(abs); } catch {} 
+      try {
+        await fs.unlink(abs);
+      } catch {}
       const buffer = Buffer.from(await file.arrayBuffer());
       await fs.writeFile(abs, buffer);
       return `/assets/characters/${uuid}/${fixedName}`;
@@ -160,10 +172,16 @@ export async function POST(req) {
       mergedData.token_art = await saveFixed(tokenFile, "token_image.webp");
     }
     if (mainThemeFile && mainThemeFile instanceof File) {
-      mergedData.main_theme_ogg = await saveFixed(mainThemeFile, "main_theme.ogg");
+      mergedData.main_theme_ogg = await saveFixed(
+        mainThemeFile,
+        "main_theme.ogg"
+      );
     }
     if (combatThemeFile && combatThemeFile instanceof File) {
-      mergedData.combat_theme_ogg = await saveFixed(combatThemeFile, "combat_theme.ogg");
+      mergedData.combat_theme_ogg = await saveFixed(
+        combatThemeFile,
+        "combat_theme.ogg"
+      );
     }
 
     const jsonPath = path.join(dataDir, `${uuid}Data.json`);
