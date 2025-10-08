@@ -61,6 +61,14 @@ export default function AbilityEditor({
           onChange={(v) => onChange("name", v)}
           placeholder={`Name Ability ${idx + 1}`}
         />
+        <div className="md:col-span-2">
+          <InputField
+            label="Visibility"
+            type="toggleIcon"
+            value={!!data.visibility}
+            onChange={(v) => onChange("visibility", v)}
+          />
+        </div>
         <div className="flex gap-5">
           <button
             type="button"
@@ -114,25 +122,12 @@ export default function AbilityEditor({
             </div>
 
             <div className="md:col-span-2">
-              <InputField
+              <AssetSelectField
                 label="Image URL"
                 value={data.img}
                 onChange={(v) => onChange("img", v)}
-                placeholder="/assets/..."
+                initialPath=""
               />
-              <div className="mt-2 h-10 w-10 overflow-hidden rounded-md border border-gray-700 bg-gray-900">
-                {data.img ? (
-                  <img
-                    src={data.img}
-                    alt={data.name || "img"}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full text-center text-[9px] leading-10 text-gray-500">
-                    No Img
-                  </div>
-                )}
-              </div>
             </div>
 
             <div className="md:col-span-2">
@@ -179,15 +174,6 @@ export default function AbilityEditor({
                 rows={4}
                 value={data.description}
                 onChange={(v) => onChange("description", v)}
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <InputField
-                label="Visibility"
-                type="toggleIcon"
-                value={!!data.visibility}
-                onChange={(v) => onChange("visibility", v)}
               />
             </div>
           </div>

@@ -11,6 +11,8 @@ export default function InputField({
   options = [],
   disabled = false,
   hint = "",
+  toggleLabel,
+  iconSize = 16,
 }) {
   const [query, setQuery] = useState(value || "");
   const [isOpen, setIsOpen] = useState(false);
@@ -208,19 +210,20 @@ export default function InputField({
         <button
           type="button"
           onClick={() => !disabled && onChange(!value)}
-          aria-pressed={!!value}
-          title={value ? "Visible" : "Hidden"}
           disabled={disabled}
-          className={`inline-flex items-center justify-center w-10 h-10 rounded-md border text-sm
+          aria-pressed={!!value}
+          title={toggleLabel ?? (value ? "Visible" : "Hidden")}
+          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition
       ${disabled ? "opacity-60 cursor-not-allowed" : ""}
       ${
         value
-          ? "bg-emerald-600/20 border-emerald-700 text-emerald-200"
-          : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+          ? "border-emerald-700 bg-emerald-600/20 text-emerald-200"
+          : "border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700"
       }`}
         >
-          {value ? <Eye size={18} /> : <EyeOff size={18} />}
-          <span className="sr-only">Toggle visibility</span>
+          {value ? <Eye size={iconSize} /> : <EyeOff size={iconSize} />}
+
+          <span>{toggleLabel ?? (value ? "Visible" : "Hidden")}</span>
         </button>
       ) : (
         <input

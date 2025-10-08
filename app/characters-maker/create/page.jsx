@@ -38,6 +38,7 @@ export default function CreateCharacterPage() {
     step1: {
       name: "",
       fullname: "",
+      fullname_wisibility: false,
       art: "",
       token_art: "",
       creator_name: creatorName,
@@ -57,8 +58,8 @@ export default function CreateCharacterPage() {
       birth_country: "",
       gender: "",
       pronoun: "",
-      height: { feet: "", inch: "", centimeter: "" },
-      weight: { pounds: "", kilogram: "" },
+      height: { feet: 0, inch: 0, centimeter: 0 },
+      weight: { pounds: 0, kilogram: 0 },
       skin_colour: "",
       hair: "",
       wiki_visibility: false,

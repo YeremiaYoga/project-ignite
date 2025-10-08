@@ -23,12 +23,20 @@ export default function Step1({ data, allData, onChange }) {
   const creatorName = user?.fullName || user?.username || "";
   const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
 
-  const [unit, setUnit] = useState({
-    heightUnit: "imperial",
-    height: { feet: "", inch: "", centimeter: "" },
-    weightUnit: "imperial",
-    weight: { kg: "", lbs: "" },
-  });
+  const [heightUnit, setHeightUnit] = useState(() =>
+    data?.height?.centimeter ? "metric" : "imperial"
+  );
+  const [weightUnit, setWeightUnit] = useState(() =>
+    data?.weight?.kilogram ? "metric" : "imperial"
+  );
+
+  const onHeightUnit = (u) => {
+    setHeightUnit(u);
+  };
+
+  const onWeightUnit = (u) => {
+    setWeightUnit(u);
+  };
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
     setTalesMode(mode === "true");
@@ -164,12 +172,10 @@ export default function Step1({ data, allData, onChange }) {
             </span>
           </div>
         </div>
-        <div>
+        <div className="mt-[14px]">
           <div className="flex items-center justify-between mb-2 text-sm font-medium text-gray-200">
             <div className="flex items-center gap-2">
-              <span className="">
-                UUID : {data.uuid}
-              </span>
+              <span className="">UUID : {data.uuid}</span>
               <button onClick={copyToClipboard}>
                 <Clipboard className="w-4 h-4 text-gray-400 hover:text-gray-200" />
               </button>
@@ -193,15 +199,14 @@ export default function Step1({ data, allData, onChange }) {
 
         <div className="">
           <div className="flex items-center justify-end mb-2 text-sm font-medium text-gray-200">
-            <div className="flex items-center gap-2">
-              Wiki-Visibility :
-              <button onClick={toggleWikiVisibility}>
-                {data.wiki_visibility ? (
-                  <Eye className="w-4 h-4 0" />
-                ) : (
-                  <EyeOff className="w-4 h-4 " />
-                )}
-              </button>
+         
+            <div className="flex items-center justify-end  text-sm font-medium text-gray-200">
+              <InputField
+                toggleLabel="Wiki-Visibility"
+                type="toggleIcon"
+                value={!!data.wiki_visibility}
+                onChange={(v) => onChange("wiki_visibility", v)}
+              />
             </div>
           </div>
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
@@ -400,67 +405,71 @@ export default function Step1({ data, allData, onChange }) {
 
             <div>
               <label className="block text-sm font-medium mb-1">Height</label>
+
               <div className="flex gap-2 items-end">
-                {unit.heightUnit === "imperial" ? (
+                {heightUnit === "imperial" ? (
                   <div className="flex gap-2 flex-1">
                     <input
                       type="number"
                       placeholder="Feet"
-                      value={data.height?.feet || ""}
+                      value={data.height?.feet ?? ""}
                       min={0}
+                      step="1"
                       onChange={(e) =>
                         onChange("height", {
                           ...data.height,
-                          feet: e.target.value,
+                          feet:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+              focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
                     <input
                       type="number"
                       placeholder="Inch"
-                      value={data.height?.inch || ""}
+                      value={data.height?.inch ?? ""}
                       min={0}
                       max={11}
+                      step="1"
                       onChange={(e) =>
                         onChange("height", {
                           ...data.height,
-                          inch: e.target.value,
+                          inch:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+              focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
                   </div>
                 ) : (
                   <input
                     type="number"
-                    placeholder="Cm"
-                    value={data.height?.centimeter || ""}
+                    placeholder="Centimeters"
+                    value={data.height?.centimeter ?? ""}
+                    min={0}
+                    step="0.1"
                     onChange={(e) =>
                       onChange("height", {
                         ...data.height,
-                        centimeter: e.target.value,
+                        centimeter:
+                          e.target.value === "" ? "" : Number(e.target.value),
                       })
                     }
                     className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
                 )}
 
                 <select
-                  value={unit.heightUnit || ""}
-                  onChange={(e) =>
-                    setUnit((prev) => ({ ...prev, heightUnit: e.target.value }))
-                  }
-                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-xs"
+                  value={heightUnit}
+                  onChange={(e) => onHeightUnit(e.target.value)}
+                  className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+          focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
                   <option value="metric">Cm</option>
-                  <option value="imperial" selected>
-                    Ft/In
-                  </option>
+                  <option value="imperial">Ft/In</option>
                 </select>
               </div>
             </div>
@@ -487,44 +496,36 @@ export default function Step1({ data, allData, onChange }) {
               <div className="flex gap-2 items-end">
                 <input
                   type="number"
-                  placeholder={unit.weightUnit === "imperial" ? "Lb" : "Kg"}
+                  placeholder={
+                    weightUnit === "imperial" ? "Pounds" : "Kilograms"
+                  }
                   value={
-                    unit.weightUnit === "imperial"
+                    weightUnit === "imperial"
                       ? data.weight?.pounds ?? ""
                       : data.weight?.kilogram ?? ""
                   }
+                  min={0}
+                  step="0.1"
                   onChange={(e) => {
                     const val = e.target.value;
                     const newWeight =
-                      unit.weightUnit === "imperial"
+                      weightUnit === "imperial"
                         ? { ...(data.weight || {}), pounds: val }
                         : { ...(data.weight || {}), kilogram: val };
                     onChange("weight", newWeight);
                   }}
                   className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                 />
 
                 <select
-                  value={data.weightUnit || ""}
-                  onChange={(e) => {
-                    const unit = e.target.value;
-
-                    const newWeight =
-                      unit === "imperial"
-                        ? { pounds: data.weight?.pounds ?? "", kilogram: "" }
-                        : { pounds: "", kilogram: data.weight?.kilogram ?? "" };
-
-                    onChange("weightUnit", unit);
-                    onChange("weight", newWeight);
-                  }}
-                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-xs"
+                  value={weightUnit}
+                  onChange={(e) => onWeightUnit(e.target.value)}
+                  className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
+          focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
-                  <option value="imperial" selected>
-                    Lb
-                  </option>
                   <option value="metric">Kg</option>
+                  <option value="imperial">Lb</option>
                 </select>
               </div>
             </div>

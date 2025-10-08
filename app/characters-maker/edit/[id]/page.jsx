@@ -40,7 +40,7 @@ export default function EditCharacterPage() {
       try {
         const res = await fetch(`/api/characters/getOne?id=${characterId}`);
         const data = await res.json();
-        if (data) setFormData(data); 
+        if (data) setFormData(data);
       } catch (err) {
         console.error("Failed to fetch character:", err);
       } finally {
@@ -138,8 +138,7 @@ export default function EditCharacterPage() {
       <div className="p-6 rounded-lg shadow mb-6">
         <CurrentComponent
           data={formData}
-          
-          onChange={handleChange} 
+          onChange={handleChange}
           mode={talesMode}
         />
       </div>

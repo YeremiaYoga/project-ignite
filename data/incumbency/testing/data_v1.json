@@ -1,0 +1,33 @@
+{
+  "name": "testing",
+  "version": 1,
+  "img": "/assets/foundry_vtt/icons/creatures/fish/fish-bioluminous-blue.webp",
+  "good": true,
+  "neutral": true,
+  "evil": false,
+  "unknown": false,
+  "role": "sustain",
+  "hp_scale": 3,
+  "cv_minimum": 2,
+  "cv_flat_cost": 4,
+  "cv_percent_cost": 3,
+  "ac_calc": "test",
+  "intivative_bonus": 3,
+  "description": "testing123",
+  "abilities": [
+    {
+      "visibility": true,
+      "type": "Basic",
+      "name": "test",
+      "cost": "Action",
+      "additional_cost": "test",
+      "type_ability": [
+        "123",
+        "qwe",
+        "qweqw"
+      ],
+      "img": "/assets/foundry_vtt/icons/sundries/scrolls/scroll-bound-sealed-black-orange.webp",
+      "description": "testing"
+    }
+  ]
+}

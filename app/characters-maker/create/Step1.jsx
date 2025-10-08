@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import InputField from "./InputField";
+import InputField from "@/components/InputField";
 import Cookies from "js-cookie";
 import { Eye, EyeOff, Clipboard } from "lucide-react";
 import { countryOptions, alignmentOptions } from "../characterOptions";
@@ -119,12 +119,31 @@ export default function Step1({ data, onChange }) {
             onChange={(val) => onChange("name", val)}
             placeholder="Please input your character’s nickname"
           />
-          <InputField
-            label="Full Name"
-            value={data.fullname}
-            onChange={(val) => onChange("fullname", val)}
-            placeholder="Please input your character’s full name"
-          />
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-sm font-medium">Fullname</label>
+              <button
+                type="button"
+                onClick={() =>
+                  onChange("fullname_wisibility", !data.fullname_wisibility)
+                }
+                className="text-gray-400 hover:text-white"
+              >
+                {data.fullname_wisibility ? (
+                  <Eye size={18} />
+                ) : (
+                  <EyeOff size={18} />
+                )}
+              </button>
+            </div>
+            <InputField
+              label=""
+              value={data.fullname}
+              onChange={(val) => onChange("fullname", val)}
+              placeholder="Please input your character’s full name"
+            />
+          </div>
+
           <div>
             <div className="flex items-center gap-4 text-sm">
               <span className="font-medium">Art :</span>
@@ -171,7 +190,7 @@ export default function Step1({ data, onChange }) {
             </span>
           </div>
         </div>
-        <div>
+        <div className="mt-[14px]">
           <div className="flex items-center justify-between mb-2 text-sm font-medium text-gray-200">
             <div className="flex items-center gap-2">
               <span className="truncate max-w-[140px]">UUID : {data.uuid}</span>
@@ -199,16 +218,12 @@ export default function Step1({ data, onChange }) {
 
         <div className="">
           <div className="flex items-center justify-end mb-2 text-sm font-medium text-gray-200">
-            <div className="flex items-center gap-2">
-              Wiki-Visibility :
-              <button onClick={toggleWikiVisibility}>
-                {data.wiki_visibility ? (
-                  <Eye className="w-4 h-4 0" />
-                ) : (
-                  <EyeOff className="w-4 h-4 " />
-                )}
-              </button>
-            </div>
+            <InputField
+              toggleLabel="Wiki-Visibility"
+              type="toggleIcon"
+              value={!!data.wiki_visibility}
+              onChange={(v) => onChange("wiki_visibility", v)}
+            />
           </div>
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
             {tokenPreview ? (

@@ -5,7 +5,6 @@ import AbilityCard from "./AbilityCard";
 import { Heart, Sword, Shield } from "lucide-react"; // 🪄 ikon dari lucide-react
 
 export default function CombatStyleCard({ data }) {
-  console.log(data);
   return (
     <div className="bg-[#0b1230] text-gray-100 p-6 rounded-lg shadow-xl w-full max-w-3xl mx-auto border border-[#1f2d5a] transition-all duration-300 ease-in-out min-h-[600px]">
       <div className="flex items-center justify-between mb-3">
@@ -33,7 +32,6 @@ export default function CombatStyleCard({ data }) {
             </div>
           </div>
         </div>
-       
 
         <div className="text-right border p-2">
           <span className="text-lg text-gray-400">V{data.version}</span>
