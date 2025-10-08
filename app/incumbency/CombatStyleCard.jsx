@@ -46,7 +46,7 @@ export default function CombatStyleCard({ data }) {
           </div>
           <div className="flex items-center gap-1">
             <Sword className="w-4 h-4 " />
-            <span>+{data.cv_minimum}</span>
+            <span>+{data.intivative_bonus}</span>
           </div>
           <div className="flex items-center gap-1">
             <Shield className="w-4 h-4 " />
