@@ -11,12 +11,10 @@ export default function CombatStyleCard({ data }) {
     return (
       <div
         className="relative group"
-        // Desktop: hover/focus
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
-        // Mobile: tap toggle
         onClick={() => setOpen((v) => !v)}
         role="button"
         tabIndex={0}
@@ -24,7 +22,6 @@ export default function CombatStyleCard({ data }) {
       >
         <span className={`w-4 h-4 rounded-full inline-block ${color}`} />
 
-        {/* Tooltip */}
         <div
           className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1
                     bg-slate-800 text-white text-xs px-2 py-1 rounded shadow
@@ -34,6 +31,32 @@ export default function CombatStyleCard({ data }) {
         >
           {label}
         </div>
+      </div>
+    );
+  }
+
+  function TooltipIcon({ icon: Icon, label, children, color = "" }) {
+    const [open, setOpen] = useState(false);
+
+    return (
+      <div
+        className="relative group cursor-pointer"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onClick={() => setOpen((v) => !v)}
+        role="button"
+        tabIndex={0}
+      >
+        <Icon className={`w-4 h-4 ${color}`} />
+        <div
+          className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1 
+          bg-slate-800 text-white text-xs px-2 py-1 rounded shadow 
+          whitespace-nowrap z-10 transition-opacity duration-200
+          ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        >
+          {label}
+        </div>
+        {children}
       </div>
     );
   }
@@ -49,21 +72,10 @@ export default function CombatStyleCard({ data }) {
             <div className="flex gap-2 items-center">
               <div className="text-gray-400 capitalize">{data.role}</div>
               <div className="flex items-center gap-2 mb-2">
-                {data.good && (
-                  <span
-                    className="w-4 h-4 bg-green-400 rounded-full"
-                    title="Good"
-                  />
-                )}
-                {data.neutral && (
-                  <span className="w-4 h-4 bg-yellow-400 rounded-full" />
-                )}
-                {data.evil && (
-                  <span className="w-4 h-4 bg-red-400 rounded-full" />
-                )}
-                {data.unknown && (
-                  <span className="w-4 h-4 bg-purple-400 rounded-full" />
-                )}
+                {data.good && <Dot color="bg-green-400" label="Good" />}
+                {data.neutral && <Dot color="bg-yellow-400" label="Neutral" />}
+                {data.evil && <Dot color="bg-red-400" label="Evil" />}
+                {data.unknown && <Dot color="bg-purple-400" label="Unknown" />}
               </div>
             </div>
           </div>
@@ -76,38 +88,52 @@ export default function CombatStyleCard({ data }) {
 
       <div className="grid grid-cols-2">
         <div className="flex justify-between">
-          <div>
+          <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Heart className="w-4 h-4 " />
+              <TooltipIcon icon={Heart} label="HP Scale"></TooltipIcon>
               <span>{data.hp_scale}</span>
             </div>
+
             <div className="flex items-center gap-1">
-              <Sword className="w-4 h-4 " />
+              <TooltipIcon icon={Sword} label="Initiative Bonus"></TooltipIcon>
               <span>+{data.intivative_bonus}</span>
             </div>
+
             <div className="flex items-center gap-1">
-              <Shield className="w-4 h-4 " />
+              <TooltipIcon icon={Shield} label="Armor Class"></TooltipIcon>
               <span>{data.ac_calc}</span>
             </div>
 
             {data.cv_minimum > 0 && (
               <div className="flex items-center gap-1">
-                <Diamond className="w-4 h-4 text-teal-400" />
-                <span>Combat Value Minimum : {data.cv_minimum}</span>
+                <TooltipIcon
+                  icon={Diamond}
+                  label="Combat Value Minimum"
+                  color="text-teal-400"
+                ></TooltipIcon>
+                <span>{data.cv_minimum}</span>
               </div>
             )}
 
             {data.cv_flat_cost > 0 && (
               <div className="flex items-center gap-1">
-                <Diamond className="w-4 h-4 text-teal-400" />
-                <span>Combat Value Flat Cost : {data.cv_flat_cost}</span>
+                <TooltipIcon
+                  icon={Diamond}
+                  label="Combat Value Flat Cost"
+                  color="text-teal-400"
+                ></TooltipIcon>
+                <span>{data.cv_flat_cost}</span>
               </div>
             )}
 
             {data.cv_percent_cost > 0 && (
               <div className="flex items-center gap-1">
-                <Diamond className="w-4 h-4 text-teal-400" />
-                <span>Combat Value Percent Cost : {data.cv_percent_cost}%</span>
+                <TooltipIcon
+                  icon={Diamond}
+                  label="Combat Value Percent Cost"
+                  color="text-teal-400"
+                ></TooltipIcon>
+                <span>{data.cv_percent_cost}%</span>
               </div>
             )}
           </div>
@@ -117,9 +143,12 @@ export default function CombatStyleCard({ data }) {
         <div className="flex gap-2 overflow-y-auto h-40">
           <div className="flex-1 min-w-0">
             <div>Detail roles:</div>
-            <div className="text-xs whitespace-pre-line break-words">
-              {data.description}
-            </div>
+            <div
+              className="text-xs whitespace-pre-line break-words"
+              dangerouslySetInnerHTML={{
+                __html: data.description.replace(/\n/g, "<br/>"),
+              }}
+            />
           </div>
         </div>
       </div>

@@ -12,7 +12,9 @@ export default function AbilityCard({
   defaultOpen = true,
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const tags = Array.isArray(type_ability) ? type_ability.join(" • ") : type_ability;
+  const tags = Array.isArray(type_ability)
+    ? type_ability.join(" • ")
+    : type_ability;
 
   return (
     <div className="mb-4 rounded-lg  shadow-md">
@@ -26,12 +28,15 @@ export default function AbilityCard({
           src={img}
           alt={name}
           className="w-10 h-10 rounded-md shadow border border-gray-600 object-cover"
-          onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
+          onError={(e) => {
+            e.currentTarget.style.visibility = "hidden";
+          }}
         />
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-200">{name}</h3>
           <p className="text-sm text-gray-400 italic">
-            ─ {type} • {cost}{tags ? ` • ${tags}` : ""}
+            ─ {type} • {cost}
+            {tags ? ` • ${tags}` : ""}
           </p>
         </div>
         {open ? (
@@ -41,16 +46,18 @@ export default function AbilityCard({
         )}
       </button>
 
-    
       <div
         className={`grid transition-[grid-template-rows] duration-200 ease-out ${
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
         <div className="overflow-hidden">
-          <div className="px-3 pb-3 text-sm leading-relaxed text-gray-300 whitespace-pre-line">
-            {description}
-          </div>
+          <div
+            className="px-3 pb-3 text-sm leading-relaxed text-gray-300 whitespace-pre-line"
+            dangerouslySetInnerHTML={{
+              __html: description.replace(/\n/g, "<br/>"),
+            }}
+          />
         </div>
       </div>
     </div>

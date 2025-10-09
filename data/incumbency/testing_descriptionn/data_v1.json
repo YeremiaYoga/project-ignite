@@ -1,0 +1,39 @@
+{
+  "name": "testing descriptionn",
+  "version": 1,
+  "img": "",
+  "good": false,
+  "neutral": false,
+  "evil": false,
+  "unknown": false,
+  "role": "",
+  "hp_scale": 0,
+  "cv_minimum": 0,
+  "cv_flat_cost": 0,
+  "cv_percent_cost": 0,
+  "ac_calc": "",
+  "intivative_bonus": 0,
+  "description": "<b>bold\n</b><i>garis miring</i>\n<u>underline\n</u><strike>garis tengah</strike><i>\n\n</i>",
+  "abilities": [
+    {
+      "visibility": true,
+      "type": "Basic",
+      "name": "",
+      "cost": "Action",
+      "additional_cost": "",
+      "type_ability": [],
+      "img": "",
+      "description": "asdasd<b>asdasdasdasd</b>"
+    },
+    {
+      "visibility": true,
+      "type": "Skill",
+      "name": "",
+      "cost": "Action",
+      "additional_cost": "",
+      "type_ability": [],
+      "img": "",
+      "description": ""
+    }
+  ]
+}
