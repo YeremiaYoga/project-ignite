@@ -13,7 +13,7 @@
   "cv_percent_cost": 3,
   "ac_calc": "test",
   "intivative_bonus": 3,
-  "description": "testing123",
+  "description": "Whenever this creature hits with a melee simple weapon attack that deals piercing damage, it can also apply the effect of Rune of Destruction to the target. This effect lasts until the start of the creature’s next turn.\n\nBefore making the attack roll, the creature must choose one damage type — fire, necrotic, or poison — to empower the rune. A creature affected by this rune loses resistance to the chosen damage type for the duration.\n\nThis effect can be applied multiple times with different damage types. However, if multiple effects of the same damage type are applied, they all end at the start of the creature’s next turn as normal.",
   "abilities": [
     {
       "visibility": true,
@@ -21,13 +21,9 @@
       "name": "test",
       "cost": "Action",
       "additional_cost": "test",
-      "type_ability": [
-        "123",
-        "qwe",
-        "qweqw"
-      ],
+      "type_ability": ["123", "qwe", "qweqw"],
       "img": "/assets/foundry_vtt/icons/sundries/scrolls/scroll-bound-sealed-black-orange.webp",
-      "description": "testing"
+      "description": "Whenever this creature hits with a melee simple weapon attack that deals piercing damage, it can also apply the effect of Rune of Destruction to the target. This effect lasts until the start of the creature’s next turn.\n\nBefore making the attack roll, the creature must choose one damage type — fire, necrotic, or poison — to empower the rune. A creature affected by this rune loses resistance to the chosen damage type for the duration.\n\nThis effect can be applied multiple times with different damage types. However, if multiple effects of the same damage type are applied, they all end at the start of the creature’s next turn as normal."
     }
   ]
 }

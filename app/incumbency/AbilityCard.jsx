@@ -48,7 +48,7 @@ export default function AbilityCard({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="px-3 pb-3 text-sm leading-relaxed text-gray-300">
+          <div className="px-3 pb-3 text-sm leading-relaxed text-gray-300 whitespace-pre-line">
             {description}
           </div>
         </div>
