@@ -120,12 +120,29 @@ export default function Step1({ data, allData, onChange }) {
             onChange={(val) => onChange("name", val)}
             placeholder="Please Input The Character Nickname"
           />
-          <InputField
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-sm font-medium">Fullname</label>
+              <InputField
+                toggleLabel="Fullname-Visibility"
+                type="toggleIcon"
+                value={data.fullname_visibility}
+                onChange={(v) => onChange("fullname_visibility", v)}
+              />
+            </div>
+            <InputField
+              label=""
+              value={data.fullname}
+              onChange={(val) => onChange("fullname", val)}
+              placeholder="Please input your character’s full name"
+            />
+          </div>
+          {/* <InputField
             label="Full Name"
             value={data.fullname}
             onChange={(val) => onChange("fullname", val)}
             placeholder="Please Input The Character Fullname"
-          />
+          /> */}
           <div>
             <div className="flex items-center gap-4 text-sm">
               <span className="font-medium">Art :</span>
@@ -199,7 +216,6 @@ export default function Step1({ data, allData, onChange }) {
 
         <div className="">
           <div className="flex items-center justify-end mb-2 text-sm font-medium text-gray-200">
-         
             <div className="flex items-center justify-end  text-sm font-medium text-gray-200">
               <InputField
                 toggleLabel="Wiki-Visibility"

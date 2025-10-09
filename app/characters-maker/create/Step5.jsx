@@ -1,5 +1,5 @@
 "use client";
-import InputField from "./InputField.jsx";
+import InputField from "@/components/InputField";
 import {
   attributesOptions,
   combatValueOptions,

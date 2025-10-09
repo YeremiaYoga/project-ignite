@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ChevronDown, ChevronUp, Trash2, Eye, EyeOff } from "lucide-react";
 import InputField from "@/components/InputField"; // <-- sesuaikan path
 import AssetSelectField from "@/components/AssetSelectField";
+import RichTextEditor from "@/components/RichTextEditor";
 const COST_OPTIONS = [
   "Action",
   "Bonus Action",
@@ -168,12 +169,11 @@ export default function AbilityEditor({
             </div>
 
             <div className="md:col-span-2">
-              <InputField
-                label="Description"
-                type="textarea"
-                rows={4}
+              <RichTextEditor
                 value={data.description}
                 onChange={(v) => onChange("description", v)}
+                placeholder="description"
+                rows={10}
               />
             </div>
           </div>

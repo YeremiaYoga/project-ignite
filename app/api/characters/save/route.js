@@ -17,6 +17,7 @@ export async function POST(req) {
     const template = {
       name: "",
       fullname: "",
+      fullname_visibility: false,
       art: "",
       token_art: "",
       creator_name: "",

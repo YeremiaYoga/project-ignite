@@ -5,6 +5,7 @@ import { Plus, Eye, EyeOff } from "lucide-react";
 import InputField from "@/components/InputField";
 import AbilityEditor from "./AbilityEditor";
 import AssetSelectField from "@/components/AssetSelectField";
+import RichTextEditor from "@/components/RichTextEditor";
 
 const ALLOWED_TYPES = [
   "Basic",
@@ -237,13 +238,11 @@ export default function IncumbencyForm({
             />
 
             <div className="md:col-span-2">
-              <InputField
-                label="Description"
-                type="textarea"
-                rows={4}
+              <RichTextEditor
                 value={form.description}
                 onChange={(v) => updateField("description", v)}
                 placeholder="Description"
+                rows={10}
               />
             </div>
           </div>

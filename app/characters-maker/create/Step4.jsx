@@ -1,5 +1,5 @@
 "use client";
-import InputField from "./InputField.jsx";
+import InputField from "@/components/InputField";
 import RelationshipSection from "./RelationshipSection.jsx";
 import MultipleInput from "@/components/MultipleInput.jsx";
 import { Upload, X } from "lucide-react";

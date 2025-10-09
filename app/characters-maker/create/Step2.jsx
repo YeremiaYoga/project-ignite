@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import InputField from "./InputField.jsx";
+import InputField from "@/components/InputField";
 import MultipleInput from "@/components/MultipleInput.jsx";
 import { Eye, EyeOff } from "lucide-react";
 import {
@@ -67,7 +67,13 @@ export default function Step2({ data, allData, onChange }) {
         <div className="col-span-9">
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Backstory</label>
-            <button
+            <InputField
+              toggleLabel="Backstory-Visibility"
+              type="toggleIcon"
+              value={step2.backstory_visibility}
+              onChange={(v) => onChange("backstory_visibility", v)}
+            />
+            {/* <button
               type="button"
               onClick={() =>
                 onChange("backstory_visibility", !step2.backstory_visibility)
@@ -79,10 +85,10 @@ export default function Step2({ data, allData, onChange }) {
               ) : (
                 <EyeOff size={18} />
               )}
-            </button>
+            </button> */}
           </div>
           <RichTextEditor
-            value={step2.backstory || ""} 
+            value={step2.backstory || ""}
             onChange={(html) => onChange("backstory", html)}
             placeholder="backstory"
             rows={22}
@@ -192,7 +198,13 @@ export default function Step2({ data, allData, onChange }) {
         <div className="col-span-6">
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Fear / Weakness</label>
-            <button
+            <InputField
+              toggleLabel="Fear/Weakness-Visibility"
+              type="toggleIcon"
+              value={data.fear_weakness_visibility}
+              onChange={(v) => onChange("fear_weakness_visibility", v)}
+            />
+            {/* <button
               type="button"
               onClick={() =>
                 onChange(
@@ -207,7 +219,7 @@ export default function Step2({ data, allData, onChange }) {
               ) : (
                 <EyeOff size={18} />
               )}
-            </button>
+            </button> */}
           </div>
           <MultipleInput
             labels=""
@@ -226,7 +238,13 @@ export default function Step2({ data, allData, onChange }) {
         <div className="col-span-6">
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Motivation</label>
-            <button
+            <InputField
+              toggleLabel="Motivation-Visibility"
+              type="toggleIcon"
+              value={data.motivation_visibility}
+              onChange={(v) => onChange("motivation_visibility", v)}
+            />
+            {/* <button
               type="button"
               onClick={() =>
                 onChange("motivation_visibility", !step2.motivation_visibility)
@@ -238,7 +256,7 @@ export default function Step2({ data, allData, onChange }) {
               ) : (
                 <EyeOff size={18} />
               )}
-            </button>
+            </button> */}
           </div>
           <MultipleInput
             labels=""

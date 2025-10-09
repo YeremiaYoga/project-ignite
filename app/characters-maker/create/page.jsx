@@ -38,7 +38,7 @@ export default function CreateCharacterPage() {
     step1: {
       name: "",
       fullname: "",
-      fullname_wisibility: false,
+      fullname_visibility: false,
       art: "",
       token_art: "",
       creator_name: creatorName,

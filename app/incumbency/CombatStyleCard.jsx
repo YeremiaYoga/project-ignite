@@ -52,12 +52,24 @@ export default function CombatStyleCard({ data }) {
             <Shield className="w-4 h-4 " />
             <span>{data.ac_calc}</span>
           </div>
+          <div className="flex items-center gap-1">
+            <Shield className="w-4 h-4 " />
+            <span>Combat Value Minimum : {data.cv_minimum}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Shield className="w-4 h-4 " />
+            <span>Combat Value Flat Cost : {data.cv_flat_cost}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Shield className="w-4 h-4 " />
+            <span>Combat Value Percent Cost : {data.cv_percent_cost}%</span>
+          </div>
         </div>
         <div className="flex gap-2">
           <div className="w-[2px] h-full bg-[#2c3a6a]" />
           <div>
             <div>Detail roles:</div>
-            <div className="text-xs">Support Unit/n/n</div>
+            <div className="text-xs">{data.description}</div>
           </div>
         </div>
       </div>

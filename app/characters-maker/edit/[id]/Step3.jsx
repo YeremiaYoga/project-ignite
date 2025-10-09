@@ -11,14 +11,19 @@ import {
 export default function Step3({ data, allData, onChange, mode }) {
   const step3 = data || {};
 
-
   return (
     <div className="p-6 max-w-6xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
       <div className="grid grid-cols-5 gap-4">
         <div className="col-span-3">
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Appearance</label>
-            <button
+            <InputField
+              toggleLabel="Apperance-Visibility"
+              type="toggleIcon"
+              value={data.appearance_visibility}
+              onChange={(v) => onChange("appearance_visibility", v)}
+            />
+            {/* <button
               type="button"
               onClick={() =>
                 onChange("appearance_visibility", !data.appearance_visibility)
@@ -30,7 +35,7 @@ export default function Step3({ data, allData, onChange, mode }) {
               ) : (
                 <EyeOff size={18} />
               )}
-            </button>
+            </button> */}
           </div>
           <InputField
             label=""
@@ -213,7 +218,13 @@ export default function Step3({ data, allData, onChange, mode }) {
         <div className="mt-1 col-span-3">
           <div className="flex items-center justify-between w-[92%]">
             <label className="text-sm font-medium">Hobbies</label>
-            <button
+            <InputField
+              toggleLabel="Hobbies-Visibility"
+              type="toggleIcon"
+              value={data.hobbies_visibility}
+              onChange={(v) => onChange("hobbies_visibility", v)}
+            />
+            {/* <button
               type="button"
               onClick={() =>
                 onChange("hobbies_visibility", !data.hobbies_visibility)
@@ -225,7 +236,7 @@ export default function Step3({ data, allData, onChange, mode }) {
               ) : (
                 <EyeOff size={18} />
               )}
-            </button>
+            </button> */}
           </div>
           <MultipleInput
             labels=""

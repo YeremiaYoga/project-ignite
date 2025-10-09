@@ -1,6 +1,6 @@
 "use client";
 
-import InputField from "./InputField.jsx";
+import InputField from "@/components/InputField";
 import MultipleInput from "@/components/MultipleInput.jsx";
 import { Eye, EyeOff, Upload } from "lucide-react";
 import { nationalityOptions, countryOptions } from "../characterOptions";
@@ -14,7 +14,13 @@ export default function Step3({ data, allData, onChange, mode }) {
         <div className="col-span-3">
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Appearance</label>
-            <button
+            <InputField
+              toggleLabel="Apperance-Visibility"
+              type="toggleIcon"
+              value={data.appearance_visibility}
+              onChange={(v) => onChange("appearance_visibility", v)}
+            />
+            {/* <button
               type="button"
               onClick={() =>
                 onChange("appearance_visibility", !data.appearance_visibility)
@@ -26,7 +32,7 @@ export default function Step3({ data, allData, onChange, mode }) {
               ) : (
                 <EyeOff size={18} />
               )}
-            </button>
+            </button> */}
           </div>
           <InputField
             label=""
@@ -210,7 +216,13 @@ export default function Step3({ data, allData, onChange, mode }) {
         <div className="mt-1 col-span-3">
           <div className="flex items-center justify-between w-[92%]">
             <label className="text-sm font-medium">Hobbies</label>
-            <button
+            <InputField
+              toggleLabel="Hobbies-Visibility"
+              type="toggleIcon"
+              value={data.hobbies_visibility}
+              onChange={(v) => onChange("hobbies_visibility", v)}
+            />
+            {/* <button
               type="button"
               onClick={() =>
                 onChange("hobbies_visibility", !data.hobbies_visibility)
@@ -222,7 +234,7 @@ export default function Step3({ data, allData, onChange, mode }) {
               ) : (
                 <EyeOff size={18} />
               )}
-            </button>
+            </button> */}
           </div>
           <MultipleInput
             labels=""
@@ -242,7 +254,9 @@ export default function Step3({ data, allData, onChange, mode }) {
           />
         </div>
         <div className="col-span-2">
-          <label className="text-sm font-medium">Signature Weapon/Spellcasting Focus</label>
+          <label className="text-sm font-medium">
+            Signature Weapon/Spellcasting Focus
+          </label>
           <MultipleInput
             labels=""
             label="Weapon"

@@ -122,19 +122,12 @@ export default function Step1({ data, onChange }) {
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-sm font-medium">Fullname</label>
-              <button
-                type="button"
-                onClick={() =>
-                  onChange("fullname_wisibility", !data.fullname_wisibility)
-                }
-                className="text-gray-400 hover:text-white"
-              >
-                {data.fullname_wisibility ? (
-                  <Eye size={18} />
-                ) : (
-                  <EyeOff size={18} />
-                )}
-              </button>
+              <InputField
+                toggleLabel="Fullname-Visibility"
+                type="toggleIcon"
+                value={data.fullname_visibility}
+                onChange={(v) => onChange("fullname_visibility", v)}
+              />
             </div>
             <InputField
               label=""
@@ -221,7 +214,7 @@ export default function Step1({ data, onChange }) {
             <InputField
               toggleLabel="Wiki-Visibility"
               type="toggleIcon"
-              value={!!data.wiki_visibility}
+              value={data.wiki_visibility}
               onChange={(v) => onChange("wiki_visibility", v)}
             />
           </div>
