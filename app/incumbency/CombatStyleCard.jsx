@@ -48,10 +48,23 @@ export default function CombatStyleCard({ data }) {
             <h1 className="text-2xl font-bold ">{data.name}</h1>
             <div className="flex gap-2 items-center">
               <div className="text-gray-400 capitalize">{data.role}</div>
-              {data.good && <Dot color="bg-green-400" label="Good" />}
-              {data.neutral && <Dot color="bg-yellow-400" label="Neutral" />}
-              {data.evil && <Dot color="bg-red-400" label="Evil" />}
-              {data.unknown && <Dot color="bg-purple-400" label="Unknown" />}
+              <div className="flex items-center gap-2 mb-2">
+                {data.good && (
+                  <span
+                    className="w-4 h-4 bg-green-400 rounded-full"
+                    title="Good"
+                  />
+                )}
+                {data.neutral && (
+                  <span className="w-4 h-4 bg-yellow-400 rounded-full" />
+                )}
+                {data.evil && (
+                  <span className="w-4 h-4 bg-red-400 rounded-full" />
+                )}
+                {data.unknown && (
+                  <span className="w-4 h-4 bg-purple-400 rounded-full" />
+                )}
+              </div>
             </div>
           </div>
         </div>
