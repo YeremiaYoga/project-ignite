@@ -124,7 +124,7 @@ export default function Step1({ data, allData, onChange }) {
             <div className="flex items-center justify-between mb-1">
               <label className="text-sm font-medium">Fullname</label>
               <InputField
-                toggleLabel="Fullname-Visibility"
+               
                 type="toggleIcon"
                 value={data.fullname_visibility}
                 onChange={(v) => onChange("fullname_visibility", v)}
@@ -218,7 +218,7 @@ export default function Step1({ data, allData, onChange }) {
           <div className="flex items-center justify-end mb-2 text-sm font-medium text-gray-200">
             <div className="flex items-center justify-end  text-sm font-medium text-gray-200">
               <InputField
-                toggleLabel="Wiki-Visibility"
+               
                 type="toggleIcon"
                 value={!!data.wiki_visibility}
                 onChange={(v) => onChange("wiki_visibility", v)}

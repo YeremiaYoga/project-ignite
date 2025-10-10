@@ -15,24 +15,12 @@ export default function Step3({ data, allData, onChange, mode }) {
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Appearance</label>
             <InputField
-              toggleLabel="Apperance-Visibility"
+            
               type="toggleIcon"
               value={data.appearance_visibility}
               onChange={(v) => onChange("appearance_visibility", v)}
             />
-            {/* <button
-              type="button"
-              onClick={() =>
-                onChange("appearance_visibility", !data.appearance_visibility)
-              }
-              className="text-gray-400 hover:text-white"
-            >
-              {data.appearance_visibility ? (
-                <Eye size={18} />
-              ) : (
-                <EyeOff size={18} />
-              )}
-            </button> */}
+          
           </div>
           <InputField
             label=""
@@ -217,24 +205,12 @@ export default function Step3({ data, allData, onChange, mode }) {
           <div className="flex items-center justify-between w-[92%]">
             <label className="text-sm font-medium">Hobbies</label>
             <InputField
-              toggleLabel="Hobbies-Visibility"
+             
               type="toggleIcon"
               value={data.hobbies_visibility}
               onChange={(v) => onChange("hobbies_visibility", v)}
             />
-            {/* <button
-              type="button"
-              onClick={() =>
-                onChange("hobbies_visibility", !data.hobbies_visibility)
-              }
-              className="text-gray-400 hover:text-white"
-            >
-              {data.hobbies_visibility ? (
-                <Eye size={18} />
-              ) : (
-                <EyeOff size={18} />
-              )}
-            </button> */}
+           
           </div>
           <MultipleInput
             labels=""

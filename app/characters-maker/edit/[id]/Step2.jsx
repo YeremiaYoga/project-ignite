@@ -70,24 +70,12 @@ export default function data({ data, allData, onChange }) {
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Backstory</label>
             <InputField
-              toggleLabel="Backstory-Visibility"
+            
               type="toggleIcon"
               value={data.backstory_visibility}
               onChange={(v) => onChange("backstory_visibility", v)}
             />
-            {/* <button
-              type="button"
-              onClick={() =>
-                onChange("backstory_visibility", !data.backstory_visibility)
-              }
-              className="text-gray-400 hover:text-white"
-            >
-              {data.backstory_visibility ? (
-                <Eye size={18} />
-              ) : (
-                <EyeOff size={18} />
-              )}
-            </button> */}
+          
           </div>
           <RichTextEditor
             value={data.backstory || ""}
@@ -201,27 +189,12 @@ export default function data({ data, allData, onChange }) {
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Fear / Weakness</label>
             <InputField
-              toggleLabel="Fear/Weakness-Visibility"
+             
               type="toggleIcon"
               value={data.fear_weakness_visibility}
               onChange={(v) => onChange("fear_weakness_visibility", v)}
             />
-            {/* <button
-              type="button"
-              onClick={() =>
-                onChange(
-                  "fear_weakness_visibility",
-                  !data.fear_weakness_visibility
-                )
-              }
-              className="text-gray-400 hover:text-white"
-            >
-              {data.fear_weakness_visibility ? (
-                <Eye size={18} />
-              ) : (
-                <EyeOff size={18} />
-              )}
-            </button> */}
+           
           </div>
           <MultipleInput
             labels=""
@@ -241,24 +214,12 @@ export default function data({ data, allData, onChange }) {
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Motivation</label>
             <InputField
-              toggleLabel="Motivation-Visibility"
+             
               type="toggleIcon"
               value={data.motivation_visibility}
               onChange={(v) => onChange("motivation_visibility", v)}
             />
-            {/* <button
-              type="button"
-              onClick={() =>
-                onChange("motivation_visibility", !data.motivation_visibility)
-              }
-              className="text-gray-400 hover:text-white"
-            >
-              {data.motivation_visibility ? (
-                <Eye size={18} />
-              ) : (
-                <EyeOff size={18} />
-              )}
-            </button> */}
+           
           </div>
           <MultipleInput
             labels=""

@@ -8,11 +8,11 @@ import {
   personalityCombatStyleOptions,
 } from "../characterOptions";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 export default function Step5({ data, allData, onChange }) {
   const step5 = data || {};
-
+  const [allIncumbency, setAllIncumbency] = useState([]);
   const damageTypes = [
     "Acid",
     "Cold",
@@ -26,6 +26,75 @@ export default function Step5({ data, allData, onChange }) {
     "Radiant",
     "Thunder",
   ];
+
+  const [selectedStyle, setSelectedStyle] = useState(null);
+  const [selectedAbility, setSelectedAbility] = useState(null);
+
+  const flagByDisposition = (disp) => {
+    const d = String(disp || "").toLowerCase();
+    if (d === "friendly") return "good";
+    if (d === "hostile") return "evil";
+    if (d === "neutral") return "neutral";
+    if (d === "unknown") return "unknown";
+    return null;
+  };
+
+
+
+  const filteredIncumbency = useMemo(() => {
+    const flag = flagByDisposition(step5.disposition);
+    if (!flag) return allIncumbency;
+    return allIncumbency.filter((it) => it?.[flag] === true);
+  }, [allIncumbency, step5.disposition]);
+
+  useEffect(() => {
+    if (!selectedStyle) return;
+    const stillValid = filteredIncumbency.some(
+      (x) => x.name === selectedStyle.name
+    );
+    if (!stillValid) {
+      setSelectedStyle(null);
+      onChange("combat_style", null);
+    }
+  }, [filteredIncumbency]);
+
+  const handleSelectStyle = (name) => {
+    const found = filteredIncumbency.find((x) => x.name === name);
+    setSelectedStyle(found || null);
+    onChange("combat_style", found || null);
+  };
+
+  const getAbilityImg = (ab) => ab?.img || ab?.icon || ab?.image || "";
+
+  const getAbilityName = (ab) =>
+    ab?.title || ab?.name || ab?.label || "Ability";
+
+  const getAbilityDesc = (ab) =>
+    (ab?.description || ab?.desc || ab?.text || "")
+      .toString()
+      .replace(/\n+/g, " ")
+      .trim()
+      .slice(0, 220);
+
+  const fetchAllIncumbency = useCallback(async () => {
+    try {
+      const res = await fetch("/api/incumbency/getAllData", {
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setAllIncumbency(Array.isArray(data) ? data : []);
+      if ((data?.length ?? 0) > 0) setSelected((prev) => prev ?? data[0]);
+    } catch (err) {
+      console.error("Failed to fetch incumbency:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAllIncumbency();
+  }, [fetchAllIncumbency]);
+
+  console.log(allIncumbency);
 
   const damageTypesWithImages = damageTypes.map((type) => ({
     value: type.toLowerCase(),
@@ -59,8 +128,6 @@ export default function Step5({ data, allData, onChange }) {
     if (idx !== -1) {
       availableValues.splice(idx, 1);
     }
-    console.log(availableValues);
-    console.log(assignedValues);
   });
 
   const maxSkillPoints = Number(step5.combat_value) || 0;
@@ -68,7 +135,7 @@ export default function Step5({ data, allData, onChange }) {
   const calcModifier = (val) => {
     if (!val || isNaN(val)) return 0;
     const mod = Math.floor((val - 10) / 2);
-    console.log(mod);
+
     return mod > 0 ? `+${mod}` : mod;
   };
 
@@ -91,7 +158,7 @@ export default function Step5({ data, allData, onChange }) {
 
   const getSkillState = (skillName) => {
     const skill = step5.skill_prof?.find((s) => s.name === skillName);
-    if (!skill) return "empty"; // default
+    if (!skill) return "empty";
     switch (skill.value) {
       case 0:
         return "empty";
@@ -109,7 +176,6 @@ export default function Step5({ data, allData, onChange }) {
   const handleSkillClick = (skillName) => {
     const currentState = getSkillState(skillName);
 
-    // hitung sisa skill point
     const usedPointsExcludingThis = (step5.skill_prof || []).reduce(
       (acc, s) => {
         if (s.name === skillName) return acc;
@@ -206,12 +272,9 @@ export default function Step5({ data, allData, onChange }) {
   };
 
   const calcSkillValue = (abilityKey, skill) => {
-    console.log(abilityKey);
     const abilityValue = assignedValues.hasOwnProperty(abilityKey)
       ? assignedValues[abilityKey]
       : step5[abilityKey];
-
-    console.log(abilityValue);
 
     const abilityMod = calcModifier(abilityValue);
 
@@ -232,9 +295,7 @@ export default function Step5({ data, allData, onChange }) {
       default:
         profValue = 0;
     }
-    console.log(abilityMod);
-    console.log(pb);
-    console.log(profValue);
+
     const total = Number(abilityMod) + pb * profValue;
 
     return total >= 0 ? `+${total}` : `${total}`;
@@ -292,21 +353,109 @@ export default function Step5({ data, allData, onChange }) {
           </p>
         </div>
 
-        {/* Work in progress: Combat Style */}
-        {/* 
-<div className="bg-gray-800 rounded-xl p-4 shadow-md">
-  <InputField
-    label="Combat Style"
-    type="select"
-    value={step5.combatStyle || ""}
-    onChange={(val) => onChange("combatStyle", val)}
-    options={["Melee", "Ranged", "Magic"]}
-    placeholder="Select Style"
-  />
-</div>
-*/}
-        <div className="bg-gray-800 rounded-xl p-4 shadow-md flex items-center justify-center">
-          <p className="text-gray-400 italic">Work in progress</p>
+        <div className="bg-gray-800 rounded-xl p-4 shadow-md">
+          <label className="text-sm font-semibold mb-2 block">
+            Combat Style
+          </label>
+
+          <select
+            value={selectedStyle?.name || ""}
+            onChange={(e) => handleSelectStyle(e.target.value)}
+            className="w-full bg-gray-800 border-gray-700 focus:ring-2 focus:ring-blue-500 border rounded px-3 py-2 text-sm"
+          >
+            <option value="" disabled>
+              {filteredIncumbency.length
+                ? "Select Combat Style"
+                : "No incumbency available"}
+            </option>
+            {filteredIncumbency.map((it) => (
+              <option key={it.name} value={it.name}>
+                {it.name}
+              </option>
+            ))}
+          </select>
+
+          {selectedStyle?.abilities?.length > 0 && (
+            <div className="mt-3">
+              <div className="text-xs text-gray-400 mb-1">Abilities</div>
+
+              <div className="grid grid-cols-6 gap-2">
+                {selectedStyle.abilities.map((ab, idx) => {
+                  const src = getAbilityImg(ab);
+                  const name = getAbilityName(ab);
+                  const desc = getAbilityDesc(ab);
+
+                  const isActive = selectedAbility === idx;
+
+                  return (
+                    <div
+                      key={idx}
+                      className={[
+                        "relative group aspect-square w-full",
+                        "rounded-md border border-gray-700 bg-gray-900",
+                        "overflow-visible",
+                        isActive ? "ring-2 ring-teal-400" : "",
+                      ].join(" ")}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={name}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setSelectedAbility(isActive ? null : idx);
+                        }
+                      }}
+                    >
+                      <div className="absolute inset-0 rounded-md overflow-hidden">
+                        {src ? (
+                          <img
+                            src={src}
+                            alt={name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-500">
+                            no img
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-10 bg-white transition-opacity rounded-md" />
+
+                      <div
+                        className={[
+                          "absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-20",
+                          "w-60 rounded-md border border-gray-700 bg-slate-900 text-gray-100",
+                          "text-xs p-2 shadow-xl",
+                          "transition-all",
+                          isActive
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 -translate-y-1",
+                          "group-hover:opacity-100 group-hover:translate-y-0",
+                          "group-focus-within:opacity-100 group-focus-within:translate-y-0",
+                        ].join(" ")}
+                        role="tooltip"
+                      >
+                        <div className="font-semibold text-teal-300">
+                          {name}
+                        </div>
+                        {desc && (
+                          <div className="mt-1 leading-snug">{desc}</div>
+                        )}
+
+                        {ab?.cost && (
+                          <div className="mt-1 text-[11px] text-gray-400">
+                            Cost: {ab.cost}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="bg-gray-800 rounded-xl p-4 flex flex-col items-center shadow-md">
@@ -473,13 +622,18 @@ export default function Step5({ data, allData, onChange }) {
           />
         </div>
 
-        <div className="bg-gray-800 rounded-xl p-4  shadow-md">
+        <div className="bg-gray-800 rounded-xl p-4 shadow-md">
           <InputField
             label="Disposition"
             type="select"
             value={step5.disposition || ""}
-            onChange={(val) => onChange("disposition", val)}
-            options={["Friendly", "Nuetral", "Hostile", "Unknown"]}
+            onChange={(val) => {
+              onChange("disposition", val);
+
+              setSelectedStyle(null);
+              onChange("combat_style", null);
+            }}
+            options={["Friendly", "Neutral", "Hostile", "Unknown"]}
             placeholder="Select Disposition"
           />
         </div>

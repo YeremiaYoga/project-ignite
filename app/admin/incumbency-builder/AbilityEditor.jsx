@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp, Trash2, Eye, EyeOff } from "lucide-react";
-import InputField from "@/components/InputField"; // <-- sesuaikan path
+import InputField from "@/components/InputField";
 import AssetSelectField from "@/components/AssetSelectField";
 import RichTextEditor from "@/components/RichTextEditor";
 const COST_OPTIONS = [
