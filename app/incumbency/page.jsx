@@ -37,7 +37,6 @@ export default function IncumbencyPage() {
   const [cvMin, setCvMin] = useState("");
   const [cvMax, setCvMax] = useState("");
 
-  // nilai draft untuk modal
   const [draftCvMin, setDraftCvMin] = useState(0);
   const [draftCvMax, setDraftCvMax] = useState(40);
 
@@ -49,12 +48,13 @@ export default function IncumbencyPage() {
   const touchStartX = useRef(null);
   const touchDeltaX = useRef(0);
 
+  const [loadingData, setLoadingData] = useState(true);
+
   const openFilter = () => {
     setDraftRoles(roleFilters);
     setDraftHpMin(hpMin === "" ? DEFAULT_MIN : Number(hpMin));
     setDraftHpMax(hpMax === "" ? DEFAULT_MAX : Number(hpMax));
 
-    // sinkron draft CV
     setDraftCvMin(cvMin === "" ? CV_DEFAULT_MIN : Number(cvMin));
     setDraftCvMax(cvMax === "" ? CV_DEFAULT_MAX : Number(cvMax));
 
@@ -71,7 +71,6 @@ export default function IncumbencyPage() {
     setDraftHpMin(DEFAULT_MIN);
     setDraftHpMax(DEFAULT_MAX);
 
-    // reset CV
     setDraftCvMin(CV_DEFAULT_MIN);
     setDraftCvMax(CV_DEFAULT_MAX);
   };
@@ -107,20 +106,29 @@ export default function IncumbencyPage() {
 
   const fetchAllIncumbency = useCallback(async () => {
     try {
+      setLoadingData(true);
       const res = await fetch("/api/incumbency/getAllData", {
         cache: "no-store",
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setAllIncumbency(Array.isArray(data) ? data : []);
-      if ((data?.length ?? 0) > 0) setSelected((prev) => prev ?? data[0]);
     } catch (err) {
       console.error("Failed to fetch incumbency:", err);
+    } finally {
+      setLoadingData(false);
     }
   }, []);
+
   useEffect(() => {
     fetchAllIncumbency();
-  }, [fetchAllIncumbency]);
+  }, []);
+
+  useEffect(() => {
+    if (allIncumbency.length > 0 && selected == null) {
+      setSelected(allIncumbency[0]);
+    }
+  }, [allIncumbency.length]);
 
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -130,7 +138,6 @@ export default function IncumbencyPage() {
       const role = (style.role || "").toLowerCase();
       const hp = Number(style.hp_scale ?? style.hp ?? 0);
 
-      // ambil angka CV minimum (default 0 jika tidak ada)
       const cv = Number(style.cv_minimum ?? 0);
 
       const matchesName = term === "" ? true : name.includes(term);
@@ -178,6 +185,7 @@ export default function IncumbencyPage() {
 
   const DesktopList = (
     <aside className="w-1/3 max-w-[300px] border-r border-[#2a2f55] p-4 flex flex-col">
+      {/* === SEARCH BAR & FILTER BUTTON === */}
       <div className="flex items-center gap-2 mb-2">
         <input
           type="text"
@@ -200,34 +208,57 @@ export default function IncumbencyPage() {
         </button>
       </div>
 
+      {/* === LIST === */}
       <div className="flex-1 overflow-y-auto space-y-2">
-        {filtered.map((style) => (
-          <div
-            key={style.name}
-            onClick={() => setSelected(style)}
-            className={`p-3 rounded-md border border-[#2a2f55] cursor-pointer transition ${
-              selected?.name === style.name
-                ? "bg-[#1c2b7a]"
-                : "bg-[#0a1040] hover:bg-[#101858]"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <img
-                src={style.img || "/assets/default.png"}
-                alt={style.name}
-                className="w-10 h-10 rounded-md object-cover border border-[#2a2f55]"
-              />
-              <div className="flex flex-col">
-                <p className="text-sm font-semibold">{style.name}</p>
-                <p className="text-xs text-gray-400 capitalize">{style.role}</p>
+        {loadingData ? (
+          [...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="p-3 rounded-md border border-[#2a2f55] bg-[#0a1040] animate-pulse flex items-center gap-3"
+            >
+              <div className="w-10 h-10 bg-[#1a1f4f] rounded-md" />
+              <div className="flex-1 space-y-1">
+                <div className="h-3 w-2/3 bg-[#1a1f4f] rounded" />
+                <div className="h-2 w-1/3 bg-[#1a1f4f] rounded" />
               </div>
             </div>
-          </div>
-        ))}
-        {filtered.length === 0 && (
+          ))
+        ) : filtered.length === 0 ? (
           <p className="text-gray-500 text-sm text-center mt-10">
             No results found.
           </p>
+        ) : (
+          filtered.map((style) => (
+            <div
+              key={style.name}
+              onClick={() => {
+                setSelected(style);
+                // buka detail cuma untuk mobile
+                if (window.innerWidth < 768) setPane("detail");
+              }}
+              className={`p-3 rounded-md border border-[#2a2f55] cursor-pointer transition ${
+                selected?.name === style.name
+                  ? "bg-[#1c2b7a]"
+                  : "bg-[#0a1040] hover:bg-[#101858]"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <img
+                  src={style.img || "/assets/example_token.png"}
+                  alt={style.name}
+                  loading="lazy"
+                  onError={(e) => (e.target.src = "/assets/example_token.png")}
+                  className="w-10 h-10 rounded-md object-cover border border-[#2a2f55]"
+                />
+                <div className="flex flex-col">
+                  <p className="text-sm font-semibold">{style.name}</p>
+                  <p className="text-xs text-gray-400 capitalize">
+                    {style.role}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </aside>
@@ -270,7 +301,9 @@ export default function IncumbencyPage() {
         </div>
 
         <div
-          className="transition-transform duration-300 ease-out flex w-[200%]"
+          className={`transition-all duration-300 ease-in-out flex w-[200%] ${
+            pane === "detail" ? "opacity-100" : "opacity-95"
+          }`}
           style={{
             transform: pane === "list" ? "translateX(0%)" : "translateX(-50%)",
           }}
@@ -302,7 +335,10 @@ export default function IncumbencyPage() {
               {filtered.map((style) => (
                 <div
                   key={style.name}
-                  onClick={() => setSelected(style)}
+                  onClick={() => {
+                    setSelected(style);
+                    setPane("detail");
+                  }}
                   className={`p-3 rounded-md border border-[#2a2f55] cursor-pointer transition ${
                     selected?.name === style.name
                       ? "bg-[#1c2b7a]"
@@ -311,7 +347,7 @@ export default function IncumbencyPage() {
                 >
                   <div className="flex items-center gap-3">
                     <img
-                      src={style.img || "/assets/default.png"}
+                      src={style.img || "/assets/example_token.png"}
                       alt={style.name}
                       className="w-10 h-10 rounded-md object-cover border border-[#2a2f55]"
                     />

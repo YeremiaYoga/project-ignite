@@ -87,12 +87,21 @@ export default function InputField({
                   {filteredOptions.map((opt) => (
                     <li
                       key={opt.value ?? opt}
-                      className="px-3 py-2 cursor-pointer hover:bg-gray-700 capitalize"
+                      className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-700 capitalize"
                       onClick={() => handleSelect(opt)}
                     >
-                      {opt.label
-                        ? opt.label.replace(/_/g, " ")
-                        : opt.toString().replace(/_/g, " ")}
+                      {opt.image && (
+                        <img
+                          src={opt.image}
+                          alt={opt.label ?? opt}
+                          className="w-5 h-5 rounded object-cover"
+                        />
+                      )}
+                      <span>
+                        {opt.label
+                          ? opt.label.replace(/_/g, " ")
+                          : opt.toString().replace(/_/g, " ")}
+                      </span>
                     </li>
                   ))}
                 </ul>

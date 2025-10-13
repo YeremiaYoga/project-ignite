@@ -9,8 +9,11 @@ import {
 } from "../characterOptions";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { Info } from "lucide-react";
 
 export default function Step5({ data, allData, onChange }) {
+  const router = useRouter();
   const step5 = data || {};
   const [allIncumbency, setAllIncumbency] = useState([]);
   const damageTypes = [
@@ -29,7 +32,8 @@ export default function Step5({ data, allData, onChange }) {
 
   const [selectedStyle, setSelectedStyle] = useState(null);
   const [selectedAbility, setSelectedAbility] = useState(null);
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [remainingSkillPoints, setRemainingSkillPoints] = useState(null);
   const flagByDisposition = (disp) => {
     const d = String(disp || "").toLowerCase();
     if (d === "friendly") return "good";
@@ -39,7 +43,9 @@ export default function Step5({ data, allData, onChange }) {
     return null;
   };
 
-
+  useEffect(() => {
+    if (!selectedStyle) setRemainingSkillPoints(null);
+  }, [selectedStyle, step5.combat_value, step5.disposition]);
 
   const filteredIncumbency = useMemo(() => {
     const flag = flagByDisposition(step5.disposition);
@@ -198,8 +204,13 @@ export default function Step5({ data, allData, onChange }) {
       0
     );
 
-    const remainingPoints = maxSkillPoints - usedPointsExcludingThis;
+    const effectiveMaxSP =
+      remainingSkillPoints !== null ? remainingSkillPoints : maxSkillPoints;
 
+    // Hitung sisa SP sebelum klik skill ini
+    const remainingPoints = effectiveMaxSP - usedPointsExcludingThis;
+
+    // ❌ Jika SP yang tersisa tidak cukup untuk naik ke state berikut — hentikan
     if (remainingPoints <= 0) {
       return;
     }
@@ -321,6 +332,8 @@ export default function Step5({ data, allData, onChange }) {
               if (numberVal >= 0 && numberVal <= 40) {
                 onChange("combat_value", numberVal);
 
+                setSelectedStyle(null);
+                onChange("combat_style", null);
                 onChange("skill_prof", []);
                 onChange("usedSkillPoints", 0);
 
@@ -353,38 +366,80 @@ export default function Step5({ data, allData, onChange }) {
           </p>
         </div>
 
-        <div className="bg-gray-800 rounded-xl p-4 shadow-md">
-          <label className="text-sm font-semibold mb-2 block">
-            Combat Style
-          </label>
+        <div className="bg-gray-800 rounded-xl p-4 shadow-md relative">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-semibold flex items-center gap-2">
+              Combat Style
+              <div
+                className="relative group cursor-pointer"
+                onClick={() => router.push("/incumbency")}
+              >
+                <Info size={14} className="text-gray-400 hover:text-teal-400" />
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 hidden group-hover:block bg-gray-900 text-gray-100 text-xs rounded-md px-2 py-1 shadow-xl z-20 w-[260px]">
+                  The combat style that your character use for combat or
+                  roleplaying situation which is overhaul to be simple for
+                  Non-Playable Character. May them be bad or good. Click here to
+                  see all of the selection.
+                </div>
+              </div>
+            </label>
+          </div>
 
-          <select
-            value={selectedStyle?.name || ""}
-            onChange={(e) => handleSelectStyle(e.target.value)}
-            className="w-full bg-gray-800 border-gray-700 focus:ring-2 focus:ring-blue-500 border rounded px-3 py-2 text-sm"
-          >
-            <option value="" disabled>
-              {filteredIncumbency.length
-                ? "Select Combat Style"
-                : "No incumbency available"}
-            </option>
-            {filteredIncumbency.map((it) => (
-              <option key={it.name} value={it.name}>
-                {it.name}
-              </option>
-            ))}
-          </select>
+          {!step5.disposition ? (
+            <div className="text-gray-500 italic text-sm">
+              Disposition have not been selected yet
+            </div>
+          ) : (
+            <InputField
+              type="selectSearch"
+              placeholder="Search Combat Style..."
+              label=""
+              value={selectedStyle?.name || ""}
+              onChange={(val) => {
+                const found = filteredIncumbency.find((x) => x.name === val);
+                setSelectedStyle(found || null);
+                onChange("combat_style", found || null);
+
+                onChange("skill_prof", []);
+                onChange("usedSkillPoints", 0);
+
+                if (found) {
+                  const SP = Number(step5.combat_value) || 0;
+                  const CV = Number(found.cv_percent_cost || 0) / 100;
+                  const FC = Number(found.cv_flat_cost || 0);
+                  const sisa = Math.floor(SP - SP * CV - FC);
+                  setRemainingSkillPoints(sisa);
+                }
+              }}
+              options={filteredIncumbency
+                .filter((it) => {
+                  const combatVal = Number(step5.combat_value) || 0;
+                  const minOk = Number(it.cv_minimum || 0) <= combatVal;
+
+                  const costPercent = Number(it.cv_percent_cost || 0) / 100;
+                  const costFlat = Number(it.cv_flat_cost || 0);
+                  const result = combatVal - combatVal * costPercent - costFlat;
+
+                  const enoughSP = result >= 0;
+
+                  return minOk && enoughSP;
+                })
+                .map((it) => ({
+                  label: `${it.name} (Min CV: ${it.cv_minimum ?? 0})`,
+                  value: it.name,
+                  image: it.icon || it.img || "",
+                }))}
+            />
+          )}
 
           {selectedStyle?.abilities?.length > 0 && (
-            <div className="mt-3">
+            <div className="mt-4">
               <div className="text-xs text-gray-400 mb-1">Abilities</div>
-
               <div className="grid grid-cols-6 gap-2">
                 {selectedStyle.abilities.map((ab, idx) => {
                   const src = getAbilityImg(ab);
                   const name = getAbilityName(ab);
                   const desc = getAbilityDesc(ab);
-
                   const isActive = selectedAbility === idx;
 
                   return (
@@ -399,12 +454,7 @@ export default function Step5({ data, allData, onChange }) {
                       role="button"
                       tabIndex={0}
                       aria-label={name}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setSelectedAbility(isActive ? null : idx);
-                        }
-                      }}
+                      onClick={() => setSelectedAbility(isActive ? null : idx)}
                     >
                       <div className="absolute inset-0 rounded-md overflow-hidden">
                         {src ? (
@@ -421,32 +471,39 @@ export default function Step5({ data, allData, onChange }) {
                         )}
                       </div>
 
-                      <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-10 bg-white transition-opacity rounded-md" />
-
+                      {/* === Tooltip bawah === */}
                       <div
                         className={[
-                          "absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-20",
-                          "w-60 rounded-md border border-gray-700 bg-slate-900 text-gray-100",
-                          "text-xs p-2 shadow-xl",
-                          "transition-all",
+                          "absolute left-1/2 -translate-x-1/2 top-full mt-2 z-30",
+                          "w-60 rounded-md border border-teal-700 bg-slate-900 text-gray-100",
+                          "text-xs p-3 shadow-xl font-medium leading-tight",
+                          "transition-all duration-150 ease-out",
                           isActive
                             ? "opacity-100 translate-y-0"
-                            : "opacity-0 -translate-y-1",
+                            : "opacity-0 translate-y-1",
                           "group-hover:opacity-100 group-hover:translate-y-0",
-                          "group-focus-within:opacity-100 group-focus-within:translate-y-0",
                         ].join(" ")}
                         role="tooltip"
                       >
-                        <div className="font-semibold text-teal-300">
-                          {name}
-                        </div>
-                        {desc && (
-                          <div className="mt-1 leading-snug">{desc}</div>
-                        )}
+                        <div className="font-bold text-teal-300">{name}</div>
 
-                        {ab?.cost && (
-                          <div className="mt-1 text-[11px] text-gray-400">
-                            Cost: {ab.cost}
+                        {desc && (
+                          <div
+                            className="mt-1 leading-snug text-gray-200"
+                            dangerouslySetInnerHTML={{ __html: desc }}
+                          />
+                        )}
+                        {ab.type && ab.cost && (
+                          <div className="mt-1 text-[11px] text-gray-300">
+                            {ab.type} - <span className="italic">Cost:</span>{" "}
+                            {ab.cost}
+                            {ab.type_ability && ab.type_ability.length > 0 && (
+                              <>
+                                {" "}
+                                • <span className="italic">Type:</span>{" "}
+                                {ab.type_ability.join(", ")}
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
@@ -485,7 +542,17 @@ export default function Step5({ data, allData, onChange }) {
             <>
               <p className="text-xs text-gray-400 mb-1">Skill Points Left</p>
               <div className="text-3xl font-bold">
-                {maxSkillPoints - (step5.usedSkillPoints || 0)}/{maxSkillPoints}
+                {(() => {
+                  const used = step5.usedSkillPoints || 0;
+                  const baseSP = Number(step5.combat_value) || 0;
+                  const effectiveSP =
+                    remainingSkillPoints !== null
+                      ? remainingSkillPoints
+                      : baseSP;
+
+                  const remaining = Math.max(0, effectiveSP - used);
+                  return `${remaining}/${baseSP}`;
+                })()}
               </div>
               <hr className="w-full border-t border-gray-400 my-2" />
               <div className="grid grid-cols-3 mt-2 gap-1">
