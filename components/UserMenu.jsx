@@ -35,7 +35,7 @@ export default function UserMenu() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            clerk_id: user.id,
+            clerkId: user.id,
             email: user.primaryEmailAddress?.emailAddress,
             name: user.username || user.fullName || "",
           }),
