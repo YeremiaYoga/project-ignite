@@ -37,7 +37,7 @@ export default function UserMenu() {
           body: JSON.stringify({
             clerkId: user.id,
             email: user.primaryEmailAddress?.emailAddress,
-            name: user.username || user.fullName || "",
+            username: user.username || user.fullName || "",
           }),
           credentials: "include",
         });
