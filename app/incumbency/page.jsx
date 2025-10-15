@@ -49,6 +49,7 @@ export default function IncumbencyPage() {
   const touchDeltaX = useRef(0);
 
   const [loadingData, setLoadingData] = useState(true);
+  const [loadingCard, setLoadingCard] = useState(false); // 🔹 tambahan
 
   const openFilter = () => {
     setDraftRoles(roleFilters);
@@ -124,11 +125,32 @@ export default function IncumbencyPage() {
     fetchAllIncumbency();
   }, []);
 
+  // 🔹 restore selected dari hash
   useEffect(() => {
-    if (allIncumbency.length > 0 && selected == null) {
-      setSelected(allIncumbency[0]);
+    if (allIncumbency.length > 0) {
+      const hash = window.location.hash.replace("#", "");
+      if (hash) {
+        const found = allIncumbency.find(
+          (i) =>
+            i.name?.toLowerCase().replace(/\s+/g, "-") ===
+            hash.toLowerCase()
+        );
+        if (found) {
+          setSelected(found);
+          return;
+        }
+      }
+      if (selected == null) setSelected(allIncumbency[0]);
     }
-  }, [allIncumbency.length]);
+  }, [allIncumbency]);
+
+  // 🔹 update hash ketika selected berubah
+  useEffect(() => {
+    if (selected?.name) {
+      const slug = selected.name.toLowerCase().replace(/\s+/g, "-");
+      window.history.replaceState(null, "", `#${slug}`);
+    }
+  }, [selected]);
 
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -232,8 +254,11 @@ export default function IncumbencyPage() {
             <div
               key={style.name}
               onClick={() => {
-                setSelected(style);
-                // buka detail cuma untuk mobile
+                setLoadingCard(true); 
+                setTimeout(() => {
+                  setSelected(style);
+                  setLoadingCard(false);
+                }, 500); 
                 if (window.innerWidth < 768) setPane("detail");
               }}
               className={`p-3 rounded-md border border-[#2a2f55] cursor-pointer transition ${
@@ -266,7 +291,9 @@ export default function IncumbencyPage() {
 
   const DesktopDetail = (
     <main className="flex-1 flex justify-center items-start p-10">
-      {selected ? (
+      {loadingCard ? (
+        <div className="text-gray-400 animate-pulse">Loading...</div>
+      ) : selected ? (
         <CombatStyleCard data={selected} folder={selected.name} />
       ) : (
         <p className="text-gray-400 text-lg">Select one</p>
@@ -274,6 +301,7 @@ export default function IncumbencyPage() {
     </main>
   );
 
+  // === MOBILE & FILTER MODAL ===
   return (
     <div className="min-h-screen bg-[#050b26] text-white w-full max-w-6xl mx-auto">
       <div className="hidden md:flex w-full min-h-screen">
@@ -336,7 +364,11 @@ export default function IncumbencyPage() {
                 <div
                   key={style.name}
                   onClick={() => {
-                    setSelected(style);
+                    setLoadingCard(true);
+                    setTimeout(() => {
+                      setSelected(style);
+                      setLoadingCard(false);
+                    }, 1000);
                     setPane("detail");
                   }}
                   className={`p-3 rounded-md border border-[#2a2f55] cursor-pointer transition ${
@@ -370,7 +402,9 @@ export default function IncumbencyPage() {
 
           <section className="w-1/2 min-w-[50%] p-4">
             <div className="flex justify-center items-start">
-              {selected ? (
+              {loadingCard ? (
+                <div className="text-gray-400 animate-pulse">Loading...</div>
+              ) : selected ? (
                 <CombatStyleCard data={selected} folder={selected.name} />
               ) : (
                 <p className="text-gray-400 text-sm">Select Incumbency</p>

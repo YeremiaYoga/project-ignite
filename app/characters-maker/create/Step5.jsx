@@ -446,15 +446,20 @@ export default function Step5({ data, allData, onChange }) {
                     <div
                       key={idx}
                       className={[
-                        "relative group aspect-square w-full",
+                        "relative aspect-square w-full",
                         "rounded-md border border-gray-700 bg-gray-900",
-                        "overflow-visible",
+                        "overflow-visible cursor-pointer",
                         isActive ? "ring-2 ring-teal-400" : "",
                       ].join(" ")}
                       role="button"
                       tabIndex={0}
                       aria-label={name}
-                      onClick={() => setSelectedAbility(isActive ? null : idx)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // kalau klik ability yang sama → tutup
+                        // kalau klik ability lain → ganti active
+                        setSelectedAbility(isActive ? null : idx);
+                      }}
                     >
                       <div className="absolute inset-0 rounded-md overflow-hidden">
                         {src ? (
@@ -471,42 +476,40 @@ export default function Step5({ data, allData, onChange }) {
                         )}
                       </div>
 
-                      {/* === Tooltip bawah === */}
-                      <div
-                        className={[
-                          "absolute left-1/2 -translate-x-1/2 top-full mt-2 z-30",
-                          "w-60 rounded-md border border-teal-700 bg-slate-900 text-gray-100",
-                          "text-xs p-3 shadow-xl font-medium leading-tight",
-                          "transition-all duration-150 ease-out",
-                          isActive
-                            ? "opacity-100 translate-y-0"
-                            : "opacity-0 translate-y-1",
-                          "group-hover:opacity-100 group-hover:translate-y-0",
-                        ].join(" ")}
-                        role="tooltip"
-                      >
-                        <div className="font-bold text-teal-300">{name}</div>
+                      {/* Tooltip muncul hanya saat diklik */}
+                      {isActive && (
+                        <div
+                          className={[
+                            "absolute left-1/2 -translate-x-1/2 top-full mt-2 z-30",
+                            "w-60 rounded-md border border-teal-700 bg-slate-900 text-gray-100",
+                            "text-xs p-3 shadow-xl font-medium leading-tight",
+                            "transition-all duration-150 ease-out opacity-100 translate-y-0",
+                          ].join(" ")}
+                          role="tooltip"
+                        >
+                          <div className="font-bold text-teal-300">{name}</div>
 
-                        {desc && (
-                          <div
-                            className="mt-1 leading-snug text-gray-200"
-                            dangerouslySetInnerHTML={{ __html: desc }}
-                          />
-                        )}
-                        {ab.type && ab.cost && (
-                          <div className="mt-1 text-[11px] text-gray-300">
-                            {ab.type} - <span className="italic">Cost:</span>{" "}
-                            {ab.cost}
-                            {ab.type_ability && ab.type_ability.length > 0 && (
-                              <>
-                                {" "}
-                                • <span className="italic">Type:</span>{" "}
-                                {ab.type_ability.join(", ")}
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                          {desc && (
+                            <div
+                              className="mt-1 leading-snug text-gray-200"
+                              dangerouslySetInnerHTML={{ __html: desc }}
+                            />
+                          )}
+                          {ab.type && ab.cost && (
+                            <div className="mt-1 text-[11px] text-gray-300">
+                              {ab.type} - <span className="italic">Cost:</span>{" "}
+                              {ab.cost}
+                              {ab.type_ability?.length > 0 && (
+                                <>
+                                  {" "}
+                                  • <span className="italic">Type:</span>{" "}
+                                  {ab.type_ability.join(", ")}
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
