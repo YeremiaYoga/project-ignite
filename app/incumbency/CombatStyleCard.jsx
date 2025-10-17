@@ -21,18 +21,25 @@ export default function CombatStyleCard({ data }) {
 
   const loadVersions = async () => {
     try {
-      const res = await fetch(`/api/incumbency/${folderName}`, {
-        cache: "no-store",
-      });
-      const arr = await res.json();
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/incumbency/${data?.id}`,
+        { cache: "no-store" }
+      );
 
-      if (Array.isArray(arr) && arr.length > 0) {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const result = await res.json();
+      const arr = Array.isArray(result) ? result : [result];
+
+      if (arr.length > 0) {
         const sorted = [...arr].sort(
           (a, b) => (a.version || 0) - (b.version || 0)
         );
+
         setDataVersions(sorted);
+
         const current =
           sorted.find((x) => x.version === data.version) || sorted.at(-1);
+
         setSelectedVersion(`v${current.version}`);
         setSelectedData(current);
       } else {
@@ -40,8 +47,10 @@ export default function CombatStyleCard({ data }) {
         setSelectedVersion(`v${data?.version || 1}`);
         setSelectedData(data);
       }
+
+      console.log("✅ Loaded versions:", arr);
     } catch (err) {
-      console.error("Failed to load versions:", err);
+      console.error("❌ Failed to load versions:", err);
       setDataVersions([]);
       setSelectedVersion(`v${data?.version || 1}`);
       setSelectedData(data);
@@ -50,7 +59,6 @@ export default function CombatStyleCard({ data }) {
 
   useEffect(() => {
     if (folderName) loadVersions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [folderName]);
 
   const handleChangeVersion = (e) => {
@@ -66,12 +74,10 @@ export default function CombatStyleCard({ data }) {
 
   return (
     <div className="bg-[#0b1230] text-gray-100 p-4 md:p-6 rounded-lg shadow-xl w-full max-w-3xl mx-auto border border-[#1f2d5a] transition-all duration-300 ease-in-out min-h-[560px]">
-      {/* Header: mobile stack, desktop row */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 mb-3">
-        {/* Left: avatar + title */}
         <div className="flex items-center gap-3">
           <img
-            src={selectedData?.img}
+            src={selectedData?.image}
             alt={selectedData?.name}
             className="w-12 h-12 md:w-10 md:h-10 rounded-sm object-contain"
           />
@@ -99,7 +105,6 @@ export default function CombatStyleCard({ data }) {
           </div>
         </div>
 
-        {/* Right: Version select (full width on mobile) */}
         <div className="md:text-right md:p-2 md:rounded-md md:bg-transparent">
           <div className="text-[10px] text-gray-400 mb-1 md:block hidden">
             Version

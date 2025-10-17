@@ -108,9 +108,10 @@ export default function IncumbencyPage() {
   const fetchAllIncumbency = useCallback(async () => {
     try {
       setLoadingData(true);
-      const res = await fetch("/api/incumbency/getAllData", {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/incumbency`,
+        { cache: "no-store" }
+      );
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setAllIncumbency(Array.isArray(data) ? data : []);
@@ -125,15 +126,13 @@ export default function IncumbencyPage() {
     fetchAllIncumbency();
   }, []);
 
-  // 🔹 restore selected dari hash
   useEffect(() => {
     if (allIncumbency.length > 0) {
       const hash = window.location.hash.replace("#", "");
       if (hash) {
         const found = allIncumbency.find(
           (i) =>
-            i.name?.toLowerCase().replace(/\s+/g, "-") ===
-            hash.toLowerCase()
+            i.name?.toLowerCase().replace(/\s+/g, "-") === hash.toLowerCase()
         );
         if (found) {
           setSelected(found);
@@ -144,7 +143,6 @@ export default function IncumbencyPage() {
     }
   }, [allIncumbency]);
 
-  // 🔹 update hash ketika selected berubah
   useEffect(() => {
     if (selected?.name) {
       const slug = selected.name.toLowerCase().replace(/\s+/g, "-");
@@ -254,11 +252,11 @@ export default function IncumbencyPage() {
             <div
               key={style.name}
               onClick={() => {
-                setLoadingCard(true); 
+                setLoadingCard(true);
                 setTimeout(() => {
                   setSelected(style);
                   setLoadingCard(false);
-                }, 500); 
+                }, 500);
                 if (window.innerWidth < 768) setPane("detail");
               }}
               className={`p-3 rounded-md border border-[#2a2f55] cursor-pointer transition ${
@@ -269,7 +267,7 @@ export default function IncumbencyPage() {
             >
               <div className="flex items-center gap-3">
                 <img
-                  src={style.img || "/assets/example_token.png"}
+                  src={style.image || "/assets/example_token.png"}
                   alt={style.name}
                   loading="lazy"
                   onError={(e) => (e.target.src = "/assets/example_token.png")}
@@ -379,7 +377,7 @@ export default function IncumbencyPage() {
                 >
                   <div className="flex items-center gap-3">
                     <img
-                      src={style.img || "/assets/example_token.png"}
+                      src={style.image || "/assets/example_token.png"}
                       alt={style.name}
                       className="w-10 h-10 rounded-md object-cover border border-[#2a2f55]"
                     />

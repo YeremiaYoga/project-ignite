@@ -7,10 +7,11 @@ export default function AbilityCard({
   type,
   cost,
   type_ability = [],
-  img,
+  image,
   description,
   defaultOpen = true,
 }) {
+  console.log(image);
   const [open, setOpen] = useState(defaultOpen);
   const tags = Array.isArray(type_ability)
     ? type_ability.join(" • ")
@@ -25,7 +26,7 @@ export default function AbilityCard({
         className="w-full flex items-start gap-3 p-3 text-left"
       >
         <img
-          src={img}
+          src={image}
           alt={name}
           className="w-10 h-10 rounded-md shadow border border-gray-600 object-cover"
           onError={(e) => {
