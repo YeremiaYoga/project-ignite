@@ -6,7 +6,7 @@ import { IBM_Plex_Mono } from "next/font/google";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import duration from "dayjs/plugin/duration";
-
+import { stamps_images } from "./characterOptions";
 dayjs.extend(utc);
 dayjs.extend(duration);
 
@@ -108,9 +108,8 @@ export default function CharacterCard({
       >
         <img
           src={
-            char.stamp_type % 2 === 1
-              ? "/assets/stamps/stamp_1.webp"
-              : "/assets/stamps/stamp_2.webp"
+            stamps_images[(char.stamp_type - 1) % stamps_images.length] ||
+            stamps_images[0]
           }
           alt="Stamp"
           className="w-10 h-auto"

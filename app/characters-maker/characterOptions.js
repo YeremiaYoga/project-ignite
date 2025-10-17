@@ -722,3 +722,51 @@ export const damageTypesWithImages = [
     image: "/assets/damageType_icon/thunder.webp",
   },
 ];
+
+
+
+export const stamps_images = [
+  // urutan dimulai dari 1 → 40 (sesuai folder struktur kamu)
+  "/assets/stamps/2_sp/anvil.webp",
+  "/assets/stamps/2_sp/bell.webp",
+  "/assets/stamps/2_sp/card.webp",
+  "/assets/stamps/2_sp/crab.webp",
+  "/assets/stamps/2_sp/crystal.webp",
+  "/assets/stamps/2_sp/glasses_vintage.webp",
+  "/assets/stamps/2_sp/gold_coin.webp",
+  "/assets/stamps/2_sp/hat.webp",
+  "/assets/stamps/2_sp/king_chess.webp",
+  "/assets/stamps/2_sp/meat.webp",
+  "/assets/stamps/2_sp/neckless.webp",
+  "/assets/stamps/2_sp/pallet.webp",
+  "/assets/stamps/2_sp/quill_pen.webp",
+  "/assets/stamps/2_sp/seashell.webp",
+  "/assets/stamps/2_sp/starfish.webp",
+
+  "/assets/stamps/3_sp/cake.webp",
+  "/assets/stamps/3_sp/candle.webp",
+  "/assets/stamps/3_sp/cat.webp",
+  "/assets/stamps/3_sp/clover.webp",
+  "/assets/stamps/3_sp/cup.webp",
+  "/assets/stamps/3_sp/dog.webp",
+  "/assets/stamps/3_sp/high_heels.webp",
+  "/assets/stamps/3_sp/key.webp",
+  "/assets/stamps/3_sp/koi_fish.webp",
+  "/assets/stamps/3_sp/ladybug.webp",
+  "/assets/stamps/3_sp/pumpkin.webp",
+  "/assets/stamps/3_sp/windmill.webp",
+
+  "/assets/stamps/4_sp/bag.webp",
+  "/assets/stamps/4_sp/banana.webp",
+  "/assets/stamps/4_sp/bom.webp",
+  "/assets/stamps/4_sp/bottle.webp",
+  "/assets/stamps/4_sp/chest.webp",
+  "/assets/stamps/4_sp/crown.webp",
+  "/assets/stamps/4_sp/flower.webp",
+  "/assets/stamps/4_sp/ice_winter.webp",
+  "/assets/stamps/4_sp/leaf.webp",
+  "/assets/stamps/4_sp/mirror.webp",
+  "/assets/stamps/4_sp/mushroom.webp",
+  "/assets/stamps/4_sp/phoniex.webp",
+  "/assets/stamps/4_sp/teddy_bear.webp",
+];
