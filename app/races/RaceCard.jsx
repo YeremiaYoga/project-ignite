@@ -1,13 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function RaceCard({ race }) {
-  const { raceName, image, description, source, traits } = race;
-  const capitalized = raceName
+  const { name, image, description, source, traits } = race;
+  const capitalized = name
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-  const linkPath = `/races/${raceName.toLowerCase().replace(/\s+/g, "_")}`;
+  const linkPath = `/races/${name.toLowerCase().replace(/\s+/g, "_")}`;
 
   console.log(race);
   return (
@@ -15,7 +14,7 @@ export default function RaceCard({ race }) {
       <div className="rounded overflow-hidden flex flex-col w-44 sm:w-100 aspect-[3/2]">
         <div className="relative w-full h-full bg-gray-700 rounded-xl overflow-hidden">
           {image && (
-            <Image
+            <img
               src={image}
               alt={`${capitalized} Image`}
               fill

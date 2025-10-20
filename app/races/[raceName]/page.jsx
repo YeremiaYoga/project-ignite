@@ -1,5 +1,3 @@
-import path from "path";
-import fs from "fs/promises";
 import RaceDetail from "./RaceDetail";
 import RaceSubrace from "./RaceSubrace";
 
@@ -8,36 +6,34 @@ export default async function RacePage({ params }) {
   const normalizedRaceName = raceName.replace(/-/g, "_");
 
   try {
-    const dataDir = path.join(
-      process.cwd(),
-      "data",
-      "races",
-      normalizedRaceName
+    const raceRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/races/key/${normalizedRaceName}`,
+      { cache: "no-store" }
     );
 
-    const raceDetailRaw = await fs.readFile(
-      path.join(dataDir, `${normalizedRaceName}Detail.json`),
-      "utf-8"
-    );
-    const raceSubraceRaw = await fs
-      .readFile(
-        path.join(dataDir, `${normalizedRaceName}Subrace.json`),
-        "utf-8"
-      )
-      .catch(() => null);
+    if (!raceRes.ok) throw new Error("Failed to fetch race data");
+    const raceDetail = await raceRes.json();
 
-    const raceDetail = JSON.parse(raceDetailRaw);
-    const raceSubrace = raceSubraceRaw ? JSON.parse(raceSubraceRaw) : null;
+    const subraceRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/subraces/race/${raceDetail.id}`,
+      { cache: "no-store" }
+    ).catch(() => null);
+
+    const raceSubrace =
+      subraceRes && subraceRes.ok ? await subraceRes.json() : [];
 
     return (
-      <main className="min-h-screen sm:px-6  py-8 sm:py-10">
+      <main className="min-h-screen sm:px-6 py-8 sm:py-10">
         <div className="mx-auto space-y-6 sm:space-y-8 max-w-6xl">
           <div className="overflow-x-auto">
             <RaceDetail data={raceDetail} />
           </div>
-          <div>
-            <RaceSubrace data={raceDetail} />
-          </div>
+
+          {raceSubrace.length > 0 && (
+            <div>
+              <RaceSubrace data={raceSubrace} />
+            </div>
+          )}
         </div>
       </main>
     );

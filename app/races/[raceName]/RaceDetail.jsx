@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+
 import { useTalesMode } from "@/context/TalesModeContext";
 import { linkifyText } from "@/utils/linkifyText";
 
@@ -19,7 +19,7 @@ export default function RaceDetail({ data }) {
           <div className="flex-shrink-0 order-1 lg:order-2 flex justify-center ">
             <div className="relative w-full max-w-[400px]">
               {data.image && (
-                <Image
+                <img
                   src={data.image}
                   alt={data.name}
                   width={0}

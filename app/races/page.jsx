@@ -12,7 +12,11 @@ export default function RacesPage() {
   useEffect(() => {
     async function fetchRaces() {
       try {
-        const res = await fetch("/api/races/getAllDataRaces");
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/races`,
+          { cache: "no-store" }
+        );
+        // const res = await fetch("/api/races/getAllDataRaces");
         const data = await res.json();
 
         setRaces(data);
@@ -33,7 +37,7 @@ export default function RacesPage() {
       } else {
         setFilteredRaces(
           races.filter((race) =>
-            race.raceName.toLowerCase().includes(search.toLowerCase())
+            race.name.toLowerCase().includes(search.toLowerCase())
           )
         );
       }
@@ -63,7 +67,7 @@ export default function RacesPage() {
       <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {filteredRaces.length > 0 ? (
           filteredRaces.map((race) => (
-            <RaceCard key={race.raceName} race={race} />
+            <RaceCard key={race.name} race={race} />
           ))
         ) : (
           <p className="col-span-full text-center text-gray-400">
