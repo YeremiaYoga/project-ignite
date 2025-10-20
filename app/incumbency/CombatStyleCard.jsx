@@ -139,7 +139,7 @@ export default function CombatStyleCard({ data }) {
             <div className="flex items-center gap-2">
               <TooltipIcon icon={Sword} label="Initiative Bonus" />
               <span className="text-sm md:text-base">
-                +{selectedData?.intivative_bonus}
+                +{selectedData?.initiative_bonus}
               </span>
             </div>
 

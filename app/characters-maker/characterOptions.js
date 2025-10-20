@@ -726,7 +726,7 @@ export const damageTypesWithImages = [
 
 
 export const stamps_images = [
-  // urutan dimulai dari 1 → 40 (sesuai folder struktur kamu)
+
   "/assets/stamps/2_sp/anvil.webp",
   "/assets/stamps/2_sp/bell.webp",
   "/assets/stamps/2_sp/card.webp",
