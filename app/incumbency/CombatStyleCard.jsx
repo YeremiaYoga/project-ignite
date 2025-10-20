@@ -12,19 +12,23 @@ import {
 } from "lucide-react";
 
 export default function CombatStyleCard({ data }) {
-  const folderName = data?.name?.toLowerCase()?.replace(/\s+/g, "_") || "";
+  const keyName =
+    data?.key || data?.name?.toLowerCase()?.replace(/\s+/g, "_") || "";
   const [dataVersions, setDataVersions] = useState([]);
   const [selectedData, setSelectedData] = useState(data);
   const [selectedVersion, setSelectedVersion] = useState(
     `v${data?.version || 1}`
   );
 
+  // ✅ ganti: ambil berdasarkan KEY, bukan ID
   const loadVersions = async () => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/incumbency/${data?.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/incumbency/key/${keyName}`,
         { cache: "no-store" }
       );
+
+      console.log(res);
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const result = await res.json();
@@ -58,8 +62,8 @@ export default function CombatStyleCard({ data }) {
   };
 
   useEffect(() => {
-    if (folderName) loadVersions();
-  }, [folderName]);
+    if (keyName) loadVersions();
+  }, [keyName]);
 
   const handleChangeVersion = (e) => {
     const vnum = Number(String(e.target.value).replace(/^v/i, ""));
@@ -215,7 +219,7 @@ export default function CombatStyleCard({ data }) {
   );
 }
 
-/* === Helpers === */
+
 function Dot({ color = "bg-green-400", label = "Good" }) {
   const [open, setOpen] = useState(false);
   return (

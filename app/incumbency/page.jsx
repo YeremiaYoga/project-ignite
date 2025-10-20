@@ -105,22 +105,37 @@ export default function IncumbencyPage() {
     (hpMin !== "" || hpMax !== "" ? 1 : 0) +
     (cvMin !== "" || cvMax !== "" ? 1 : 0);
 
-  const fetchAllIncumbency = useCallback(async () => {
-    try {
-      setLoadingData(true);
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/incumbency`,
-        { cache: "no-store" }
-      );
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-      setAllIncumbency(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Failed to fetch incumbency:", err);
-    } finally {
-      setLoadingData(false);
-    }
-  }, []);
+const fetchAllIncumbency = useCallback(async () => {
+  try {
+    setLoadingData(true);
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/incumbency`,
+      { cache: "no-store" }
+    );
+
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : [];
+
+    const uniqueByKey = Object.values(
+      arr.reduce((acc, item) => {
+        const key = item.key || item.name?.toLowerCase().replace(/\s+/g, "_");
+        if (!acc[key] || (item.version || 0) > (acc[key].version || 0)) {
+          acc[key] = item;
+        }
+        return acc;
+      }, {})
+    );
+
+    setAllIncumbency(uniqueByKey);
+  } catch (err) {
+    console.error("Failed to fetch incumbency:", err);
+  } finally {
+    setLoadingData(false);
+  }
+}, []);
+
 
   useEffect(() => {
     fetchAllIncumbency();
