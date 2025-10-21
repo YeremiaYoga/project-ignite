@@ -8,6 +8,7 @@ export default function RaceDetail({ data }) {
 
   if (!data) return <p>No race data available.</p>;
 
+  console.log(data);
   return (
     <section>
       <section
@@ -18,9 +19,9 @@ export default function RaceDetail({ data }) {
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-shrink-0 order-1 lg:order-2 flex justify-center ">
             <div className="relative w-full max-w-[400px]">
-              {data.image && (
+              {data.main_image && (
                 <img
-                  src={data.image}
+                  src={data.main_image}
                   alt={data.name}
                   width={0}
                   height={0}
