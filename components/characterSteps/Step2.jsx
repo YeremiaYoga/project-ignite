@@ -7,10 +7,10 @@ import {
   allTraitsOptions,
   economicalOptions,
   socialClassOptions,
-} from "@/data/characterOptions";
+} from "../../data/characterOptions";
 import RichTextEditor from "@/components/RichTextEditor";
-export default function data({ data, allData, onChange }) {
-  const step2 = data || {};
+export default function Step2({ data, allData, onChange }) {
+ 
 
   const allTraitsWithImages = allTraitsOptions.map((trait) => ({
     value: trait.toLowerCase(),
@@ -18,18 +18,16 @@ export default function data({ data, allData, onChange }) {
     image: `/assets/personality_icon/${trait.toLowerCase()}.webp`,
   }));
 
-  let traits = (data.personality_traits || []).map((t) => t.toLowerCase());
-
   return (
     <div className="p-6 max-w-6xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-9 flex items-center">
           <p className="text-lg font-semibold">
-            {data.name || "Unknown"}'s Profile
+            {allData?.name || "Unknown"}'s Profile
           </p>
         </div>
 
-        {data.character_type === "NPC" && (
+        {allData?.character_type === "NPC" && (
           <div className="col-span-3">
             <label className="block text-sm font-medium mb-1">
               Personality Traits
@@ -37,28 +35,28 @@ export default function data({ data, allData, onChange }) {
             <div className="grid grid-cols-2 gap-2">
               <InputField
                 type="selectImage"
-                value={traits[0] || ""}
+                value={data.personality_traits?.[0] || ""}
                 onChange={(val) => {
                   const updated = [...(data.personality_traits || [])];
                   updated[0] = val;
                   onChange("personality_traits", updated);
                 }}
                 options={allTraitsWithImages.filter(
-                  (t) => t.value !== traits[1]
+                  (t) => t.value !== data.personality_traits?.[1]
                 )}
                 placeholder="Select Trait"
               />
 
               <InputField
                 type="selectImage"
-                value={traits[1] || ""}
+                value={data.personality_traits?.[1] || ""}
                 onChange={(val) => {
                   const updated = [...(data.personality_traits || [])];
                   updated[1] = val;
                   onChange("personality_traits", updated);
                 }}
                 options={allTraitsWithImages.filter(
-                  (t) => t.value !== traits[0]
+                  (t) => t.value !== data.personality_traits?.[0]
                 )}
                 placeholder="Select Trait"
               />
@@ -70,12 +68,12 @@ export default function data({ data, allData, onChange }) {
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Backstory</label>
             <InputField
-            
+         
               type="toggleIcon"
               value={data.backstory_visibility}
               onChange={(v) => onChange("backstory_visibility", v)}
             />
-          
+  
           </div>
           <RichTextEditor
             value={data.backstory || ""}
@@ -86,7 +84,7 @@ export default function data({ data, allData, onChange }) {
         </div>
 
         <div className="col-span-3 space-y-4">
-          {allData?.step1?.character_type === "NPC" && (
+          {allData?.character_type === "NPC" && (
             <InputField
               label="Voice Style"
               value={data.voice_style || ""}
@@ -112,7 +110,7 @@ export default function data({ data, allData, onChange }) {
           <InputField
             label="Current Economical Standing"
             type="select"
-            value={data.current_economical_standing}
+            value={data.current_last_economical_standing}
             onChange={(val) =>
               onChange("current_last_economical_standing", val)
             }
@@ -189,7 +187,7 @@ export default function data({ data, allData, onChange }) {
           <div className="flex items-center justify-between mb-1">
             <label className="text-sm font-medium">Fear / Weakness</label>
             <InputField
-             
+         
               type="toggleIcon"
               value={data.fear_weakness_visibility}
               onChange={(v) => onChange("fear_weakness_visibility", v)}
@@ -200,7 +198,7 @@ export default function data({ data, allData, onChange }) {
             labels=""
             label="Fear or Weakness"
             type="object"
-            fields={["fear_weak", "from"]}
+            fields={["fear/weak", "from"]}
             items={
               data.fear_weakness && data.fear_weakness.length
                 ? data.fear_weakness
@@ -219,7 +217,7 @@ export default function data({ data, allData, onChange }) {
               value={data.motivation_visibility}
               onChange={(v) => onChange("motivation_visibility", v)}
             />
-           
+          
           </div>
           <MultipleInput
             labels=""

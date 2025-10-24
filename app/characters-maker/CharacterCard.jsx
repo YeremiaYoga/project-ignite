@@ -6,7 +6,7 @@ import { IBM_Plex_Mono } from "next/font/google";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import duration from "dayjs/plugin/duration";
-import { stamps_images } from "./characterOptions";
+import { stamps_images } from "../../data/characterOptions";
 dayjs.extend(utc);
 dayjs.extend(duration);
 

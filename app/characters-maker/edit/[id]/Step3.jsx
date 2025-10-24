@@ -7,7 +7,7 @@ import { Eye, EyeOff, Upload } from "lucide-react";
 import {
   nationalityOptions,
   countryOptions,
-} from "@/app/characters-maker/characterOptions";
+} from "@/data/characterOptions";
 export default function Step3({ data, allData, onChange, mode }) {
   const step3 = data || {};
 

@@ -7,7 +7,7 @@ import {
   creatureTypeOptions,
   personalityCombatStyleOptions,
   damageTypesWithImages,
-} from "@/app/characters-maker/characterOptions";
+} from "@/data/characterOptions";
 
 import { useState, useEffect } from "react";
 

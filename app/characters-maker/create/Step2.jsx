@@ -7,7 +7,7 @@ import {
   allTraitsOptions,
   economicalOptions,
   socialClassOptions,
-} from "../characterOptions";
+} from "../../../data/characterOptions";
 import RichTextEditor from "@/components/RichTextEditor";
 export default function Step2({ data, allData, onChange }) {
   const step2 = data || {};

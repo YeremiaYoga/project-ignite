@@ -26,6 +26,20 @@ export default function UserMenu() {
   const { signOut } = useClerk();
   const localPassword = process.env.NEXT_PUBLIC_LOCAL_MODE_PASSWORD;
 
+  const handleLogout = async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      await signOut(() => {
+        window.location.href = "/";
+      });
+    } catch (err) {
+      console.error("💥 Logout failed:", err);
+    }
+  };
   useEffect(() => {
     const syncAndFetchUser = async () => {
       if (!user) return;
@@ -33,7 +47,9 @@ export default function UserMenu() {
       try {
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             clerkId: user.id,
             email: user.primaryEmailAddress?.emailAddress,
@@ -158,7 +174,7 @@ export default function UserMenu() {
                     {displayName}
                   </span>
                   <button
-                    onClick={() => signOut(() => (window.location.href = "/"))}
+                    onClick={handleLogout}
                     className="text-red-600 font-semibold hover:underline"
                   >
                     Sign Out

@@ -2,81 +2,172 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
+
 import InputField from "@/components/InputField";
 import Cookies from "js-cookie";
 import { Eye, EyeOff, Clipboard } from "lucide-react";
-import { countryOptions, alignmentOptions } from "../../../data/characterOptions";
+import { countryOptions, alignmentOptions } from "../../data/characterOptions";
 
-export default function Step1({ data, onChange }) {
+export default function Step1({ data = {}, onChange }) {
   const [artPreview, setArtPreview] = useState(null);
   const [tokenPreview, setTokenPreview] = useState(null);
   const [raceOptions, setRaceOptions] = useState([]);
   const [backgroundOptions, setBackgroundOptions] = useState([]);
-  const { user } = useUser();
-  const [talesMode, setTalesMode] = useState(false);
-  const [charId, setCharId] = useState("");
-  const creatorName = user?.fullName || user?.username || "";
-  const creatorEmail = user?.primaryEmailAddress?.emailAddress || "";
+  const [subraceOptions, setSubraceOptions] = useState([]);
+  const [noSubrace, setNoSubrace] = useState(false);
 
-  const [unit, setUnit] = useState({
-    heightUnit: "imperial",
-    height: { feet: "", inch: "", centimeter: "" },
-    weight_unit: "imperial",
-    weight: { kg: "", lbs: "" },
-  });
+  const [talesMode, setTalesMode] = useState(false);
+  const [privateId, setPrivateId] = useState("");
+  const [publicId, setPublicId] = useState("");
+
+  console.log(data);
 
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
     setTalesMode(mode === "true");
   }, []);
+
+  useEffect(() => {
+    if (!artPreview && data.art_image) {
+      setArtPreview(data.art_image);
+    }
+    if (!tokenPreview && data.token_image) {
+      setTokenPreview(data.token_image);
+    }
+
+    if (data.art_image && !data.art) onChange("art", data.art_image);
+    if (data.token_image && !data.token_art)
+      onChange("token_art", data.token_image);
+
+    if (data.main_theme_ogg && typeof data.main_theme_ogg === "string") {
+      const mainUrl = data.main_theme_ogg.startsWith("http")
+        ? data.main_theme_ogg
+        : `${process.env.NEXT_PUBLIC_API_URL}${data.main_theme_ogg}`;
+      onChange("main_theme_ogg", mainUrl);
+    }
+
+    if (data.combat_theme_ogg && typeof data.combat_theme_ogg === "string") {
+      const combatUrl = data.combat_theme_ogg.startsWith("http")
+        ? data.combat_theme_ogg
+        : `${process.env.NEXT_PUBLIC_API_URL}${data.combat_theme_ogg}`;
+      onChange("combat_theme_ogg", combatUrl);
+    }
+  }, [
+    data.art_image,
+    data.token_image,
+    data.main_theme_ogg,
+    data.combat_theme_ogg,
+  ]);
+
   useEffect(() => {
     const chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let randomId = "";
-    for (let i = 0; i < 12; i++) {
-      randomId += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setCharId(randomId);
-    onChange("uuid", randomId);
-    // onChange("wiki_visibility", false);
+
+    const randomString = (len) => {
+      let s = "";
+      for (let i = 0; i < len; i++) {
+        s += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return s;
+    };
+
+    const privateId = randomString(22);
+    const publicId = randomString(18);
+
+    setPrivateId(privateId);
+    setPublicId(publicId);
+
+    onChange("private_id", privateId);
+    onChange("public_id", publicId);
   }, []);
-  const formatRace = (str) =>
-    str
-      .replace(/_/g, " ")
-      .toLowerCase()
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+
   useEffect(() => {
     async function fetchData() {
       try {
-        const resRaces = await fetch("/api/races/getAllRace");
+        const resRaces = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/races`
+        );
         if (!resRaces.ok) throw new Error("Failed to fetch races");
         const races = await resRaces.json();
 
         setRaceOptions(
           races.map((r) => ({
-            label: formatRace(r),
-            value: formatRace(r),
+            label: r.name,
+            value: r.id,
+            id: r.id,
+            // image: r.image || r.main_image || "/assets/races/default.webp",
+            description: r.description,
           }))
         );
 
-        const resBackgrounds = await fetch("/api/backgrounds/getAllBackground");
-        if (!resBackgrounds.ok) throw new Error("Failed to fetch backgrounds");
+        const resBackgrounds = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/backgrounds`
+        );
+        if (!resBackgrounds.ok)
+          throw new Error(
+            `Failed to fetch backgrounds: ${resBackgrounds.status}`
+          );
+
         const backgrounds = await resBackgrounds.json();
-        setBackgroundOptions(backgrounds.map((b) => ({ label: b, value: b })));
+
+        setBackgroundOptions(
+          backgrounds.map((b) => ({
+            label: b.name,
+            value: b.id,
+            id: b.id,
+            // image: b.image || "/assets/backgrounds/default.webp",
+            description: b.description || "",
+          }))
+        );
       } catch (err) {
-        console.error(err);
+        console.error("Fetch data error:", err);
       }
     }
 
     fetchData();
   }, []);
 
-  const toggleWikiVisibility = () => {
-    onChange("wiki_visibility", !data.wiki_visibility);
-  };
+  useEffect(() => {
+    if (!data.race_id) {
+      setSubraceOptions([]);
+      setNoSubrace(false);
+      return;
+    }
+
+    const fetchSubraces = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/subraces/race/${data.race_id}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch subraces");
+
+        const subs = await res.json();
+        if (subs.length === 0) {
+          setNoSubrace(true);
+          setSubraceOptions([]);
+        } else {
+          setNoSubrace(false);
+          setSubraceOptions(
+            subs.map((s) => ({
+              label: s.name,
+              value: s.id,
+              id: s.id,
+              description: s.description || "",
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Fetch subraces error:", err);
+        setNoSubrace(true);
+        setSubraceOptions([]);
+      }
+    };
+
+    fetchSubraces();
+  }, [data.race_id]);
+
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(charId);
+    navigator.clipboard.writeText(publicId);
     alert("ID copied to clipboard!");
   };
 
@@ -101,18 +192,6 @@ export default function Step1({ data, onChange }) {
     <div className="p-6 max-w-5xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
       <div className="grid grid-cols-4 gap-4">
         <div className="space-y-4 col-span-2">
-          <input
-            type="hidden"
-            name="creator_name"
-            value={creatorName}
-            onChange={() => onChange("creator_name", creatorName)}
-          />
-          <input
-            type="hidden"
-            name="creator_email"
-            value={creatorEmail}
-            onChange={() => onChange("creator_email", creatorEmail)}
-          />
           <InputField
             label="Nickname"
             value={data.name}
@@ -124,14 +203,14 @@ export default function Step1({ data, onChange }) {
               <label className="text-sm font-medium">Fullname</label>
               <InputField
                 type="toggleIcon"
-                value={data.fullname_visibility}
-                onChange={(v) => onChange("fullname_visibility", v)}
+                value={data.full_name_visibility}
+                onChange={(v) => onChange("full_name_visibility", v)}
               />
             </div>
             <InputField
               label=""
-              value={data.fullname}
-              onChange={(val) => onChange("fullname", val)}
+              value={data.full_name}
+              onChange={(val) => onChange("full_name", val)}
               placeholder="Please input your character’s full name"
             />
           </div>
@@ -183,18 +262,21 @@ export default function Step1({ data, onChange }) {
           </div>
         </div>
         <div className="mt-[14px]">
-          <div className="flex items-center justify-between mb-2 text-sm font-medium text-gray-200">
-            <div className="flex items-center gap-2">
-              <span className="truncate max-w-[140px]">UUID : {data.uuid}</span>
+          <div className=" mb-2 text-sm font-medium text-gray-200">
+            <div className="flex items-center justify-between gap-2">
+              <span className=" ">Public Id : {data.public_id}</span>
               <button onClick={copyToClipboard}>
                 <Clipboard className="w-4 h-4 text-gray-400 hover:text-gray-200" />
               </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className=" ">Private Id : {data.private_id}</span>
             </div>
           </div>
 
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
             {artPreview ? (
-              <Image
+              <img
                 src={artPreview}
                 alt="Preview"
                 width={250}
@@ -208,22 +290,20 @@ export default function Step1({ data, onChange }) {
           <div className="text-center mt-2">Art</div>
         </div>
 
-        <div className="">
+        <div className="mt-15">
           <div className="flex items-center justify-end mb-2 text-sm font-medium text-gray-200">
             <InputField
               type="toggleIcon"
               value={data.wiki_visibility}
               toggleLabel="Wiki Visibility"
               onChange={(v) => {
-                // 🔹 Saat mengubah dari OFF → ON
                 if (!data.wiki_visibility && v === true) {
                   const confirmOpen = window.confirm(
                     "Are you certain you wish to make this your character public?"
                   );
-                  if (!confirmOpen) return; // ❌ Batalkan jika user tekan Cancel
+                  if (!confirmOpen) return;
                 }
 
-                // ✅ Update nilai kalau disetujui
                 onChange("wiki_visibility", v);
               }}
             />
@@ -231,7 +311,7 @@ export default function Step1({ data, onChange }) {
 
           <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
             {tokenPreview ? (
-              <Image
+              <img
                 src={tokenPreview}
                 alt="Preview"
                 width={250}
@@ -252,18 +332,50 @@ export default function Step1({ data, onChange }) {
           <InputField
             label="Race"
             type="selectSearch"
-            value={data.race}
-            onChange={(val) => onChange("race", val)}
+            value={data.race_name}
+            onChange={(val) => {
+              const selected = raceOptions.find(
+                (r) => r.id === val || r.value === val
+              );
+              onChange("race_id", selected?.id || "");
+              onChange("race_name", selected?.label || "");
+              onChange("subrace_id", "");
+              onChange("subrace_name", "");
+            }}
             placeholder={raceOptions.length ? "Select Race" : "Loading..."}
             options={raceOptions}
           />
 
-          <InputField
-            label="Sub Race"
-            value={data.subrace}
-            onChange={(val) => onChange("subrace", val)}
-            placeholder="Please Input The Subrace"
-          />
+          <div>
+            <InputField
+              label="Sub Race"
+              type="selectSearch"
+              value={data.subrace_name}
+              onChange={(val) => {
+                const selected = subraceOptions.find(
+                  (s) => s.id === val || s.value === val
+                );
+                onChange("subrace_id", selected?.id || "");
+                onChange("subrace_name", selected?.label || "");
+              }}
+              placeholder={
+                !data.race_id
+                  ? "Select race first"
+                  : noSubrace
+                  ? "No subrace available"
+                  : subraceOptions.length
+                  ? "Select Subrace"
+                  : "Loading..."
+              }
+              options={subraceOptions}
+              disabled={!data.race_id || noSubrace}
+            />
+            {data.race_id && noSubrace && (
+              <p className="text-xs text-gray-400 italic mt-1">
+                ⚠️ This race does not have any subrace.
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -573,7 +685,7 @@ export default function Step1({ data, onChange }) {
 
           {data.character_type === "Player" && (
             <InputField
-              label="Backgrounds"
+              label="Background"
               type="selectSearch"
               value={data.backgrounds}
               onChange={(val) => onChange("backgrounds", val)}

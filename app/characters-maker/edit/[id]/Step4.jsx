@@ -10,7 +10,7 @@ import {
   enemiesOptions,
   subordinatesOptions,
   affiliationsOptions,
-} from "@/app/characters-maker/characterOptions";
+} from "@/data/characterOptions";
 export default function Step4({ data, allData, onChange }) {
   const step4 = data || {};
 

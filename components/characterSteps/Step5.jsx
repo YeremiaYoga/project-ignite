@@ -6,7 +6,7 @@ import {
   sizeOptions,
   creatureTypeOptions,
   personalityCombatStyleOptions,
-} from "../../../data/characterOptions";
+} from "../../data/characterOptions";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -50,7 +50,7 @@ export default function Step5({ data, allData, onChange }) {
   const filteredIncumbency = useMemo(() => {
     const flag = flagByDisposition(step5.disposition);
     if (!flag) return allIncumbency;
-    return allIncumbency.filter((it) => it?.[flag] === true);
+    return allIncumbency.filter((it) => it?.[`alignment_${flag}`] === true);
   }, [allIncumbency, step5.disposition]);
 
   useEffect(() => {
@@ -60,17 +60,17 @@ export default function Step5({ data, allData, onChange }) {
     );
     if (!stillValid) {
       setSelectedStyle(null);
-      onChange("combat_style", null);
+      onChange("incumbency_id", null);
     }
   }, [filteredIncumbency]);
 
   const handleSelectStyle = (name) => {
     const found = filteredIncumbency.find((x) => x.name === name);
     setSelectedStyle(found || null);
-    onChange("combat_style", found || null);
+    onChange("incumbency_id", found || null);
   };
 
-  const getAbilityImg = (ab) => ab?.img || ab?.icon || ab?.image || "";
+  const getAbilityImg = (ab) => ab?.image || "";
 
   const getAbilityName = (ab) =>
     ab?.title || ab?.name || ab?.label || "Ability";
@@ -84,9 +84,12 @@ export default function Step5({ data, allData, onChange }) {
 
   const fetchAllIncumbency = useCallback(async () => {
     try {
-      const res = await fetch("/api/incumbency/getAllData", {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/incumbency`,
+        {
+          cache: "no-store",
+        }
+      );
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setAllIncumbency(Array.isArray(data) ? data : []);
@@ -207,10 +210,8 @@ export default function Step5({ data, allData, onChange }) {
     const effectiveMaxSP =
       remainingSkillPoints !== null ? remainingSkillPoints : maxSkillPoints;
 
-    // Hitung sisa SP sebelum klik skill ini
     const remainingPoints = effectiveMaxSP - usedPointsExcludingThis;
 
-    // ❌ Jika SP yang tersisa tidak cukup untuk naik ke state berikut — hentikan
     if (remainingPoints <= 0) {
       return;
     }
@@ -333,7 +334,7 @@ export default function Step5({ data, allData, onChange }) {
                 onChange("combat_value", numberVal);
 
                 setSelectedStyle(null);
-                onChange("combat_style", null);
+                onChange("incumbency_id", null);
                 onChange("skill_prof", []);
                 onChange("usedSkillPoints", 0);
 
@@ -397,8 +398,9 @@ export default function Step5({ data, allData, onChange }) {
               value={selectedStyle?.name || ""}
               onChange={(val) => {
                 const found = filteredIncumbency.find((x) => x.name === val);
+                console.log(found);
                 setSelectedStyle(found || null);
-                onChange("combat_style", found || null);
+                onChange("incumbency_id", found.id || null);
 
                 onChange("skill_prof", []);
                 onChange("usedSkillPoints", 0);
@@ -421,13 +423,12 @@ export default function Step5({ data, allData, onChange }) {
                   const result = combatVal - combatVal * costPercent - costFlat;
 
                   const enoughSP = result >= 0;
-
                   return minOk && enoughSP;
                 })
                 .map((it) => ({
                   label: `${it.name} (Min CV: ${it.cv_minimum ?? 0})`,
                   value: it.name,
-                  image: it.icon || it.img || "",
+                  image: it.image || "/assets/default_style.webp",
                 }))}
             />
           )}
@@ -445,6 +446,8 @@ export default function Step5({ data, allData, onChange }) {
                   return (
                     <div
                       key={idx}
+                      id={`ability-${ab.id || idx}`} // ✅ id ditambahkan di sini
+                      data-id={ab.id || idx} // ✅ untuk selector data
                       className={[
                         "relative aspect-square w-full",
                         "rounded-md border border-gray-700 bg-gray-900",
@@ -456,8 +459,6 @@ export default function Step5({ data, allData, onChange }) {
                       aria-label={name}
                       onClick={(e) => {
                         e.stopPropagation();
-                        // kalau klik ability yang sama → tutup
-                        // kalau klik ability lain → ganti active
                         setSelectedAbility(isActive ? null : idx);
                       }}
                     >
@@ -476,7 +477,6 @@ export default function Step5({ data, allData, onChange }) {
                         )}
                       </div>
 
-                      {/* Tooltip muncul hanya saat diklik */}
                       {isActive && (
                         <div
                           className={[
@@ -593,7 +593,7 @@ export default function Step5({ data, allData, onChange }) {
             <div
               className="relative w-40 h-40 bg-center bg-no-repeat bg-contain"
               style={{
-                backgroundImage: `url("../assets/abilityScore_icon/${attr.key}_ability_score.webp")`,
+                backgroundImage: `url(/assets/abilityScore_icon/${attr.key}_ability_score.webp)`,
               }}
             >
               <div className="absolute inset-x-0 top-1/3 text-center text-lg font-bold text-white mt-2 ml-1">
@@ -701,7 +701,7 @@ export default function Step5({ data, allData, onChange }) {
               onChange("disposition", val);
 
               setSelectedStyle(null);
-              onChange("combat_style", null);
+              onChange("incumbency_id", null);
             }}
             options={["Friendly", "Neutral", "Hostile", "Unknown"]}
             placeholder="Select Disposition"

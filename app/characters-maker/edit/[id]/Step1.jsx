@@ -9,7 +9,7 @@ import { Eye, EyeOff, Clipboard } from "lucide-react";
 import {
   countryOptions,
   alignmentOptions,
-} from "@/app/characters-maker/characterOptions";
+} from "@/data/characterOptions";
 
 export default function Step1({ data, allData, onChange }) {
   console.log(data);
