@@ -28,11 +28,16 @@ export default function UserMenu() {
 
   const handleLogout = async () => {
     try {
+      // 🔥 Tidak pakai cookies lagi, jadi kita cukup clear localStorage
+      localStorage.removeItem("access_token");
+
+      // (opsional) panggil backend untuk logging
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
         method: "POST",
-        credentials: "include",
+        headers: { "Content-Type": "application/json" },
       });
 
+      // 🧭 sign out dari Clerk lalu redirect ke login
       await signOut(() => {
         window.location.href = "/";
       });
@@ -40,27 +45,39 @@ export default function UserMenu() {
       console.error("💥 Logout failed:", err);
     }
   };
+
   useEffect(() => {
     const syncAndFetchUser = async () => {
       if (!user) return;
 
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clerkId: user.id,
-            email: user.primaryEmailAddress?.emailAddress,
-            username: user.username || user.fullName || "",
-          }),
-          credentials: "include",
-        });
-
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`
+        const loginRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              clerkId: user.id,
+              email: user.primaryEmailAddress?.emailAddress,
+              username: user.username || user.fullName || "",
+            }),
+          }
         );
+
+        const loginData = await loginRes.json();
+        if (!loginRes.ok) throw new Error(loginData.error || "Login failed");
+
+        localStorage.setItem("access_token", loginData.token);
+        const token = loginData.token;
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
         if (!res.ok) throw new Error("Failed to fetch user data");
         const data = await res.json();
         setUserData(data.user);

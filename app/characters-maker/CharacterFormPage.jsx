@@ -28,40 +28,55 @@ export default function CharacterFormPage({ mode = "create" }) {
     { title: "Step 5", component: Step5 },
   ];
 
-  useEffect(() => {
-    if (mode !== "edit" || !id) {
-      setFormData(getDefaultForm());
-      return;
-    }
+useEffect(() => {
+  if (mode !== "edit" || !id) {
+    setFormData(getDefaultForm());
+    return;
+  }
 
-    const fetchCharacter = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/characters/${id}`,
-          {
-            credentials: "include",
-          }
-        );
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Failed to load character");
-        setFormData({
-          ...getDefaultForm(),
-          ...json,
-          height: json.height || { feet: 0, inch: 0, centimeter: 0 },
-          weight: json.weight || { pounds: 0, kilogram: 0 },
-          size: json.size || { general: "Medium", vtt_size: "med" },
-          main_resident: json.main_resident || { resident: "", country: "" },
-        });
-      } catch (err) {
-        console.error("❌ Error fetching character:", err);
-        alert("Failed to load character data.");
-        router.push("/characters-maker");
-      } finally {
-        setLoading(false);
+  const fetchCharacter = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        alert("⚠️ Token hilang, silakan login ulang.");
+        router.replace("/");
+        return;
       }
-    };
-    fetchCharacter();
-  }, [mode, id]);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/characters/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to load character");
+
+      // ✅ Merge data
+      setFormData({
+        ...getDefaultForm(),
+        ...json,
+        height: json.height || { feet: 0, inch: 0, centimeter: 0 },
+        weight: json.weight || { pounds: 0, kilogram: 0 },
+        size: json.size || { general: "Medium", vtt_size: "med" },
+        main_resident: json.main_resident || { resident: "", country: "" },
+      });
+    } catch (err) {
+      console.error("❌ Error fetching character:", err);
+      alert("Failed to load character data.");
+      router.push("/characters-maker");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchCharacter();
+}, [mode, id]);
+
 
   const handleChange = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -86,8 +101,15 @@ export default function CharacterFormPage({ mode = "create" }) {
       if (!formData) return;
       setSaving(true);
 
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        alert("⚠️ Token hilang, silakan login ulang.");
+        return;
+      }
+
       const form = new FormData();
       form.append("data", JSON.stringify(formData));
+
       ["art", "token_art", "main_theme_ogg", "combat_theme_ogg"].forEach(
         (f) => {
           if (formData[f] instanceof File) form.append(f, formData[f]);
@@ -96,23 +118,25 @@ export default function CharacterFormPage({ mode = "create" }) {
 
       const url =
         mode === "edit"
-          ? `${process.env.NEXT_PUBLIC_API_URL}/characters/${id}`
-          : `${process.env.NEXT_PUBLIC_API_URL}/characters/save`;
+          ? `${BASE_URL}/characters/${id}`
+          : `${BASE_URL}/characters/save`;
 
       const res = await fetch(url, {
         method: mode === "edit" ? "PUT" : "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: form,
-        credentials: "include",
       });
 
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Save failed");
 
       alert(`✅ Character ${mode === "edit" ? "updated" : "saved"}!`);
-      router.replace("/characters-maker");
+      router.replace("/dashboard/builder/character");
     } catch (err) {
       console.error("❌ Save error:", err);
-      alert("❌ Failed to save character.");
+      alert("❌ Failed to save character: " + err.message);
     } finally {
       setSaving(false);
     }
