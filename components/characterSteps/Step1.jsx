@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 import InputField from "@/components/InputField";
 import Cookies from "js-cookie";
-import { Eye, EyeOff, Clipboard } from "lucide-react";
+import { Link, FileKey, Clipboard } from "lucide-react";
 import { countryOptions, alignmentOptions } from "../../data/characterOptions";
 
 export default function Step1({ data = {}, onChange }) {

@@ -20,6 +20,8 @@ export default function CharacterFormPage({ mode = "create" }) {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(mode === "edit");
 
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
   const steps = [
     { title: "Step 1", component: Step1 },
     { title: "Step 2", component: Step2 },
@@ -28,55 +30,43 @@ export default function CharacterFormPage({ mode = "create" }) {
     { title: "Step 5", component: Step5 },
   ];
 
-useEffect(() => {
-  if (mode !== "edit" || !id) {
-    setFormData(getDefaultForm());
-    return;
-  }
-
-  const fetchCharacter = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        alert("⚠️ Token hilang, silakan login ulang.");
-        router.replace("/");
-        return;
-      }
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/characters/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to load character");
-
-      // ✅ Merge data
-      setFormData({
-        ...getDefaultForm(),
-        ...json,
-        height: json.height || { feet: 0, inch: 0, centimeter: 0 },
-        weight: json.weight || { pounds: 0, kilogram: 0 },
-        size: json.size || { general: "Medium", vtt_size: "med" },
-        main_resident: json.main_resident || { resident: "", country: "" },
-      });
-    } catch (err) {
-      console.error("❌ Error fetching character:", err);
-      alert("Failed to load character data.");
-      router.push("/characters-maker");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (mode !== "edit" || !id) {
+      setFormData(getDefaultForm());
+      return;
     }
-  };
 
-  fetchCharacter();
-}, [mode, id]);
+    const fetchCharacter = async () => {
+      try {
+        setLoading(true);
 
+        const res = await fetch(`${BASE_URL}/characters/${id}`, {
+          method: "GET",
+          credentials: "include", // 👈 kirim cookie otomatis
+        });
+
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || "Failed to load character");
+
+        setFormData({
+          ...getDefaultForm(),
+          ...json,
+          height: json.height || { feet: 0, inch: 0, centimeter: 0 },
+          weight: json.weight || { pounds: 0, kilogram: 0 },
+          size: json.size || { general: "Medium", vtt_size: "med" },
+          main_resident: json.main_resident || { resident: "", country: "" },
+        });
+      } catch (err) {
+        console.error("❌ Error fetching character:", err);
+        alert("Failed to load character data.");
+        router.push("/characters-maker");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCharacter();
+  }, [mode, id]);
 
   const handleChange = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -95,17 +85,11 @@ useEffect(() => {
   const nextStep = () => goToStep(currentStep + 1);
   const prevStep = () => goToStep(currentStep - 1);
 
-  // 💾 Save or Update
+  // 💾 Save or Update (pakai Cookie)
   const handleSubmit = async () => {
     try {
       if (!formData) return;
       setSaving(true);
-
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        alert("⚠️ Token hilang, silakan login ulang.");
-        return;
-      }
 
       const form = new FormData();
       form.append("data", JSON.stringify(formData));
@@ -123,9 +107,7 @@ useEffect(() => {
 
       const res = await fetch(url, {
         method: mode === "edit" ? "PUT" : "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include", // ✅ kirim cookie ke backend
         body: form,
       });
 
@@ -133,7 +115,7 @@ useEffect(() => {
       if (!res.ok) throw new Error(result.error || "Save failed");
 
       alert(`✅ Character ${mode === "edit" ? "updated" : "saved"}!`);
-      router.replace("/dashboard/builder/character");
+      router.replace("/characters-maker");
     } catch (err) {
       console.error("❌ Save error:", err);
       alert("❌ Failed to save character: " + err.message);
@@ -155,7 +137,7 @@ useEffect(() => {
     <main className="mx-auto px-4 py-8 text-white min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <button
-          onClick={() => router.push("/characters-maker")}
+          onClick={() => router.push("/characters-maker/character")}
           className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded shadow text-sm"
         >
           ← Back
@@ -185,6 +167,7 @@ useEffect(() => {
         ))}
       </div>
 
+      {/* STEP CONTENT */}
       <div className="p-6 rounded-lg shadow bg-[#0b1230] border border-slate-700">
         <CurrentComponent
           data={formData}
@@ -192,6 +175,7 @@ useEffect(() => {
           onChange={handleChange}
         />
       </div>
+
       {/* NAVIGATION BUTTONS */}
       <div className="flex justify-between mb-4 mt-5">
         <button

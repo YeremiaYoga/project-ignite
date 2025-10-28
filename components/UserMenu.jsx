@@ -26,18 +26,15 @@ export default function UserMenu() {
   const { signOut } = useClerk();
   const localPassword = process.env.NEXT_PUBLIC_LOCAL_MODE_PASSWORD;
 
+  // ✅ Logout: hapus cookie di server
   const handleLogout = async () => {
     try {
-      // 🔥 Tidak pakai cookies lagi, jadi kita cukup clear localStorage
-      localStorage.removeItem("access_token");
-
-      // (opsional) panggil backend untuk logging
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include", // ⬅️ penting agar cookie bisa dihapus
       });
 
-      // 🧭 sign out dari Clerk lalu redirect ke login
+      // sign out dari Clerk lalu redirect ke home
       await signOut(() => {
         window.location.href = "/";
       });
@@ -46,36 +43,34 @@ export default function UserMenu() {
     }
   };
 
+  // ✅ Login sync ke backend (buat cookie)
   useEffect(() => {
     const syncAndFetchUser = async () => {
       if (!user) return;
 
       try {
+        // 🔥 login ke backend: cookie akan otomatis diset
         const loginRes = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               clerkId: user.id,
               email: user.primaryEmailAddress?.emailAddress,
               username: user.username || user.fullName || "",
             }),
+            credentials: "include", // ⬅️ penting untuk simpan cookie httpOnly
           }
         );
 
         const loginData = await loginRes.json();
         if (!loginRes.ok) throw new Error(loginData.error || "Login failed");
 
-        localStorage.setItem("access_token", loginData.token);
-        const token = loginData.token;
+        // 🔎 Ambil data user dari backend menggunakan cookie
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { credentials: "include" } // ⬅️ cookie dikirim otomatis
         );
 
         if (!res.ok) throw new Error("Failed to fetch user data");
@@ -89,6 +84,7 @@ export default function UserMenu() {
     syncAndFetchUser();
   }, [user]);
 
+  // ✅ Tutup menu kalau klik di luar
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target))
@@ -98,6 +94,7 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ✅ Load color preferences
   useEffect(() => {
     setColors({
       sub1: Cookies.get("ignite-hyperlink-color-sub1") || "#3b82f6",
@@ -226,7 +223,6 @@ export default function UserMenu() {
                   </label>
                 </div>
 
-                {/* Other Options */}
                 <button
                   onClick={() => setShowOtherOptions(!showOtherOptions)}
                   className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
@@ -258,7 +254,6 @@ export default function UserMenu() {
 
             <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
-            {/* Theme Color Settings */}
             <button
               onClick={() => setShowThemeColors(!showThemeColors)}
               className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
@@ -293,7 +288,7 @@ export default function UserMenu() {
         )}
       </div>
 
-      {/* ✅ Modal Profile */}
+      {/* ✅ Profile Modal */}
       {showProfile && userData && (
         <ProfileModal
           userData={userData}
