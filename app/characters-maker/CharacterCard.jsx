@@ -78,9 +78,9 @@ export default function CharacterCard({
 
       <div className="absolute top-[27px] left-[11px] flex flex-col items-center w-[120px]">
         <div className="w-[80px] h-[80px] rounded-full overflow-hidden">
-          {char.token_art ? (
+          {char.token_image ? (
             <img
-              src={char.token_art}
+              src={char.token_image}
               alt={char.name}
               className="w-full h-full object-cover"
             />

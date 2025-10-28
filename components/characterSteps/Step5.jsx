@@ -426,7 +426,7 @@ export default function Step5({ data, allData, onChange }) {
                   return minOk && enoughSP;
                 })
                 .map((it) => ({
-                  label: `${it.name} (Min CV: ${it.cv_minimum ?? 0})`,
+                  label: `${it.name} (V${it.version ?? 0})`,
                   value: it.name,
                   image: it.image || "/assets/default_style.webp",
                 }))}
