@@ -809,8 +809,8 @@ export default function Step1({ data = {}, onChange }) {
               value={data.hair}
               onChange={(val) => onChange("hair", val)}
               hint={{
-                icon: "palette",
-                text: "Describes your character’s skin tone or complexion. Used for artistic, descriptive, or visual reference.",
+                icon: "scissors",
+                text: "Describes your character’s hair color, style, or length. Useful for portraits, tokens, or narrative detail.",
               }}
             />
           </div>
