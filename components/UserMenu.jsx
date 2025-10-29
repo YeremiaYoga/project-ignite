@@ -26,15 +26,14 @@ export default function UserMenu() {
   const { signOut } = useClerk();
   const localPassword = process.env.NEXT_PUBLIC_LOCAL_MODE_PASSWORD;
 
-  // ✅ Logout: hapus cookie di server
   const handleLogout = async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
         method: "POST",
-        credentials: "include", // ⬅️ penting agar cookie bisa dihapus
+        credentials: "include", 
       });
 
-      // sign out dari Clerk lalu redirect ke home
+
       await signOut(() => {
         window.location.href = "/";
       });
@@ -43,13 +42,11 @@ export default function UserMenu() {
     }
   };
 
-  // ✅ Login sync ke backend (buat cookie)
   useEffect(() => {
     const syncAndFetchUser = async () => {
       if (!user) return;
 
       try {
-        // 🔥 login ke backend: cookie akan otomatis diset
         const loginRes = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
           {
@@ -60,17 +57,16 @@ export default function UserMenu() {
               email: user.primaryEmailAddress?.emailAddress,
               username: user.username || user.fullName || "",
             }),
-            credentials: "include", // ⬅️ penting untuk simpan cookie httpOnly
+            credentials: "include", 
           }
         );
 
         const loginData = await loginRes.json();
         if (!loginRes.ok) throw new Error(loginData.error || "Login failed");
 
-        // 🔎 Ambil data user dari backend menggunakan cookie
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`,
-          { credentials: "include" } // ⬅️ cookie dikirim otomatis
+          { credentials: "include" } 
         );
 
         if (!res.ok) throw new Error("Failed to fetch user data");
@@ -84,7 +80,6 @@ export default function UserMenu() {
     syncAndFetchUser();
   }, [user]);
 
-  // ✅ Tutup menu kalau klik di luar
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target))
@@ -94,7 +89,6 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Load color preferences
   useEffect(() => {
     setColors({
       sub1: Cookies.get("ignite-hyperlink-color-sub1") || "#3b82f6",

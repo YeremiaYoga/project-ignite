@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Copy } from "lucide-react";
+import { Copy, Eye, EyeOff } from "lucide-react";
 import { IBM_Plex_Mono } from "next/font/google";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -12,7 +12,7 @@ dayjs.extend(duration);
 
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["700"],
 });
 
 export default function CharacterCard({
@@ -24,7 +24,7 @@ export default function CharacterCard({
   isTrash,
 }) {
   const [remaining, setRemaining] = useState("");
-
+  const [showPrivate, setShowPrivate] = useState(false);
   useEffect(() => {
     if (!isTrash || !char.deleted_at) return;
 
@@ -65,14 +65,36 @@ export default function CharacterCard({
         backgroundImage: "url('/assets/character_image.png')",
       }}
     >
-      <div className="absolute top-4 right-5 flex items-center gap-1 text-sm text-gray-700">
-        <span className={`text-lg ${ibmPlexMono.className}`}>
-          {char.uuid ?? "UnknownID"}
+      <div className="absolute top-5 right-5 flex items-center gap-2 text-sm text-gray-700 font-bold">
+        <span className={`text-xs ${ibmPlexMono.className}`}>
+          {showPrivate
+            ? char.private_id ?? "UnknownID"
+            : "•".repeat(Math.min((char.private_id ?? "").length || 8, 12))}
+        </span>
+
+        <button
+          onClick={() => setShowPrivate((prev) => !prev)}
+          className="text-gray-500 hover:text-blue-500 transition-colors"
+          title={showPrivate ? "Hide ID" : "Show ID"}
+        >
+          {showPrivate ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+
+        <Copy
+          size={16}
+          className="cursor-pointer hover:text-blue-500 transition-colors"
+          onClick={() => navigator.clipboard.writeText(char.private_id ?? "")}
+          title="Copy Private ID"
+        />
+      </div>
+      <div className="absolute top-10 right-5 flex items-center gap-1 text-sm text-gray-700">
+        <span className={`text-xs ${ibmPlexMono.className}`}>
+          {char.public_id ?? "UnknownID"}
         </span>
         <Copy
           size={16}
           className="cursor-pointer hover:text-gray-900"
-          onClick={() => navigator.clipboard.writeText(char.uuid ?? "")}
+          onClick={() => navigator.clipboard.writeText(char.public_id ?? "")}
         />
       </div>
 
@@ -101,7 +123,7 @@ export default function CharacterCard({
       </div>
 
       <div
-        className="absolute right-7 top-12"
+        className="absolute right-7 top-16"
         style={{
           transform: `rotate(${char.rotation_stamp || 0}deg)`,
         }}
@@ -146,7 +168,7 @@ export default function CharacterCard({
             <button
               onClick={() => onDelete?.(char.uuid)}
               className="px-4 py-1 bg-red-600 text-white rounded"
-              disabled
+            
             >
               Delete
             </button>

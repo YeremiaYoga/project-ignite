@@ -20,20 +20,27 @@ export default function CharacterTrashList() {
     // return () => clearInterval(interval);
   }, []);
 
-  const fetchTrash = async () => {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/characters/trash`,
-        {
-          credentials: "include",
-        }
-      );
-      const data = await res.json();
-      setCharacters(data);
-    } catch (err) {
-      console.error("Failed to fetch trash characters:", err);
-    }
-  };
+const fetchTrash = async () => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/characters/trash`,
+      { credentials: "include" }
+    );
+
+    const data = await res.json();
+
+    // Sesuaikan tergantung struktur respons
+    const chars = Array.isArray(data)
+      ? data
+      : data.characters || data.data || [];
+
+    setCharacters(chars);
+  } catch (err) {
+    console.error("Failed to fetch trash characters:", err);
+    setCharacters([]); // fallback biar gak error di map()
+  }
+};
+
 
   const fetchExpired = async () => {
     try {
@@ -52,34 +59,34 @@ export default function CharacterTrashList() {
     }
   };
 
-//   const handleRestore = async (id, name) => {
-//     const confirmed = window.confirm(
-//       `Are you sure you want to restore "${name}" ?`
-//     );
-//     if (!confirmed) return;
+  const handleRestore = async (id, name) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to restore "${name}" ?`
+    );
+    if (!confirmed) return;
 
-//     try {
-//       const res = await fetch(
-//         `${process.env.NEXT_PUBLIC_API_URL}/characters/${id}/restore`,
-//         {
-//           method: "PUT",
-//           credentials: "include",
-//         }
-//       );
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/characters/${id}/restore`,
+        {
+          method: "PUT",
+          credentials: "include",
+        }
+      );
 
-//       const data = await res.json();
+      const data = await res.json();
 
-//       if (!res.ok) {
-//         throw new Error(data.error || "Failed to move character to restore");
-//       }
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to move character to restore");
+      }
 
-//       fetchTrash();
-//       alert(`"${name}" has been restore.`);
-//     } catch (err) {
-//       console.error(err);
-//       alert(`Failed to move "${name}" restore.`);
-//     }
-//   };
+      fetchTrash();
+      alert(`"${name}" has been restore.`);
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to move "${name}" restore.`);
+    }
+  };
 
   if (characters.length === 0) {
     return <p className="text-gray-400 text-center">Trash bin is empty.</p>;

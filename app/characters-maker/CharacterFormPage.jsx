@@ -40,21 +40,34 @@ export default function CharacterFormPage({ mode = "create" }) {
       try {
         setLoading(true);
 
-        const res = await fetch(`${BASE_URL}/characters/${id}`, {
+        // 🔐 Ambil karakter via private_id
+        const res = await fetch(`${BASE_URL}/characters/private/${id}`, {
           method: "GET",
-          credentials: "include", // 👈 kirim cookie otomatis
+          credentials: "include", // penting untuk kirim cookie token
         });
 
+        if (!res.ok) {
+          // kalau response error (misal 403 / 404)
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || "Failed to load character");
+        }
+
         const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Failed to load character");
+        console.log("✅ Character data loaded:", json);
+
+        // pastikan json adalah data karakter (bukan {success, data})
+        const charData = json.data || json;
 
         setFormData({
           ...getDefaultForm(),
-          ...json,
-          height: json.height || { feet: 0, inch: 0, centimeter: 0 },
-          weight: json.weight || { pounds: 0, kilogram: 0 },
-          size: json.size || { general: "Medium", vtt_size: "med" },
-          main_resident: json.main_resident || { resident: "", country: "" },
+          ...charData,
+          height: charData.height || { feet: 0, inch: 0, centimeter: 0 },
+          weight: charData.weight || { pounds: 0, kilogram: 0 },
+          size: charData.size || { general: "Medium", vtt_size: "med" },
+          main_resident: charData.main_resident || {
+            resident: "",
+            country: "",
+          },
         });
       } catch (err) {
         console.error("❌ Error fetching character:", err);
@@ -137,7 +150,7 @@ export default function CharacterFormPage({ mode = "create" }) {
     <main className="mx-auto px-4 py-8 text-white min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <button
-          onClick={() => router.push("/characters-maker/character")}
+          onClick={() => router.push("/characters-maker")}
           className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded shadow text-sm"
         >
           ← Back

@@ -11,7 +11,7 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Info } from "lucide-react";
-
+import LabelWithHint from "@/components/LabelWithHint";
 export default function Step5({ data, allData, onChange }) {
   const router = useRouter();
   const step5 = data || {};

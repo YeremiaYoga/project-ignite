@@ -11,8 +11,8 @@ import {
   subordinatesOptions,
   affiliationsOptions,
 } from "../../data/characterOptions";
+import LabelWithHint from "@/components/LabelWithHint";
 export default function Step4({ data, allData, onChange }) {
-
   return (
     <div className="p-6 max-w-6xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
       <div className="grid grid-cols-10 gap-6">
@@ -22,14 +22,21 @@ export default function Step4({ data, allData, onChange }) {
             label="Notable"
             items={data.notable_accomplishments || [""]}
             onChange={(items) => onChange("notable_accomplishments", items)}
+            hint={{
+              icon: "trophy",
+              text: "Highlights of your character’s key achievements or memorable victories — whether heroic deeds, inventions, or infamous acts. Serves as a record of what made them remarkable in the world’s history.",
+            }}
           />
 
           <div className="mt-3 space-y-2">
-            <label className="block text-sm font-medium">
-              Connection Towards Events
-            </label>
+            <LabelWithHint
+              label="Connection Towards Events"
+              icon="link-2"
+              text="Records how your character is tied to significant events — whether as a witness, participant, or cause. Each entry may include notes on involvement, consequences, and impact on their personal story."
+            />
 
-            {(data.connection_towards_events && data.connection_towards_events.length > 0
+            {(data.connection_towards_events &&
+            data.connection_towards_events.length > 0
               ? data.connection_towards_events
               : [
                   {
@@ -47,9 +54,9 @@ export default function Step4({ data, allData, onChange }) {
                 <button
                   type="button"
                   onClick={() => {
-                    const updated = (data.connection_towards_events || []).filter(
-                      (_, i) => i !== idx
-                    );
+                    const updated = (
+                      data.connection_towards_events || []
+                    ).filter((_, i) => i !== idx);
                     onChange("connection_towards_events", updated);
                   }}
                   className="absolute -top-3 -right-3 p-1 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-md"
@@ -63,7 +70,9 @@ export default function Step4({ data, allData, onChange }) {
                       label=""
                       value={conn.name || ""}
                       onChange={(val) => {
-                        const updated = [...(data.connection_towards_events || [])];
+                        const updated = [
+                          ...(data.connection_towards_events || []),
+                        ];
                         updated[idx] = { ...conn, name: val };
                         onChange("connection_towards_events", updated);
                       }}
@@ -75,7 +84,9 @@ export default function Step4({ data, allData, onChange }) {
                       label=""
                       value={conn.id_event || ""}
                       onChange={(val) => {
-                        const updated = [...(data.connection_towards_events || [])];
+                        const updated = [
+                          ...(data.connection_towards_events || []),
+                        ];
                         updated[idx] = { ...conn, id_event: val };
                         onChange("connection_towards_events", updated);
                       }}
@@ -91,7 +102,9 @@ export default function Step4({ data, allData, onChange }) {
                       label=""
                       value={conn.connection || ""}
                       onChange={(val) => {
-                        const updated = [...(data.connection_towards_events || [])];
+                        const updated = [
+                          ...(data.connection_towards_events || []),
+                        ];
                         updated[idx] = { ...conn, connection: val };
                         onChange("connection_towards_events", updated);
                       }}
@@ -114,7 +127,9 @@ export default function Step4({ data, allData, onChange }) {
                       label=""
                       value={conn.connection_notes || ""}
                       onChange={(val) => {
-                        const updated = [...(data.connection_towards_events || [])];
+                        const updated = [
+                          ...(data.connection_towards_events || []),
+                        ];
                         updated[idx] = { ...conn, connection_notes: val };
                         onChange("connection_towards_events", updated);
                       }}
@@ -130,7 +145,8 @@ export default function Step4({ data, allData, onChange }) {
               className="mt-2 px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm"
               onClick={() =>
                 onChange("connection_towards_events", [
-                  ...(data.connection_towards_events && data.connection_towards_events.length > 0
+                  ...(data.connection_towards_events &&
+                  data.connection_towards_events.length > 0
                     ? data.connection_towards_events
                     : []),
                   {
@@ -153,7 +169,10 @@ export default function Step4({ data, allData, onChange }) {
             value={data.notable_quotes || ""}
             onChange={(val) => onChange("notable_quotes", val)}
             placeholder="Enter Notable Quotes"
-            hint="test info"
+            hint={{
+              icon: "quote",
+              text: "Famous or meaningful words spoken by your character themselves. These lines often capture their ideals, wit, or defining moments in dialogue or reflection.",
+            }}
           />
 
           <div className="mt-3 space-y-2">
@@ -169,6 +188,10 @@ export default function Step4({ data, allData, onChange }) {
               }
               onChange={(vals) => onChange("quotes_from_others", vals)}
               columns={1}
+              hint={{
+                icon: "message-circle",
+                text: "Statements or remarks said about your character by other individuals. These quotes can reveal reputation, rumors, admiration, or disdain from an external perspective.",
+              }}
             />
           </div>
         </div>

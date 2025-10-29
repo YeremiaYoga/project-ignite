@@ -95,7 +95,7 @@ export default function CharacterList({ username }) {
       }
 
       setCharacters((prev) => prev.filter((char) => char.uuid !== id));
-      fetchChars();
+      fetchRemoteChars();
       alert(`"${name}" has been moved to trash.`);
     } catch (err) {
       console.error(err);
@@ -113,9 +113,9 @@ export default function CharacterList({ username }) {
     <div className="grid grid-cols-3 gap-6">
       {characters.map((char) => (
         <CharacterCard
-          key={char.uuid}
+          key={char.public_id}
           char={char}
-          onEdit={(id) => handleEdit(id)}
+          onEdit={(id) => handleEdit(char.private_id)}
           onView={(id) => router.push(`/characters-maker/view/${id}`)}
           onDelete={() => handleDelete(char.id, char.name)}
         />

@@ -8,7 +8,7 @@ import {
   nationalityOptions,
   countryOptions,
 } from "../../data/characterOptions";
-
+import LabelWithHint from "@/components/LabelWithHint";
 export default function Step3({ data, allData, onChange, mode }) {
   useEffect(() => {
     if (data.main_theme_ogg && typeof data.main_theme_ogg === "string") {
@@ -33,7 +33,11 @@ export default function Step3({ data, allData, onChange, mode }) {
       <div className="grid grid-cols-5 gap-4">
         <div className="col-span-3">
           <div className="flex items-center justify-between mb-1">
-            <label className="text-sm font-medium">Appearance</label>
+            <LabelWithHint
+              label="Apperance"
+              icon="user-square"
+              text="A summary of your character’s general look and demeanor — posture, body type, presence, and the overall impression they give. This section gives readers a first visual sense of who the character is."
+            />
             <InputField
               type="toggleIcon"
               value={data.appearance_visibility}
@@ -52,7 +56,11 @@ export default function Step3({ data, allData, onChange, mode }) {
 
         <div className="space-y-3 col-span-2">
           <div>
-            <label className="block text-sm font-medium mb-1">Main Theme</label>
+            <LabelWithHint
+              label="Main Theme"
+              icon="music"
+              text="The central musical or emotional theme that embodies your character’s spirit. Often used in storytelling or media to represent their essence or emotional state."
+            />
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -94,9 +102,11 @@ export default function Step3({ data, allData, onChange, mode }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Combat Theme
-            </label>
+            <LabelWithHint
+              label="Combat Theme"
+              icon="file-audio"
+              text="A theme that represents your character’s energy and mindset in battle — whether it’s a calm duel rhythm or a chaotic storm of emotion and sound."
+            />
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -144,12 +154,18 @@ export default function Step3({ data, allData, onChange, mode }) {
             value={data.nationality || ""}
             onChange={(val) => onChange("nationality", val)}
             options={mode ? nationalityOptions : undefined}
+            hint={{
+              icon: "flag",
+              text: "The country, empire, or faction your character originates from. It helps define cultural identity, traditions, and historical context.",
+            }}
           />
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Main Resident
-            </label>
+            <LabelWithHint
+              label="Main Resident"
+              icon="home"
+              text="Your character’s current primary place of living — the region, city, or environment they consider home. It may influence their lifestyle and resources."
+            />
             <div className="grid grid-cols-2 gap-4">
               <InputField
                 label=""
@@ -190,6 +206,10 @@ export default function Step3({ data, allData, onChange, mode }) {
             btnLabel="Add Details"
             items={data.notable_details || [""]}
             onChange={(items) => onChange("notable_details", items)}
+            hint={{
+              icon: "eye",
+              text: "Specific visual traits or markings that stand out — scars, tattoos, jewelry, unusual eye colors, or other defining physical details that make your character recognizable.",
+            }}
           />
         </div>
         <div className="col-span-2">
@@ -198,6 +218,10 @@ export default function Step3({ data, allData, onChange, mode }) {
             label="Occupation"
             items={data.current_occupation || [""]}
             onChange={(items) => onChange("current_occupation", items)}
+            hint={{
+              icon: "briefcase-business",
+              text: "Your character’s present career, role, or profession. Defines their main activity or source of livelihood within the world’s setting.",
+            }}
           />
         </div>
         <div className="col-span-2">
@@ -206,6 +230,10 @@ export default function Step3({ data, allData, onChange, mode }) {
             label="Occupation"
             items={data.previous_occupation || [""]}
             onChange={(items) => onChange("previous_occupation", items)}
+            hint={{
+              icon: "briefcase",
+              text: "Professions, duties, or societal roles your character held before their current path. This helps record their skills, history, and life experience.",
+            }}
           />
         </div>
         <div className="col-span-2">
@@ -214,6 +242,10 @@ export default function Step3({ data, allData, onChange, mode }) {
             label="Resident"
             items={data.other_resident || [""]}
             onChange={(items) => onChange("other_resident", items)}
+            hint={{
+              icon: "map-pin-house",
+              text: "Additional notable locations your character has lived in or maintains ties with — secondary homes, safehouses, or places of memory and significance.",
+            }}
           />
         </div>
       </div>
@@ -221,7 +253,12 @@ export default function Step3({ data, allData, onChange, mode }) {
       <div className="grid grid-cols-7 gap-4">
         <div className="mt-1 col-span-3">
           <div className="flex items-center justify-between w-[92%]">
-            <label className="text-sm font-medium">Hobbies</label>
+            <LabelWithHint
+              label="Hobbies"
+              icon="gamepad-2"
+              text="Recreational or personal interests pursued during downtime. Hobbies can reflect a character’s softer side, coping habits, or hidden talents.
+"
+            />
             <InputField
               type="toggleIcon"
               value={data.hobbies_visibility}
@@ -236,7 +273,11 @@ export default function Step3({ data, allData, onChange, mode }) {
           />
         </div>
         <div className="col-span-2">
-          <label className="text-sm font-medium">Signature Object</label>
+          <LabelWithHint
+            label="Signature Object"
+            icon="star"
+            text="A personal or symbolic item your character is rarely seen without. It may carry emotional value, heritage, or magical properties tied to their story."
+          />
 
           <MultipleInput
             labels=""
@@ -246,9 +287,11 @@ export default function Step3({ data, allData, onChange, mode }) {
           />
         </div>
         <div className="col-span-2">
-          <label className="text-sm font-medium">
-            Signature Weapon/Spellcasting Focus
-          </label>
+          <LabelWithHint
+            label="Signature Weapon/Spellcasting Focus"
+            icon="wand"
+            text="The main weapon, magical implement, or channeling focus your character wields. Often customized, named, or uniquely bound to them, reflecting their style and power."
+          />
           <MultipleInput
             labels=""
             label="Weapon"

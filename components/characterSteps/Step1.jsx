@@ -5,8 +5,9 @@ import { useState, useEffect } from "react";
 
 import InputField from "@/components/InputField";
 import Cookies from "js-cookie";
-import { Link, FileKey, Clipboard } from "lucide-react";
+import { Link, FileKey, Clipboard, Eye, EyeOff, Info } from "lucide-react";
 import { countryOptions, alignmentOptions } from "../../data/characterOptions";
+import LabelWithHint from "@/components/LabelWithHint";
 
 export default function Step1({ data = {}, onChange }) {
   const [artPreview, setArtPreview] = useState(null);
@@ -19,6 +20,7 @@ export default function Step1({ data = {}, onChange }) {
   const [talesMode, setTalesMode] = useState(false);
   const [privateId, setPrivateId] = useState("");
   const [publicId, setPublicId] = useState("");
+  const [showPrivate, setShowPrivate] = useState(false);
 
   console.log(data);
 
@@ -166,8 +168,8 @@ export default function Step1({ data = {}, onChange }) {
     fetchSubraces();
   }, [data.race_id]);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(publicId);
+  const copyToClipboard = (id) => {
+    navigator.clipboard.writeText(id);
     alert("ID copied to clipboard!");
   };
 
@@ -197,10 +199,18 @@ export default function Step1({ data = {}, onChange }) {
             value={data.name}
             onChange={(val) => onChange("name", val)}
             placeholder="Please input your character’s nickname"
+            hint={{
+              icon: "id-card",
+              text: "The name your character is commonly known by. It can be an alias, title, or shortened version of their full name — often used by friends, allies, or in informal situations. (Exp : Edward, Alexander, Misa, or Michael)",
+            }}
           />
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-sm font-medium">Fullname</label>
+              <LabelWithHint
+                label="Fullname"
+                icon="id-card-lanyard"
+                text="Your character’s complete name, as recorded in your profile. It may contain personal or story-related details, so share it only if you’re comfortable. (Exp : Edward Elric, Alexander III of Macedon, Misa Amane (弥 海砂), or Michael Stevens)"
+              />
               <InputField
                 type="toggleIcon"
                 value={data.full_name_visibility}
@@ -274,7 +284,7 @@ export default function Step1({ data = {}, onChange }) {
                   </div>
                 </div>
 
-                <span>{data.public_id}</span>
+                <span className="text-xs">{data.public_id}</span>
               </div>
 
               <button
@@ -285,19 +295,45 @@ export default function Step1({ data = {}, onChange }) {
                 <Clipboard className="w-4 h-4" />
               </button>
             </div>
-
-            <div className="flex items-center gap-2">
-              <div className="relative group">
-                <FileKey className="w-4 h-4 " />
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-slate-800 text-gray-200 text-xs px-3 py-2 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity w-96 z-10 pointer-events-none">
-                  Your Private Character ID. Do not share this with anyone
-                  except your Dungeon Master, Ignite Admin, or yourself. It
-                  works like a password for your character — anyone with this ID
-                  can edit or modify your character data.
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="relative group">
+                  <FileKey className="w-4 h-4" />
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-slate-800 text-gray-200 text-xs px-3 py-2 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity w-96 z-10 pointer-events-none">
+                    Your Private Character ID. Do not share this with anyone
+                    except your Dungeon Master, Ignite Admin, or yourself. It
+                    works like a password for your character — anyone with this
+                    ID can edit or modify your character data.
+                  </div>
                 </div>
+
+                <span className="font-mono text-xs select-all">
+                  {showPrivate
+                    ? data.private_id
+                    : "•".repeat(Math.min(data.private_id?.length || 8, 12))}
+                </span>
               </div>
 
-              <span>{data.private_id}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowPrivate(!showPrivate)}
+                  className="text-gray-400 hover:text-gray-200 transition-colors"
+                  title={showPrivate ? "Hide ID" : "Show ID"}
+                >
+                  {showPrivate ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+                <button
+                  onClick={() => copyToClipboard(data.private_id)}
+                  className="text-gray-400 hover:text-gray-200 transition-colors"
+                  title="Copy Private ID"
+                >
+                  <Clipboard className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -314,10 +350,17 @@ export default function Step1({ data = {}, onChange }) {
               <span className="text-gray-500 text-sm">[ Art Preview ]</span>
             )}
           </div>
-          <div className="text-center mt-2">Art</div>
+          <div className="flex justify-center mt-2">
+            <LabelWithHint
+              label="Art"
+              icon="palette"
+              text="The main artwork that represents your character in full detail. Used in profiles, sheets, and campaign showcases. Choose an image that captures your character’s essence.
+"
+            />
+          </div>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-6">
           <div className="flex items-center justify-end mb-2 text-sm font-medium text-gray-200">
             <InputField
               type="toggleIcon"
@@ -349,7 +392,13 @@ export default function Step1({ data = {}, onChange }) {
               <span className="text-gray-500 text-sm">[ Token Preview ]</span>
             )}
           </div>
-          <div className="text-center mt-2">Token</div>
+          <div className="flex justify-center mt-2">
+            <LabelWithHint
+              label="Token"
+              icon="map-pin"
+              text="A smaller portrait or cropped version of your character’s image, used for tokens in a tabletop setting, maps, or quick references during sessions."
+            />
+          </div>
         </div>
       </div>
       <hr className="border-gray-700" />
@@ -371,11 +420,15 @@ export default function Step1({ data = {}, onChange }) {
             }}
             placeholder={raceOptions.length ? "Select Race" : "Loading..."}
             options={raceOptions}
+            hint={{
+              icon: "baby",
+              text: "The species or ancestry your character belongs to. It defines physical traits, cultural origins, and unique abilities that shape who they are in the world.",
+            }}
           />
 
           <div>
             <InputField
-              label="Sub Race"
+              label="Subrace"
               type="selectSearch"
               value={data.subrace_name}
               onChange={(val) => {
@@ -396,6 +449,10 @@ export default function Step1({ data = {}, onChange }) {
               }
               options={subraceOptions}
               disabled={!data.race_id || noSubrace}
+              hint={{
+                icon: "users-round",
+                text: "A branch or lineage within your main race that adds further distinction or specialized traits.",
+              }}
             />
             {data.race_id && noSubrace && (
               <p className="text-xs text-gray-400 italic mt-1">
@@ -413,6 +470,10 @@ export default function Step1({ data = {}, onChange }) {
             onChange={(val) => onChange("alignment", val)}
             placeholder="Please Choose Your Alignment"
             options={alignmentOptions}
+            hint={{
+              icon: "scale",
+              text: "A reflection of your character’s moral and ethical outlook — how they view order, chaos, good, and evil. It serves as a guide, not a restriction.",
+            }}
           />
 
           <InputField
@@ -421,6 +482,10 @@ export default function Step1({ data = {}, onChange }) {
             value={data.character_type}
             onChange={(val) => onChange("character_type", val)}
             options={["Player", "NPC"]}
+            hint={{
+              icon: "user-cog",
+              text: "Defines whether this character is a Player Character (PC) — a adventurer controlled by a player — or a Non-Player Character (NPC), representing story figures, allies, enemies, or other important individuals within your story.",
+            }}
           />
         </div>
       </div>
@@ -435,10 +500,18 @@ export default function Step1({ data = {}, onChange }) {
             value={data.status}
             onChange={(val) => onChange("status", val)}
             options={["Alive", "Unknown", "Dead"]}
+            hint={{
+              icon: "activity",
+              text: "Indicates the character’s current state — Alive, Deceased, or Unknown. Used to track their condition or legacy within the story.",
+            }}
           />
 
           <div>
-            <label className="block text-sm font-medium mb-1">Birth Year</label>
+            <LabelWithHint
+              label="Birth Year"
+              icon="calendar"
+              text="The year your character was born. Useful for establishing age, timeline consistency, and historical context."
+            />
             <div className="flex gap-2 items-end">
               <input
                 type="number"
@@ -478,11 +551,15 @@ export default function Step1({ data = {}, onChange }) {
 
           {(data.status === "Dead" || data.status === "Unknown") && (
             <div>
-              <label className="block text-sm font-medium mb-1">
-                {data.status === "Unknown"
-                  ? "Presume Death Year"
-                  : "Death Year"}
-              </label>
+              <LabelWithHint
+                label={
+                  data.status === "Unknown"
+                    ? "Presume Death Year"
+                    : "Death Year"
+                }
+                icon="clock"
+                text="The year your character passed away, if applicable. Leave blank if the character is still alive or their fate is unknown."
+              />
               <div className="flex gap-2 items-end">
                 <input
                   type="number"
@@ -530,6 +607,10 @@ export default function Step1({ data = {}, onChange }) {
               value={data.birth_place}
               onChange={(val) => onChange("birth_place", val)}
               placeholder=""
+              hint={{
+                icon: "activity",
+                text: "The town, city, or specific location where your character was born. Adds depth to their personal history and connection to the world.",
+              }}
             />
             {talesMode ? (
               <InputField
@@ -560,10 +641,18 @@ export default function Step1({ data = {}, onChange }) {
               onChange={(val) => onChange("gender", val)}
               placeholder="Select Gender"
               options={["Male", "Female", "Nonbinary", "Undefined"]}
+              hint={{
+                icon: "venus-mars",
+                text: "Your character’s identified gender. Used for narrative reference and character documentation.",
+              }}
             />
 
             <div>
-              <label className="block text-sm font-medium mb-1">Height</label>
+              <LabelWithHint
+                label="Height"
+                icon="ruler"
+                text="Your character’s height. Adds visual and descriptive detail to your character’s physical presence."
+              />
               <div className="flex gap-2 items-end">
                 {data.height_unit === "imperial" ? (
                   <div className="flex gap-2 flex-1">
@@ -647,10 +736,18 @@ export default function Step1({ data = {}, onChange }) {
                 "It/Its",
                 "No Pronouns",
               ]}
+              hint={{
+                icon: "quote",
+                text: "The pronouns your character uses (e.g., he/him, she/her, they/them). Helps others refer to your character respectfully and accurately.",
+              }}
             />
 
             <div>
-              <label className="block text-sm font-medium mb-1">Weight</label>
+              <LabelWithHint
+                label="Weight"
+                icon="scale"
+                text="Your character’s weight. Used mainly for descriptive purposes or when physical statistics are relevant."
+              />
               <div className="flex gap-2 items-end">
                 <input
                   type="number"
@@ -701,12 +798,20 @@ export default function Step1({ data = {}, onChange }) {
               type="text"
               value={data.skin_colour}
               onChange={(val) => onChange("skin_colour", val)}
+              hint={{
+                icon: "palette",
+                text: "Describes your character’s skin tone or complexion. Used for artistic, descriptive, or visual reference.",
+              }}
             />
             <InputField
               label="Hair"
               type="text"
               value={data.hair}
               onChange={(val) => onChange("hair", val)}
+              hint={{
+                icon: "palette",
+                text: "Describes your character’s skin tone or complexion. Used for artistic, descriptive, or visual reference.",
+              }}
             />
           </div>
 
@@ -714,12 +819,16 @@ export default function Step1({ data = {}, onChange }) {
             <InputField
               label="Background"
               type="selectSearch"
-              value={data.backgrounds}
-              onChange={(val) => onChange("backgrounds", val)}
+              value={data.background_id}
+              onChange={(val) => onChange("background_id", val)}
               placeholder={
                 backgroundOptions.length ? "Select Background" : "Loading..."
               }
               options={backgroundOptions}
+              hint={{
+                icon: "book-open",
+                text: "Your character’s background or origin, such as Soldier, Sage, or Outlander. Defines their history, early skills, and the experiences that shaped them",
+              }}
             />
           )}
         </div>

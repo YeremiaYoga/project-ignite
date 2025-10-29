@@ -8,10 +8,9 @@ import {
   economicalOptions,
   socialClassOptions,
 } from "../../data/characterOptions";
+import LabelWithHint from "@/components/LabelWithHint";
 import RichTextEditor from "@/components/RichTextEditor";
 export default function Step2({ data, allData, onChange }) {
- 
-
   const allTraitsWithImages = allTraitsOptions.map((trait) => ({
     value: trait.toLowerCase(),
     label: trait,
@@ -29,9 +28,11 @@ export default function Step2({ data, allData, onChange }) {
 
         {allData?.character_type === "NPC" && (
           <div className="col-span-3">
-            <label className="block text-sm font-medium mb-1">
-              Personality Traits
-            </label>
+            <LabelWithHint
+              label="Personality Traits"
+              icon="brain"
+              text="Highlights defining aspects of your character’s personality — including habits, virtues, flaws, or mental tendencies. These traits can influence decision-making, behavior, and serve as the foundation for the character, affecting how they respond under stress or emotional strain."
+            />
             <div className="grid grid-cols-2 gap-2">
               <InputField
                 type="selectImage"
@@ -66,14 +67,17 @@ export default function Step2({ data, allData, onChange }) {
 
         <div className="col-span-9">
           <div className="flex items-center justify-between mb-1">
-            <label className="text-sm font-medium">Backstory</label>
+            <LabelWithHint
+              label="Backstory"
+              icon="album"
+              text="The written history of your character’s past — detailing their origins, defining moments, relationships, and experiences that shaped who they are today.
+"
+            />
             <InputField
-         
               type="toggleIcon"
               value={data.backstory_visibility}
               onChange={(v) => onChange("backstory_visibility", v)}
             />
-  
           </div>
           <RichTextEditor
             value={data.backstory || ""}
@@ -98,6 +102,10 @@ export default function Step2({ data, allData, onChange }) {
             value={data.main_personality || ""}
             onChange={(val) => onChange("main_personality", val)}
             placeholder="Enter main personality"
+            hint={{
+              icon: "user",
+              text: "A general summary of your character’s temperament, attitude, and core behavior. Describes how they usually act, think, and respond to the world around them.",
+            }}
           />
           <InputField
             label="Previous Economical Standing"
@@ -106,6 +114,10 @@ export default function Step2({ data, allData, onChange }) {
             onChange={(val) => onChange("previous_economical_standing", val)}
             placeholder="Select Economical Standing"
             options={economicalOptions}
+            hint={{
+              icon: "coins",
+              text: "Represents your character’s past financial or material condition — whether they came from poverty, modest means, or great wealth before the story began.",
+            }}
           />
           <InputField
             label="Current Economical Standing"
@@ -116,6 +128,10 @@ export default function Step2({ data, allData, onChange }) {
             }
             placeholder="Select Economical Standing"
             options={economicalOptions}
+            hint={{
+              icon: "wallet",
+              text: "Reflects your character’s present wealth or resources.",
+            }}
           />
           <InputField
             label="Previous Social Classes"
@@ -124,6 +140,10 @@ export default function Step2({ data, allData, onChange }) {
             onChange={(val) => onChange("previous_social_classes", val)}
             placeholder="Select Sosial Classes"
             options={socialClassOptions}
+            hint={{
+              icon: "building-2",
+              text: "Your character’s former position or reputation within society — such as peasant, noble, scholar, or outcast — before major life changes or events.",
+            }}
           />
           <InputField
             label="Current Social Classes"
@@ -132,6 +152,10 @@ export default function Step2({ data, allData, onChange }) {
             onChange={(val) => onChange("current_social_classes", val)}
             placeholder="Select Sosial Classes"
             options={socialClassOptions}
+            hint={{
+              icon: "building",
+              text: "Your character’s current status or standing in society. May differ from their origins based on achievements, failures, or world events.",
+            }}
           />
         </div>
 
@@ -149,6 +173,10 @@ export default function Step2({ data, allData, onChange }) {
                 { label: "Test2", value: "Test2" },
                 { label: "Test3", value: "Test3" },
               ]}
+              hint={{
+                icon: "compass",
+                text: "Represents the entity, philosophy, or figure your character places their faith or belief in. It could be a god, cosmic force, or ideology — shaping their worldview, purpose, and moral compass. Although they could have left their Wayfarer path.",
+              }}
             />
           </div>
 
@@ -177,6 +205,10 @@ export default function Step2({ data, allData, onChange }) {
                   : [""]
               }
               onChange={(vals) => onChange("detailed_personality", vals)}
+              hint={{
+                icon: "brain-circuit",
+                text: "An in-depth analysis of your character’s mindset — describing emotional layers, decision patterns, quirks, and internal conflicts that extend beyond their main personality summary.",
+              }}
             />
           </div>
         </div>
@@ -185,14 +217,18 @@ export default function Step2({ data, allData, onChange }) {
 
         <div className="col-span-6">
           <div className="flex items-center justify-between mb-1">
-            <label className="text-sm font-medium">Fear / Weakness</label>
+            <LabelWithHint
+              label="Fear / Weakness"
+              icon="ghost"
+              text="The specific fear, trauma, or vulnerability your character possesses.
+Name: The term or concept defining this fear.
+From: The origin — what caused or instilled this fear."
+            />
             <InputField
-         
               type="toggleIcon"
               value={data.fear_weakness_visibility}
               onChange={(v) => onChange("fear_weakness_visibility", v)}
             />
-           
           </div>
           <MultipleInput
             labels=""
@@ -210,14 +246,20 @@ export default function Step2({ data, allData, onChange }) {
 
         <div className="col-span-6">
           <div className="flex items-center justify-between mb-1">
-            <label className="text-sm font-medium">Motivation</label>
+            <LabelWithHint
+              label="Motivation"
+              icon="flame"
+              text="The driving force behind your character’s actions and ambitions.
+Name: The defined goal or ideal they pursue.
+From: The event, person, or memory that sparked this drive.
+How Gained: The process or realization that turned it into a lasting conviction.
+"
+            />
             <InputField
-             
               type="toggleIcon"
               value={data.motivation_visibility}
               onChange={(v) => onChange("motivation_visibility", v)}
             />
-          
           </div>
           <MultipleInput
             labels=""
