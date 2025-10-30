@@ -11,48 +11,40 @@ export default function CharacterTrashList() {
   useEffect(() => {
     fetchTrash();
 
-    // fetchExpired();
-
-    // const interval = setInterval(() => {
-    //   fetchExpired();
-    // }, 5 * 60 * 1000);
-
+    // 🔁 kalau nanti ingin aktifkan auto-clean expired:
+    // const interval = setInterval(fetchExpired, 5 * 60 * 1000);
     // return () => clearInterval(interval);
   }, []);
 
-const fetchTrash = async () => {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/characters/trash`,
-      { credentials: "include" }
-    );
+  const fetchTrash = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/characters/trash`,
+        { credentials: "include" }
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    // Sesuaikan tergantung struktur respons
-    const chars = Array.isArray(data)
-      ? data
-      : data.characters || data.data || [];
+      // ✅ pastikan struktur respons fleksibel
+      const chars = Array.isArray(data)
+        ? data
+        : data.characters || data.data || [];
 
-    setCharacters(chars);
-  } catch (err) {
-    console.error("Failed to fetch trash characters:", err);
-    setCharacters([]); // fallback biar gak error di map()
-  }
-};
-
+      setCharacters(chars);
+    } catch (err) {
+      console.error("Failed to fetch trash characters:", err);
+      setCharacters([]); // fallback biar aman di map()
+    }
+  };
 
   const fetchExpired = async () => {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/characters/trash/expired`,
-        {
-          credentials: "include",
-        }
+        { credentials: "include" }
       );
       const data = await res.json();
-      console.log("Expired characters (>5 hari):", data);
-
+      console.log("🕓 Expired characters (>5 hari):", data);
       fetchTrash();
     } catch (err) {
       console.error("Failed to fetch expired trash characters:", err);
@@ -77,29 +69,33 @@ const fetchTrash = async () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to move character to restore");
+        throw new Error(data.error || "Failed to restore character");
       }
 
+      alert(`✅ "${name}" has been restored.`);
       fetchTrash();
-      alert(`"${name}" has been restore.`);
     } catch (err) {
       console.error(err);
-      alert(`Failed to move "${name}" restore.`);
+      alert(`❌ Failed to restore "${name}".`);
     }
   };
 
   if (characters.length === 0) {
-    return <p className="text-gray-400 text-center">Trash bin is empty.</p>;
+    return (
+      <p className="text-gray-400 text-center mt-10">
+        Trash bin is empty.
+      </p>
+    );
   }
 
   return (
-    <div className="grid grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 place-items-center">
       {characters.map((char) => (
         <CharacterCard
           key={char.uuid}
           char={char}
           isTrash={true}
-          onRestore={(id) => handleRestore(char.id, char.name)}
+          onRestore={() => handleRestore(char.id, char.name)}
         />
       ))}
     </div>

@@ -14,52 +14,35 @@ export default function CharacterList({ username }) {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/characters/user`,
-        {
-          credentials: "include",
-        }
+        { credentials: "include" }
       );
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setCharacters(data);
     } catch (err) {
       console.error("Failed to fetch remote characters:", err);
     }
-  }, [setCharacters]);
+  }, []);
 
   const fetchLocalChars = useCallback(async () => {
     try {
       const res = await fetch("/api/characters/getAll");
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
-
       const filtered = data.filter((char) => char.creator_name === username);
-      console.log(filtered);
       setCharacters(filtered);
     } catch (err) {
       console.error("Failed to fetch local characters:", err);
     }
-  }, [setCharacters, username]);
-
+  }, [username]);
 
   useEffect(() => {
     const modeFromCookie = Cookies.get("ignite-local-mode");
-
-    setLocalMode(modeFromCookie); 
+    setLocalMode(modeFromCookie);
 
     const isLocalModeActive = modeFromCookie === "true";
-
     if (isLocalModeActive) {
-      if (username) {
-        fetchLocalChars();
-      }
+      if (username) fetchLocalChars();
     } else {
       fetchRemoteChars();
     }
@@ -67,9 +50,7 @@ export default function CharacterList({ username }) {
     console.log(
       `Username: ${username}, Local Mode Active: ${isLocalModeActive}`
     );
-
-  }, [username, setLocalMode, fetchLocalChars, fetchRemoteChars]);
-
+  }, [username, fetchLocalChars, fetchRemoteChars]);
 
   const handleEdit = (id) => router.push(`/characters-maker/edit/${id}`);
 
@@ -89,10 +70,8 @@ export default function CharacterList({ username }) {
       );
 
       const data = await res.json();
-
-      if (!res.ok) {
+      if (!res.ok)
         throw new Error(data.error || "Failed to move character to trash");
-      }
 
       setCharacters((prev) => prev.filter((char) => char.uuid !== id));
       fetchRemoteChars();
@@ -105,18 +84,20 @@ export default function CharacterList({ username }) {
 
   if (characters.length === 0) {
     return (
-      <p className="text-gray-400 text-center">No characters created yet.</p>
+      <p className="text-gray-400 text-center mt-10">
+        No characters created yet.
+      </p>
     );
   }
 
   return (
-    <div className="grid grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 place-items-center">
       {characters.map((char) => (
         <CharacterCard
           key={char.public_id}
           char={char}
-          onEdit={(id) => handleEdit(char.private_id)}
-          onView={(id) => router.push(`/characters-maker/view/${id}`)}
+          onEdit={() => handleEdit(char.private_id)}
+          onView={() => router.push(`/characters-maker/view/${char.private_id}`)}
           onDelete={() => handleDelete(char.id, char.name)}
         />
       ))}

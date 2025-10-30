@@ -1,26 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Info } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 
 export default function MultipleInput({
   labels = "Items",
+  hint = null, // { text: "", icon: "calendar" }
   label = "Item",
   btnLabel = "Add",
   items = [],
   onChange,
   type = "string", // "string" | "object"
-  fields = ["name"], // hanya untuk type object
-  selectOptions = null, // hanya untuk single field select
-  columns = 1, // jumlah kolom untuk object fields
+  fields = ["name"],
+  selectOptions = null,
+  columns = 1,
 }) {
   const [entries, setEntries] = useState(
     items.length
       ? items
       : type === "object"
-      ? [Object.fromEntries(fields.map((f) => [f, ""]))] // buat objek kosong sesuai fields
+      ? [Object.fromEntries(fields.map((f) => [f, ""]))]
       : [""]
   );
+
+  const resolveLucideIcon = (iconName) => {
+    if (!iconName) return Info;
+    const cleanName = iconName.replace(/[-_]/g, "").toLowerCase();
+    const found = Object.entries(LucideIcons).find(
+      ([key]) => key.toLowerCase() === cleanName
+    );
+    return found ? found[1] : Info;
+  };
+
+  const HintIcon = hint?.icon ? resolveLucideIcon(hint.icon) : Info;
 
   const addItem = () => {
     const newItem =
@@ -50,15 +63,37 @@ export default function MultipleInput({
 
   return (
     <div className="my-2">
+      {/* Label utama dengan hint */}
       {labels && (
-        <label className="block text-sm font-medium mb-2">{labels}</label>
+        <label className="block text-sm font-medium mb-2 text-gray-200 flex items-center gap-1">
+          {labels}
+          {hint && (
+            <div className="relative group flex items-center">
+              <HintIcon
+                size={18}
+                className="text-gray-400 cursor-pointer transition-colors duration-200 group-hover:text-blue-600"
+              />
+              <div
+                className="absolute left-full bottom-0 ml-2 hidden group-hover:block 
+                transition-all duration-150 opacity-0 group-hover:opacity-100 
+                group-hover:translate-x-[2px] bg-gray-800 text-gray-200 text-xs 
+                rounded-md px-3 py-2 shadow-lg z-20 w-80"
+              >
+                {hint.text}
+              </div>
+            </div>
+          )}
+        </label>
       )}
 
+      {/* Daftar input */}
       {entries.map((item, index) => (
         <div
           key={index}
-          className={`flex items-center mb-2  ${
-            type === "object" ? "rounded-lg border  border-gray-600" : ""
+          className={`flex items-center mb-2 ${
+            type === "object"
+              ? "rounded-lg border border-gray-700 bg-gray-900"
+              : ""
           }`}
         >
           {type === "object" ? (
@@ -74,7 +109,7 @@ export default function MultipleInput({
                   placeholder={f.charAt(0).toUpperCase() + f.slice(1)}
                   value={item[f] || ""}
                   onChange={(e) => updateItem(index, f, e.target.value)}
-                  className="w-full p-2 rounded bg-gray-800 border border-gray-600"
+                  className="w-full p-2 rounded bg-gray-800 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-100"
                 />
               ))}
             </div>
@@ -82,7 +117,7 @@ export default function MultipleInput({
             <select
               value={item}
               onChange={(e) => updateItem(index, e.target.value)}
-              className="flex-1 p-2 rounded-lg border bg-gray-800 border-gray-600"
+              className="flex-1 p-2 rounded-lg border bg-gray-800 border-gray-600 text-gray-200 focus:border-blue-500"
             >
               <option value="">Select {label}</option>
               {selectOptions.map((opt) => (
@@ -97,7 +132,7 @@ export default function MultipleInput({
               placeholder={label}
               value={item}
               onChange={(e) => updateItem(index, e.target.value)}
-              className="flex-1 p-2 rounded-lg border bg-gray-800 border-gray-600"
+              className="flex-1 p-2 rounded-lg border bg-gray-800 border-gray-600 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
             />
           )}
 
@@ -113,12 +148,13 @@ export default function MultipleInput({
         </div>
       ))}
 
+      {/* Tombol tambah */}
       <button
         type="button"
         onClick={addItem}
         className="px-2 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
       >
-        {btnLabel == "Add" || !btnLabel ? `Add ${label}` : btnLabel}
+        {btnLabel === "Add" || !btnLabel ? `Add ${label}` : btnLabel}
       </button>
     </div>
   );

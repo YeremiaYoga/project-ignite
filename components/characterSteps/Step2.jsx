@@ -182,7 +182,7 @@ export default function Step2({ data, allData, onChange }) {
 
           <div className="col-span-5">
             <MultipleInput
-              labels="Titles"
+              labels="Titles / Nicknames"
               label="Title"
               type="object"
               fields={["name", "from"]}
@@ -192,6 +192,10 @@ export default function Step2({ data, allData, onChange }) {
                   : [{ name: "", from: "" }]
               }
               onChange={(vals) => onChange("titles", vals)}
+              hint={{
+                icon: "medal",
+                text: "Names or epithets your character has earned or been given — whether formal honors, infamous aliases, or affectionate monikers used by allies and foes alike.",
+              }}
             />
           </div>
 

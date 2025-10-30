@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Info, Eye, EyeOff } from "lucide-react"; // tetap import default icons
-import * as LucideIcons from "lucide-react"; 
+import * as LucideIcons from "lucide-react";
 
 export default function InputField({
   label,
@@ -19,7 +19,7 @@ export default function InputField({
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef();
 
-    const resolveLucideIcon = (iconName) => {
+  const resolveLucideIcon = (iconName) => {
     if (!iconName) return Info;
     const cleanName = iconName.replace(/[-_]/g, "").toLowerCase();
     const found = Object.entries(LucideIcons).find(
@@ -28,7 +28,7 @@ export default function InputField({
     return found ? found[1] : Info;
   };
 
-    const HintIcon = hint?.icon ? resolveLucideIcon(hint.icon) : Info;
+  const HintIcon = hint?.icon ? resolveLucideIcon(hint.icon) : Info;
 
   const filteredOptions =
     type === "selectSearch"
@@ -45,7 +45,6 @@ export default function InputField({
     setQuery(opt.label ?? opt);
     setIsOpen(false);
   };
-  
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -59,28 +58,27 @@ export default function InputField({
 
   return (
     <div ref={ref} className="relative">
-    {label && (
-  <label className="block text-sm font-medium mb-1 flex items-center gap-1">
-    {label}
-    {hint && (
-      <div className="relative group flex items-center">
-        <HintIcon
-          size={18}
-          className="text-gray-400 cursor-pointer transition-colors duration-200 group-hover:text-blue-600"
-        />
-        <div
-          className="absolute left-full bottom-0 ml-2 hidden group-hover:block 
+      {label && (
+        <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+          {label}
+          {hint && (
+            <div className="relative group flex items-center">
+              <HintIcon
+                size={18}
+                className="text-gray-400 cursor-pointer transition-colors duration-200 group-hover:text-blue-600"
+              />
+              <div
+                className="absolute left-full bottom-0 ml-2 hidden group-hover:block 
           transition-all duration-150 opacity-0 group-hover:opacity-100 
           group-hover:translate-x-[2px] bg-gray-800 text-gray-200 text-xs 
           rounded-md px-3 py-2 shadow-lg z-20 w-80"
-        >
-          {hint.text}
-        </div>
-      </div>
-    )}
-  </label>
-)}
-
+              >
+                {hint.text}
+              </div>
+            </div>
+          )}
+        </label>
+      )}
 
       {type === "selectSearch" ? (
         <>

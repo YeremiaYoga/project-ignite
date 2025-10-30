@@ -373,7 +373,7 @@ export default function Step5({ data, allData, onChange }) {
               Combat Style
               <div
                 className="relative group cursor-pointer"
-                onClick={() => router.push("/incumbency")}
+                onClick={() => window.open("/incumbency", "_blank")}
               >
                 <Info size={14} className="text-gray-400 hover:text-teal-400" />
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 hidden group-hover:block bg-gray-900 text-gray-100 text-xs rounded-md px-2 py-1 shadow-xl z-20 w-[260px]">

@@ -39,7 +39,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-stretch space-x-2 p-2">
           <Image
-            src="/assets/project_ignite_logo.webp"
+            src="/assets/project_ignite_logo2.webp"
             alt="Ignite Logo"
             width={0}
             height={0}

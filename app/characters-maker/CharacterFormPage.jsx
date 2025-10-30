@@ -39,25 +39,17 @@ export default function CharacterFormPage({ mode = "create" }) {
     const fetchCharacter = async () => {
       try {
         setLoading(true);
-
-        // 🔐 Ambil karakter via private_id
         const res = await fetch(`${BASE_URL}/characters/private/${id}`, {
           method: "GET",
-          credentials: "include", // penting untuk kirim cookie token
+          credentials: "include",
         });
-
         if (!res.ok) {
-          // kalau response error (misal 403 / 404)
           const errorData = await res.json().catch(() => ({}));
           throw new Error(errorData.error || "Failed to load character");
         }
-
         const json = await res.json();
         console.log("✅ Character data loaded:", json);
-
-        // pastikan json adalah data karakter (bukan {success, data})
         const charData = json.data || json;
-
         setFormData({
           ...getDefaultForm(),
           ...charData,
@@ -98,7 +90,6 @@ export default function CharacterFormPage({ mode = "create" }) {
   const nextStep = () => goToStep(currentStep + 1);
   const prevStep = () => goToStep(currentStep - 1);
 
-  // 💾 Save or Update (pakai Cookie)
   const handleSubmit = async () => {
     try {
       if (!formData) return;
@@ -147,24 +138,25 @@ export default function CharacterFormPage({ mode = "create" }) {
   const CurrentComponent = steps[currentStep].component;
 
   return (
-    <main className="mx-auto px-4 py-8 text-white min-h-screen">
-      <div className="flex justify-between items-center mb-6">
+    <main className="mx-auto px-3 sm:px-6 py-6 sm:py-8 text-white min-h-screen">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0 mb-6">
         <button
           onClick={() => router.push("/characters-maker")}
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded shadow text-sm"
+          className="w-full sm:w-auto px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded shadow text-sm"
         >
           ← Back
         </button>
 
-        <h1 className="text-2xl font-bold text-center flex-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-center flex-1">
           {mode === "edit" ? "Edit Character" : "Create Character"}
         </h1>
 
-        <div className="w-[80px]" />
+        <div className="hidden sm:block w-[80px]" />
       </div>
 
       {/* STEP INDICATOR */}
-      <div className="flex justify-center mb-4 gap-2">
+      <div className="flex justify-center flex-wrap mb-6 gap-2">
         {steps.map((_, idx) => (
           <div
             key={idx}
@@ -181,20 +173,32 @@ export default function CharacterFormPage({ mode = "create" }) {
       </div>
 
       {/* STEP CONTENT */}
-      <div className="p-6 rounded-lg shadow bg-[#0b1230] border border-slate-700">
-        <CurrentComponent
-          data={formData}
-          allData={formData}
-          onChange={handleChange}
-        />
+      <div className="p-4 sm:p-6 rounded-lg shadow bg-[#0b1230] border border-slate-700">
+        {currentStep === steps.length - 1 &&
+        formData?.character_type?.toLowerCase() === "player" ? (
+          <div className="text-center py-10">
+            <p className="text-yellow-300 text-lg font-semibold mb-2">
+              ⚠️ Step 5 is only available for NPC characters.
+            </p>
+            <p className="text-gray-300 text-sm">
+              Players do not have access to this configuration step.
+            </p>
+          </div>
+        ) : (
+          <CurrentComponent
+            data={formData}
+            allData={formData}
+            onChange={handleChange}
+          />
+        )}
       </div>
 
       {/* NAVIGATION BUTTONS */}
-      <div className="flex justify-between mb-4 mt-5">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
         <button
           onClick={prevStep}
           disabled={currentStep === 0}
-          className={`px-4 py-2 rounded shadow ${
+          className={`w-full sm:w-auto px-4 py-2 rounded shadow ${
             currentStep === 0
               ? "bg-gray-600 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700"
@@ -203,33 +207,45 @@ export default function CharacterFormPage({ mode = "create" }) {
           Previous
         </button>
 
-        <div className="flex gap-2">
-          <button
-            onClick={handleSubmit}
-            disabled={saving}
-            className={`px-4 py-2 rounded shadow ${
-              saving
-                ? "bg-gray-500 cursor-not-allowed"
-                : "bg-yellow-500 hover:bg-yellow-600"
-            }`}
-          >
-            {saving ? "Saving..." : "Save"}
-          </button>
-
-          {currentStep === steps.length - 1 ? (
+        <div className="flex flex-col sm:flex-row gap-3">
+          {currentStep === steps.length - 1 &&
+          formData?.character_type?.toLowerCase() === "player" ? (
             <button
               onClick={handleSubmit}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
+              className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
             >
               Finish
             </button>
           ) : (
-            <button
-              onClick={nextStep}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded shadow"
-            >
-              Next
-            </button>
+            <>
+              <button
+                onClick={handleSubmit}
+                disabled={saving}
+                className={`w-full sm:w-auto px-4 py-2 rounded shadow ${
+                  saving
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-yellow-500 hover:bg-yellow-600"
+                }`}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+
+              {currentStep === steps.length - 1 ? (
+                <button
+                  onClick={handleSubmit}
+                  className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 rounded shadow"
+                >
+                  Finish
+                </button>
+              ) : (
+                <button
+                  onClick={nextStep}
+                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded shadow"
+                >
+                  Next
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -237,7 +253,7 @@ export default function CharacterFormPage({ mode = "create" }) {
   );
 }
 
-// default form factory
+// Default form factory
 function getDefaultForm() {
   return {
     name: "",
@@ -268,7 +284,6 @@ function getDefaultForm() {
     wiki_visibility: false,
     weight_unit: "imperial",
     height_unit: "imperial",
-
     backstory_visibility: false,
     backstory: "",
     voice_style: "",

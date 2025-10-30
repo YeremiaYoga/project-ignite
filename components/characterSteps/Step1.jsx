@@ -62,6 +62,8 @@ export default function Step1({ data = {}, onChange }) {
   ]);
 
   useEffect(() => {
+    if (data.private_id || data.public_id) return;
+
     const chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -81,7 +83,7 @@ export default function Step1({ data = {}, onChange }) {
 
     onChange("private_id", privateId);
     onChange("public_id", publicId);
-  }, []);
+  }, [data.private_id, data.public_id]);
 
   useEffect(() => {
     async function fetchData() {
@@ -642,7 +644,7 @@ export default function Step1({ data = {}, onChange }) {
               placeholder="Select Gender"
               options={["Male", "Female", "Nonbinary", "Undefined"]}
               hint={{
-                icon: "venus-mars",
+                icon: "venus-and-mars",
                 text: "Your character’s identified gender. Used for narrative reference and character documentation.",
               }}
             />
@@ -819,8 +821,14 @@ export default function Step1({ data = {}, onChange }) {
             <InputField
               label="Background"
               type="selectSearch"
-              value={data.background_id}
-              onChange={(val) => onChange("background_id", val)}
+              value={data.background_name}
+              onChange={(val) => {
+                const selected = backgroundOptions.find(
+                  (r) => r.id === val || r.value === val
+                );
+                onChange("background_id", selected?.id || "");
+                onChange("background_name", selected?.label || "");
+              }}
               placeholder={
                 backgroundOptions.length ? "Select Background" : "Loading..."
               }
