@@ -2,11 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import Step1 from "@/components/characterSteps/Step1";
-import Step2 from "@/components/characterSteps/Step2";
-import Step3 from "@/components/characterSteps/Step3";
-import Step4 from "@/components/characterSteps/Step4";
-import Step5 from "@/components/characterSteps/Step5";
+import dynamic from "next/dynamic";
+import Cookies from "js-cookie";
+
+// ✅ Desktop components
+import Step1Desktop from "@/components/characterSteps/Step1";
+import Step2Desktop from "@/components/characterSteps/Step2";
+import Step3Desktop from "@/components/characterSteps/Step3";
+import Step4Desktop from "@/components/characterSteps/Step4";
+import Step5Desktop from "@/components/characterSteps/Step5";
+
+// ✅ Mobile components (lazy load agar tidak berat di desktop)
+const Step1Mobile = dynamic(() =>
+  import("@/components/characterSteps/mobile/Step1")
+);
+const Step2Mobile = dynamic(() =>
+  import("@/components/characterSteps/mobile/Step2")
+);
+const Step3Mobile = dynamic(() =>
+  import("@/components/characterSteps/mobile/Step3")
+);
 
 export default function CharacterFormPage({ mode = "create" }) {
   const router = useRouter();
@@ -19,17 +34,28 @@ export default function CharacterFormPage({ mode = "create" }) {
   const [formData, setFormData] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(mode === "edit");
+  const [isMobile, setIsMobile] = useState(false);
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+  // ✅ Deteksi layar mobile (kurang dari 768px)
+  useEffect(() => {
+    const checkScreen = () => setIsMobile(window.innerWidth < 768);
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
+  // ✅ Tentukan komponen step berdasarkan device
   const steps = [
-    { title: "Step 1", component: Step1 },
-    { title: "Step 2", component: Step2 },
-    { title: "Step 3", component: Step3 },
-    { title: "Step 4", component: Step4 },
-    { title: "Step 5", component: Step5 },
+    { title: "Step 1", component: isMobile ? Step1Mobile : Step1Desktop },
+    { title: "Step 2", component: isMobile ? Step2Mobile : Step2Desktop },
+    { title: "Step 3", component: isMobile ? Step3Mobile : Step3Desktop },
+    { title: "Step 4", component: Step4Desktop },
+    { title: "Step 5", component: Step5Desktop },
   ];
 
+  // ✅ Fetch karakter untuk mode edit
   useEffect(() => {
     if (mode !== "edit" || !id) {
       setFormData(getDefaultForm());
@@ -43,13 +69,15 @@ export default function CharacterFormPage({ mode = "create" }) {
           method: "GET",
           credentials: "include",
         });
+
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || "Failed to load character");
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to load character");
         }
+
         const json = await res.json();
-        console.log("✅ Character data loaded:", json);
         const charData = json.data || json;
+
         setFormData({
           ...getDefaultForm(),
           ...charData,
@@ -73,9 +101,11 @@ export default function CharacterFormPage({ mode = "create" }) {
     fetchCharacter();
   }, [mode, id]);
 
+  // ✅ Handle perubahan field
   const handleChange = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
 
+  // ✅ Navigasi antar step
   const goToStep = (step) => {
     if (step >= 0 && step < steps.length) {
       setCurrentStep(step);
@@ -90,6 +120,7 @@ export default function CharacterFormPage({ mode = "create" }) {
   const nextStep = () => goToStep(currentStep + 1);
   const prevStep = () => goToStep(currentStep - 1);
 
+  // ✅ Simpan character
   const handleSubmit = async () => {
     try {
       if (!formData) return;
@@ -111,7 +142,7 @@ export default function CharacterFormPage({ mode = "create" }) {
 
       const res = await fetch(url, {
         method: mode === "edit" ? "PUT" : "POST",
-        credentials: "include", // ✅ kirim cookie ke backend
+        credentials: "include",
         body: form,
       });
 
@@ -128,6 +159,7 @@ export default function CharacterFormPage({ mode = "create" }) {
     }
   };
 
+  // ✅ Loading state
   if (loading || !formData)
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
@@ -138,7 +170,7 @@ export default function CharacterFormPage({ mode = "create" }) {
   const CurrentComponent = steps[currentStep].component;
 
   return (
-    <main className="mx-auto px-3 sm:px-6 py-6 sm:py-8 text-white min-h-screen">
+    <main className="mx-auto w-full px-3 sm:max-w-6xl sm:px-6 py-6 sm:py-8 text-white min-h-screen">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0 mb-6">
         <button
@@ -253,7 +285,7 @@ export default function CharacterFormPage({ mode = "create" }) {
   );
 }
 
-// Default form factory
+// ✅ Default form factory (tanpa perubahan)
 function getDefaultForm() {
   return {
     name: "",
