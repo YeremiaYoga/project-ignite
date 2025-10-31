@@ -22,6 +22,12 @@ const Step2Mobile = dynamic(() =>
 const Step3Mobile = dynamic(() =>
   import("@/components/characterSteps/mobile/Step3")
 );
+const Step4Mobile = dynamic(() =>
+  import("@/components/characterSteps/mobile/Step4")
+);
+const Step5Mobile = dynamic(() =>
+  import("@/components/characterSteps/mobile/Step5")
+);
 
 export default function CharacterFormPage({ mode = "create" }) {
   const router = useRouter();
@@ -51,8 +57,8 @@ export default function CharacterFormPage({ mode = "create" }) {
     { title: "Step 1", component: isMobile ? Step1Mobile : Step1Desktop },
     { title: "Step 2", component: isMobile ? Step2Mobile : Step2Desktop },
     { title: "Step 3", component: isMobile ? Step3Mobile : Step3Desktop },
-    { title: "Step 4", component: Step4Desktop },
-    { title: "Step 5", component: Step5Desktop },
+    { title: "Step 4", component: isMobile ? Step4Mobile : Step4Desktop },
+    { title: "Step 5", component: isMobile ? Step5Mobile : Step5Desktop },
   ];
 
   // ✅ Fetch karakter untuk mode edit

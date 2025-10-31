@@ -193,9 +193,9 @@ export default function Step1({ data = {}, onChange }) {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
-      <div className="grid grid-cols-4 gap-4">
-        <div className="space-y-4 col-span-2">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="space-y-4 md:col-span-2 lg:col-span-2">
           <InputField
             label="Nickname"
             value={data.name}
@@ -231,7 +231,7 @@ export default function Step1({ data = {}, onChange }) {
             <div className="flex items-center gap-4 text-sm">
               <span className="font-medium">Art :</span>
               <div className="flex items-center gap-3 ml-auto">
-                <span className="text-gray-300 text-sm truncate max-w-[200px]">
+                <span className="text-gray-300 text-sm truncate max-w-[140px] sm:max-w-[200px]">
                   {data.art ? data.art.name : "No file chosen"}
                 </span>
                 <label className="cursor-pointer px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
@@ -253,7 +253,7 @@ export default function Step1({ data = {}, onChange }) {
             <div className="flex items-center gap-4 text-sm">
               <span className="font-medium">Token :</span>
               <div className="flex items-center gap-3 ml-auto">
-                <span className="text-gray-300 text-sm truncate max-w-[200px]">
+                <span className="text-gray-300 text-sm truncate max-w-[140px] sm:max-w-[200px]">
                   {data.token_art ? data.token_art.name : "No file chosen"}
                 </span>
 
@@ -273,13 +273,13 @@ export default function Step1({ data = {}, onChange }) {
             </span>
           </div>
         </div>
-        <div className="mt-[14px]">
+  <div className="mt-[14px]">
           <div className="mb-2 text-sm font-medium text-gray-200 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <div className="relative group">
                   <Link className="w-4 h-4 " />
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-slate-800 text-gray-200 text-xs px-3 py-2 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity w-80 z-10 pointer-events-none">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-slate-800 text-gray-200 text-xs px-3 py-2 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity w-40 sm:w-80 z-10 pointer-events-none">
                     Your Public Character ID — used to identify your character
                     across public sheets, campaigns, constellations, and other
                     shared data. Safe to share with people you trust.
@@ -301,7 +301,7 @@ export default function Step1({ data = {}, onChange }) {
               <div className="flex items-center gap-2">
                 <div className="relative group">
                   <FileKey className="w-4 h-4" />
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-slate-800 text-gray-200 text-xs px-3 py-2 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity w-96 z-10 pointer-events-none">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-slate-800 text-gray-200 text-xs px-3 py-2 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity w-44 sm:w-96 z-10 pointer-events-none">
                     Your Private Character ID. Do not share this with anyone
                     except your Dungeon Master, Ignite Admin, or yourself. It
                     works like a password for your character — anyone with this
@@ -339,7 +339,7 @@ export default function Step1({ data = {}, onChange }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
+          <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-36 h-36 sm:w-[230px] sm:h-[230px] overflow-hidden">
             {artPreview ? (
               <img
                 src={artPreview}
@@ -381,7 +381,7 @@ export default function Step1({ data = {}, onChange }) {
             />
           </div>
 
-          <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-[230px] h-[230px] overflow-hidden">
+          <div className="flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800 w-36 h-36 sm:w-[230px] sm:h-[230px] overflow-hidden">
             {tokenPreview ? (
               <img
                 src={tokenPreview}
@@ -405,7 +405,7 @@ export default function Step1({ data = {}, onChange }) {
       </div>
       <hr className="border-gray-700" />
 
-      <div className="grid grid-cols-2 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="space-y-4">
           <InputField
             label="Race"
@@ -494,8 +494,8 @@ export default function Step1({ data = {}, onChange }) {
 
       <hr className="border-gray-700" />
 
-      <div className="grid grid-cols-5 gap-6">
-        <div className="space-y-4 col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="space-y-4 lg:col-span-2 md:col-span-2">
           <InputField
             label="Status"
             type="selectButton"
@@ -634,8 +634,8 @@ export default function Step1({ data = {}, onChange }) {
           </div>
         </div>
 
-        <div className="space-y-4 col-span-3">
-          <div className="grid grid-cols-2 gap-4 items-start">
+  <div className="space-y-4 lg:col-span-3 md:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
             <InputField
               label="Gender"
               type="select"
@@ -724,7 +724,7 @@ export default function Step1({ data = {}, onChange }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
             <InputField
               label="Pronoun"
               type="select"
@@ -794,7 +794,7 @@ export default function Step1({ data = {}, onChange }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField
               label="Skin Colour"
               type="text"

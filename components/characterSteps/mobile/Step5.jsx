@@ -6,7 +6,7 @@ import {
   sizeOptions,
   creatureTypeOptions,
   personalityCombatStyleOptions,
-} from "../../data/characterOptions";
+} from "@/data/characterOptions";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";

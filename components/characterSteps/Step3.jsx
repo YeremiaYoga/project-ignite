@@ -266,7 +266,7 @@ export default function Step3({ data, allData, onChange, mode }) {
             />
           </div>
           <MultipleInput
-            labels=""
+            labels="Hobbies"
             label="Hobbies"
             items={data.hobbies || [""]}
             onChange={(items) => onChange("hobbies", items)}
