@@ -59,13 +59,14 @@ export default function InputField({
   return (
     <div ref={ref} className="relative">
       {label && (
-        <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+        <label className=" text-sm font-medium mb-1 flex items-center gap-1">
           {label}
           {hint && (
             <div className="relative group flex items-center">
               <HintIcon
                 size={18}
                 className="text-gray-400 cursor-pointer transition-colors duration-200 group-hover:text-blue-600"
+                title={hint.text} 
               />
               <div
                 className="absolute left-full bottom-0 ml-2 hidden group-hover:block 
