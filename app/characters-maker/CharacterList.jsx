@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import CharacterCard from "./CharacterCard";
 
-export default function CharacterList({ username }) {
+export default function CharacterList({ username, searchTerm = "" }) {
   const router = useRouter();
   const [characters, setCharacters] = useState([]);
   const [localMode, setLocalMode] = useState(false);
@@ -82,17 +82,24 @@ export default function CharacterList({ username }) {
     }
   };
 
-  if (characters.length === 0) {
+  // 🧠 Filter hasil berdasarkan searchTerm
+  const filteredCharacters = characters.filter((char) =>
+    char.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (filteredCharacters.length === 0) {
     return (
       <p className="text-gray-400 text-center mt-10">
-        No characters created yet.
+        {characters.length === 0
+          ? "No characters created yet."
+          : "No matching characters found."}
       </p>
     );
   }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 place-items-center">
-      {characters.map((char) => (
+      {filteredCharacters.map((char) => (
         <CharacterCard
           key={char.public_id}
           char={char}

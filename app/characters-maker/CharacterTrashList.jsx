@@ -4,16 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CharacterCard from "./CharacterCard";
 
-export default function CharacterTrashList() {
+export default function CharacterTrashList({ searchTerm = "" }) {
   const router = useRouter();
   const [characters, setCharacters] = useState([]);
 
   useEffect(() => {
     fetchTrash();
-
-    // 🔁 kalau nanti ingin aktifkan auto-clean expired:
-    // const interval = setInterval(fetchExpired, 5 * 60 * 1000);
-    // return () => clearInterval(interval);
   }, []);
 
   const fetchTrash = async () => {
@@ -34,20 +30,6 @@ export default function CharacterTrashList() {
     } catch (err) {
       console.error("Failed to fetch trash characters:", err);
       setCharacters([]); // fallback biar aman di map()
-    }
-  };
-
-  const fetchExpired = async () => {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/characters/trash/expired`,
-        { credentials: "include" }
-      );
-      const data = await res.json();
-      console.log("🕓 Expired characters (>5 hari):", data);
-      fetchTrash();
-    } catch (err) {
-      console.error("Failed to fetch expired trash characters:", err);
     }
   };
 
@@ -80,17 +62,24 @@ export default function CharacterTrashList() {
     }
   };
 
-  if (characters.length === 0) {
+  // 🔍 Filter hasil berdasarkan searchTerm
+  const filteredCharacters = characters.filter((char) =>
+    char.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (filteredCharacters.length === 0) {
     return (
       <p className="text-gray-400 text-center mt-10">
-        Trash bin is empty.
+        {characters.length === 0
+          ? "Trash bin is empty."
+          : "No matching characters found in trash."}
       </p>
     );
   }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 place-items-center">
-      {characters.map((char) => (
+      {filteredCharacters.map((char) => (
         <CharacterCard
           key={char.uuid}
           char={char}
