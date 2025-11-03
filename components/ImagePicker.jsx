@@ -72,20 +72,6 @@ export default function ImagePicker({
           </button>
         </div>
 
-        {/* Breadcrumb */}
-        {/* <div className="flex items-center gap-1 px-4 py-2 text-xs text-gray-400">
-          {breadcrumbs.map((b, idx) => (
-            <span key={b.path} className="flex items-center gap-1">
-              <button
-                className="hover:text-white"
-                onClick={() => fetchImages(b.path)}
-              >
-                {b.name}
-              </button>
-              {idx < breadcrumbs.length - 1 && <span>/</span>}
-            </span>
-          ))}
-        </div> */}
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-4">
@@ -111,11 +97,9 @@ export default function ImagePicker({
                   <img
                     src={img.url}
                     alt={img.name}
-                    className="h-24 w-full object-cover transition-opacity group-hover:opacity-80"
+                    className="h-full w-full object-cover transition-opacity group-hover:opacity-80"
                   />
-                  <div className="absolute bottom-0 inset-x-0 bg-black/40 px-2 py-1 text-[11px] text-gray-200 truncate">
-                    {img.name}
-                  </div>
+             
                 </button>
               ))}
             </div>
