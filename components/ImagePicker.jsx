@@ -30,7 +30,7 @@ export default function ImagePicker({
       setLoading(true);
       const res = await fetch(`${baseUrl}?path=${encodeURIComponent(p)}`, {
         cache: "no-store",
-        credentials: "include", // ✅ penting supaya cookie terkirim
+        credentials: "include",
       });
       const json = await res.json();
 

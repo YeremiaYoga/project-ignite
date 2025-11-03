@@ -30,9 +30,8 @@ export default function UserMenu() {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
         method: "POST",
-        credentials: "include", 
+        credentials: "include",
       });
-
 
       await signOut(() => {
         window.location.href = "/";
@@ -57,7 +56,7 @@ export default function UserMenu() {
               email: user.primaryEmailAddress?.emailAddress,
               username: user.username || user.fullName || "",
             }),
-            credentials: "include", 
+            credentials: "include",
           }
         );
 
@@ -66,7 +65,7 @@ export default function UserMenu() {
 
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`,
-          { credentials: "include" } 
+          { credentials: "include" }
         );
 
         if (!res.ok) throw new Error("Failed to fetch user data");
@@ -158,11 +157,25 @@ export default function UserMenu() {
     <>
       <div className="relative" ref={menuRef}>
         <button
-          className="text-gray-300 hover:text-white"
+          className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-gray-500 hover:border-white transition"
           aria-label="User Menu"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
-          <CircleUserRound size={28} />
+          {userData?.profile_picture ? (
+            <img
+              src={
+                userData.profile_picture.startsWith("http")
+                  ? userData.profile_picture
+                  : `${process.env.NEXT_PUBLIC_MEDIA_URL}${userData.profile_picture}`
+              }
+              alt="User avatar"
+              className="w-full h-full object-cover rounded-full"
+            />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full bg-gray-800 text-gray-300">
+              <CircleUserRound size={22} />
+            </div>
+          )}
         </button>
 
         {isMenuOpen && (
