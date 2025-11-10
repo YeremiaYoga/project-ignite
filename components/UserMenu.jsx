@@ -28,13 +28,20 @@ export default function UserMenu() {
   const { signOut } = useClerk();
   const localPassword = process.env.NEXT_PUBLIC_LOCAL_MODE_PASSWORD;
 
-  // 🔹 Logout
   const handleLogout = async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
         method: "POST",
         credentials: "include",
       });
+
+      localStorage.removeItem("patreon_email");
+      localStorage.removeItem("patreon_avatar");
+      setPatreonData(null);
+
+      Cookies.remove("ignite-tales-mode");
+      Cookies.remove("ignite-local-mode");
+
       await signOut(() => (window.location.href = "/"));
     } catch (err) {
       console.error("💥 Logout failed:", err);
@@ -103,7 +110,7 @@ export default function UserMenu() {
     setLocalMode(Cookies.get("ignite-local-mode") === "true");
 
     // Ambil dari localStorage kalau ada
-    const savedPatreon = localStorage.getItem("patreon_email");
+    const savedPatreon = localStorage.getItem("patreon_full_name");
     if (savedPatreon)
       setPatreonData({
         email: savedPatreon,
@@ -171,9 +178,9 @@ export default function UserMenu() {
         );
         if (!res.ok) return;
         const data = await res.json();
-        if (data && data.email) {
+        if (data && data.full_name) {
           setPatreonData(data);
-          localStorage.setItem("patreon_email", data.email);
+          localStorage.setItem("patreon_full_name", data.full_name);
           if (data.avatar_url)
             localStorage.setItem("patreon_avatar", data.avatar_url);
         }
@@ -191,7 +198,7 @@ export default function UserMenu() {
 
   // 🔹 Disconnect Patreon (local only)
   const handleDisconnectPatreon = () => {
-    localStorage.removeItem("patreon_email");
+    localStorage.removeItem("patreon_full_name");
     localStorage.removeItem("patreon_avatar");
     setPatreonData(null);
   };
@@ -255,7 +262,7 @@ export default function UserMenu() {
                 {/* 🔹 Patreon Section */}
                 {patreonData ? (
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-green-500 font-semibold">
+                    <div className="flex items-center gap-2 text-orange-500 font-semibold">
                       {patreonData.avatar_url && (
                         <img
                           src={patreonData.avatar_url}
@@ -263,7 +270,19 @@ export default function UserMenu() {
                           className="w-5 h-5 rounded-full"
                         />
                       )}
-                      <span>{patreonData.email}</span>
+                      <span className="truncate flex items-center gap-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 640 640"
+                          className="w-4 h-4 fill-[#ff9100]" 
+                          aria-label="Patreon Icon"
+                        >
+                          <path d="M554 217.8C553.9 152.4 503 98.8 443.3 79.5C369.1 55.5 271.3 59 200.4 92.4C114.6 132.9 87.6 221.7 86.6 310.2C85.8 383 93 574.6 201.2 576C281.5 577 293.5 473.5 330.7 423.7C357.1 388.2 391.2 378.2 433.1 367.8C505.1 350 554.2 293.1 554.1 217.8L554 217.8z" />
+                        </svg>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                          {patreonData?.full_name || "Heralds"}
+                        </span>
+                      </span>
                     </div>
                     <button
                       onClick={handleDisconnectPatreon}
@@ -275,7 +294,7 @@ export default function UserMenu() {
                 ) : (
                   <button
                     onClick={handleConnectPatreon}
-                    className="w-full text-left font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                    className="w-full text-left font-semibold text-orange-600 dark:text-orange-400 hover:underline"
                   >
                     Connect Patreon
                   </button>

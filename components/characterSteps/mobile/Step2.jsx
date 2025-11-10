@@ -10,7 +10,7 @@ import {
 } from "@/data/characterOptions";
 import LabelWithHint from "@/components/LabelWithHint";
 import RichTextEditor from "@/components/RichTextEditor";
-
+import RichTextAdvanced from "@/components/RichTextAdvanced";
 export default function Step2Mobile({ data, allData, onChange }) {
   const allTraitsWithImages = allTraitsOptions.map((trait) => ({
     value: trait.toLowerCase(),
@@ -78,12 +78,19 @@ export default function Step2Mobile({ data, allData, onChange }) {
             onChange={(v) => onChange("backstory_visibility", v)}
           />
         </div>
-        <RichTextEditor
+
+        <RichTextAdvanced
+          value={data.backstory}
+          onChange={(v) => onChange("backstory", v)}
+          placeholder="backstory"
+          rows={10}
+        />
+        {/* <RichTextEditor
           value={data.backstory || ""}
           onChange={(html) => onChange("backstory", html)}
           placeholder="Write your backstory here..."
           rows={10}
-        />
+        /> */}
       </div>
 
       {/* VOICE STYLE & PERSONALITY */}

@@ -10,6 +10,7 @@ import {
 } from "../../data/characterOptions";
 import LabelWithHint from "@/components/LabelWithHint";
 import RichTextEditor from "@/components/RichTextEditor";
+import RichTextAdvanced from "@/components/RichTextAdvanced";
 export default function Step2({ data, allData, onChange }) {
   const allTraitsWithImages = allTraitsOptions.map((trait) => ({
     value: trait.toLowerCase(),
@@ -79,12 +80,18 @@ export default function Step2({ data, allData, onChange }) {
               onChange={(v) => onChange("backstory_visibility", v)}
             />
           </div>
-          <RichTextEditor
+          <RichTextAdvanced
+            value={data.backstory}
+            onChange={(v) => onChange("backstory", v)}
+            placeholder="backstory"
+            rows={12}
+          />
+          {/* <RichTextEditor
             value={data.backstory || ""}
             onChange={(html) => onChange("backstory", html)}
             placeholder="backstory"
             rows={22}
-          />
+          /> */}
         </div>
 
         <div className="col-span-3 space-y-4">
