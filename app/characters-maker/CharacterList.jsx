@@ -7,12 +7,13 @@ import CharacterCard from "./CharacterCard";
 
 export default function CharacterList({ username, searchTerm = "" }) {
   const router = useRouter();
-  const [characters, setCharacters] = useState([]);
-  const [characterLimit, setCharacterLimit] = useState(5); // default
+  const [characters, setCharacters] = useState([]); // hanya yang active
+  const [allCharacters, setAllCharacters] = useState([]); // semua, untuk slot
+  const [characterLimit, setCharacterLimit] = useState(5);
   const [localMode, setLocalMode] = useState(false);
 
-  // 🧩 Ambil data karakter remote
-  const fetchRemoteChars = useCallback(async () => {
+  // 🧩 Ambil karakter aktif (untuk ditampilkan)
+  const fetchActiveChars = useCallback(async () => {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/characters/user`,
@@ -22,7 +23,22 @@ export default function CharacterList({ username, searchTerm = "" }) {
       const data = await res.json();
       setCharacters(data);
     } catch (err) {
-      console.error("Failed to fetch remote characters:", err);
+      console.error("❌ Failed to fetch active characters:", err);
+    }
+  }, []);
+
+  // 🧩 Ambil semua karakter user (untuk slot count)
+  const fetchAllChars = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/characters/user/all`,
+        { credentials: "include" }
+      );
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setAllCharacters(data);
+    } catch (err) {
+      console.error("❌ Failed to fetch all characters:", err);
     }
   }, []);
 
@@ -34,6 +50,7 @@ export default function CharacterList({ username, searchTerm = "" }) {
       const data = await res.json();
       const filtered = data.filter((char) => char.creator_name === username);
       setCharacters(filtered);
+      setAllCharacters(filtered);
     } catch (err) {
       console.error("Failed to fetch local characters:", err);
     }
@@ -57,24 +74,29 @@ export default function CharacterList({ username, searchTerm = "" }) {
 
   useEffect(() => {
     const modeFromCookie = Cookies.get("ignite-local-mode");
-    setLocalMode(modeFromCookie);
     const isLocalModeActive = modeFromCookie === "true";
+    setLocalMode(isLocalModeActive);
 
     fetchUserData();
 
     if (isLocalModeActive) {
       if (username) fetchLocalChars();
     } else {
-      fetchRemoteChars();
+      fetchActiveChars();
+      fetchAllChars(); // hitung semua karakter
     }
+  }, [
+    username,
+    fetchLocalChars,
+    fetchActiveChars,
+    fetchAllChars,
+    fetchUserData,
+  ]);
 
-    console.log(
-      `Username: ${username}, Local Mode Active: ${isLocalModeActive}`
-    );
-  }, [username, fetchLocalChars, fetchRemoteChars, fetchUserData]);
-
+  // ✏️ Edit karakter
   const handleEdit = (id) => router.push(`/characters-maker/edit/${id}`);
 
+  // 🗑️ Move to trash
   const handleDelete = async (id, name) => {
     const confirmed = window.confirm(
       `Are you sure you want to move "${name}" to trash?`
@@ -94,8 +116,8 @@ export default function CharacterList({ username, searchTerm = "" }) {
       if (!res.ok)
         throw new Error(data.error || "Failed to move character to trash");
 
-      setCharacters((prev) => prev.filter((char) => char.uuid !== id));
-      fetchRemoteChars();
+      await fetchActiveChars();
+      await fetchAllChars();
       alert(`"${name}" has been moved to trash.`);
     } catch (err) {
       console.error(err);
@@ -103,18 +125,19 @@ export default function CharacterList({ username, searchTerm = "" }) {
     }
   };
 
-  // 🧠 Filter hasil berdasarkan searchTerm
+  // 🔍 Filter nama
   const filteredCharacters = characters.filter((char) =>
     char.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // 🧮 Hitung slot terpakai
-  const usedSlots = characters.length;
+  // ✅ Hitung slot: semua karakter dihitung
+  const usedSlots = allCharacters.length;
   const totalSlots = characterLimit ?? 5;
   const remainingSlots = Math.max(totalSlots - usedSlots, 0);
 
   return (
     <div className="flex flex-col items-center">
+      {/* === Slot Info === */}
       <div className="flex flex-col items-center mb-6">
         <h3 className="text-sm text-gray-600 dark:text-gray-300 font-medium mb-2">
           Character Slots ({usedSlots}/{totalSlots})
@@ -139,6 +162,7 @@ export default function CharacterList({ username, searchTerm = "" }) {
         )}
       </div>
 
+      {/* === Character Cards (hanya active) === */}
       {filteredCharacters.length === 0 ? (
         <p className="text-gray-400 text-center mt-10">
           {characters.length === 0

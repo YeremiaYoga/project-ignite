@@ -8,6 +8,7 @@ export default function CharacterTrashList({ searchTerm = "" }) {
   const router = useRouter();
   const [characters, setCharacters] = useState([]);
 
+  // 🧩 Load data trash saat awal
   useEffect(() => {
     fetchTrash();
   }, []);
@@ -18,10 +19,8 @@ export default function CharacterTrashList({ searchTerm = "" }) {
         `${process.env.NEXT_PUBLIC_API_URL}/characters/trash`,
         { credentials: "include" }
       );
-
       const data = await res.json();
 
-      // ✅ pastikan struktur respons fleksibel
       const chars = Array.isArray(data)
         ? data
         : data.characters || data.data || [];
@@ -29,10 +28,11 @@ export default function CharacterTrashList({ searchTerm = "" }) {
       setCharacters(chars);
     } catch (err) {
       console.error("Failed to fetch trash characters:", err);
-      setCharacters([]); // fallback biar aman di map()
+      setCharacters([]);
     }
   };
 
+  // ♻️ Restore karakter dari trash
   const handleRestore = async (id, name) => {
     const confirmed = window.confirm(
       `Are you sure you want to restore "${name}" ?`
@@ -49,10 +49,8 @@ export default function CharacterTrashList({ searchTerm = "" }) {
       );
 
       const data = await res.json();
-
-      if (!res.ok) {
+      if (!res.ok)
         throw new Error(data.error || "Failed to restore character");
-      }
 
       alert(`✅ "${name}" has been restored.`);
       fetchTrash();
@@ -62,7 +60,35 @@ export default function CharacterTrashList({ searchTerm = "" }) {
     }
   };
 
-  // 🔍 Filter hasil berdasarkan searchTerm
+  // 🗑️ Delete permanently
+  const handleDeletePermanent = async (id, name) => {
+    const confirmed = window.confirm(
+      `⚠️ Are you sure you want to permanently delete "${name}"?\nThis action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/characters/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.error || "Failed to permanently delete");
+
+      alert(`🗑️ "${name}" has been permanently deleted.`);
+      fetchTrash(); // refresh trash list
+    } catch (err) {
+      console.error(err);
+      alert(`❌ Failed to permanently delete "${name}".`);
+    }
+  };
+
+  // 🔍 Filter karakter berdasarkan pencarian
   const filteredCharacters = characters.filter((char) =>
     char.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -85,6 +111,7 @@ export default function CharacterTrashList({ searchTerm = "" }) {
           char={char}
           isTrash={true}
           onRestore={() => handleRestore(char.id, char.name)}
+          onDeletePermanent={() => handleDeletePermanent(char.id, char.name)}
         />
       ))}
     </div>

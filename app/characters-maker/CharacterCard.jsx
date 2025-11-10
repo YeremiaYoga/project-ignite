@@ -21,17 +21,19 @@ export default function CharacterCard({
   onView,
   onDelete,
   onRestore,
+  onDeletePermanent, // ✅ baru ditambahkan
   isTrash,
 }) {
   const [remaining, setRemaining] = useState("");
   const [showPrivate, setShowPrivate] = useState(false);
+
   useEffect(() => {
     if (!isTrash || !char.deleted_at) return;
 
     const calculateRemaining = () => {
       if (!char.deleted_at) return;
       const deletedAt = dayjs.utc(char.deleted_at);
-      const expiry = deletedAt.add(1, "day");
+      const expiry = deletedAt.add(1, "day"); // contoh: expired 1 hari
       const now = dayjs.utc();
       const diff = expiry.diff(now);
       if (diff <= 0) {
@@ -40,20 +42,15 @@ export default function CharacterCard({
       }
 
       const dur = dayjs.duration(diff);
-
-      const formatted = `${dur.days()}:${String(dur.hours()).padStart(
-        2,
-        "0"
-      )}:${String(dur.minutes()).padStart(2, "0")}:${String(
-        dur.seconds()
-      ).padStart(2, "0")} remaining`;
-
+      const formatted = `${dur.hours().toString().padStart(2, "0")}:${dur
+        .minutes()
+        .toString()
+        .padStart(2, "0")}:${dur.seconds().toString().padStart(2, "0")} remaining`;
       setRemaining(formatted);
     };
 
     calculateRemaining();
     const interval = setInterval(calculateRemaining, 1000);
-
     return () => clearInterval(interval);
   }, [char.deleted_at, isTrash]);
 
@@ -65,6 +62,7 @@ export default function CharacterCard({
         backgroundImage: "url('/assets/character_image.png')",
       }}
     >
+      {/* 🔹 ID dan tombol salin */}
       <div className="absolute top-5 right-5 flex items-center gap-2 text-sm text-gray-700 font-bold">
         <span className={`text-xs ${ibmPlexMono.className}`}>
           {showPrivate
@@ -87,6 +85,8 @@ export default function CharacterCard({
           title="Copy Private ID"
         />
       </div>
+
+      {/* 🔹 Public ID */}
       <div className="absolute top-10 right-5 flex items-center gap-1 text-sm text-gray-700">
         <span className={`text-xs ${ibmPlexMono.className}`}>
           {char.public_id ?? "UnknownID"}
@@ -98,6 +98,7 @@ export default function CharacterCard({
         />
       </div>
 
+      {/* 🔹 Avatar */}
       <div className="absolute top-[27px] left-[11px] flex flex-col items-center w-[120px]">
         <div className="w-[80px] h-[80px] rounded-full overflow-hidden">
           {char.token_image ? (
@@ -116,12 +117,14 @@ export default function CharacterCard({
         </div>
       </div>
 
+      {/* 🔹 Nama */}
       <div className="absolute top-[110px] left-12">
         <h2 className="mt-2 text-center text-2xl font-bold text-gray-800 w-full">
           {char.name}
         </h2>
       </div>
 
+      {/* 🔹 Stamp */}
       <div
         className="absolute right-7 top-16"
         style={{
@@ -138,16 +141,23 @@ export default function CharacterCard({
         />
       </div>
 
+      {/* 🔹 Tombol Aksi */}
       <div className="flex justify-center gap-3 mt-auto mb-2 items-center">
         {isTrash ? (
           <>
             <span className="text-sm text-gray-600">{remaining}</span>
-
             <button
-              onClick={() => onRestore?.(char.uuid)}
-              className="px-4 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+              onClick={() => onRestore?.(char.id)}
+              className="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600"
             >
               Restore
+            </button>
+
+            <button
+              onClick={() => onDeletePermanent?.(char.id)}
+              className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Delete
             </button>
           </>
         ) : (
@@ -167,8 +177,7 @@ export default function CharacterCard({
             </button>
             <button
               onClick={() => onDelete?.(char.uuid)}
-              className="px-4 py-1 bg-red-600 text-white rounded"
-            
+              className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700"
             >
               Delete
             </button>
