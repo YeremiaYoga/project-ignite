@@ -21,26 +21,27 @@ export default function UserMenu() {
   const [showOtherOptions, setShowOtherOptions] = useState(false);
   const [colors, setColors] = useState({});
   const [userData, setUserData] = useState(null);
+  const [patreonData, setPatreonData] = useState(null);
+
   const menuRef = useRef(null);
   const { user } = useUser();
   const { signOut } = useClerk();
   const localPassword = process.env.NEXT_PUBLIC_LOCAL_MODE_PASSWORD;
 
+  // 🔹 Logout
   const handleLogout = async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
         method: "POST",
         credentials: "include",
       });
-
-      await signOut(() => {
-        window.location.href = "/";
-      });
+      await signOut(() => (window.location.href = "/"));
     } catch (err) {
       console.error("💥 Logout failed:", err);
     }
   };
 
+  // 🔹 Sync user data (Clerk -> Supabase)
   useEffect(() => {
     const syncAndFetchUser = async () => {
       if (!user) return;
@@ -79,6 +80,7 @@ export default function UserMenu() {
     syncAndFetchUser();
   }, [user]);
 
+  // 🔹 Handle click outside menu
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target))
@@ -88,6 +90,7 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // 🔹 Initialize color theme + Patreon local cache
   useEffect(() => {
     setColors({
       sub1: Cookies.get("ignite-hyperlink-color-sub1") || "#3b82f6",
@@ -98,8 +101,17 @@ export default function UserMenu() {
     });
     setTalesMode(Cookies.get("ignite-tales-mode") === "true");
     setLocalMode(Cookies.get("ignite-local-mode") === "true");
+
+    // Ambil dari localStorage kalau ada
+    const savedPatreon = localStorage.getItem("patreon_email");
+    if (savedPatreon)
+      setPatreonData({
+        email: savedPatreon,
+        avatar_url: localStorage.getItem("patreon_avatar"),
+      });
   }, []);
 
+  // 🔹 Apply CSS vars untuk background
   const applyCSSVariables = (obj) => {
     Object.entries(obj).forEach(([key, val]) => {
       let varName;
@@ -111,6 +123,7 @@ export default function UserMenu() {
     });
   };
 
+  // 🔹 Handle color change
   const handleColorChange = (e, key) => {
     const newColor = e.target.value;
     const updated = { ...colors, [key]: newColor };
@@ -127,6 +140,7 @@ export default function UserMenu() {
     applyCSSVariables(updated);
   };
 
+  // 🔹 Toggle modes
   const toggleTalesMode = () => {
     const newVal = !talesMode;
     setTalesMode(newVal);
@@ -145,6 +159,41 @@ export default function UserMenu() {
     setLocalMode(newVal);
     Cookies.set("ignite-local-mode", newVal.toString(), { expires: 365 });
     window.location.reload();
+  };
+
+  // 🔹 Ambil data Patreon dari backend
+  useEffect(() => {
+    if (!userData?.id) return;
+    const fetchPatreonData = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/patreon/user/${userData.id}`
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.email) {
+          setPatreonData(data);
+          localStorage.setItem("patreon_email", data.email);
+          if (data.avatar_url)
+            localStorage.setItem("patreon_avatar", data.avatar_url);
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch Patreon link:", err);
+      }
+    };
+    fetchPatreonData();
+  }, [userData?.id]);
+
+  // 🔹 Handle connect Patreon
+  const handleConnectPatreon = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth?user_id=${userData.id}`;
+  };
+
+  // 🔹 Disconnect Patreon (local only)
+  const handleDisconnectPatreon = () => {
+    localStorage.removeItem("patreon_email");
+    localStorage.removeItem("patreon_avatar");
+    setPatreonData(null);
   };
 
   const displayName =
@@ -190,6 +239,7 @@ export default function UserMenu() {
 
             <SignedIn>
               <div className="flex flex-col space-y-2">
+                {/* Username + Logout */}
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-800 dark:text-gray-200 truncate">
                     {displayName}
@@ -202,6 +252,36 @@ export default function UserMenu() {
                   </button>
                 </div>
 
+                {/* 🔹 Patreon Section */}
+                {patreonData ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-green-500 font-semibold">
+                      {patreonData.avatar_url && (
+                        <img
+                          src={patreonData.avatar_url}
+                          alt="Patreon Avatar"
+                          className="w-5 h-5 rounded-full"
+                        />
+                      )}
+                      <span>{patreonData.email}</span>
+                    </div>
+                    <button
+                      onClick={handleDisconnectPatreon}
+                      className="text-xs text-red-500 hover:underline"
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleConnectPatreon}
+                    className="w-full text-left font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                  >
+                    Connect Patreon
+                  </button>
+                )}
+
+                {/* Profile */}
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
@@ -214,6 +294,7 @@ export default function UserMenu() {
 
                 <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
+                {/* Tales Mode */}
                 <div className="flex items-center justify-between">
                   <span className="text-gray-700 dark:text-gray-100 font-semibold">
                     Tales Mode
@@ -230,6 +311,7 @@ export default function UserMenu() {
                   </label>
                 </div>
 
+                {/* Other Options */}
                 <button
                   onClick={() => setShowOtherOptions(!showOtherOptions)}
                   className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
@@ -261,6 +343,7 @@ export default function UserMenu() {
 
             <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
+            {/* Theme color section */}
             <button
               onClick={() => setShowThemeColors(!showThemeColors)}
               className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"

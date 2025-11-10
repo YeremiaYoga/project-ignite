@@ -51,7 +51,7 @@ export default function ProfileModal({ userData, onClose, onSave }) {
     <>
       <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999] p-4">
         <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-xl shadow-lg p-6 space-y-5 relative">
-          {/* Header */}
+
           <div className="flex justify-between items-center border-b border-gray-300 dark:border-gray-700 pb-3">
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
               User Profile
@@ -64,7 +64,7 @@ export default function ProfileModal({ userData, onClose, onSave }) {
             </button>
           </div>
 
-          {/* Profile Picture */}
+      
           <div className="flex flex-col items-center space-y-2 mt-3">
             <img
               src={
