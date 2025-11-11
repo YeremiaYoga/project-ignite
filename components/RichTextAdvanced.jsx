@@ -164,7 +164,7 @@ const handleHeadingChange = (e) => {
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2 p-2 border-b border-gray-700">
         <div className="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded">
-          <Type size={14} />
+          <Type size={12} />
           <select
             value={heading}
             onChange={handleHeadingChange}
@@ -209,7 +209,7 @@ const handleHeadingChange = (e) => {
         onFocus={() => setIsFocused(true)}   // ✅ per editor
         onBlur={() => setIsFocused(false)}   // ✅ per editor
         onInput={handleInput}
-        className="p-3 outline-none text-gray-100 leading-relaxed"
+        className="p-3 outline-none text-gray-100 leading-relaxed text-xs"
         style={{
           minHeight: rows * 20,
           lineHeight: "1.6",
@@ -227,43 +227,43 @@ const handleHeadingChange = (e) => {
 
         [contenteditable] {
           font-family: inherit;
-          font-size: 1rem;
+          font-size: 12px;
           line-height: 1.6;
           color: #f3f4f6;
         }
 
         [contenteditable] h1 {
-          font-size: 1.875rem;
+          font-size: 26px;
           font-weight: 700;
           margin: 0.75rem 0;
         }
 
         [contenteditable] h2 {
-          font-size: 1.5rem;
+          font-size: 24px;
           font-weight: 600;
           margin: 0.6rem 0;
         }
 
         [contenteditable] h3 {
-          font-size: 1.25rem;
+          font-size: 21px;
           font-weight: 600;
           margin: 0.5rem 0;
         }
 
         [contenteditable] h4 {
-          font-size: 1.125rem;
+          font-size: 18px;
           font-weight: 500;
           margin: 0.4rem 0;
         }
 
         [contenteditable] h5 {
-          font-size: 1rem;
+          font-size: 15px;
           font-weight: 500;
           margin: 0.3rem 0;
         }
 
         [contenteditable] h6 {
-          font-size: 0.875rem;
+          font-size: 12px;
           font-weight: 500;
           margin: 0.3rem 0;
         }

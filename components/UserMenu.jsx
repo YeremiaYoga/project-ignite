@@ -242,6 +242,14 @@ export default function UserMenu() {
                   Login
                 </button>
               </SignInButton>
+              <button
+                onClick={() =>
+                  (window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth`)
+                }
+                className="block w-full text-left font-semibold text-orange-600 dark:text-orange-400 hover:underline"
+              >
+                Login with Patreon
+              </button>
             </SignedOut>
 
             <SignedIn>
@@ -274,7 +282,7 @@ export default function UserMenu() {
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 640 640"
-                          className="w-4 h-4 fill-[#ff9100]" 
+                          className="w-4 h-4 fill-[#ff9100]"
                           aria-label="Patreon Icon"
                         >
                           <path d="M554 217.8C553.9 152.4 503 98.8 443.3 79.5C369.1 55.5 271.3 59 200.4 92.4C114.6 132.9 87.6 221.7 86.6 310.2C85.8 383 93 574.6 201.2 576C281.5 577 293.5 473.5 330.7 423.7C357.1 388.2 391.2 378.2 433.1 367.8C505.1 350 554.2 293.1 554.1 217.8L554 217.8z" />

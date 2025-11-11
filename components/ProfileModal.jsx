@@ -13,7 +13,7 @@ export default function ProfileModal({ userData, onClose, onSave }) {
 
   const handleSave = async () => {
     if (!username.trim()) {
-      alert("Username tidak boleh kosong!");
+      alert("Username cannot be empty!");
       return;
     }
 
@@ -27,13 +27,13 @@ export default function ProfileModal({ userData, onClose, onSave }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ username, profile_picture: profilePicture }),
-          credentials: "include", 
+          credentials: "include",
         }
       );
 
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData.error || "Gagal menyimpan data pengguna.");
+        throw new Error(errData.error || "Failed to save user data.");
       }
 
       const updated = await res.json();
@@ -51,7 +51,6 @@ export default function ProfileModal({ userData, onClose, onSave }) {
     <>
       <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999] p-4">
         <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-xl shadow-lg p-6 space-y-5 relative">
-
           <div className="flex justify-between items-center border-b border-gray-300 dark:border-gray-700 pb-3">
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
               User Profile
@@ -64,7 +63,6 @@ export default function ProfileModal({ userData, onClose, onSave }) {
             </button>
           </div>
 
-      
           <div className="flex flex-col items-center space-y-2 mt-3">
             <img
               src={
