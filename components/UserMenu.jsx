@@ -51,7 +51,6 @@ export default function UserMenu() {
       setPatreonData(null);
       setUserData(null);
 
-      // 🔹 Reload agar state bersih sepenuhnya
       window.location.href = "/";
     } catch (err) {
       console.error("💥 Logout failed:", err);
@@ -217,7 +216,10 @@ export default function UserMenu() {
               <>
                 {/* Login Options */}
                 <SignInButton mode="modal">
-                  <button className="block w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline">
+                  <button
+                    className="block w-full text-left font-semibold text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60"
+                    disabled
+                  >
                     Login with Clerk
                   </button>
                 </SignInButton>

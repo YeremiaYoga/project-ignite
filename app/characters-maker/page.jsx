@@ -63,7 +63,7 @@ export default function CharactersMakerPage() {
   // 🔹 Loading state
   if (loading) {
     return (
-      <main className="flex items-center justify-center min-h-screen text-white bg-gray-900">
+      <main className="flex items-center justify-center min-h-screen text-white ">
         <p>Loading...</p>
       </main>
     );
