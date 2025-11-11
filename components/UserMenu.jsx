@@ -225,7 +225,7 @@ export default function UserMenu() {
                   onClick={handleConnectPatreon}
                   className="block w-full text-left font-semibold text-orange-600 dark:text-orange-400 hover:underline"
                 >
-                  Login with Patreon
+                  Connect Patreon
                 </button>
               </>
             ) : (
@@ -244,7 +244,7 @@ export default function UserMenu() {
                 </div>
 
                 {/* Patreon Linked */}
-                {patreonData ? (
+                {/* {patreonData && (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-orange-500 font-semibold">
                       <svg
@@ -265,14 +265,7 @@ export default function UserMenu() {
                       Disconnect
                     </button>
                   </div>
-                ) : (
-                  <button
-                    onClick={handleConnectPatreon}
-                    className="w-full text-left font-semibold text-orange-600 dark:text-orange-400 hover:underline"
-                  >
-                    Connect Patreon
-                  </button>
-                )}
+                )} */}
 
                 {/* Profile */}
                 <button
