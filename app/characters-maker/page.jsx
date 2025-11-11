@@ -1,40 +1,76 @@
 "use client";
 
-import { useUser, SignedOut, SignInButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CharacterList from "./CharacterList";
 import CharacterTrashList from "./CharacterTrashList";
 import { Trash2, List, Search } from "lucide-react";
 
 export default function CharactersMakerPage() {
   const router = useRouter();
-  const { isSignedIn, user } = useUser();
-  const username = user?.username || user?.fullName || user?.email;
 
+  const [userData, setUserData] = useState(null);
   const [viewTrash, setViewTrash] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // 🔹 Fetch user dari cookie Patreon (JWT ignite_access_token)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+          credentials: "include",
+        });
+        if (!res.ok) {
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        if (data?.user) setUserData(data.user);
+      } catch (err) {
+        console.error("❌ Error fetching Patreon user:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleCreate = () => router.push("/characters-maker/create");
   const toggleView = () => setViewTrash((prev) => !prev);
 
-  if (!isSignedIn) {
+  // 🔹 Jika belum login
+  if (!loading && !userData) {
     return (
       <main className="max-w-6xl w-full mx-auto px-4 py-8 text-white bg-gray-900 min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4">Characters Maker</h1>
         <p className="text-gray-400 mb-4">
-          You must be logged in to access the Characters Maker.
+          You must be logged in with Patreon to access the Characters Maker.
         </p>
-        <SignedOut>
-          <SignInButton mode="modal">
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded shadow">
-              Login
-            </button>
-          </SignInButton>
-        </SignedOut>
+        <button
+          onClick={() =>
+            (window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth`)
+          }
+          className="px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded shadow"
+        >
+          Login with Patreon
+        </button>
       </main>
     );
   }
+
+  // 🔹 Loading state
+  if (loading) {
+    return (
+      <main className="flex items-center justify-center min-h-screen text-white bg-gray-900">
+        <p>Loading...</p>
+      </main>
+    );
+  }
+
+  const username =
+    userData?.username || userData?.name || userData?.email || "Unknown User";
 
   return (
     <main className="max-w-7xl w-full mx-auto px-4 py-8 text-white bg-gray-900 min-h-screen">

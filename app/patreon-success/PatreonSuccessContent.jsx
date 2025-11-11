@@ -23,7 +23,7 @@ export default function PatreonSuccessContent() {
   }, [router, searchParams]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen text-white">
       <h1 className="text-2xl font-bold mb-3">Connecting your Patreon...</h1>
       <p className="text-gray-400 text-sm">Please wait a moment.</p>
     </div>

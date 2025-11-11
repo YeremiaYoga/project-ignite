@@ -31,20 +31,28 @@ export default function UserMenu() {
   // 🔹 Logout universal
   const handleLogout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
 
+      if (!res.ok) throw new Error("Logout failed");
+
+      // Hapus semua data lokal
       Cookies.remove("ignite_access_token");
       Cookies.remove("ignite-tales-mode");
       Cookies.remove("ignite-local-mode");
       localStorage.removeItem("patreon_full_name");
       localStorage.removeItem("patreon_avatar");
+
       setPatreonData(null);
       setUserData(null);
 
-      await signOut(() => (window.location.href = "/"));
+      // 🔹 Reload agar state bersih sepenuhnya
+      window.location.href = "/";
     } catch (err) {
       console.error("💥 Logout failed:", err);
     }
