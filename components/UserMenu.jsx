@@ -28,6 +28,7 @@ export default function UserMenu() {
   const { signOut } = useClerk();
   const localPassword = process.env.NEXT_PUBLIC_LOCAL_MODE_PASSWORD;
 
+  // 🔹 Logout universal
   const handleLogout = async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/logout`, {
@@ -35,12 +36,13 @@ export default function UserMenu() {
         credentials: "include",
       });
 
-      localStorage.removeItem("patreon_email");
-      localStorage.removeItem("patreon_avatar");
-      setPatreonData(null);
-
+      Cookies.remove("ignite_access_token");
       Cookies.remove("ignite-tales-mode");
       Cookies.remove("ignite-local-mode");
+      localStorage.removeItem("patreon_full_name");
+      localStorage.removeItem("patreon_avatar");
+      setPatreonData(null);
+      setUserData(null);
 
       await signOut(() => (window.location.href = "/"));
     } catch (err) {
@@ -48,44 +50,23 @@ export default function UserMenu() {
     }
   };
 
-  // 🔹 Sync user data (Clerk -> Supabase)
+  // 🔹 Cek login via cookie Patreon
   useEffect(() => {
-    const syncAndFetchUser = async () => {
-      if (!user) return;
-
+    const checkPatreonLogin = async () => {
       try {
-        const loginRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              clerkId: user.id,
-              email: user.primaryEmailAddress?.emailAddress,
-              username: user.username || user.fullName || "",
-            }),
-            credentials: "include",
-          }
-        );
-
-        const loginData = await loginRes.json();
-        if (!loginRes.ok) throw new Error(loginData.error || "Login failed");
-
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`,
-          { credentials: "include" }
-        );
-
-        if (!res.ok) throw new Error("Failed to fetch user data");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+          credentials: "include",
+        });
+        if (!res.ok) return;
         const data = await res.json();
-        setUserData(data.user);
+        if (data?.user) setUserData(data.user);
       } catch (err) {
-        console.error("❌ Error syncing/fetching user:", err.message);
+        console.error("❌ Error checking Patreon login:", err);
       }
     };
 
-    syncAndFetchUser();
-  }, [user]);
+    checkPatreonLogin();
+  }, []);
 
   // 🔹 Handle click outside menu
   useEffect(() => {
@@ -97,7 +78,7 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 🔹 Initialize color theme + Patreon local cache
+  // 🔹 Initialize color theme
   useEffect(() => {
     setColors({
       sub1: Cookies.get("ignite-hyperlink-color-sub1") || "#3b82f6",
@@ -108,17 +89,40 @@ export default function UserMenu() {
     });
     setTalesMode(Cookies.get("ignite-tales-mode") === "true");
     setLocalMode(Cookies.get("ignite-local-mode") === "true");
-
-    // Ambil dari localStorage kalau ada
-    const savedPatreon = localStorage.getItem("patreon_full_name");
-    if (savedPatreon)
-      setPatreonData({
-        email: savedPatreon,
-        avatar_url: localStorage.getItem("patreon_avatar"),
-      });
   }, []);
 
-  // 🔹 Apply CSS vars untuk background
+  // 🔹 Fetch Patreon link (optional)
+  useEffect(() => {
+    if (!userData?.id) return;
+    const fetchPatreonData = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/patreon/user/${userData.id}`
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.full_name) setPatreonData(data);
+      } catch (err) {
+        console.error("❌ Failed to fetch Patreon data:", err);
+      }
+    };
+    fetchPatreonData();
+  }, [userData?.id]);
+
+  // 🔹 Connect Patreon
+  const handleConnectPatreon = () => {
+    if (!userData?.id)
+      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth`;
+    else
+      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth?user_id=${userData.id}`;
+  };
+
+  // 🔹 Disconnect local
+  const handleDisconnectPatreon = () => {
+    setPatreonData(null);
+  };
+
+  // 🔹 CSS color updates
   const applyCSSVariables = (obj) => {
     Object.entries(obj).forEach(([key, val]) => {
       let varName;
@@ -130,7 +134,6 @@ export default function UserMenu() {
     });
   };
 
-  // 🔹 Handle color change
   const handleColorChange = (e, key) => {
     const newColor = e.target.value;
     const updated = { ...colors, [key]: newColor };
@@ -147,7 +150,7 @@ export default function UserMenu() {
     applyCSSVariables(updated);
   };
 
-  // 🔹 Toggle modes
+  // 🔹 Mode toggles
   const toggleTalesMode = () => {
     const newVal = !talesMode;
     setTalesMode(newVal);
@@ -168,50 +171,16 @@ export default function UserMenu() {
     window.location.reload();
   };
 
-  // 🔹 Ambil data Patreon dari backend
-  useEffect(() => {
-    if (!userData?.id) return;
-    const fetchPatreonData = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/patreon/user/${userData.id}`
-        );
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data && data.full_name) {
-          setPatreonData(data);
-          localStorage.setItem("patreon_full_name", data.full_name);
-          if (data.avatar_url)
-            localStorage.setItem("patreon_avatar", data.avatar_url);
-        }
-      } catch (err) {
-        console.error("❌ Failed to fetch Patreon link:", err);
-      }
-    };
-    fetchPatreonData();
-  }, [userData?.id]);
-
-  // 🔹 Handle connect Patreon
-  const handleConnectPatreon = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth?user_id=${userData.id}`;
-  };
-
-  // 🔹 Disconnect Patreon (local only)
-  const handleDisconnectPatreon = () => {
-    localStorage.removeItem("patreon_full_name");
-    localStorage.removeItem("patreon_avatar");
-    setPatreonData(null);
-  };
-
   const displayName =
     userData?.username?.trim() ||
     userData?.name?.trim() ||
-    user?.primaryEmailAddress?.emailAddress ||
+    userData?.email ||
     "Unknown User";
 
   return (
     <>
       <div className="relative" ref={menuRef}>
+        {/* Avatar */}
         <button
           className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-gray-500 hover:border-white transition"
           aria-label="User Menu"
@@ -236,25 +205,24 @@ export default function UserMenu() {
 
         {isMenuOpen && (
           <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50 p-4 space-y-3 text-sm">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="block w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline">
-                  Login
+            {!userData ? (
+              <>
+                {/* Login Options */}
+                <SignInButton mode="modal">
+                  <button className="block w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline">
+                    Login with Clerk
+                  </button>
+                </SignInButton>
+                <button
+                  onClick={handleConnectPatreon}
+                  className="block w-full text-left font-semibold text-orange-600 dark:text-orange-400 hover:underline"
+                >
+                  Login with Patreon
                 </button>
-              </SignInButton>
-              <button
-                onClick={() =>
-                  (window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth`)
-                }
-                className="block w-full text-left font-semibold text-orange-600 dark:text-orange-400 hover:underline"
-              >
-                Login with Patreon
-              </button>
-            </SignedOut>
-
-            <SignedIn>
-              <div className="flex flex-col space-y-2">
-                {/* Username + Logout */}
+              </>
+            ) : (
+              <>
+                {/* Logged In Menu */}
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-800 dark:text-gray-200 truncate">
                     {displayName}
@@ -267,29 +235,19 @@ export default function UserMenu() {
                   </button>
                 </div>
 
-                {/* 🔹 Patreon Section */}
+                {/* Patreon Linked */}
                 {patreonData ? (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-orange-500 font-semibold">
-                      {patreonData.avatar_url && (
-                        <img
-                          src={patreonData.avatar_url}
-                          alt="Patreon Avatar"
-                          className="w-5 h-5 rounded-full"
-                        />
-                      )}
-                      <span className="truncate flex items-center gap-1">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 640 640"
-                          className="w-4 h-4 fill-[#ff9100]"
-                          aria-label="Patreon Icon"
-                        >
-                          <path d="M554 217.8C553.9 152.4 503 98.8 443.3 79.5C369.1 55.5 271.3 59 200.4 92.4C114.6 132.9 87.6 221.7 86.6 310.2C85.8 383 93 574.6 201.2 576C281.5 577 293.5 473.5 330.7 423.7C357.1 388.2 391.2 378.2 433.1 367.8C505.1 350 554.2 293.1 554.1 217.8L554 217.8z" />
-                        </svg>
-                        <span className="font-semibold text-gray-800 dark:text-gray-200">
-                          {patreonData?.full_name || "Heralds"}
-                        </span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 640 640"
+                        className="w-4 h-4 fill-[#ff9100]"
+                      >
+                        <path d="M554 217.8C553.9 152.4 503 98.8 443.3 79.5C369.1 55.5 271.3 59 200.4 92.4C114.6 132.9 87.6 221.7 86.6 310.2C85.8 383 93 574.6 201.2 576C281.5 577 293.5 473.5 330.7 423.7C357.1 388.2 391.2 378.2 433.1 367.8C505.1 350 554.2 293.1 554.1 217.8z" />
+                      </svg>
+                      <span className="text-gray-200">
+                        {patreonData.full_name || "Patreon Linked"}
                       </span>
                     </div>
                     <button
@@ -365,8 +323,8 @@ export default function UserMenu() {
                     </div>
                   </div>
                 )}
-              </div>
-            </SignedIn>
+              </>
+            )}
 
             <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
