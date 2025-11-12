@@ -216,12 +216,12 @@ export default function UserMenu() {
               <>
                 {/* Login Options */}
                 <SignInButton mode="modal">
-                  <button
+                  {/* <button
                     className="block w-full text-left font-semibold text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60"
                     disabled
                   >
                     Login with Clerk
-                  </button>
+                  </button> */}
                 </SignInButton>
                 <button
                   onClick={handleConnectPatreon}
