@@ -9,7 +9,6 @@ export default function UserMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [talesMode, setTalesMode] = useState(false);
-  const [localMode, setLocalMode] = useState(false);
   const [showThemeColors, setShowThemeColors] = useState(false);
   const [showOtherOptions, setShowOtherOptions] = useState(false);
   const [colors, setColors] = useState({});
@@ -17,9 +16,8 @@ export default function UserMenu() {
   const [patreonData, setPatreonData] = useState(null);
 
   const menuRef = useRef(null);
-  const localPassword = process.env.NEXT_PUBLIC_LOCAL_MODE_PASSWORD;
 
-  // 🔹 Universal Logout
+  // 🔹 Logout universal
   const handleLogout = async () => {
     try {
       const res = await fetch(
@@ -32,10 +30,8 @@ export default function UserMenu() {
 
       if (!res.ok) throw new Error("Logout failed");
 
-      // Bersihkan data lokal
       Cookies.remove("ignite_access_token");
       Cookies.remove("ignite-tales-mode");
-      Cookies.remove("ignite-local-mode");
       localStorage.removeItem("patreon_full_name");
       localStorage.removeItem("patreon_avatar");
 
@@ -48,7 +44,7 @@ export default function UserMenu() {
     }
   };
 
-  // 🔹 Cek login backend (cookie access_token)
+  // 🔹 Cek login backend
   useEffect(() => {
     const checkLogin = async () => {
       try {
@@ -67,12 +63,11 @@ export default function UserMenu() {
     checkLogin();
   }, []);
 
-  // 🔹 Close menu on click outside
+  // 🔹 Close menu on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+      if (menuRef.current && !menuRef.current.contains(e.target))
         setIsMenuOpen(false);
-      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -89,7 +84,6 @@ export default function UserMenu() {
     });
 
     setTalesMode(Cookies.get("ignite-tales-mode") === "true");
-    setLocalMode(Cookies.get("ignite-local-mode") === "true");
   }, []);
 
   // 🔹 Fetch Patreon data
@@ -120,12 +114,11 @@ export default function UserMenu() {
       window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth?user_id=${userData.id}`;
   };
 
-  // 🔹 Disconnect local patreon view
   const handleDisconnectPatreon = () => {
     setPatreonData(null);
   };
 
-  // 🔹 CSS Color updates
+  // 🔹 Apply CSS theme color
   const applyCSSVariables = (obj) => {
     Object.entries(obj).forEach(([key, val]) => {
       let varName =
@@ -159,26 +152,11 @@ export default function UserMenu() {
     applyCSSVariables(updated);
   };
 
-  // 🔹 Tales Mode
+  // 🔹 Tales Mode toggle
   const toggleTalesMode = () => {
     const newVal = !talesMode;
     setTalesMode(newVal);
     Cookies.set("ignite-tales-mode", newVal.toString(), { expires: 365 });
-  };
-
-  // 🔹 Discovery Vault (local mode)
-  const toggleLocalMode = () => {
-    const newVal = !localMode;
-    if (newVal) {
-      const input = prompt("Enter password:");
-      if (input !== localPassword) {
-        alert("Incorrect password!");
-        return;
-      }
-    }
-    setLocalMode(newVal);
-    Cookies.set("ignite-local-mode", newVal.toString(), { expires: 365 });
-    window.location.reload();
   };
 
   const displayName =
@@ -267,39 +245,16 @@ export default function UserMenu() {
                   </label>
                 </div>
 
-                {/* Other Options */}
-                <button
-                  onClick={() => setShowOtherOptions(!showOtherOptions)}
-                  className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
-                >
-                  {showOtherOptions ? "Back" : "Other Options"}
-                </button>
-
-                {showOtherOptions && (
-                  <div className="space-y-3 mt-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-700 dark:text-gray-100 font-semibold">
-                        Discovery Vault
-                      </span>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={localMode}
-                          onChange={toggleLocalMode}
-                        />
-                        <div className="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-green-600 transition"></div>
-                        <div className="absolute left-0.5 top-0.5 bg-white h-5 w-5 rounded-full transition-transform peer-checked:translate-x-5"></div>
-                      </label>
-                    </div>
-                  </div>
+                {/* Other Options (sekarang kosong, karena Discovery Vault dihapus) */}
+                {false && (
+                  <button className="hidden">Hidden Options</button>
                 )}
               </>
             )}
 
             <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
-            {/* Theme section */}
+            {/* Theme customization */}
             <button
               onClick={() => setShowThemeColors(!showThemeColors)}
               className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
@@ -334,7 +289,6 @@ export default function UserMenu() {
         )}
       </div>
 
-      {/* Profile Modal */}
       {showProfile && userData && (
         <ProfileModal
           userData={userData}
