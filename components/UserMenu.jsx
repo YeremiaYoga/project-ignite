@@ -1,13 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import {
-  useUser,
-  useClerk,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-} from "@clerk/nextjs";
 import Cookies from "js-cookie";
 import { CircleUserRound } from "lucide-react";
 import ProfileModal from "./ProfileModal";
@@ -24,11 +17,9 @@ export default function UserMenu() {
   const [patreonData, setPatreonData] = useState(null);
 
   const menuRef = useRef(null);
-  const { user } = useUser();
-  const { signOut } = useClerk();
   const localPassword = process.env.NEXT_PUBLIC_LOCAL_MODE_PASSWORD;
 
-  // 🔹 Logout universal
+  // 🔹 Universal Logout
   const handleLogout = async () => {
     try {
       const res = await fetch(
@@ -41,7 +32,7 @@ export default function UserMenu() {
 
       if (!res.ok) throw new Error("Logout failed");
 
-      // Hapus semua data lokal
+      // Bersihkan data lokal
       Cookies.remove("ignite_access_token");
       Cookies.remove("ignite-tales-mode");
       Cookies.remove("ignite-local-mode");
@@ -57,35 +48,37 @@ export default function UserMenu() {
     }
   };
 
-  // 🔹 Cek login via cookie Patreon
+  // 🔹 Cek login backend (cookie access_token)
   useEffect(() => {
-    const checkPatreonLogin = async () => {
+    const checkLogin = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
           credentials: "include",
         });
         if (!res.ok) return;
+
         const data = await res.json();
         if (data?.user) setUserData(data.user);
       } catch (err) {
-        console.error("❌ Error checking Patreon login:", err);
+        console.error("❌ Error checking login:", err);
       }
     };
 
-    checkPatreonLogin();
+    checkLogin();
   }, []);
 
-  // 🔹 Handle click outside menu
+  // 🔹 Close menu on click outside
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target))
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
         setIsMenuOpen(false);
+      }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // 🔹 Initialize color theme
+  // 🔹 Theme init
   useEffect(() => {
     setColors({
       sub1: Cookies.get("ignite-hyperlink-color-sub1") || "#3b82f6",
@@ -94,13 +87,15 @@ export default function UserMenu() {
       bgMiddle: Cookies.get("ignite-bg-middle-color") || "#1f1f1f",
       bgBottom: Cookies.get("ignite-bg-bottom-color") || "#111827",
     });
+
     setTalesMode(Cookies.get("ignite-tales-mode") === "true");
     setLocalMode(Cookies.get("ignite-local-mode") === "true");
   }, []);
 
-  // 🔹 Fetch Patreon link (optional)
+  // 🔹 Fetch Patreon data
   useEffect(() => {
     if (!userData?.id) return;
+
     const fetchPatreonData = async () => {
       try {
         const res = await fetch(
@@ -110,9 +105,10 @@ export default function UserMenu() {
         const data = await res.json();
         if (data && data.full_name) setPatreonData(data);
       } catch (err) {
-        console.error("❌ Failed to fetch Patreon data:", err);
+        console.error("❌ Failed to fetch Patreon:", err);
       }
     };
+
     fetchPatreonData();
   }, [userData?.id]);
 
@@ -124,19 +120,23 @@ export default function UserMenu() {
       window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth?user_id=${userData.id}`;
   };
 
-  // 🔹 Disconnect local
+  // 🔹 Disconnect local patreon view
   const handleDisconnectPatreon = () => {
     setPatreonData(null);
   };
 
-  // 🔹 CSS color updates
+  // 🔹 CSS Color updates
   const applyCSSVariables = (obj) => {
     Object.entries(obj).forEach(([key, val]) => {
-      let varName;
-      if (key === "sub1" || key === "sub2") varName = `--hyperlink-${key}`;
-      else if (key === "bgTop") varName = "--bg-top";
-      else if (key === "bgMiddle") varName = "--bg-middle";
-      else if (key === "bgBottom") varName = "--bg-bottom";
+      let varName =
+        key === "sub1" || key === "sub2"
+          ? `--hyperlink-${key}`
+          : key === "bgTop"
+          ? "--bg-top"
+          : key === "bgMiddle"
+          ? "--bg-middle"
+          : "--bg-bottom";
+
       document.documentElement.style.setProperty(varName, val);
     });
   };
@@ -145,6 +145,7 @@ export default function UserMenu() {
     const newColor = e.target.value;
     const updated = { ...colors, [key]: newColor };
     setColors(updated);
+
     const cookieKey =
       key === "bgMiddle"
         ? "ignite-bg-middle-color"
@@ -153,21 +154,23 @@ export default function UserMenu() {
         : key === "bgBottom"
         ? "ignite-bg-bottom-color"
         : `ignite-hyperlink-color-${key}`;
+
     Cookies.set(cookieKey, newColor, { expires: 365 });
     applyCSSVariables(updated);
   };
 
-  // 🔹 Mode toggles
+  // 🔹 Tales Mode
   const toggleTalesMode = () => {
     const newVal = !talesMode;
     setTalesMode(newVal);
     Cookies.set("ignite-tales-mode", newVal.toString(), { expires: 365 });
   };
 
+  // 🔹 Discovery Vault (local mode)
   const toggleLocalMode = () => {
     const newVal = !localMode;
     if (newVal) {
-      const input = prompt("Enter password to enable API Mode:");
+      const input = prompt("Enter password:");
       if (input !== localPassword) {
         alert("Incorrect password!");
         return;
@@ -190,7 +193,6 @@ export default function UserMenu() {
         {/* Avatar */}
         <button
           className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-gray-500 hover:border-white transition"
-          aria-label="User Menu"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {userData?.profile_picture ? (
@@ -200,7 +202,6 @@ export default function UserMenu() {
                   ? userData.profile_picture
                   : `${process.env.NEXT_PUBLIC_MEDIA_URL}${userData.profile_picture}`
               }
-              alt="User avatar"
               className="w-full h-full object-cover rounded-full"
             />
           ) : (
@@ -210,19 +211,12 @@ export default function UserMenu() {
           )}
         </button>
 
+        {/* MENU */}
         {isMenuOpen && (
           <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50 p-4 space-y-3 text-sm">
+
             {!userData ? (
               <>
-                {/* Login Options */}
-                <SignInButton mode="modal">
-                  {/* <button
-                    className="block w-full text-left font-semibold text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60"
-                    disabled
-                  >
-                    Login with Clerk
-                  </button> */}
-                </SignInButton>
                 <button
                   onClick={handleConnectPatreon}
                   className="block w-full text-left font-semibold text-orange-600 dark:text-orange-400 hover:underline"
@@ -232,7 +226,6 @@ export default function UserMenu() {
               </>
             ) : (
               <>
-                {/* Logged In Menu */}
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-800 dark:text-gray-200 truncate">
                     {displayName}
@@ -245,31 +238,6 @@ export default function UserMenu() {
                   </button>
                 </div>
 
-                {/* Patreon Linked */}
-                {/* {patreonData && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-orange-500 font-semibold">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 640 640"
-                        className="w-4 h-4 fill-[#ff9100]"
-                      >
-                        <path d="M554 217.8C553.9 152.4 503 98.8 443.3 79.5C369.1 55.5 271.3 59 200.4 92.4C114.6 132.9 87.6 221.7 86.6 310.2C85.8 383 93 574.6 201.2 576C281.5 577 293.5 473.5 330.7 423.7C357.1 388.2 391.2 378.2 433.1 367.8C505.1 350 554.2 293.1 554.1 217.8z" />
-                      </svg>
-                      <span className="text-gray-200">
-                        {patreonData.full_name || "Patreon Linked"}
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleDisconnectPatreon}
-                      className="text-xs text-red-500 hover:underline"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                )} */}
-
-                {/* Profile */}
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
@@ -294,7 +262,7 @@ export default function UserMenu() {
                       checked={talesMode}
                       onChange={toggleTalesMode}
                     />
-                    <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600 transition"></div>
+                    <div className="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-blue-600 transition"></div>
                     <div className="absolute left-0.5 top-0.5 bg-white h-5 w-5 rounded-full transition-transform peer-checked:translate-x-5"></div>
                   </label>
                 </div>
@@ -320,7 +288,7 @@ export default function UserMenu() {
                           checked={localMode}
                           onChange={toggleLocalMode}
                         />
-                        <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition"></div>
+                        <div className="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-green-600 transition"></div>
                         <div className="absolute left-0.5 top-0.5 bg-white h-5 w-5 rounded-full transition-transform peer-checked:translate-x-5"></div>
                       </label>
                     </div>
@@ -331,7 +299,7 @@ export default function UserMenu() {
 
             <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
-            {/* Theme color section */}
+            {/* Theme section */}
             <button
               onClick={() => setShowThemeColors(!showThemeColors)}
               className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
@@ -366,7 +334,7 @@ export default function UserMenu() {
         )}
       </div>
 
-      {/* ✅ Profile Modal */}
+      {/* Profile Modal */}
       {showProfile && userData && (
         <ProfileModal
           userData={userData}
