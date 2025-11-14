@@ -107,7 +107,7 @@ export default function CharacterTrashList({ searchTerm = "" }) {
           char={char}
           isTrash={true}
           onRestore={() => handleRestore(char.id, char.name)}
-          onDeletePermanent={() => handleDeletePermanent(char.id, char.name)}
+          onDeletePermanent={() => handleDeletePermanent(char.private_id, char.name)}
         />
       ))}
     </div>
