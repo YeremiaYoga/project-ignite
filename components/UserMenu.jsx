@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import Cookies from "js-cookie";
 import { CircleUserRound } from "lucide-react";
 import ProfileModal from "./ProfileModal";
-
+import { useRouter } from "next/navigation";
 export default function UserMenu() {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [talesMode, setTalesMode] = useState(false);
@@ -192,7 +193,6 @@ export default function UserMenu() {
         {/* MENU */}
         {isMenuOpen && (
           <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50 p-4 space-y-3 text-sm">
-
             {!userData ? (
               <>
                 <button
@@ -225,6 +225,15 @@ export default function UserMenu() {
                 >
                   Profile
                 </button>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/characters-maker");
+                  }}
+                  className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
+                >
+                  Character
+                </button>
 
                 <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
@@ -246,9 +255,7 @@ export default function UserMenu() {
                 </div>
 
                 {/* Other Options (sekarang kosong, karena Discovery Vault dihapus) */}
-                {false && (
-                  <button className="hidden">Hidden Options</button>
-                )}
+                {false && <button className="hidden">Hidden Options</button>}
               </>
             )}
 
