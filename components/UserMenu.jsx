@@ -115,10 +115,6 @@ export default function UserMenu() {
       window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth?user_id=${userData.id}`;
   };
 
-  const handleDisconnectPatreon = () => {
-    setPatreonData(null);
-  };
-
   // 🔹 Apply CSS theme color
   const applyCSSVariables = (obj) => {
     Object.entries(obj).forEach(([key, val]) => {
@@ -237,7 +233,6 @@ export default function UserMenu() {
 
                 <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
-                {/* Tales Mode */}
                 <div className="flex items-center justify-between">
                   <span className="text-gray-700 dark:text-gray-100 font-semibold">
                     Tales Mode
@@ -254,7 +249,6 @@ export default function UserMenu() {
                   </label>
                 </div>
 
-                {/* Other Options (sekarang kosong, karena Discovery Vault dihapus) */}
                 {false && <button className="hidden">Hidden Options</button>}
               </>
             )}
