@@ -18,7 +18,6 @@ export default function UserMenu() {
 
   const menuRef = useRef(null);
 
-  // 🔹 Logout universal
   const handleLogout = async () => {
     try {
       const res = await fetch(
@@ -45,7 +44,6 @@ export default function UserMenu() {
     }
   };
 
-  // 🔹 Cek login backend
   useEffect(() => {
     const checkLogin = async () => {
       try {
@@ -64,7 +62,6 @@ export default function UserMenu() {
     checkLogin();
   }, []);
 
-  // 🔹 Close menu on outside click
   useEffect(() => {
     const handler = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target))
@@ -74,7 +71,6 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // 🔹 Theme init
   useEffect(() => {
     setColors({
       sub1: Cookies.get("ignite-hyperlink-color-sub1") || "#3b82f6",
@@ -87,7 +83,6 @@ export default function UserMenu() {
     setTalesMode(Cookies.get("ignite-tales-mode") === "true");
   }, []);
 
-  // 🔹 Fetch Patreon data
   useEffect(() => {
     if (!userData?.id) return;
 
@@ -107,7 +102,6 @@ export default function UserMenu() {
     fetchPatreonData();
   }, [userData?.id]);
 
-  // 🔹 Connect Patreon
   const handleConnectPatreon = () => {
     if (!userData?.id)
       window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth`;
@@ -115,7 +109,6 @@ export default function UserMenu() {
       window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/patreon/auth?user_id=${userData.id}`;
   };
 
-  // 🔹 Apply CSS theme color
   const applyCSSVariables = (obj) => {
     Object.entries(obj).forEach(([key, val]) => {
       let varName =
@@ -149,7 +142,6 @@ export default function UserMenu() {
     applyCSSVariables(updated);
   };
 
-  // 🔹 Tales Mode toggle
   const toggleTalesMode = () => {
     const newVal = !talesMode;
     setTalesMode(newVal);
@@ -165,7 +157,6 @@ export default function UserMenu() {
   return (
     <>
       <div className="relative" ref={menuRef}>
-        {/* Avatar */}
         <button
           className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-gray-500 hover:border-white transition"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -186,7 +177,6 @@ export default function UserMenu() {
           )}
         </button>
 
-        {/* MENU */}
         {isMenuOpen && (
           <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50 p-4 space-y-3 text-sm">
             {!userData ? (
@@ -255,7 +245,6 @@ export default function UserMenu() {
 
             <hr className="my-2 border-gray-300 dark:border-gray-700" />
 
-            {/* Theme customization */}
             <button
               onClick={() => setShowThemeColors(!showThemeColors)}
               className="w-full text-left font-semibold text-gray-800 dark:text-gray-200 hover:underline"
