@@ -80,7 +80,6 @@ export default function ProfileModal({ userData, onClose, onSave }) {
             </button>
           </div>
 
-          {/* Profile Info */}
           <div className="space-y-3 text-gray-700 dark:text-gray-200">
             <ProfileRow label="Name" value={userData.name} />
             <ProfileRow label="Email" value={userData.email} />
@@ -97,7 +96,6 @@ export default function ProfileModal({ userData, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-300 dark:border-gray-700">
             <button
               onClick={onClose}
@@ -116,7 +114,6 @@ export default function ProfileModal({ userData, onClose, onSave }) {
         </div>
       </div>
 
-      {/* 🖼️ Asset Picker Modal */}
       {showImagePicker && (
         <ImagePicker
           isOpen={showImagePicker}
