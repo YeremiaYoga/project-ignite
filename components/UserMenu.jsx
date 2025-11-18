@@ -301,7 +301,7 @@ export default function UserMenu() {
                 </button>
 
                 {/* 1.2 Tombol Use Patreon Profile Picture */}
-                {/* {patreonAvatar && (
+                {patreonAvatar && (
                   <div className="ml-7 flex gap-2 mt-0.5">
                     <button
                       onClick={handleUsePatreonAvatar}
@@ -309,16 +309,16 @@ export default function UserMenu() {
                     >
                       Use Patreon Profile Picture
                     </button>
-                    {usePatreonAvatar && (
+                    {/* {usePatreonAvatar && (
                       <button
                         onClick={handleUseIgniteAvatar}
                         className="text-[11px] text-slate-300 hover:text-white hover:underline"
                       >
                         Use Ignite Picture
                       </button>
-                    )}
+                    )} */}
                   </div>
-                )} */}
+                )}
 
                 {/* 2. Friend List (non-aktif) */}
                 <button
