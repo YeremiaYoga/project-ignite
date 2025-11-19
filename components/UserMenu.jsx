@@ -10,6 +10,8 @@ import {
   Earth,
   HeartPlus,
   LogOut,
+  Copy,        // 🔹 NEW
+  Check,       // 🔹 NEW (optional untuk feedback)
 } from "lucide-react";
 import ProfileModal from "./ProfileModal";
 import { useRouter } from "next/navigation";
@@ -24,6 +26,7 @@ export default function UserMenu() {
   const [userData, setUserData] = useState(null);
   const [patreonData, setPatreonData] = useState(null);
   const [usePatreonAvatar, setUsePatreonAvatar] = useState(false);
+  const [copied, setCopied] = useState(false); // 🔹 NEW
 
   const menuRef = useRef(null);
 
@@ -197,6 +200,19 @@ export default function UserMenu() {
     setUsePatreonAvatar(false);
   };
 
+  const handleCopyFriendCode = async () => {
+    if (!userData?.friend_code) return;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(userData.friend_code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }
+    } catch (err) {
+      console.error("❌ Failed to copy friend code:", err);
+    }
+  };
+
   const displayName =
     (userData?.username && userData.username.trim()) ||
     (userData?.name && userData.name.trim()) ||
@@ -266,11 +282,27 @@ export default function UserMenu() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{displayName}</p>
-                  {/* {patreonData?.full_name && (
-                    <p className="text-xs text-orange-300 truncate">
-                      Patreon: {patreonData.full_name}
-                    </p>
-                  )} */}
+
+                  {/* 🔹 Friend Code di bawah nama */}
+                  {userData?.friend_code && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="text-[11px] text-slate-300 font-mono truncate">
+                        {userData.friend_code}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleCopyFriendCode}
+                        className="p-0.5 rounded hover:bg-slate-800 transition flex items-center justify-center"
+                        title={copied ? "Copied!" : "Copy friend code"}
+                      >
+                        {copied ? (
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3 text-slate-300" />
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -278,9 +310,6 @@ export default function UserMenu() {
                 <CircleUserRound className="w-8 h-8" />
                 <div>
                   <p className="font-semibold">Welcome</p>
-                  {/* <p className="text-xs text-slate-300">
-                    Connect Patreon to unlock more features.
-                  </p> */}
                 </div>
               </div>
             )}
@@ -288,7 +317,7 @@ export default function UserMenu() {
             {/* ===== MENU UTAMA ===== */}
             {userData ? (
               <div className="space-y-1 pt-1">
-                {/* 1. Profile (di kiri, icon user-pen) */}
+                {/* 1. Profile */}
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
@@ -300,7 +329,6 @@ export default function UserMenu() {
                   <span>Profile</span>
                 </button>
 
-                {/* 1.2 Tombol Use Patreon Profile Picture */}
                 {patreonAvatar && (
                   <div className="ml-7 flex gap-2 mt-0.5">
                     <button
@@ -309,18 +337,9 @@ export default function UserMenu() {
                     >
                       Use Patreon Profile Picture
                     </button>
-                    {/* {usePatreonAvatar && (
-                      <button
-                        onClick={handleUseIgniteAvatar}
-                        className="text-[11px] text-slate-300 hover:text-white hover:underline"
-                      >
-                        Use Ignite Picture
-                      </button>
-                    )} */}
                   </div>
                 )}
 
-                {/* 2. Friend List (non-aktif) */}
                 <button
                   type="button"
                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left opacity-60 cursor-not-allowed"
@@ -329,7 +348,6 @@ export default function UserMenu() {
                   <span>Friends List</span>
                 </button>
 
-                {/* 3. Support Me On Patreon (pakai gambar yang kamu kirim) */}
                 <button
                   onClick={handleSupportPatreon}
                   className="w-full  px-3 py-2 rounded-lg  transition mt-1"
@@ -340,8 +358,6 @@ export default function UserMenu() {
                     className="w-44 h-auto object-contain"
                   />
                 </button>
-
-                {/* 4. Characters (book-user) */}
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
@@ -352,13 +368,9 @@ export default function UserMenu() {
                   <BookUser className="w-4 h-4" />
                   <span>Characters</span>
                 </button>
-
-                {/* 5. Campaigns / Worlds (earth) */}
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
-                    // sesuaikan route kalau beda
-                    // router.push("/worlds");
                   }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left opacity-60 cursor-not-allowed"
                 >
@@ -366,7 +378,6 @@ export default function UserMenu() {
                   <span>Campaigns / Worlds</span>
                 </button>
 
-                {/* 6. Support & Legal (non-aktif) */}
                 <button
                   type="button"
                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left opacity-60 cursor-not-allowed"
@@ -375,7 +386,6 @@ export default function UserMenu() {
                   <span>Support &amp; Legal</span>
                 </button>
 
-                {/* 7. Sign Out (paling bawah, putih) */}
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg mt-1 text-left text-white hover:bg-red-600/80 hover:text-white transition"
@@ -392,18 +402,6 @@ export default function UserMenu() {
                 >
                   Connect Patreon
                 </button>
-
-                {/* <button
-                  onClick={handleSupportPatreon}
-                  className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 transition"
-                >
-                  <span>Support Me On Patreon</span>
-                  <img
-                    src="/assets/ui/patreon-support-button.png"
-                    alt="Patreon"
-                    className="w-7 h-7 object-contain"
-                  />
-                </button> */}
               </div>
             )}
 
