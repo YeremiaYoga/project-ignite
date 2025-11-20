@@ -10,23 +10,25 @@ import {
   Earth,
   HeartPlus,
   LogOut,
-  Copy,        // 🔹 NEW
-  Check,       // 🔹 NEW (optional untuk feedback)
+  Copy,
+  Check,
 } from "lucide-react";
 import ProfileModal from "./ProfileModal";
+import FriendListModal from "./FriendListModal"; // 🔹 NEW
 import { useRouter } from "next/navigation";
 
 export default function UserMenu() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showFriends, setShowFriends] = useState(false); // 🔹 NEW
   const [talesMode, setTalesMode] = useState(false);
   const [showThemeColors, setShowThemeColors] = useState(false);
   const [colors, setColors] = useState({});
   const [userData, setUserData] = useState(null);
   const [patreonData, setPatreonData] = useState(null);
   const [usePatreonAvatar, setUsePatreonAvatar] = useState(false);
-  const [copied, setCopied] = useState(false); // 🔹 NEW
+  const [copied, setCopied] = useState(false);
 
   const menuRef = useRef(null);
 
@@ -219,7 +221,6 @@ export default function UserMenu() {
     userData?.email ||
     "Unknown User";
 
-  // ambil avatar patreon dari state / localStorage
   let patreonAvatar = null;
   if (typeof window !== "undefined") {
     patreonAvatar =
@@ -283,7 +284,7 @@ export default function UserMenu() {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{displayName}</p>
 
-                  {/* 🔹 Friend Code di bawah nama */}
+                  {/* Friend Code di bawah nama */}
                   {userData?.friend_code && (
                     <div className="flex items-center gap-1 mt-0.5">
                       <span className="text-[11px] text-slate-300 font-mono truncate">
@@ -340,12 +341,17 @@ export default function UserMenu() {
                   </div>
                 )}
 
+                {/* 🔹 Friends List → buka modal */}
                 <button
                   type="button"
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left opacity-60 cursor-not-allowed"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setShowFriends(true);
+                  }}
+                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left hover:bg-slate-800 transition"
                 >
                   <UsersRound className="w-4 h-4" />
-                  <span>Friends List</span>
+                  <span>Friends</span>
                 </button>
 
                 <button
@@ -358,6 +364,7 @@ export default function UserMenu() {
                     className="w-44 h-auto object-contain"
                   />
                 </button>
+
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
@@ -368,6 +375,7 @@ export default function UserMenu() {
                   <BookUser className="w-4 h-4" />
                   <span>Characters</span>
                 </button>
+
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
@@ -464,6 +472,15 @@ export default function UserMenu() {
           userData={userData}
           onClose={() => setShowProfile(false)}
           onSave={(updated) => setUserData(updated)}
+        />
+      )}
+
+      {/* 🔹 Friends Modal */}
+      {showFriends && userData && (
+        <FriendListModal
+          userId={userData.id}
+          friendCode={userData.friend_code}
+          onClose={() => setShowFriends(false)}
         />
       )}
     </>
