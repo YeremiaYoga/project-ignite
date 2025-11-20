@@ -38,13 +38,13 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
   const [error, setError] = useState("");
   const [copySelf, setCopySelf] = useState(false);
 
-  // 🔹 Friend Requests
+  // Friend Requests
   const [incoming, setIncoming] = useState([]);
   const [outgoing, setOutgoing] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [requestError, setRequestError] = useState("");
 
-  // 🔹 Blocked friends
+  // Blocked users
   const [blockedFriends, setBlockedFriends] = useState([]);
   const [loadingBlocked, setLoadingBlocked] = useState(false);
   const [blockedError, setBlockedError] = useState("");
@@ -69,8 +69,9 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
       const flat = (data.friends || []).map((f) => ({
         friendshipId: f.friendship_id,
         userId: f.friend?.id,
+        // username first, fallback to name, then email
         name:
-          f.friend?.name || f.friend?.username || f.friend?.email || "Unknown",
+          f.friend?.username || f.friend?.name || f.friend?.email || "Unknown",
         email: f.friend?.email || null,
         username: f.friend?.username || null,
         friendCode: f.friend?.friend_code || null,
@@ -105,18 +106,22 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
           friendshipId: r.friendship_id,
           requesterId: r.requester_id,
           userId: r.friend_user?.id,
+          // username first
           name:
-            r.friend_user?.name ||
             r.friend_user?.username ||
+            r.friend_user?.name ||
             r.friend_user?.friend_code ||
             "Unknown",
           friendCode: r.friend_user?.friend_code || null,
+          username:
+            r.friend_user?.username || r.friend_user?.friend_code || "Unknown",
           profilePicture: r.friend_user?.profile_picture || null,
           createdAt: r.created_at,
         }));
 
       setIncoming(normalize(data.incoming));
       setOutgoing(normalize(data.outgoing));
+      console.log(data);
     } catch (err) {
       console.error("❌ Failed to fetch friend requests:", err);
       setRequestError("Failed to load friend requests.");
@@ -140,8 +145,9 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
       const flat = (data.blocked || []).map((f) => ({
         friendshipId: f.friendship_id,
         userId: f.friend?.id,
+        // username first
         name:
-          f.friend?.name || f.friend?.username || f.friend?.email || "Unknown",
+          f.friend?.username || f.friend?.name || f.friend?.email || "Unknown",
         email: f.friend?.email || null,
         username: f.friend?.username || null,
         friendCode: f.friend?.friend_code || null,
@@ -226,7 +232,6 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
       });
       if (!res.ok) throw new Error("Failed to block user");
 
-      // refresh friends & blocked
       await Promise.all([fetchFriends(), fetchBlockedFriends()]);
     } catch (err) {
       console.error("❌ Failed to block friend:", err);
@@ -234,33 +239,33 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
     }
   };
 
- const handleUnblock = async (friend) => {
-  if (!friend?.friendshipId) return;
+  const handleUnblock = async (friend) => {
+    if (!friend?.friendshipId) return;
 
-  try {
-    const ok = confirm(
-      `Unblock ${friend.name || "this user"}?\nThey will be your friend again.`
-    );
-    if (!ok) return;
+    try {
+      const ok = confirm(
+        `Unblock ${
+          friend.name || "this user"
+        }?\nThey will be your friend again.`
+      );
+      if (!ok) return;
 
-    const res = await fetch(`${API_BASE}/friends/unblock`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        friendship_id: friend.friendshipId,
-      }),
-    });
-    if (!res.ok) throw new Error("Failed to unblock user");
+      const res = await fetch(`${API_BASE}/friends/unblock`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          friendship_id: friend.friendshipId,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to unblock user");
 
-    // 🔁 Refresh: dia keluar dari blocked, masuk ke friends
-    await Promise.all([fetchBlockedFriends(), fetchFriends()]);
-  } catch (err) {
-    console.error("❌ Failed to unblock friend:", err);
-    alert("Failed to unblock user.");
-  }
-};
-
+      await Promise.all([fetchBlockedFriends(), fetchFriends()]);
+    } catch (err) {
+      console.error("❌ Failed to unblock friend:", err);
+      alert("Failed to unblock user.");
+    }
+  };
 
   const handleRespondRequest = async (reqItem, action) => {
     try {
@@ -421,7 +426,7 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{f.name}</p>
+                    <p className="text-sm font-medium truncate">{f.username}</p>
                     <p className="text-[11px] text-slate-400 truncate">
                       {f.friendCode || f.email || f.username || ""}
                     </p>
@@ -470,9 +475,7 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
 
           {/* Incoming */}
           <div className="mb-3">
-            <p className="text-[11px] text-slate-300 mb-1">
-              Incoming Requests
-            </p>
+            <p className="text-[11px] text-slate-300 mb-1">Incoming Requests</p>
             {incoming.length === 0 ? (
               <p className="text-[11px] text-slate-500">
                 No incoming requests.
@@ -498,7 +501,7 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-medium truncate">
-                          {r.name}
+                          {r.username}
                         </p>
                         <p className="text-[11px] text-slate-400 truncate">
                           {r.friendCode || "-"}
@@ -531,9 +534,7 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
 
           {/* Outgoing */}
           <div>
-            <p className="text-[11px] text-slate-300 mb-1">
-              Outgoing Requests
-            </p>
+            <p className="text-[11px] text-slate-300 mb-1">Outgoing Requests</p>
             {outgoing.length === 0 ? (
               <p className="text-[11px] text-slate-500">
                 No outgoing requests.
@@ -559,7 +560,7 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-medium truncate">
-                          {r.name}
+                          {r.username}
                         </p>
                         <p className="text-[11px] text-slate-400 truncate">
                           {r.friendCode || "-"}
@@ -619,9 +620,11 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-medium truncate">{b.name}</p>
+                      <p className="text-xs font-medium truncate">
+                        {b.username}
+                      </p>
                       <p className="text-[11px] text-slate-400 truncate">
-                        {b.friendCode || b.email || b.username || ""}
+                        {b.friendCode || ""}
                       </p>
                     </div>
                   </div>
