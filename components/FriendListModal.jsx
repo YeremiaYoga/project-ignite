@@ -69,7 +69,7 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
       const flat = (data.friends || []).map((f) => ({
         friendshipId: f.friendship_id,
         userId: f.friend?.id,
-        // username first, fallback to name, then email
+        // username first, fallback ke name/email
         name:
           f.friend?.username || f.friend?.name || f.friend?.email || "Unknown",
         email: f.friend?.email || null,
@@ -106,7 +106,6 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
           friendshipId: r.friendship_id,
           requesterId: r.requester_id,
           userId: r.friend_user?.id,
-          // username first
           name:
             r.friend_user?.username ||
             r.friend_user?.name ||
@@ -121,7 +120,6 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
 
       setIncoming(normalize(data.incoming));
       setOutgoing(normalize(data.outgoing));
-      console.log(data);
     } catch (err) {
       console.error("❌ Failed to fetch friend requests:", err);
       setRequestError("Failed to load friend requests.");
@@ -145,7 +143,6 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
       const flat = (data.blocked || []).map((f) => ({
         friendshipId: f.friendship_id,
         userId: f.friend?.id,
-        // username first
         name:
           f.friend?.username || f.friend?.name || f.friend?.email || "Unknown",
         email: f.friend?.email || null,
@@ -283,12 +280,16 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
         throw new Error(msg || "Failed to respond request");
       }
 
+      // hapus dari incoming list
       setIncoming((prev) =>
         prev.filter((r) => r.friendshipId !== reqItem.friendshipId)
       );
 
       if (action === "accept") {
         fetchFriends();
+      } else if (action === "block") {
+        // kalo block, refresh blocked list
+        fetchBlockedFriends();
       }
     } catch (err) {
       console.error("❌ Failed to respond friend request:", err);
@@ -426,7 +427,9 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{f.username}</p>
+                    <p className="text-sm font-medium truncate">
+                      {f.username || f.name}
+                    </p>
                     <p className="text-[11px] text-slate-400 truncate">
                       {f.friendCode || f.email || f.username || ""}
                     </p>
@@ -501,7 +504,7 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-medium truncate">
-                          {r.username}
+                          {r.username || r.name}
                         </p>
                         <p className="text-[11px] text-slate-400 truncate">
                           {r.friendCode || "-"}
@@ -524,6 +527,15 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
                       >
                         <XCircle className="w-3 h-3" />
                         Reject
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRespondRequest(r, "block")}
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] bg-red-700 hover:bg-red-600"
+                        title="Block and stop future requests"
+                      >
+                        <ShieldBan className="w-3 h-3" />
+                        Block
                       </button>
                     </div>
                   </div>
@@ -560,7 +572,7 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-medium truncate">
-                          {r.username}
+                          {r.username || r.name}
                         </p>
                         <p className="text-[11px] text-slate-400 truncate">
                           {r.friendCode || "-"}
@@ -621,7 +633,7 @@ export default function FriendListModal({ userId, friendCode, onClose }) {
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-medium truncate">
-                        {b.username}
+                        {b.username || b.name}
                       </p>
                       <p className="text-[11px] text-slate-400 truncate">
                         {b.friendCode || ""}
