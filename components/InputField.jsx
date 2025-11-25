@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Info, Eye, EyeOff } from "lucide-react"; // tetap import default icons
+import { Info, Eye, EyeOff } from "lucide-react"; // default icons
 import * as LucideIcons from "lucide-react";
 
 export default function InputField({
@@ -32,7 +32,7 @@ export default function InputField({
 
   const filteredOptions =
     type === "selectSearch"
-      ? options.filter((opt) =>
+      ? (options || []).filter((opt) =>
           (opt.label ?? opt)
             .toString()
             .toLowerCase()
@@ -41,10 +41,32 @@ export default function InputField({
       : options;
 
   const handleSelect = (opt) => {
-    onChange(opt.value ?? opt);
-    setQuery(opt.label ?? opt);
+    onChange(opt.value ?? opt);          // lempar value ke parent
+    setQuery(opt.label ?? opt);         // tampilkan label di input
     setIsOpen(false);
   };
+
+  // 🔁 SYNC query dengan value dari parent (misalnya saat EDIT form)
+  useEffect(() => {
+    if (type !== "selectSearch") return;
+
+    if (value === undefined || value === null || value === "") {
+      setQuery("");
+      return;
+    }
+
+    const found = (options || []).find((opt) => {
+      const optVal = opt.value ?? opt;
+      const optLabel = opt.label ?? opt;
+      return optVal === value || optLabel === value;
+    });
+
+    if (found) {
+      setQuery(found.label ?? found);
+    } else {
+      setQuery(String(value));
+    }
+  }, [value, options, type]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -66,7 +88,7 @@ export default function InputField({
               <HintIcon
                 size={18}
                 className="text-gray-400 cursor-pointer transition-colors duration-200 group-hover:text-blue-600"
-                title={hint.text} 
+                title={hint.text}
               />
               <div
                 className="absolute left-full bottom-0 ml-2 hidden group-hover:block 
@@ -89,7 +111,7 @@ export default function InputField({
             onChange={(e) => {
               setQuery(e.target.value);
               setIsOpen(true);
-              onChange("");
+              onChange(""); // clear value di parent saat user mulai ngetik
             }}
             onClick={() => setIsOpen(true)}
             placeholder={placeholder || "Search..."}
