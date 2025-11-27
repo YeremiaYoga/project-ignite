@@ -6,7 +6,6 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
-// warna rarity
 const RARITY_COLORS = {
   common: "#b5bda6",
   uncommon: "#78c178",
@@ -29,7 +28,6 @@ function getRarityColor(r) {
   return RARITY_COLORS[key] || "#e5e7eb";
 }
 
-// helper slug
 function makeSlug(item) {
   const type = (item.__type || item.type || "item").toLowerCase();
   const name = (item.name || "")
@@ -47,7 +45,6 @@ function formatNumber(value) {
   });
 }
 
-// price formatter
 function formatPriceLabel(value) {
   if (value == null || isNaN(value)) return "-";
 
@@ -67,9 +64,7 @@ export default function FoundryItemView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ======================================================
-  // 🔥 FETCH ITEMS (sekali aja)
-  // ======================================================
+
   useEffect(() => {
     async function fetchItems() {
       try {
@@ -109,9 +104,7 @@ export default function FoundryItemView() {
     fetchItems();
   }, []);
 
-  // ======================================================
-  // 🔥 FILTER (boleh nanti ditambah debounce kalau mau)
-  // ======================================================
+
   const filteredItems = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return items;
@@ -123,9 +116,6 @@ export default function FoundryItemView() {
     });
   }, [items, search]);
 
-  // ======================================================
-  // 🔥 HANDLE SELECT
-  // ======================================================
   function handleSelect(item) {
     setSelected(item);
     const slug = makeSlug(item);
@@ -135,9 +125,6 @@ export default function FoundryItemView() {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
-  // ======================================================
-  // RENDER
-  // ======================================================
   return (
     <div className="min-h-screen text-slate-50 flex justify-center w-full">
       <div className="w-full max-w-7xl h-[90vh] bg-slate-950/80 border border-slate-700 rounded-none shadow-xl backdrop-blur-md flex gap-4 overflow-hidden">

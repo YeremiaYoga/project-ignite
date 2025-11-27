@@ -1,6 +1,5 @@
 "use client";
 
-// urutan properties
 const PROPERTY_ORDER = [
   "mgc",
   "fin",
@@ -102,7 +101,6 @@ const PROPERTY_META = {
   },
 };
 
-// mapping warna rarity
 const RARITY_COLORS = {
   common: "#b5bda6",
   uncommon: "#78c178",
@@ -154,7 +152,6 @@ export default function ItemDetail({ item }) {
     );
   }
 
-  // ====== BASIC FIELDS ======
   const name = item.name || "Unnamed item";
   const type = item.__type || item.type || "";
   const rarity = item.rarity || item.rarity_name || "";
@@ -176,7 +173,6 @@ export default function ItemDetail({ item }) {
     item.raw_data?.img ||
     "/assets/example_token.png";
 
-  // slug untuk anchor / share link
   const slugBase = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -240,7 +236,6 @@ export default function ItemDetail({ item }) {
     typeof item.properties === "object" &&
     !Array.isArray(item.properties)
   ) {
-    // handle bentuk { mgc: true, fin: true, ... }
     properties = Object.entries(item.properties)
       .filter(([, v]) => !!v)
       .map(([k]) => k);
@@ -330,7 +325,6 @@ export default function ItemDetail({ item }) {
 
   return (
     <>
-      {/* HEADER */}
       <div className="flex items-start mb-5 gap-4">
         <div className="shrink-0">
           <div
@@ -384,7 +378,6 @@ export default function ItemDetail({ item }) {
 
       <div className="my-4 h-px bg-gradient-to-r from-transparent via-amber-300/50 to-transparent" />
 
-      {/* DESCRIPTION */}
       <div className="flex-1">
         <div className=" overflow-y-auto pr-1">
           <p className="text-sm uppercase tracking-wide text-slate-400 mb-1">
@@ -410,7 +403,7 @@ export default function ItemDetail({ item }) {
         )}
       </div>
 
-      {/* PROPERTIES BAR */}
+
       {orderedDisplayProperties.length > 0 && (
         <div className="mt-4">
           <div className="flex flex-wrap gap-2">
