@@ -16,9 +16,8 @@ const RARITY_COLORS = {
   artifact: "#a46b43",
 };
 
-// helper rarity
 function getRarityColor(r) {
-  if (!r) return "#e5e7eb"; // fallback yang kamu minta
+  if (!r) return "#e5e7eb";
 
   let key = r.toLowerCase().trim();
   const clean = key.replace(/[\-_]/g, "").replace(/\s+/g, " ");
@@ -69,7 +68,7 @@ export default function FoundryItemView() {
   const [error, setError] = useState("");
 
   // ======================================================
-  // 🔥 FETCH ITEMS
+  // 🔥 FETCH ITEMS (sekali aja)
   // ======================================================
   useEffect(() => {
     async function fetchItems() {
@@ -90,18 +89,15 @@ export default function FoundryItemView() {
 
         setItems(arr);
 
-        // pilih item dari URL jika ada
         const urlSlug = searchParams.get("item");
         if (urlSlug) {
           const found = arr.find((it) => makeSlug(it) === urlSlug);
           if (found) {
             setSelected(found);
-            setLoading(false);
             return;
           }
         }
 
-        // fallback pilih item pertama
         if (arr.length > 0) setSelected(arr[0]);
       } catch (err) {
         setError(err.message || "Failed to load items");
@@ -111,10 +107,10 @@ export default function FoundryItemView() {
     }
 
     fetchItems();
-  }, [searchParams]); // biar kalau query ?item berubah, dia ikut baca
+  }, []);
 
   // ======================================================
-  // 🔥 FILTER
+  // 🔥 FILTER (boleh nanti ditambah debounce kalau mau)
   // ======================================================
   const filteredItems = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -134,7 +130,9 @@ export default function FoundryItemView() {
     setSelected(item);
 
     const slug = makeSlug(item);
-    const params = new URLSearchParams(searchParams.toString());
+
+    // kalau mau simpan query lain juga, tinggal tambah di sini
+    const params = new URLSearchParams();
     params.set("item", slug);
 
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -146,9 +144,7 @@ export default function FoundryItemView() {
   return (
     <div className="min-h-screen text-slate-50 flex justify-center w-full">
       <div className="w-full max-w-7xl h-[90vh] bg-slate-950/80 border border-slate-700 rounded-none shadow-xl backdrop-blur-md flex gap-4 overflow-hidden">
-        {/* LEFT SIDE LIST */}
         <div className="w-[30%] h-full bg-slate-900/80 border-slate-800 p-4 flex flex-col min-h-0">
-          {/* Search + Button */}
           <div className="flex gap-2 mb-4 shrink-0">
             <div className="flex-1 relative">
               <input
@@ -169,7 +165,6 @@ export default function FoundryItemView() {
             </button>
           </div>
 
-          {/* Table Header */}
           <div className="flex-1 bg-slate-950/60 border border-slate-800 rounded-xl flex flex-col min-h-0">
             <div className="flex items-center px-4 py-2 border-b border-slate-800 bg-slate-900/70 text-[11px] uppercase tracking-wide text-slate-400 shrink-0">
               <div className="w-7 h-7 rounded-md border border-slate-600 mr-3 flex items-center justify-center text-[9px]">
@@ -183,7 +178,6 @@ export default function FoundryItemView() {
               </div>
             </div>
 
-            {/* LIST */}
             <div className="flex-1 overflow-y-auto">
               {loading ? (
                 [...Array(8)].map((_, i) => (
@@ -252,7 +246,6 @@ export default function FoundryItemView() {
                         transition`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        {/* IMAGE WITH RARITY BORDER */}
                         <div
                           className="w-9 h-9 rounded-md overflow-hidden border"
                           style={{ borderColor: rarityColor }}
@@ -267,7 +260,6 @@ export default function FoundryItemView() {
                           />
                         </div>
 
-                        {/* NAME */}
                         <div className="flex flex-col min-w-0">
                           <span className="font-semibold text-slate-100 break-words">
                             {item.name || "Unnamed item"}
@@ -278,7 +270,6 @@ export default function FoundryItemView() {
                         </div>
                       </div>
 
-                      {/* Price / Weight */}
                       <div className="text-right text-[10px] text-slate-400 leading-tight shrink-0">
                         <div>{priceLabel}</div>
                         <div>{weightLabel}</div>
@@ -291,7 +282,6 @@ export default function FoundryItemView() {
           </div>
         </div>
 
-        {/* RIGHT SIDE DETAIL */}
         <div className="flex-1 h-full bg-slate-900/80 p-6 flex flex-col overflow-hidden">
           <ItemDetail item={selected} />
         </div>
