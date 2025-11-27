@@ -403,7 +403,7 @@ export default function ItemDetail({ item }) {
             </p>
             {masteryDescription && (
               <p className="mt-1 text-sm text-slate-400 leading-relaxed">
-                {/* {masteryDescription} */}
+                {masteryDescription}
               </p>
             )}
           </div>
@@ -424,7 +424,7 @@ export default function ItemDetail({ item }) {
                 <div
                   key={code}
                   className="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-600 text-[11px] text-slate-100 cursor-default hover:border-amber-300/70 hover:bg-slate-700/80 transition"
-                  // title={tooltip}
+                  title={tooltip}
                 >
                   {meta.label}
                 </div>

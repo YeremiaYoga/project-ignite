@@ -128,10 +128,7 @@ export default function FoundryItemView() {
   // ======================================================
   function handleSelect(item) {
     setSelected(item);
-
     const slug = makeSlug(item);
-
-    // kalau mau simpan query lain juga, tinggal tambah di sini
     const params = new URLSearchParams();
     params.set("item", slug);
 
@@ -151,7 +148,7 @@ export default function FoundryItemView() {
                 type="text"
                 placeholder="Search items..."
                 value={search}
-                // onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs outline-none 
                 focus:ring-2 focus:ring-indigo-500/70 transition"
               />
