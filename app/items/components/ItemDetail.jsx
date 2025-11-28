@@ -14,10 +14,6 @@ import {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
-/**
- * onFavoriteChange optional:
- *   ({ type, id, isFavorite, favoritesCount }) => void
- */
 export default function ItemDetail({ item, onFavoriteChange }) {
   const noop = () => {};
   const emitFavoriteChange = onFavoriteChange || noop;
