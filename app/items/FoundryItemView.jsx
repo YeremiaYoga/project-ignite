@@ -26,6 +26,7 @@ const TYPE_OPTIONS = [
 ];
 
 const RARITY_OPTIONS = [
+  { key: "null", label: "None" },
   { key: "common", label: "Common" },
   { key: "uncommon", label: "Uncommon" },
   { key: "rare", label: "Rare" },
@@ -172,7 +173,12 @@ export default function FoundryItemView() {
     return items.filter((it) => {
       const name = (it.name || "").toLowerCase();
       const type = (it.__type || it.type || "").toLowerCase();
-      const rarityKey = normalizeRarityKey(it.rarity || it.rarity_name || "");
+
+      // normalize rarity → kosong jadi bucket "null"
+      const rawRarityKey = normalizeRarityKey(
+        it.rarity || it.rarity_name || ""
+      );
+      const rarityBucket = rawRarityKey || "null"; // <<< ini yang bikin "None" bisa nangkep null/kosong
 
       const matchesSearch =
         term === "" ? true : name.includes(term) || type.includes(term);
@@ -181,7 +187,9 @@ export default function FoundryItemView() {
         typeFilters.length === 0 ? true : typeFilters.includes(type);
 
       const matchesRarity =
-        rarityFilters.length === 0 ? true : rarityFilters.includes(rarityKey);
+        rarityFilters.length === 0
+          ? true
+          : rarityFilters.includes(rarityBucket);
 
       return matchesSearch && matchesType && matchesRarity;
     });

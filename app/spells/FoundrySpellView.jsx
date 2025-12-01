@@ -2,57 +2,21 @@
 
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Diamond } from "lucide-react";
 import SpellDetail from "./components/SpellDetail";
-import SpellFilterModal from "./components/SpellFilterModal";
+// import SpellFilterModal from "./components/SpellFilterModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
-const SCHOOL_COLORS = {
-  abjuration: "#60a5fa",
-  conjuration: "#34d399",
-  divination: "#facc15",
-  enchantment: "#f97316",
-  evocation: "#ef4444",
-  illusion: "#a855f7",
-  necromancy: "#6b7280",
-  transmutation: "#22c55e",
-};
-
-const SCHOOL_OPTIONS = [
-  { key: "abjuration", label: "Abjuration" },
-  { key: "conjuration", label: "Conjuration" },
-  { key: "divination", label: "Divination" },
-  { key: "enchantment", label: "Enchantment" },
-  { key: "evocation", label: "Evocation" },
-  { key: "illusion", label: "Illusion" },
-  { key: "necromancy", label: "Necromancy" },
-  { key: "transmutation", label: "Transmutation" },
-];
-
-const LEVEL_OPTIONS = [
-  { key: "0", label: "Cantrip" },
-  { key: "1", label: "Level 1" },
-  { key: "2", label: "Level 2" },
-  { key: "3", label: "Level 3" },
-  { key: "4", label: "Level 4" },
-  { key: "5", label: "Level 5" },
-  { key: "6", label: "Level 6" },
-  { key: "7", label: "Level 7" },
-  { key: "8", label: "Level 8" },
-  { key: "9", label: "Level 9" },
-];
-
+// ======================== HELPERS ========================
 function normalizeSchool(school) {
   if (!school) return "";
   return String(school).toLowerCase().trim();
 }
 
-function getSchoolColor(school) {
-  const key = normalizeSchool(school);
-//   if (!key) return "#e5e7eb";
-//   return SCHOOL_COLORS[key] || "#e5e7eb";
-
- return "#e5e7eb";
+// sementara warna sekolah putih semua
+function getSchoolColor() {
+  return "#e5e7eb";
 }
 
 function normalizeLevel(level) {
@@ -60,6 +24,12 @@ function normalizeLevel(level) {
   const num = Number(level);
   if (Number.isNaN(num)) return String(level);
   return String(num);
+}
+
+function getLevelLabel(level) {
+  const num = Number(level);
+  if (Number.isNaN(num)) return level;
+  return num === 0 ? "Cantrip" : `Level ${num}`;
 }
 
 function makeSlug(spell) {
@@ -70,12 +40,172 @@ function makeSlug(spell) {
   return `spell-${name}`;
 }
 
-function getLevelLabel(level) {
-  const num = Number(level);
-  if (Number.isNaN(num)) return level;
-  return num === 0 ? "Cantrip" : `Level ${num}`;
+function cap(str) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+/**
+ * Ambil objek activation mentah lalu jadikan label singkat
+ * contoh: "1 Action", "Bonus Action", "Reaction"
+ */
+function getActivationLabel(spell) {
+  const activation =
+    spell.activation ||
+    spell.format_data?.activation ||
+    spell.raw_data?.system?.activation;
+
+  if (!activation || typeof activation !== "object") return "";
+
+  const value = activation.value;
+  const type = activation.type;
+
+  if (!type) return "";
+
+  const map = {
+    action: "Action",
+    bonus: "Bonus Action",
+    reaction: "Reaction",
+    minute: "Minute",
+    hour: "Hour",
+  };
+
+  const typeLabel = map[type] || cap(String(type));
+
+  if (value != null && value !== "" && Number(value) !== 0) {
+    return `${value} ${typeLabel}`;
+  }
+
+  return typeLabel;
+}
+
+/**
+ * Ambil range + template → "Self (100 ft line)" dll.
+ * - Jika units = self/touch → hanya "Self"/"Touch"
+ * - Jika value > 0 → "100 ft"
+ * - Jika value = 0 → hanya units capitalized ("Self", "Touch", dll)
+ */
+function getRangeLabel(spell) {
+  const range =
+    spell.range ||
+    spell.format_data?.range ||
+    spell.raw_data?.system?.range;
+
+  const template =
+    spell.template ||
+    spell.format_data?.template ||
+    spell.raw_data?.system?.target?.template;
+
+  let base = "";
+
+  if (!range) {
+    base = "";
+  } else if (typeof range === "string") {
+    const raw = range.trim().toLowerCase();
+
+    // khusus pattern "0 self" / "self 0"
+    if (raw.includes("self")) {
+      return "Self";
+    }
+    // khusus pattern "0 touch" / "touch 0"
+    if (raw.includes("touch")) {
+      return "Touch";
+    }
+
+    // pattern "0 ft", "0 m", dll → ambil units saja
+    const m = raw.match(/^0+\s+([a-z]+.*)$/);
+    if (m) {
+      // kembalikan units dengan huruf pertama besar
+      return cap(m[1]);
+    }
+
+    // selain itu, pakai apa adanya
+    base = range;
+  } else if (typeof range === "object") {
+    const units = range.units || range.unit;
+    const value = range.value;
+
+    if (!units && (value == null || value === "")) {
+      base = "";
+    } else if (units === "self") {
+      // Self tanpa value
+      base = "Self";
+    } else if (units === "touch") {
+      // Touch tanpa value
+      base = "Touch";
+    } else if (value != null && Number(value) !== 0) {
+      // Ada value > 0
+      base = `${value} ${units || ""}`.trim();
+    } else if (units) {
+      // value 0 / null → tampilkan units saja (cap)
+      base = cap(String(units));
+    }
+  }
+
+  // gabung dengan template kalau ada
+  if (template && typeof template === "object") {
+    const size = template.size;
+    const tType = template.type;
+    const tUnits = template.units || template.unit || "";
+
+    const innerParts = [];
+    if (size != null && size !== "") {
+      innerParts.push(`${size}${tUnits ? tUnits : ""}`.trim());
+    }
+    if (tType) innerParts.push(cap(String(tType)));
+
+    const inner = innerParts.join(" ");
+    if (inner) {
+      if (!base) return inner; // fallback kalau range kosong
+      return `${base} (${inner})`;
+    }
+  }
+
+  return base || "";
+}
+
+/**
+ * Baca flag concentration dari duration object
+ */
+function getConcentrationFlag(spell) {
+  const duration =
+    spell.duration ||
+    spell.format_data?.duration ||
+    spell.raw_data?.system?.duration;
+
+  if (!duration) return false;
+
+  if (typeof duration === "object") {
+    if (typeof duration.concentration === "boolean") {
+      return duration.concentration;
+    }
+    if (typeof duration.concentration === "string") {
+      return duration.concentration.toLowerCase() === "true";
+    }
+  }
+
+  if (typeof duration === "string") {
+    return duration.toLowerCase().includes("concentration");
+  }
+
+  return false;
+}
+
+/**
+ * Summary: "Level 6 • 1 Action • Self (100 ft line)"
+ */
+function getSpellSummary(spell) {
+  const lvl = normalizeLevel(spell.level ?? spell.level_int ?? spell.lvl ?? 0);
+  const levelLabel = getLevelLabel(lvl);
+  const activationLabel = getActivationLabel(spell);
+  const rangeLabel = getRangeLabel(spell);
+
+  return [levelLabel, activationLabel, rangeLabel]
+    .filter((x) => x && String(x).trim() !== "")
+    .join(" • ");
+}
+
+// ======================== COMPONENT ========================
 export default function FoundrySpellView() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -240,15 +370,7 @@ export default function FoundrySpellView() {
 
       <div className="flex-1 bg-slate-950/60 border border-slate-800 rounded-xl flex flex-col min-h-0">
         <div className="flex items-center px-4 py-2 border-b border-slate-800 bg-slate-900/70 text-[11px] uppercase tracking-wide text-slate-400 shrink-0">
-          <div className="w-7 h-7 rounded-md border border-slate-600 mr-3 flex items-center justify-center text-[9px]">
-            #
-          </div>
-          <span className="font-semibold text-slate-100">Spell</span>
-          <div className="flex-1" />
-          <div className="text-right text-[10px] text-slate-400">
-            <div>Level</div>
-            <div>School</div>
-          </div>
+          <span className="font-semibold text-slate-100">Spells</span>
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -263,13 +385,8 @@ export default function FoundrySpellView() {
                   <div className="w-9 h-9 rounded-md bg-slate-800/80 border border-slate-700" />
                   <div className="space-y-1">
                     <div className="h-3 w-24 bg-slate-800 rounded" />
-                    <div className="h-2 w-16 bg-slate-800 rounded" />
+                    <div className="h-2 w-32 bg-slate-800 rounded" />
                   </div>
-                </div>
-
-                <div className="space-y-1 text-right">
-                  <div className="h-2 w-10 bg-slate-800 rounded" />
-                  <div className="h-2 w-8 bg-slate-800 rounded" />
                 </div>
               </div>
             ))
@@ -296,10 +413,9 @@ export default function FoundrySpellView() {
               const schoolColor = getSchoolColor(
                 spell.school || spell.school_name
               );
-              const levelNorm = normalizeLevel(
-                spell.level ?? spell.level_int ?? spell.lvl ?? ""
-              );
-              const levelLabel = getLevelLabel(levelNorm);
+
+              const summary = getSpellSummary(spell); // "Level 6 • 1 Action • Self (100 ft line)"
+              const isConcentration = getConcentrationFlag(spell);
 
               return (
                 <button
@@ -334,15 +450,22 @@ export default function FoundrySpellView() {
                       <span className="font-semibold text-slate-100 break-words">
                         {spell.name || "Unnamed spell"}
                       </span>
-                      <span className="text-[11px] text-slate-400 capitalize break-words">
-                        {school}
+                      <span className="text-[11px] text-slate-300 break-words">
+                        {summary}
                       </span>
                     </div>
                   </div>
 
-                  <div className="text-right text-[10px] text-slate-400 leading-tight shrink-0">
-                    <div>{levelLabel}</div>
+                  {/* kanan: school + concentration diamond */}
+                  <div className=" items-center gap-2 text-right text-[10px] text-slate-400 leading-tight shrink-0">
                     <div className="capitalize">{school}</div>
+                    <Diamond
+                      className={`w-4 h-4 ${
+                        isConcentration
+                          ? "text-slate-50 fill-slate-50"
+                          : "text-slate-500 fill-transparent"
+                      }`}
+                    />
                   </div>
                 </button>
               );
@@ -374,7 +497,6 @@ export default function FoundrySpellView() {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          {/* top bar */}
           <div className="shrink-0 sticky top-0 z-20 flex items-center justify-between bg-[#050b26]/90 backdrop-blur border-b border-slate-800 px-3 py-2">
             {pane === "detail" ? (
               <button
@@ -388,7 +510,6 @@ export default function FoundrySpellView() {
             )}
           </div>
 
-          {/* slider list/detail */}
           <div
             className="flex w-[200%] flex-1 min-h-0 transition-all duration-300 ease-in-out"
             style={{
@@ -396,12 +517,10 @@ export default function FoundrySpellView() {
                 pane === "list" ? "translateX(0%)" : "translateX(-50%)",
             }}
           >
-            {/* LIST PANE */}
             <section className="w-1/2 min-w-[50%] h-full p-4 flex flex-col min-h-0">
               {ListBlock}
             </section>
 
-            {/* DETAIL PANE */}
             <section className="w-1/2 min-w-[50%] h-full p-4 flex flex-col min-h-0">
               <div className="flex-1 bg-slate-900/80 rounded-xl border border-slate-800 p-4 overflow-auto">
                 {selected ? (
@@ -415,7 +534,7 @@ export default function FoundrySpellView() {
         </div>
       </div>
 
-      {/* FILTER MODAL */}
+      {/* FILTER MODAL (masih dimatikan, tinggal aktifkan kalau mau) */}
       {/* {filterOpen && (
         <SpellFilterModal
           schoolOptions={SCHOOL_OPTIONS}

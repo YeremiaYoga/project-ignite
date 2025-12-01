@@ -1,74 +1,156 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
-const SCHOOL_COLORS = {
-  abjuration: "#60a5fa",
-  conjuration: "#34d399",
-  divination: "#facc15",
-  enchantment: "#f97316",
-  evocation: "#ef4444",
-  illusion: "#a855f7",
-  necromancy: "#6b7280",
-  transmutation: "#22c55e",
-};
+// --- helper umum biar gak pernah nge-render object mentah ---
+function safeText(v) {
+  if (v == null) return "";
+  if (typeof v === "string" || typeof v === "number") return String(v);
 
-function normalizeSchool(school) {
-  if (!school) return "";
-  return String(school).toLowerCase().trim();
-}
-
-// -------- helpers biar nggak ngasih object ke JSX --------
-function safeText(value) {
-  if (value == null) return "";
-  if (typeof value === "string" || typeof value === "number") {
-    return String(value);
-  }
-  if (Array.isArray(value)) {
-    return value
-      .map((v) => safeText(v))
+  if (Array.isArray(v)) {
+    return v
+      .map((x) => safeText(x))
       .filter(Boolean)
       .join(", ");
   }
-  if (typeof value === "object") {
-    return Object.values(value)
-      .map((v) => safeText(v))
+
+  if (typeof v === "object") {
+    return Object.values(v)
+      .map((x) => safeText(x))
       .filter(Boolean)
       .join(", ");
   }
+
   return "";
 }
 
-function stringifySource(src) {
-  if (!src) return "";
-  if (typeof src === "string" || typeof src === "number") {
-    return String(src);
+function cap(str) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Activation → "1 Action", "Bonus Action", dll
+function getActivationLabel(spell) {
+  const activation =
+    spell.activation ||
+    spell.format_data?.system?.activation ||
+    spell.raw_data?.system?.activation;
+
+  if (!activation) return "";
+
+  if (typeof activation === "string") return activation;
+
+  const value = activation.value;
+  const type = activation.type;
+
+  if (!type) return safeText(activation);
+
+  const map = {
+    action: "Action",
+    bonus: "Bonus Action",
+    reaction: "Reaction",
+    minute: "Minute",
+    hour: "Hour",
+  };
+
+  const typeLabel = map[type] || cap(String(type));
+
+  if (value != null && value !== "" && Number(value) !== 0) {
+    return `${value} ${typeLabel}`;
   }
-  if (typeof src === "object") {
-    // khusus format { book, page, rules, custom, license, revision, ... }
-    const { book, page, rules, custom, license, revision, ...rest } = src;
-    const parts = [];
 
-    if (book) parts.push(String(book));
-    if (page) parts.push(`p. ${page}`);
-    if (rules) parts.push(String(rules));
-    if (custom) parts.push(String(custom));
-    if (license) parts.push(`(${license})`);
-    if (revision) parts.push(`rev. ${revision}`);
+  return typeLabel;
+}
 
-    const other = Object.values(rest)
-      .map((v) => safeText(v))
-      .filter(Boolean)
-      .join(", ");
+// Duration → "1 minute", "Concentration, up to 10 minutes" (kalau ada di string)
+function getDurationLabel(spell) {
+  const dur =
+    spell.duration ||
+    spell.format_data?.system?.duration ||
+    spell.raw_data?.system?.duration;
 
-    if (other) parts.push(other);
+  if (!dur) return "";
 
-    return parts.join(" – ");
+  // kalau sudah string (misal sudah "Concentration, up to 10 minutes")
+  if (typeof dur === "string") return dur;
+
+  const value = dur.value;
+  const units = dur.units || dur.unit;
+
+  if (!units && value == null) return safeText(dur);
+
+  if (value != null && value !== "" && Number(value) !== 0) {
+    return `${value} ${units || ""}`.trim();
   }
-  return String(src);
+
+  return units ? cap(String(units)) : safeText(dur);
+}
+
+// Range → "120 ft", "Self", "Touch"
+function getRangeLabel(spell) {
+  const range =
+    spell.range ||
+    spell.format_data?.system?.range ||
+    spell.raw_data?.system?.range;
+
+  if (!range) return "";
+
+  if (typeof range === "string") return range;
+
+  const value = range.value;
+  const units = range.units || range.unit;
+
+  if (!units && value == null) return safeText(range);
+
+  if (units === "self" || units === "Self") return "Self";
+  if (units === "touch" || units === "Touch") return "Touch";
+
+  if (value != null && Number(value) !== 0 && units) {
+    return `${value} ${units}`;
+  }
+
+  if (units) return cap(String(units));
+
+  return safeText(range);
+}
+
+// Ambil properties jadi array string rapi
+function getProperties(spell) {
+  const raw =
+    spell.properties ||
+    spell.format_data?.system?.properties ||
+    spell.raw_data?.system?.properties;
+
+  if (!raw) return [];
+
+  // CASE 1: Array → langsung clean
+  if (Array.isArray(raw)) {
+    return raw.map((x) => String(x).trim()).filter(Boolean);
+  }
+
+  // CASE 2: String → split + bersihkan tanda kurung []
+  if (typeof raw === "string") {
+    return raw
+      .replace(/[\[\]"]/g, "") // HAPUS bracket & quote
+      .split(/[;,]/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+  }
+
+  // CASE 3: Object → ambil key yang bernilai true
+  if (typeof raw === "object") {
+    return Object.entries(raw)
+      .filter(([, v]) => !!v) // pilih yang true
+      .map(([k]) => cap(k.replace(/_/g, " ")));
+  }
+
+  // fallback terakhir → string biasa
+  return [String(raw).trim()].filter(Boolean);
 }
 
 export default function SpellDetail({ spell }) {
+  const [activeProp, setActiveProp] = useState(null);
+
   if (!spell) {
     return (
       <div className="flex-1 flex items-center justify-center text-sm text-slate-400">
@@ -79,51 +161,21 @@ export default function SpellDetail({ spell }) {
 
   const name = spell.name || "Unnamed spell";
   const level = spell.level ?? spell.level_int ?? spell.lvl ?? 0;
-  const schoolRaw = spell.school || spell.school_name || "";
-  const schoolKey = normalizeSchool(schoolRaw);
-  const schoolColor = SCHOOL_COLORS[schoolKey] || null;
+  const levelLabel =
+    Number(level) === 0 ? "Cantrip" : `Level ${Number(level) || level}`;
 
-  const castingTime = safeText(
-    spell.activation ||
-      spell.casting_time ||
-      spell.cast_time ||
-      spell.format_data?.system?.activation?.value ||
-      spell.raw_data?.system?.activation?.value
-  );
+  const school = spell.school || spell.school_name || "";
 
-  const range = safeText(
-    spell.range ||
-      spell.format_data?.system?.range?.value ||
-      spell.raw_data?.system?.range?.value
-  );
+  const activationLabel = getActivationLabel(spell);
+  const durationLabel = getDurationLabel(spell);
+  const rangeLabel = getRangeLabel(spell);
 
-  const duration = safeText(
-    spell.duration ||
-      spell.format_data?.system?.duration?.value ||
-      spell.raw_data?.system?.duration?.value
-  );
+  const components =
+    safeText(spell.components) ||
+    safeText(spell.format_data?.system?.components?.value) ||
+    safeText(spell.raw_data?.system?.components?.value);
 
-  const components = safeText(
-    spell.components ||
-      spell.format_data?.system?.components?.value ||
-      spell.raw_data?.system?.components?.value
-  );
-
-  const material = safeText(
-    spell.material ||
-      spell.materials ||
-      spell.format_data?.system?.materials?.value ||
-      spell.raw_data?.system?.materials?.value
-  );
-
-  const source = stringifySource(
-    spell.source ||
-      spell.sourcebook ||
-      spell.compendium_source ||
-      spell.format_data?.system?.source ||
-      spell.raw_data?.system?.source
-  );
-
+  // SESUAI REQUEST: material & source TIDAK ditampilkan
   const imgSrc =
     spell.image ||
     spell.format_data?.img ||
@@ -140,30 +192,23 @@ export default function SpellDetail({ spell }) {
       ? descriptionRaw
       : "<p>No description available.</p>";
 
-  const levelLabel =
-    Number(level) === 0
-      ? "Cantrip"
-      : `Level ${Number.isNaN(Number(level)) ? level : Number(level)}`;
+// subtitle tanpa useMemo
+const subtitleParts = [];
 
-  const subtitle = useMemo(() => {
-    const parts = [];
-    if (levelLabel) parts.push(levelLabel);
-    if (schoolRaw) parts.push(schoolRaw);
-    return parts.join(" • ");
-  }, [levelLabel, schoolRaw]);
+if (levelLabel) subtitleParts.push(levelLabel);
+if (school) subtitleParts.push(school);
 
-  const titleStyle = schoolColor ? { color: schoolColor } : {};
-  const borderStyle = schoolColor ? { borderColor: schoolColor } : {};
+const subtitle = subtitleParts.join(" • ");
+
+
+  const properties = getProperties(spell);
 
   return (
     <div className="flex flex-col h-full">
       {/* HEADER */}
       <div className="flex items-start mb-3 gap-4">
         <div className="shrink-0">
-          <div
-            className="w-16 h-16 rounded-xl flex items-center justify-center text-[11px] font-semibold text-slate-200 shadow border"
-            style={borderStyle}
-          >
+          <div className="w-16 h-16 rounded-xl border border-slate-700 overflow-hidden">
             <img
               src={imgSrc}
               alt={name}
@@ -177,24 +222,39 @@ export default function SpellDetail({ spell }) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
+            {/* KIRI: nama + level/school + casting + duration */}
             <div className="min-w-0">
-              <h1
-                className="lg:text-2xl font-semibold break-words leading-tight"
-                style={titleStyle}
-              >
+              <h1 className="lg:text-2xl font-semibold break-words leading-tight">
                 {name}
               </h1>
 
-              <p className="text-xs text-slate-300 mt-1 break-words">
-                {subtitle}
-              </p>
+         
+              {subtitle && (
+                <p className="text-xs text-slate-300 mt-1 break-words">
+                  {subtitle}
+                </p>
+              )}
+
+              {/* Casting & Duration tepat di bawah level */}
+              {activationLabel && (
+                <p className="text-[11px] text-slate-300 mt-1">
+                  Casting : {activationLabel}
+                </p>
+              )}
+
+              {durationLabel && (
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  Duration : {durationLabel}
+                </p>
+              )}
             </div>
 
-            <div className="text-right text-[11px] text-indigo-300 leading-tight shrink-0 space-y-1">
-              {castingTime && <div>Casting: {castingTime}</div>}
-              {range && <div>Range: {range}</div>}
-              {duration && <div>Duration: {duration}</div>}
-            </div>
+            {/* KANAN: Range sejajar dengan nama */}
+            {rangeLabel && (
+              <div className="text-right text-[11px] text-indigo-300 leading-tight shrink-0">
+                <div>Range {rangeLabel}</div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -204,31 +264,13 @@ export default function SpellDetail({ spell }) {
       {/* BODY */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto pr-1">
-          {/* Quick meta */}
-          <div className="mb-3 text-[11px] text-slate-300 space-y-1">
-            {components && (
-              <div>
-                <span className="font-semibold text-slate-200">
-                  Components:
-                </span>{" "}
-                {components}
-              </div>
-            )}
-            {material && (
-              <div>
-                <span className="font-semibold text-slate-200">
-                  Material:
-                </span>{" "}
-                {material}
-              </div>
-            )}
-            {source && (
-              <div>
-                <span className="font-semibold text-slate-200">Source:</span>{" "}
-                {source}
-              </div>
-            )}
-          </div>
+          {/* Components saja (material & source dihapus) */}
+          {components && (
+            <div className="mb-3 text-[11px] text-slate-300">
+              <span className="font-semibold text-slate-200">Components:</span>{" "}
+              {components}
+            </div>
+          )}
 
           <p className="text-sm uppercase tracking-wide text-slate-400 mb-1">
             Description
@@ -239,6 +281,52 @@ export default function SpellDetail({ spell }) {
             dangerouslySetInnerHTML={{ __html: descriptionHtml }}
           />
         </div>
+
+        {/* PROPERTIES PALING BAWAH SEPERTI "BAR" */}
+        {properties.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-slate-700/60 shrink-0">
+            <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">
+              Properties
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {properties.map((prop, idx) => {
+                const code = String(prop).toLowerCase().trim();
+                const isActive = activeProp === code;
+
+                return (
+                  <button
+                    key={`${code}-${idx}`}
+                    type="button"
+                    onClick={() =>
+                      setActiveProp((prev) => (prev === code ? null : code))
+                    }
+                    className={`px-3 py-1 rounded-full border text-[11px] cursor-pointer transition
+                      ${
+                        isActive
+                          ? "border-amber-300 bg-slate-700/90 text-slate-50"
+                          : "border-slate-600 bg-slate-800/80 text-slate-100 hover:border-amber-300/70 hover:bg-slate-700/80"
+                      }`}
+                  >
+                    {prop}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* {activeProp && (
+              <div className="mt-2 text-[11px] text-slate-100 bg-slate-900/95 border border-slate-700 rounded-lg p-2">
+                <div className="font-semibold mb-1">
+                  {cap(activeProp.replace(/_/g, " "))}
+                </div>
+                <p className="leading-snug text-slate-300">
+            
+                  No additional description configured.
+                </p>
+              </div>
+            )} */}
+          </div>
+        )}
       </div>
     </div>
   );
