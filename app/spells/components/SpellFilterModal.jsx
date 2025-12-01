@@ -3,47 +3,46 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
-
-export default function ItemFilterModal({
-  typeOptions = [],
-  selectedTypes = [],
-  rarityOptions = [],
-  selectedRarities = [],
+export default function SpellFilterModal({
+  schoolOptions = [],
+  selectedSchools = [],
+  levelOptions = [],
+  selectedLevels = [],
   onClose,
   onApply,
 }) {
-  const [draftTypes, setDraftTypes] = useState(selectedTypes || []);
-  const [draftRarities, setDraftRarities] = useState(selectedRarities || []);
+  const [draftSchools, setDraftSchools] = useState(selectedSchools || []);
+  const [draftLevels, setDraftLevels] = useState(selectedLevels || []);
 
   useEffect(() => {
-    setDraftTypes(selectedTypes || []);
-  }, [selectedTypes]);
+    setDraftSchools(selectedSchools || []);
+  }, [selectedSchools]);
 
   useEffect(() => {
-    setDraftRarities(selectedRarities || []);
-  }, [selectedRarities]);
+    setDraftLevels(selectedLevels || []);
+  }, [selectedLevels]);
 
-  const toggleType = (key) => {
-    setDraftTypes((prev) =>
+  const toggleSchool = (key) => {
+    setDraftSchools((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
   };
 
-  const toggleRarity = (key) => {
-    setDraftRarities((prev) =>
+  const toggleLevel = (key) => {
+    setDraftLevels((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
   };
 
   const handleReset = () => {
-    setDraftTypes([]);
-    setDraftRarities([]);
+    setDraftSchools([]);
+    setDraftLevels([]);
   };
 
   const handleApply = () => {
     onApply({
-      types: draftTypes,
-      rarities: draftRarities,
+      schools: draftSchools,
+      levels: draftLevels,
     });
   };
 
@@ -53,15 +52,12 @@ export default function ItemFilterModal({
       aria-modal="true"
       role="dialog"
     >
-      <div
-        className="absolute inset-0 bg-black/60"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
       <div className="relative z-10 w-full max-w-md rounded-xl border border-[#2a2f55] bg-[#050822] p-4 shadow-2xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-slate-100">
-            Filter Items
+            Filter Spells
           </h3>
           <button
             type="button"
@@ -72,23 +68,23 @@ export default function ItemFilterModal({
           </button>
         </div>
 
-        {/* TYPE FILTER */}
+        {/* SCHOOL FILTER */}
         <div className="mb-4">
           <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-            Type
+            School
           </div>
           <div className="flex flex-wrap gap-2">
-            {typeOptions.map((opt) => {
-              const active = draftTypes.includes(opt.key);
+            {schoolOptions.map((opt) => {
+              const active = draftSchools.includes(opt.key);
               return (
                 <button
                   key={opt.key}
                   type="button"
-                  onClick={() => toggleType(opt.key)}
+                  onClick={() => toggleSchool(opt.key)}
                   className={`px-2.5 py-1 rounded-md border text-xs capitalize transition
                     ${
                       active
-                        ? "border-emerald-600 bg-emerald-500/20 text-emerald-100"
+                        ? "border-indigo-500 bg-indigo-500/20 text-indigo-100"
                         : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
                     }`}
                 >
@@ -99,23 +95,23 @@ export default function ItemFilterModal({
           </div>
         </div>
 
-        {/* RARITY FILTER */}
+        {/* LEVEL FILTER */}
         <div className="mb-4">
           <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-            Rarity
+            Level
           </div>
           <div className="flex flex-wrap gap-2">
-            {rarityOptions.map((opt) => {
-              const active = draftRarities.includes(opt.key);
+            {levelOptions.map((opt) => {
+              const active = draftLevels.includes(opt.key);
               return (
                 <button
                   key={opt.key}
                   type="button"
-                  onClick={() => toggleRarity(opt.key)}
+                  onClick={() => toggleLevel(opt.key)}
                   className={`px-2.5 py-1 rounded-md border text-xs capitalize transition
                     ${
                       active
-                        ? "border-indigo-500 bg-indigo-500/20 text-indigo-100"
+                        ? "border-emerald-500 bg-emerald-500/20 text-emerald-100"
                         : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
                     }`}
                 >

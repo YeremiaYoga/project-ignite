@@ -46,6 +46,7 @@ export default function UserMenu() {
 
       Cookies.remove("ignite_access_token");
       Cookies.remove("ignite-tales-mode");
+      Cookies.remove("ignite-user-data");
       localStorage.removeItem("patreon_full_name");
       localStorage.removeItem("patreon_avatar");
 
@@ -67,7 +68,23 @@ export default function UserMenu() {
         if (!res.ok) return;
 
         const data = await res.json();
-        if (data?.user) setUserData(data.user);
+
+        if (data?.user) {
+          setUserData(data.user);
+
+          const safeUser = {
+            username: data.user.username,
+            email: data.user.email,
+            role: data.user.role,
+            friend_code: data.user.friend_code,
+            profile_picture: data.user.profile_picture,
+          };
+
+          Cookies.set("ignite-user-data", JSON.stringify(safeUser), {
+            expires: 1,
+            sameSite: "lax",
+          });
+        }
       } catch (err) {
         console.error("❌ Error checking login:", err);
       }
@@ -171,74 +188,73 @@ export default function UserMenu() {
     Cookies.set("ignite-tales-mode", newVal.toString(), { expires: 365 });
   };
 
- const handleUsePatreonAvatar = async () => {
-  try {
-    if (!userData?.id) {
-      console.warn("⚠️ No user id found");
-      return;
-    }
-
-    let avatar = null;
-
-    // Ambil dari patreonData dulu
-    if (patreonData) {
-      avatar =
-        patreonData.avatar ||
-        patreonData.image_url ||
-        patreonData.avatar_url ||
-        null;
-    }
-
-    // Fallback: localStorage
-    if (!avatar && typeof window !== "undefined") {
-      avatar = window.localStorage.getItem("patreon_avatar");
-    }
-
-    if (!avatar) {
-      console.warn("⚠️ No Patreon avatar found.");
-      return;
-    }
-
-    // 🔹 Sama seperti handleSave: PATCH /users/:id
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/users/${userData.id}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          profile_picture: avatar,
-        }),
+  const handleUsePatreonAvatar = async () => {
+    try {
+      if (!userData?.id) {
+        console.warn("⚠️ No user id found");
+        return;
       }
-    );
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      console.error("❌ Failed to update avatar in DB:", errData);
-      return;
+      let avatar = null;
+
+      // Ambil dari patreonData dulu
+      if (patreonData) {
+        avatar =
+          patreonData.avatar ||
+          patreonData.image_url ||
+          patreonData.avatar_url ||
+          null;
+      }
+
+      // Fallback: localStorage
+      if (!avatar && typeof window !== "undefined") {
+        avatar = window.localStorage.getItem("patreon_avatar");
+      }
+
+      if (!avatar) {
+        console.warn("⚠️ No Patreon avatar found.");
+        return;
+      }
+
+      // 🔹 Sama seperti handleSave: PATCH /users/:id
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${userData.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            profile_picture: avatar,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        console.error("❌ Failed to update avatar in DB:", errData);
+        return;
+      }
+
+      const updated = await res.json();
+
+      // Struktur sama kayak handleSave → updated.user
+      const updatedUser = updated.user || updated;
+
+      // Update state userData biar langsung ke-refresh di UI
+      setUserData((prev) => ({
+        ...prev,
+        ...(updatedUser || {}),
+        profile_picture: avatar,
+      }));
+
+      // Optional: kalau mau tetap pakai toggle ini
+      setUsePatreonAvatar(true);
+    } catch (err) {
+      console.error("❌ Failed to use Patreon avatar:", err);
     }
-
-    const updated = await res.json();
-
-    // Struktur sama kayak handleSave → updated.user
-    const updatedUser = updated.user || updated;
-
-    // Update state userData biar langsung ke-refresh di UI
-    setUserData((prev) => ({
-      ...prev,
-      ...(updatedUser || {}),
-      profile_picture: avatar,
-    }));
-
-    // Optional: kalau mau tetap pakai toggle ini
-    setUsePatreonAvatar(true);
-  } catch (err) {
-    console.error("❌ Failed to use Patreon avatar:", err);
-  }
-};
-
+  };
 
   const handleUseIgniteAvatar = () => {
     setUsePatreonAvatar(false);

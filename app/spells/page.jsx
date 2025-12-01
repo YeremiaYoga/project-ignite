@@ -1,30 +1,17 @@
-import fs from "fs";
-import path from "path";
-import ClientSpellsPage from "./ClientSpellsPage";
+// app/spells/page.jsx
+import { Suspense } from "react";
+import FoundrySpellView from "./FoundrySpellView";
 
-export default function SpellsPage() {
-  const baseDirectory = path.join(process.cwd(), "data", "spells");
-
-  const levelFolders = fs.readdirSync(baseDirectory).filter((name) => {
-    const fullPath = path.join(baseDirectory, name);
-    return fs.statSync(fullPath).isDirectory() && 
-           (name === "cantrips" || /^[1-9]$/.test(name));
-  });
-
-  const spells = [];
-
-
-  for (const folder of levelFolders) {
-    const folderPath = path.join(baseDirectory, folder);
-    const fileNames = fs.readdirSync(folderPath);
-
-    for (const fileName of fileNames) {
-      const filePath = path.join(folderPath, fileName);
-      const fileContents = fs.readFileSync(filePath, "utf8");
-      const json = JSON.parse(fileContents);
-      spells.push(json); 
-    }
-  }
-
-  return <ClientSpellsPage spells={spells} />;
+export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-slate-200">
+          Loading spells...
+        </div>
+      }
+    >
+      <FoundrySpellView />
+    </Suspense>
+  );
 }

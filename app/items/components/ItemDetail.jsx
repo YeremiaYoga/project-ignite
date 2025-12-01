@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import { Heart } from "lucide-react";
 
 import {
@@ -18,6 +19,95 @@ export default function ItemDetail({ item, onFavoriteChange }) {
   const noop = () => {};
   const emitFavoriteChange = onFavoriteChange || noop;
 
+  // ==== LOGIN STATE (DARI COOKIE) ====
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // ==== FAVORITE STATE ====
+  const [favCount, setFavCount] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
+
+  // ==== TOOLTIP PROPERTY (ON CLICK) ====
+  const [activeProperty, setActiveProperty] = useState(null);
+
+  // --- Cek login dari cookie sekali di awal
+  useEffect(() => {
+    const userCookie = Cookies.get("ignite-user-data");
+    setIsLoggedIn(Boolean(userCookie));
+  }, []);
+
+  // --- Sinkron favorite dengan item tiap kali item berubah
+  useEffect(() => {
+    if (!item) {
+      setFavCount(0);
+      setIsFavorite(false);
+      setFavLoading(false);
+      return;
+    }
+
+    setFavCount(item.favorites_count ?? 0);
+    setIsFavorite(Boolean(item.is_favorite));
+    setFavLoading(false);
+  }, [item?.__global_id, item?.id, item?.__type]);
+
+  const handlePropertyClick = (code) => {
+    setActiveProperty((prev) => (prev === code ? null : code));
+  };
+
+  async function handleToggleFavorite() {
+    if (!item?.id || !item.__type) return;
+    if (!isLoggedIn) return;
+    if (favLoading) return;
+
+    try {
+      setFavLoading(true);
+
+      const res = await fetch(
+        `${API_BASE}/foundry/items/${item.__type}/${item.id}/favorite`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        console.error("❌ toggle favorite failed:", res.status);
+        return;
+      }
+
+      const data = await res.json();
+
+      let nextCount = favCount;
+      let nextIsFavorite = isFavorite;
+
+      if (typeof data.favorites_count === "number") {
+        nextCount = data.favorites_count;
+      } else {
+        nextCount = favCount + (data.action === "favorite" ? 1 : -1);
+      }
+
+      if (data.action === "favorite") nextIsFavorite = true;
+      else if (data.action === "unfavorite") nextIsFavorite = false;
+
+      if (nextCount < 0) nextCount = 0;
+
+      setFavCount(nextCount);
+      setIsFavorite(nextIsFavorite);
+
+      emitFavoriteChange({
+        type: item.__type,
+        id: item.id,
+        isFavorite: nextIsFavorite,
+        favoritesCount: nextCount,
+      });
+    } catch (err) {
+      console.error("❌ toggle favorite error:", err);
+    } finally {
+      setFavLoading(false);
+    }
+  }
+
+  // ❗ EARLY RETURN SETELAH SEMUA HOOK
   if (!item) {
     return (
       <div className="flex-1 flex items-center justify-center text-sm text-slate-400">
@@ -26,6 +116,7 @@ export default function ItemDetail({ item, onFavoriteChange }) {
     );
   }
 
+  // ====== LOGIC BERDASARKAN item (bukan hooks, aman kalau conditional) ======
   const name = item.name || "Unnamed item";
   const type = item.__type || item.type || "";
   const rarity = item.rarity || item.rarity_name || "";
@@ -56,75 +147,6 @@ export default function ItemDetail({ item, onFavoriteChange }) {
       : "-";
 
   const weightLabel = weight ? `${weight} lb` : "-";
-
-  // ==== FAVORITE STATE ====
-  const [favCount, setFavCount] = useState(item.favorites_count ?? 0);
-  const [isFavorite, setIsFavorite] = useState(Boolean(item.is_favorite));
-  const [favLoading, setFavLoading] = useState(false);
-
-  // reset state favorite tiap kali item berubah
-  useEffect(() => {
-    setFavCount(item.favorites_count ?? 0);
-    setIsFavorite(Boolean(item.is_favorite));
-    setFavLoading(false);
-  }, [item.__global_id, item.id, item.__type]);
-
-  async function handleToggleFavorite() {
-    if (!item?.id || !item.__type) return;
-    if (favLoading) return;
-
-    try {
-      setFavLoading(true);
-
-      const res = await fetch(
-        `${API_BASE}/foundry/items/${item.__type}/${item.id}/favorite`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
-
-      if (!res.ok) {
-        console.error("❌ toggle favorite failed:", res.status);
-        return;
-      }
-
-      const data = await res.json();
-
-      let nextCount = favCount;
-      let nextIsFavorite = isFavorite;
-
-      if (typeof data.favorites_count === "number") {
-        nextCount = data.favorites_count;
-      } else {
-        // fallback kalau backend belum kirim favorites_count
-        nextCount = favCount + (data.action === "favorite" ? 1 : -1);
-      }
-
-      if (data.action === "favorite") {
-        nextIsFavorite = true;
-      } else if (data.action === "unfavorite") {
-        nextIsFavorite = false;
-      }
-
-      if (nextCount < 0) nextCount = 0;
-
-      setFavCount(nextCount);
-      setIsFavorite(nextIsFavorite);
-
-      // 🔁 push ke parent supaya items list & selected ikut update
-      emitFavoriteChange({
-        type: item.__type,
-        id: item.id,
-        isFavorite: nextIsFavorite,
-        favoritesCount: nextCount,
-      });
-    } catch (err) {
-      console.error("❌ toggle favorite error:", err);
-    } finally {
-      setFavLoading(false);
-    }
-  }
 
   // ===== PROPERTY / DESCRIPTION =====
 
@@ -287,7 +309,7 @@ export default function ItemDetail({ item, onFavoriteChange }) {
         </div>
       </div>
 
-      {/* BAR FAVORITE – di atas garis amber */}
+      {/* BAR FAVORITE */}
       <div className="mb-3 flex items-center justify-between text-[11px] text-slate-400">
         {/* kiri: total favorites */}
         <div className="flex items-center gap-1">
@@ -299,51 +321,34 @@ export default function ItemDetail({ item, onFavoriteChange }) {
           <span>{favCount || 0} favorites</span>
         </div>
 
-        {/* kanan: tombol toggle favorite */}
-        <button
-          type="button"
-          onClick={handleToggleFavorite}
-          disabled={favLoading}
-          className={`inline-flex items-center justify-center rounded-full border px-2 py-1
-            ${
-              isFavorite
-                ? "border-rose-500 bg-rose-500/15 text-rose-300"
-                : "border-slate-600 bg-slate-800/60 text-slate-200 hover:border-rose-400 hover:text-rose-300"
-            }
-            ${favLoading ? "opacity-60 cursor-not-allowed" : ""}
-            transition text-[11px] gap-1`}
-        >
-          <Heart
-            className={`w-4 h-4 ${
-              isFavorite ? "text-rose-500 fill-rose-500" : "text-current"
-            }`}
-          />
-          <span>{isFavorite ? "Favorited" : "Add to favorites"}</span>
-        </button>
-        {/* <button
-          type="button"
-          onClick={handleToggleFavorite}
-          disabled={favLoading}
-          className={`p-1.5 rounded-md border transition
-    ${
-      isFavorite
-        ? "border-rose-500 bg-rose-500/10"
-        : "border-slate-600 bg-slate-800/40 hover:bg-slate-700"
-    }
-    ${favLoading ? "opacity-50 cursor-not-allowed" : ""}
-  `}
-        >
-          <Heart
-            className={`w-4 h-4 transition
-      ${isFavorite ? "text-rose-500 fill-rose-500" : "text-slate-300"}
-    `}
-          />
-        </button> */}
+        {/* kanan: tombol toggle favorite → hanya tampil kalau sudah login */}
+        {isLoggedIn && (
+          <button
+            type="button"
+            onClick={handleToggleFavorite}
+            disabled={favLoading}
+            className={`inline-flex items-center justify-center rounded-full border px-2 py-1
+              ${
+                isFavorite
+                  ? "border-rose-500 bg-rose-500/15 text-rose-300"
+                  : "border-slate-600 bg-slate-800/60 text-slate-200 hover:border-rose-400 hover:text-rose-300"
+              }
+              ${favLoading ? "opacity-60 cursor-not-allowed" : ""}
+              transition text-[11px] gap-1`}
+          >
+            <Heart
+              className={`w-4 h-4 ${
+                isFavorite ? "text-rose-500 fill-rose-500" : "text-current"
+              }`}
+            />
+            <span>{isFavorite ? "Favorited" : "Add to favorites"}</span>
+          </button>
+        )}
       </div>
 
       <div className="my-2 h-px bg-gradient-to-r from-transparent via-amber-300/50 to-transparent" />
 
-      {/* BODY: atas scroll, bawah properties nempel */}
+      {/* BODY */}
       <div className="flex-1 flex flex-col">
         {/* Atas: description + mastery (scroll) */}
         <div className="flex-1 overflow-y-auto pr-1">
@@ -370,7 +375,6 @@ export default function ItemDetail({ item, onFavoriteChange }) {
           )}
         </div>
 
-        {/* Bawah: PROPERTIES ditempel ke bawah panel */}
         {orderedDisplayProperties.length > 0 && (
           <div className="mt-4 pt-2 border-t border-slate-700/60 shrink-0">
             <div className="flex flex-wrap gap-2">
@@ -378,19 +382,38 @@ export default function ItemDetail({ item, onFavoriteChange }) {
                 const meta = PROPERTY_META[code] || {
                   label: code.toUpperCase(),
                 };
-                const tooltip = meta.description;
+                const isActive = activeProperty === code;
 
                 return (
-                  <div
+                  <button
                     key={code}
-                    className="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-600 text-[11px] text-slate-100 cursor-default hover:border-amber-300/70 hover:bg-slate-700/80 transition"
-                    title={tooltip}
+                    type="button"
+                    onClick={() => handlePropertyClick(code)}
+                    className={`px-3 py-1 rounded-full bg-slate-800/80 border text-[11px] text-slate-100 cursor-pointer transition
+                      ${
+                        isActive
+                          ? "border-amber-300 bg-slate-700/90"
+                          : "border-slate-600 hover:border-amber-300/70 hover:bg-slate-700/80"
+                      }`}
                   >
                     {meta.label}
-                  </div>
+                  </button>
                 );
               })}
             </div>
+
+            {activeProperty && (
+              <div className="mt-2 text-[11px] text-slate-100 bg-slate-900/95 border border-slate-700 rounded-lg p-2">
+                <div className="font-semibold mb-1">
+                  {PROPERTY_META[activeProperty]?.label ||
+                    activeProperty.toUpperCase()}
+                </div>
+                <p className="leading-snug text-slate-300">
+                  {PROPERTY_META[activeProperty]?.description ||
+                    "No description available."}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
