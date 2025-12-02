@@ -192,17 +192,81 @@ export default function SpellDetail({ spell }) {
       ? descriptionRaw
       : "<p>No description available.</p>";
 
-// subtitle tanpa useMemo
-const subtitleParts = [];
+  // subtitle tanpa useMemo
+  const subtitleParts = [];
 
-if (levelLabel) subtitleParts.push(levelLabel);
-if (school) subtitleParts.push(school);
+  if (levelLabel) subtitleParts.push(levelLabel);
+  if (school) subtitleParts.push(school);
 
-const subtitle = subtitleParts.join(" • ");
-
+  const subtitle = subtitleParts.join(" • ");
 
   const properties = getProperties(spell);
+  function getRangeLabel(spell) {
+    const range =
+      spell.range || spell.format_data?.range || spell.raw_data?.system?.range;
 
+    const template =
+      spell.template ||
+      spell.format_data?.template ||
+      spell.raw_data?.system?.target?.template;
+
+    let base = "";
+
+    if (!range) {
+      base = "";
+    } else if (typeof range === "string") {
+      const raw = range.trim().toLowerCase();
+
+      if (raw.includes("self")) {
+        return "Self";
+      }
+      if (raw.includes("touch")) {
+        return "Touch";
+      }
+
+      const m = raw.match(/^0+\s+([a-z]+.*)$/);
+      if (m) {
+        return cap(m[1]);
+      }
+
+      base = range;
+    } else if (typeof range === "object") {
+      const units = range.units || range.unit;
+      const value = range.value;
+
+      if (!units && (value == null || value === "")) {
+        base = "";
+      } else if (units === "self") {
+        base = "Self";
+      } else if (units === "touch") {
+        base = "Touch";
+      } else if (value != null && Number(value) !== 0) {
+        base = `${value} ${units || ""}`.trim();
+      } else if (units) {
+        base = cap(String(units));
+      }
+    }
+
+    if (template && typeof template === "object") {
+      const size = template.size;
+      const tType = template.type;
+      const tUnits = template.units || template.unit || "";
+
+      const innerParts = [];
+      if (size != null && size !== "") {
+        innerParts.push(`${size}${tUnits ? tUnits : ""}`.trim());
+      }
+      if (tType) innerParts.push(cap(String(tType)));
+
+      const inner = innerParts.join(" ");
+      if (inner) {
+        if (!base) return inner;
+        return `${base} (${inner})`;
+      }
+    }
+
+    return base || "";
+  }
   return (
     <div className="flex flex-col h-full">
       {/* HEADER */}
@@ -228,14 +292,12 @@ const subtitle = subtitleParts.join(" • ");
                 {name}
               </h1>
 
-         
-              {subtitle && (
-                <p className="text-xs text-slate-300 mt-1 break-words">
-                  {subtitle}
-                </p>
+              {rangeLabel && (
+                <div className="text-right text-[11px] text-slate-300 leading-tight shrink-0">
+                  <div>Range : {getRangeLabel(spell)}</div>
+                </div>
               )}
 
-              {/* Casting & Duration tepat di bawah level */}
               {activationLabel && (
                 <p className="text-[11px] text-slate-300 mt-1">
                   Casting : {activationLabel}
@@ -250,10 +312,11 @@ const subtitle = subtitleParts.join(" • ");
             </div>
 
             {/* KANAN: Range sejajar dengan nama */}
-            {rangeLabel && (
-              <div className="text-right text-[11px] text-indigo-300 leading-tight shrink-0">
-                <div>Range {rangeLabel}</div>
-              </div>
+
+            {subtitle && (
+              <p className="text-xs text-slate-300 mt-1 break-words">
+                {subtitle}
+              </p>
             )}
           </div>
         </div>

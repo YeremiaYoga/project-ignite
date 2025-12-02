@@ -4,19 +4,14 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Diamond } from "lucide-react";
 import SpellDetail from "./components/SpellDetail";
-// import SpellFilterModal from "./components/SpellFilterModal";
+import SpellFilterModal from "./components/SpellFilterModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
 // ======================== HELPERS ========================
-function normalizeSchool(school) {
-  if (!school) return "";
-  return String(school).toLowerCase().trim();
-}
-
-// sementara warna sekolah putih semua
-function getSchoolColor() {
-  return "#e5e7eb";
+function cap(str) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function normalizeLevel(level) {
@@ -40,15 +35,37 @@ function makeSlug(spell) {
   return `spell-${name}`;
 }
 
-function cap(str) {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.slice(1);
+// sekolah untuk tampilan + filter
+function getSpellSchoolKey(spell) {
+  const raw =
+    spell.school ||
+    spell.school_name ||
+    spell.format_data?.school ||
+    spell.raw_data?.system?.school;
+
+  if (!raw) return "";
+  const lower = String(raw).toLowerCase().trim();
+
+  const map = {
+    abjuration: "Abjuration",
+    conjuration: "Conjuration",
+    divination: "Divination",
+    enchantment: "Enchantment",
+    evocation: "Evocation",
+    illusion: "Illusion",
+    necromancy: "Necromancy",
+    transmutation: "Transmutation",
+  };
+
+  return map[lower] || cap(lower);
 }
 
-/**
- * Ambil objek activation mentah lalu jadikan label singkat
- * contoh: "1 Action", "Bonus Action", "Reaction"
- */
+// sementara warna sekolah putih semua
+function getSchoolColor() {
+  return "#e5e7eb";
+}
+
+// Activation label utk display
 function getActivationLabel(spell) {
   const activation =
     spell.activation ||
@@ -68,6 +85,8 @@ function getActivationLabel(spell) {
     reaction: "Reaction",
     minute: "Minute",
     hour: "Hour",
+    round: "Round",
+    special: "Special",
   };
 
   const typeLabel = map[type] || cap(String(type));
@@ -79,17 +98,34 @@ function getActivationLabel(spell) {
   return typeLabel;
 }
 
-/**
- * Ambil range + template → "Self (100 ft line)" dll.
- * - Jika units = self/touch → hanya "Self"/"Touch"
- * - Jika value > 0 → "100 ft"
- * - Jika value = 0 → hanya units capitalized ("Self", "Touch", dll)
- */
+// Activation key utk filter (lowercase)
+function getActivationFilterKey(spell) {
+  const activation =
+    spell.activation ||
+    spell.format_data?.activation ||
+    spell.raw_data?.system?.activation;
+
+  if (!activation || typeof activation !== "object") return "";
+
+  const type = activation.type;
+  if (!type) return "";
+
+  const map = {
+    action: "action",
+    bonus: "bonus action",
+    reaction: "reaction",
+    minute: "minute",
+    hour: "hour",
+    round: "round",
+    special: "special",
+  };
+
+  return map[type] || String(type).toLowerCase();
+}
+
 function getRangeLabel(spell) {
   const range =
-    spell.range ||
-    spell.format_data?.range ||
-    spell.raw_data?.system?.range;
+    spell.range || spell.format_data?.range || spell.raw_data?.system?.range;
 
   const template =
     spell.template ||
@@ -103,23 +139,18 @@ function getRangeLabel(spell) {
   } else if (typeof range === "string") {
     const raw = range.trim().toLowerCase();
 
-    // khusus pattern "0 self" / "self 0"
     if (raw.includes("self")) {
       return "Self";
     }
-    // khusus pattern "0 touch" / "touch 0"
     if (raw.includes("touch")) {
       return "Touch";
     }
 
-    // pattern "0 ft", "0 m", dll → ambil units saja
     const m = raw.match(/^0+\s+([a-z]+.*)$/);
     if (m) {
-      // kembalikan units dengan huruf pertama besar
       return cap(m[1]);
     }
 
-    // selain itu, pakai apa adanya
     base = range;
   } else if (typeof range === "object") {
     const units = range.units || range.unit;
@@ -128,21 +159,16 @@ function getRangeLabel(spell) {
     if (!units && (value == null || value === "")) {
       base = "";
     } else if (units === "self") {
-      // Self tanpa value
       base = "Self";
     } else if (units === "touch") {
-      // Touch tanpa value
       base = "Touch";
     } else if (value != null && Number(value) !== 0) {
-      // Ada value > 0
       base = `${value} ${units || ""}`.trim();
     } else if (units) {
-      // value 0 / null → tampilkan units saja (cap)
       base = cap(String(units));
     }
   }
 
-  // gabung dengan template kalau ada
   if (template && typeof template === "object") {
     const size = template.size;
     const tType = template.type;
@@ -156,13 +182,96 @@ function getRangeLabel(spell) {
 
     const inner = innerParts.join(" ");
     if (inner) {
-      if (!base) return inner; // fallback kalau range kosong
+      if (!base) return inner;
       return `${base} (${inner})`;
     }
   }
 
   return base || "";
 }
+
+// Range kategori utk filter: Self, Touch, Point, Area, Special
+function getRangeFilterKey(spell) {
+  const range =
+    spell.range ||
+    spell.format_data?.range ||
+    spell.raw_data?.system?.range;
+
+  const template =
+    spell.template ||
+    spell.format_data?.template ||
+    spell.raw_data?.system?.target?.template;
+
+  if (!range && !template) return "";
+
+  // 1. SELALU prioritaskan Self / Touch dari units atau string,
+  //    tanpa peduli value / template.
+  if (typeof range === "object" && range) {
+    const units = (range.units || range.unit || "").toLowerCase();
+    if (units === "self") return "Self";
+    if (units === "touch") return "Touch";
+  }
+
+  if (typeof range === "string") {
+    const raw = range.toLowerCase();
+    if (raw.includes("self")) return "Self";
+    if (raw.includes("touch")) return "Touch";
+  }
+
+  // 2. Area / Special / Point
+
+  // kalau ada template area, treat as Area
+  if (template && typeof template === "object") {
+    const tType = (template.type || "").toLowerCase();
+    if (
+      tType === "cone" ||
+      tType === "line" ||
+      tType === "sphere" ||
+      tType === "cube" ||
+      tType === "cylinder"
+    ) {
+      return "Area";
+    }
+    // kalau tipe template nggak jelas, tetap anggap Area aja
+    return "Area";
+  }
+
+  if (typeof range === "string") {
+    const raw = range.toLowerCase();
+    if (
+      raw.includes("cone") ||
+      raw.includes("line") ||
+      raw.includes("sphere") ||
+      raw.includes("cube") ||
+      raw.includes("cylinder")
+    ) {
+      return "Area";
+    }
+    if (raw.includes("special")) return "Special";
+    return "Point";
+  }
+
+  if (typeof range === "object" && range) {
+    const units = (range.units || range.unit || "").toLowerCase();
+
+    if (
+      units.includes("cone") ||
+      units.includes("line") ||
+      units.includes("sphere") ||
+      units.includes("cube") ||
+      units.includes("cylinder")
+    ) {
+      return "Area";
+    }
+    if (units.includes("special")) return "Special";
+
+    // ada units tapi bukan self/touch/area/special → anggap Point
+    if (units) return "Point";
+  }
+
+  return "";
+}
+
 
 /**
  * Baca flag concentration dari duration object
@@ -191,9 +300,84 @@ function getConcentrationFlag(spell) {
   return false;
 }
 
-/**
- * Summary: "Level 6 • 1 Action • Self (100 ft line)"
- */
+// ritual utk filter
+function getRitualFlag(spell) {
+  if (typeof spell.ritual === "boolean") return spell.ritual;
+  if (typeof spell.ritual === "string")
+    return spell.ritual.toLowerCase() === "true";
+
+  const r =
+    spell.format_data?.ritual ??
+    spell.raw_data?.system?.components?.ritual ??
+    spell.raw_data?.system?.ritual;
+
+  if (typeof r === "boolean") return r;
+  if (typeof r === "string") return r.toLowerCase() === "true";
+
+  return false;
+}
+
+// damage types utk filter
+function getDamageTypes(spell) {
+  const out = new Set();
+
+  if (spell.damage_type) out.add(String(spell.damage_type).toLowerCase());
+
+  if (spell.format_data?.damageType) {
+    const v = spell.format_data.damageType;
+    if (Array.isArray(v)) {
+      v.forEach((d) => out.add(String(d).toLowerCase()));
+    } else {
+      out.add(String(v).toLowerCase());
+    }
+  }
+
+  const parts = spell.raw_data?.system?.damage?.parts;
+  if (Array.isArray(parts)) {
+    parts.forEach((p) => {
+      if (Array.isArray(p) && p[1]) {
+        out.add(String(p[1]).toLowerCase());
+      }
+    });
+  }
+
+  return Array.from(out);
+}
+
+// classes utk filter
+function getSpellClasses(spell) {
+  const raw =
+    spell.classes ||
+    spell.class_list ||
+    spell.format_data?.classes ||
+    spell.raw_data?.classes ||
+    spell.raw_data?.system?.classes ||
+    spell.raw_data?.flags?.dnd5e?.spell?.classes;
+
+  const result = [];
+
+  if (!raw) return result;
+
+  if (Array.isArray(raw)) {
+    raw.forEach((c) => {
+      if (!c) return;
+      result.push(cap(String(c)));
+    });
+  } else if (typeof raw === "string") {
+    raw
+      .split(/[;,/]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .forEach((c) => result.push(cap(c)));
+  } else if (typeof raw === "object") {
+    Object.keys(raw).forEach((k) => {
+      if (raw[k]) result.push(cap(k));
+    });
+  }
+
+  return Array.from(new Set(result));
+}
+
 function getSpellSummary(spell) {
   const lvl = normalizeLevel(spell.level ?? spell.level_int ?? spell.lvl ?? 0);
   const levelLabel = getLevelLabel(lvl);
@@ -217,8 +401,16 @@ export default function FoundrySpellView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [schoolFilters, setSchoolFilters] = useState([]);
-  const [levelFilters, setLevelFilters] = useState([]);
+  const [filters, setFilters] = useState({
+    classes: [],
+    levels: [],
+    castTime: [],
+    damageType: [],
+    range: [],
+    school: [],
+    ritual: false,
+  });
+
   const [filterOpen, setFilterOpen] = useState(false);
 
   // ===== Mobile state =====
@@ -303,25 +495,72 @@ export default function FoundrySpellView() {
 
     return spells.filter((sp) => {
       const name = (sp.name || "").toLowerCase();
-      const schoolKey = normalizeSchool(sp.school || sp.school_name || "");
-      const lvl = normalizeLevel(sp.level ?? sp.level_int ?? sp.lvl ?? "");
+      const lvlNum = Number(sp.level ?? sp.level_int ?? sp.lvl ?? 0);
+      const lvlKey = Number.isNaN(lvlNum)
+        ? ""
+        : lvlNum === 0
+        ? "Cantrips"
+        : lvlNum;
+
+      const schoolKey = getSpellSchoolKey(sp);
+      const schoolLower = schoolKey.toLowerCase();
 
       const matchesSearch =
         term === ""
           ? true
           : name.includes(term) ||
-            schoolKey.includes(term) ||
-            (`${lvl}` || "").includes(term);
+            schoolLower.includes(term) ||
+            String(lvlNum).includes(term);
 
+      // === FILTERS ===
+      // classes
+      const spellClasses = getSpellClasses(sp); // "Cleric", "Wizard", ...
+      const matchesClasses =
+        !filters.classes.length ||
+        spellClasses.some((cls) => filters.classes.includes(cls));
+
+      // level
+      const matchesLevels =
+        !filters.levels.length || filters.levels.includes(lvlKey);
+
+      // cast time
+      const castKey = getActivationFilterKey(sp); // "action", "bonus action", ...
+      const matchesCastTime =
+        !filters.castTime.length ||
+        (castKey && filters.castTime.includes(castKey));
+
+      // range
+      const rangeKey = getRangeFilterKey(sp); // "Self", "Touch", "Point", "Area", "Special"
+      const matchesRange =
+        !filters.range.length || (rangeKey && filters.range.includes(rangeKey));
+
+      // damage type
+      const dmgTypes = getDamageTypes(sp); // ['fire','necrotic']
+      const matchesDamageType =
+        !filters.damageType.length ||
+        dmgTypes.some((dt) => filters.damageType.includes(dt));
+
+      // school
       const matchesSchool =
-        schoolFilters.length === 0 ? true : schoolFilters.includes(schoolKey);
+        !filters.school.length ||
+        (schoolKey && filters.school.includes(schoolKey));
 
-      const matchesLevel =
-        levelFilters.length === 0 ? true : levelFilters.includes(lvl);
+      // ritual: kalau filter.ritual true, hanya tampil yang ritual
+      const isRitual = getRitualFlag(sp);
+      const matchesRitual = !filters.ritual || isRitual;
 
-      return matchesSearch && matchesSchool && matchesLevel;
+      return (
+        matchesSearch &&
+        matchesClasses &&
+        matchesLevels &&
+        matchesCastTime &&
+        matchesRange &&
+        matchesDamageType &&
+        matchesSchool &&
+        matchesRitual
+      );
     });
-  }, [spells, search, schoolFilters, levelFilters]);
+  }, [spells, search, filters]);
 
   function handleSelect(spell, fromMobile = false) {
     setSelected(spell);
@@ -337,7 +576,13 @@ export default function FoundrySpellView() {
   }
 
   const activeFilterCount =
-    (schoolFilters.length ? 1 : 0) + (levelFilters.length ? 1 : 0);
+    (filters.classes.length ? 1 : 0) +
+    (filters.levels.length ? 1 : 0) +
+    (filters.castTime.length ? 1 : 0) +
+    (filters.range.length ? 1 : 0) +
+    (filters.damageType.length ? 1 : 0) +
+    (filters.school.length ? 1 : 0) +
+    (filters.ritual ? 1 : 0);
 
   const ListBlock = (
     <>
@@ -408,13 +653,10 @@ export default function FoundrySpellView() {
                 spell.raw_data?.img ||
                 "/assets/example_token.png";
 
-              const school =
-                spell.school || spell.school_name || "Unknown School";
-              const schoolColor = getSchoolColor(
-                spell.school || spell.school_name
-              );
+              const school = getSpellSchoolKey(spell) || "Unknown School";
+              const schoolColor = getSchoolColor();
 
-              const summary = getSpellSummary(spell); // "Level 6 • 1 Action • Self (100 ft line)"
+              const summary = getSpellSummary(spell);
               const isConcentration = getConcentrationFlag(spell);
 
               return (
@@ -456,8 +698,7 @@ export default function FoundrySpellView() {
                     </div>
                   </div>
 
-                  {/* kanan: school + concentration diamond */}
-                  <div className=" items-center gap-2 text-right text-[10px] text-slate-400 leading-tight shrink-0">
+                  <div className="items-center gap-2 text-right text-[10px] text-slate-400 leading-tight shrink-0">
                     <div className="capitalize">{school}</div>
                     <Diamond
                       className={`w-4 h-4 ${
@@ -534,21 +775,16 @@ export default function FoundrySpellView() {
         </div>
       </div>
 
-      {/* FILTER MODAL (masih dimatikan, tinggal aktifkan kalau mau) */}
-      {/* {filterOpen && (
+      {filterOpen && (
         <SpellFilterModal
-          schoolOptions={SCHOOL_OPTIONS}
-          selectedSchools={schoolFilters}
-          levelOptions={LEVEL_OPTIONS}
-          selectedLevels={levelFilters}
+          value={filters} 
           onClose={() => setFilterOpen(false)}
-          onApply={({ schools, levels }) => {
-            setSchoolFilters(schools);
-            setLevelFilters(levels);
+          onApply={(newFilters) => {
+            setFilters(newFilters);
             setFilterOpen(false);
           }}
         />
-      )} */}
+      )}
     </div>
   );
 }
