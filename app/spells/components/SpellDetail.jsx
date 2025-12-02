@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-// --- helper umum biar gak pernah nge-render object mentah ---
 function safeText(v) {
   if (v == null) return "";
   if (typeof v === "string" || typeof v === "number") return String(v);
@@ -29,7 +28,6 @@ function cap(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Activation → "1 Action", "Bonus Action", dll
 function getActivationLabel(spell) {
   const activation =
     spell.activation ||
@@ -62,7 +60,6 @@ function getActivationLabel(spell) {
   return typeLabel;
 }
 
-// Duration → "1 minute", "Concentration, up to 10 minutes" (kalau ada di string)
 function getDurationLabel(spell) {
   const dur =
     spell.duration ||
@@ -71,7 +68,6 @@ function getDurationLabel(spell) {
 
   if (!dur) return "";
 
-  // kalau sudah string (misal sudah "Concentration, up to 10 minutes")
   if (typeof dur === "string") return dur;
 
   const value = dur.value;
@@ -86,7 +82,6 @@ function getDurationLabel(spell) {
   return units ? cap(String(units)) : safeText(dur);
 }
 
-// Range → "120 ft", "Self", "Touch"
 function getRangeLabel(spell) {
   const range =
     spell.range ||
@@ -114,7 +109,6 @@ function getRangeLabel(spell) {
   return safeText(range);
 }
 
-// Ambil properties jadi array string rapi
 function getProperties(spell) {
   const raw =
     spell.properties ||
@@ -123,28 +117,24 @@ function getProperties(spell) {
 
   if (!raw) return [];
 
-  // CASE 1: Array → langsung clean
   if (Array.isArray(raw)) {
     return raw.map((x) => String(x).trim()).filter(Boolean);
   }
 
-  // CASE 2: String → split + bersihkan tanda kurung []
   if (typeof raw === "string") {
     return raw
-      .replace(/[\[\]"]/g, "") // HAPUS bracket & quote
+      .replace(/[\[\]"]/g, "")
       .split(/[;,]/)
       .map((x) => x.trim())
       .filter(Boolean);
   }
 
-  // CASE 3: Object → ambil key yang bernilai true
   if (typeof raw === "object") {
     return Object.entries(raw)
-      .filter(([, v]) => !!v) // pilih yang true
+      .filter(([, v]) => !!v)
       .map(([k]) => cap(k.replace(/_/g, " ")));
   }
 
-  // fallback terakhir → string biasa
   return [String(raw).trim()].filter(Boolean);
 }
 
@@ -192,7 +182,6 @@ export default function SpellDetail({ spell }) {
       ? descriptionRaw
       : "<p>No description available.</p>";
 
-  // subtitle tanpa useMemo
   const subtitleParts = [];
 
   if (levelLabel) subtitleParts.push(levelLabel);
@@ -286,14 +275,13 @@ export default function SpellDetail({ spell }) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
-            {/* KIRI: nama + level/school + casting + duration */}
             <div className="min-w-0">
               <h1 className="lg:text-2xl font-semibold break-words leading-tight">
                 {name}
               </h1>
 
               {rangeLabel && (
-                <div className="text-right text-[11px] text-slate-300 leading-tight shrink-0">
+                <div className="text-xs text-slate-300 mt-1 break-words">
                   <div>Range : {getRangeLabel(spell)}</div>
                 </div>
               )}
@@ -311,10 +299,8 @@ export default function SpellDetail({ spell }) {
               )}
             </div>
 
-            {/* KANAN: Range sejajar dengan nama */}
-
             {subtitle && (
-              <p className="text-xs text-slate-300 mt-1 break-words">
+              <p className="text-right text-xs text-slate-300 leading-tight shrink-0">
                 {subtitle}
               </p>
             )}
