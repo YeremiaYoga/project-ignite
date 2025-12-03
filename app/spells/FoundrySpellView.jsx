@@ -204,8 +204,6 @@ function getRangeFilterKey(spell) {
 
   if (!range && !template) return "";
 
-  // 1. SELALU prioritaskan Self / Touch dari units atau string,
-  //    tanpa peduli value / template.
   if (typeof range === "object" && range) {
     const units = (range.units || range.unit || "").toLowerCase();
     if (units === "self") return "Self";
@@ -218,9 +216,6 @@ function getRangeFilterKey(spell) {
     if (raw.includes("touch")) return "Touch";
   }
 
-  // 2. Area / Special / Point
-
-  // kalau ada template area, treat as Area
   if (template && typeof template === "object") {
     const tType = (template.type || "").toLowerCase();
     if (
@@ -232,7 +227,6 @@ function getRangeFilterKey(spell) {
     ) {
       return "Area";
     }
-    // kalau tipe template nggak jelas, tetap anggap Area aja
     return "Area";
   }
 
@@ -265,13 +259,11 @@ function getRangeFilterKey(spell) {
     }
     if (units.includes("special")) return "Special";
 
-    // ada units tapi bukan self/touch/area/special → anggap Point
     if (units) return "Point";
   }
 
   return "";
 }
-
 
 /**
  * Baca flag concentration dari duration object
@@ -490,6 +482,19 @@ export default function FoundrySpellView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // dipanggil saat SpellDetail punya data baru (favorite/rating berubah)
+  function handleSpellUpdate(updated) {
+    if (!updated || updated.id == null) return;
+
+    setSpells((prev) =>
+      prev.map((sp) => (sp.id === updated.id ? { ...sp, ...updated } : sp))
+    );
+
+    setSelected((prev) =>
+      prev && prev.id === updated.id ? { ...prev, ...updated } : prev
+    );
+  }
+
   const filteredSpells = useMemo(() => {
     const term = search.trim().toLowerCase();
 
@@ -512,40 +517,32 @@ export default function FoundrySpellView() {
             schoolLower.includes(term) ||
             String(lvlNum).includes(term);
 
-      // === FILTERS ===
-      // classes
-      const spellClasses = getSpellClasses(sp); // "Cleric", "Wizard", ...
+      const spellClasses = getSpellClasses(sp);
       const matchesClasses =
         !filters.classes.length ||
         spellClasses.some((cls) => filters.classes.includes(cls));
 
-      // level
       const matchesLevels =
         !filters.levels.length || filters.levels.includes(lvlKey);
 
-      // cast time
-      const castKey = getActivationFilterKey(sp); // "action", "bonus action", ...
+      const castKey = getActivationFilterKey(sp);
       const matchesCastTime =
         !filters.castTime.length ||
         (castKey && filters.castTime.includes(castKey));
 
-      // range
-      const rangeKey = getRangeFilterKey(sp); // "Self", "Touch", "Point", "Area", "Special"
+      const rangeKey = getRangeFilterKey(sp);
       const matchesRange =
         !filters.range.length || (rangeKey && filters.range.includes(rangeKey));
 
-      // damage type
-      const dmgTypes = getDamageTypes(sp); // ['fire','necrotic']
+      const dmgTypes = getDamageTypes(sp);
       const matchesDamageType =
         !filters.damageType.length ||
         dmgTypes.some((dt) => filters.damageType.includes(dt));
 
-      // school
       const matchesSchool =
         !filters.school.length ||
         (schoolKey && filters.school.includes(schoolKey));
 
-      // ritual: kalau filter.ritual true, hanya tampil yang ritual
       const isRitual = getRitualFlag(sp);
       const matchesRitual = !filters.ritual || isRitual;
 
@@ -727,7 +724,7 @@ export default function FoundrySpellView() {
           </div>
 
           <div className="flex-1 h-full bg-slate-900/80 p-6 flex flex-col overflow-hidden">
-            <SpellDetail spell={selected} />
+            <SpellDetail spell={selected} onSpellUpdate={handleSpellUpdate} />
           </div>
         </div>
 
@@ -765,7 +762,10 @@ export default function FoundrySpellView() {
             <section className="w-1/2 min-w-[50%] h-full p-4 flex flex-col min-h-0">
               <div className="flex-1 bg-slate-900/80 rounded-xl border border-slate-800 p-4 overflow-auto">
                 {selected ? (
-                  <SpellDetail spell={selected} />
+                  <SpellDetail
+                    spell={selected}
+                    onSpellUpdate={handleSpellUpdate}
+                  />
                 ) : (
                   <p className="text-sm text-slate-400">Select a spell</p>
                 )}
@@ -777,7 +777,7 @@ export default function FoundrySpellView() {
 
       {filterOpen && (
         <SpellFilterModal
-          value={filters} 
+          value={filters}
           onClose={() => setFilterOpen(false)}
           onApply={(newFilters) => {
             setFilters(newFilters);
