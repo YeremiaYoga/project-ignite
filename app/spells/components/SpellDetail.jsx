@@ -251,10 +251,13 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
     try {
       setFavLoading(true);
 
-      const res = await fetch(`${API_BASE}/ignite/spells/${spell.id}/favorite`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${API_BASE}/ignite/spells/${spell.id}/favorite`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
 
       const json = await res.json();
       if (!res.ok) {
@@ -450,52 +453,6 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
               )}
 
               {/* BUTTON FAVORITE & RATING DI POJOK KANAN, BERDAMPINGAN */}
-              <div className="flex items-center gap-2">
-                {isLoggedIn && (
-                  <button
-                    type="button"
-                    onClick={handleToggleFavorite}
-                    disabled={favLoading}
-                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[11px] transition
-                      ${
-                        isFavorite
-                          ? "border-rose-500 bg-rose-500/15 text-rose-300"
-                          : "border-slate-600 bg-slate-800/60 text-slate-200 hover:border-rose-400 hover:text-rose-300"
-                      } ${favLoading ? "opacity-60 cursor-not-allowed" : ""}`}
-                  >
-                    <Heart
-                      className={`w-3.5 h-3.5 ${
-                        isFavorite
-                          ? "text-rose-500 fill-rose-500"
-                          : "text-current"
-                      }`}
-                    />
-                    <span>{isFavorite ? "Favorited" : "Add to favorites"}</span>
-                  </button>
-                )}
-
-                {isLoggedIn && (
-                  <select
-                    value={myRating}
-                    onChange={handleChangeRating}
-                    disabled={ratingLoading}
-                    className="bg-slate-900/80 border border-slate-600 text-[11px] rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-amber-300"
-                  >
-                    {/* NONE = hapus rating */}
-                    <option value="">None</option>
-                    {RATING_OPTIONS.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-                  </select>
-                )}
-
-                {/* HANYA HURUF RATING, PUTIH, TANPA SCORE & JUMLAH VOTE */}
-                <div className="min-w-[20px] text-sm font-semibold text-white text-center">
-                  {avgLetter || "-"}
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -517,8 +474,49 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
               ? `${favoriteCount} favorites`
               : "No favorites yet"}
           </span>
+          <div className="min-w-[20px] text-sm font-semibold text-white text-center">
+            {avgLetter || "-"}
+          </div>
         </div>
-        {/* kanan dibiarkan kosong / bisa dipakai info lain nanti */}
+        <div className="flex items-center gap-2">
+          {isLoggedIn && (
+            <button
+              type="button"
+              onClick={handleToggleFavorite}
+              disabled={favLoading}
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[11px] transition
+                      ${
+                        isFavorite
+                          ? "border-rose-500 bg-rose-500/15 text-rose-300"
+                          : "border-slate-600 bg-slate-800/60 text-slate-200 hover:border-rose-400 hover:text-rose-300"
+                      } ${favLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+            >
+              <Heart
+                className={`w-3.5 h-3.5 ${
+                  isFavorite ? "text-rose-500 fill-rose-500" : "text-current"
+                }`}
+              />
+              <span>{isFavorite ? "Favorited" : "Add to favorites"}</span>
+            </button>
+          )}
+
+          {isLoggedIn && (
+            <select
+              value={myRating}
+              onChange={handleChangeRating}
+              disabled={ratingLoading}
+              className="bg-slate-900/80 border border-slate-600 text-[11px] rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-amber-300"
+            >
+              {/* NONE = hapus rating */}
+              <option value="">None</option>
+              {RATING_OPTIONS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
 
       {/* GARIS PEMISAH */}
@@ -579,7 +577,6 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
                   {cap(activeProp.replace(/_/g, " "))}
                 </div>
                 <p className="leading-snug text-slate-300">
-               
                   No additional information.
                 </p>
               </div>
