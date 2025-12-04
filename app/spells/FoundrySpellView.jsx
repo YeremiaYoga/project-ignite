@@ -5,7 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Diamond } from "lucide-react";
 import SpellDetail from "./components/SpellDetail";
 import SpellFilterModal from "./components/SpellFilterModal";
-
+import Cookies from "js-cookie";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
 // ======================== HELPERS ========================
@@ -193,9 +193,7 @@ function getRangeLabel(spell) {
 // Range kategori utk filter: Self, Touch, Point, Area, Special
 function getRangeFilterKey(spell) {
   const range =
-    spell.range ||
-    spell.format_data?.range ||
-    spell.raw_data?.system?.range;
+    spell.range || spell.format_data?.range || spell.raw_data?.system?.range;
 
   const template =
     spell.template ||
@@ -448,10 +446,17 @@ export default function FoundrySpellView() {
         setLoading(true);
         setError("");
 
-        const res = await fetch(`${API_BASE}/ignite/spells/all`, {
+        const isLoggedIn = !!Cookies.get("ignite-user-data"); 
+
+        const baseUrl = isLoggedIn
+          ? `${API_BASE}/ignite/spells/all`
+          : `${API_BASE}/ignite/spells`;
+
+        const res = await fetch(baseUrl, {
           method: "GET",
-          credentials: "include",
           cache: "no-store",
+          credentials: "include", 
+    
         });
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -479,19 +484,19 @@ export default function FoundrySpellView() {
     }
 
     fetchSpells();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // dipanggil saat SpellDetail punya data baru (favorite/rating berubah)
-  function handleSpellUpdate(updated) {
-    if (!updated || updated.id == null) return;
+  function handleSpellUpdate(updatedSpell) {
+    if (!updatedSpell || !updatedSpell.id) return;
 
     setSpells((prev) =>
-      prev.map((sp) => (sp.id === updated.id ? { ...sp, ...updated } : sp))
+      prev.map((sp) =>
+        sp.id === updatedSpell.id ? { ...sp, ...updatedSpell } : sp
+      )
     );
 
     setSelected((prev) =>
-      prev && prev.id === updated.id ? { ...prev, ...updated } : prev
+      prev && prev.id === updatedSpell.id ? { ...prev, ...updatedSpell } : prev
     );
   }
 
@@ -735,18 +740,7 @@ export default function FoundrySpellView() {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <div className="shrink-0 sticky top-0 z-20 flex items-center justify-between bg-[#050b26]/90 backdrop-blur border-b border-slate-800 px-3 py-2">
-            {pane === "detail" ? (
-              <button
-                onClick={() => setPane("list")}
-                className="px-2 py-1 text-xs rounded-md border border-[#2a2f55] bg-[#101858] hover:bg-[#19246e]"
-              >
-                Back
-              </button>
-            ) : (
-              <span className="text-xs text-slate-400">Spells</span>
-            )}
-          </div>
+          {/* ... header & swipe layout sama */}
 
           <div
             className="flex w-[200%] flex-1 min-h-0 transition-all duration-300 ease-in-out"

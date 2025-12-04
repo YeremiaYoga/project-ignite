@@ -104,17 +104,11 @@ function getRangeLabel(spell) {
   } else if (typeof range === "string") {
     const raw = range.trim().toLowerCase();
 
-    if (raw.includes("self")) {
-      return "Self";
-    }
-    if (raw.includes("touch")) {
-      return "Touch";
-    }
+    if (raw.includes("self")) return "Self";
+    if (raw.includes("touch")) return "Touch";
 
     const m = raw.match(/^0+\s+([a-z]+.*)$/);
-    if (m) {
-      return cap(m[1]);
-    }
+    if (m) return cap(m[1]);
 
     base = range;
   } else if (typeof range === "object") {
@@ -185,29 +179,28 @@ function getProperties(spell) {
 }
 
 export default function SpellDetail({ spell, onSpellUpdate }) {
+  console.log(spell);
   const emitUpdate = onSpellUpdate || (() => {});
 
-  // ==== LOGIN STATE (dari cookie) ====
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // ==== FAVORITES STATE ====
   const [favoriteCount, setFavoriteCount] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
 
-  // ==== RATING STATE ====
-  const [myRating, setMyRating] = useState(""); // S/A/B/C/D/F atau ""
-  const [avgLetter, setAvgLetter] = useState("");
-  const [avgScore, setAvgScore] = useState(null); // tidak ditampilkan tapi kita simpan saja
-  const [ratingTotal, setRatingTotal] = useState(0); // tidak ditampilkan
+
+  const [myRating, setMyRating] = useState("");     
+  const [avgLetter, setAvgLetter] = useState("");    
+  const [avgScore, setAvgScore] = useState(null);    
+  const [ratingTotal, setRatingTotal] = useState(0); 
   const [ratingLoading, setRatingLoading] = useState(false);
 
-  // ==== PROPERTIES STATE ====
   const [activeProp, setActiveProp] = useState(null);
 
-  // cek login sekali di awal
   useEffect(() => {
     const userCookie = Cookies.get("ignite-user-data");
+    console.log(userCookie);
     setIsLoggedIn(Boolean(userCookie));
   }, []);
 
@@ -225,9 +218,11 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
       return;
     }
 
+    // FAVORITES
     setFavoriteCount(spell.favorites_count ?? 0);
     setIsFavorite(Boolean(spell.is_favorite));
 
+    // RATINGS
     const my = spell.my_rating;
     setMyRating(my?.rating || my?.value || "");
 
@@ -278,7 +273,6 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
       setFavoriteCount(nextCount);
       setIsFavorite(nextIsFavorite);
 
-      // kirim balik ke parent supaya list & selected di parent ikut ke-update
       const updatedForParent = {
         ...spell,
         ...(json.spell || {}),
@@ -295,8 +289,7 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
 
   async function handleChangeRating(e) {
     const val = e.target.value;
-    // "" (None) = hapus rating
-    const rating = val === "" ? null : val;
+    const rating = val === "" ? null : val; // "" = NONE → hapus rating
 
     setMyRating(val);
 
@@ -351,7 +344,6 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
     setActiveProp((prev) => (prev === code ? null : code));
   };
 
-  // EARLY RETURN SESUDAH SEMUA HOOK
   if (!spell) {
     return (
       <div className="flex-1 flex items-center justify-center text-sm text-slate-400">
@@ -402,7 +394,7 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* HEADER UTAMA: GAMBAR + INFO SPELL */}
+      {/* HEADER UTAMA */}
       <div className="flex items-start gap-4">
         {/* KIRI: GAMBAR */}
         <div className="shrink-0">
@@ -418,7 +410,7 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
           </div>
         </div>
 
-        {/* KANAN: TITLE + DETAIL */}
+        {/* KANAN: INFO SPELL */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -451,45 +443,48 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
                   {subtitle}
                 </p>
               )}
-
-              {/* BUTTON FAVORITE & RATING DI POJOK KANAN, BERDAMPINGAN */}
             </div>
           </div>
         </div>
       </div>
 
-      {/* BAR FAVORITE + LINE */}
+      {/* BAR FAVORITES + AVG LETTER (di atas garis) */}
       <div className="mt-3 mb-2 flex items-center justify-between text-[11px] text-slate-400">
-        {/* LEFT: jumlah favorites (di atas garis) */}
-        <div className="flex items-center gap-1">
-          <Heart
-            className={`w-3.5 h-3.5 ${
-              favoriteCount > 0
-                ? "text-rose-400 fill-rose-400"
-                : "text-slate-500"
-            }`}
-          />
-          <span>
-            {favoriteCount > 0
-              ? `${favoriteCount} favorites`
-              : "No favorites yet"}
-          </span>
-          <div className="min-w-[20px] text-sm font-semibold text-white text-center">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Heart
+              className={`w-3.5 h-3.5 ${
+                favoriteCount > 0
+                  ? "text-rose-400 fill-rose-400"
+                  : "text-slate-500"
+              }`}
+            />
+            <span>
+              {favoriteCount > 0
+                ? `${favoriteCount} favorites`
+                : "No favorites yet"}
+            </span>
+          </div>
+
+          {/* huruf rating putih */}
+          <div className="ml-3 px-2 py-0.5 rounded-full border border-slate-600 text-xs font-semibold text-white min-w-[28px] text-center">
             {avgLetter || "-"}
           </div>
         </div>
+
         <div className="flex items-center gap-2">
+          {/* tombol favorite & select rating sejajar di pojok kanan, hanya ketika login */}
           {isLoggedIn && (
             <button
               type="button"
               onClick={handleToggleFavorite}
               disabled={favLoading}
               className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[11px] transition
-                      ${
-                        isFavorite
-                          ? "border-rose-500 bg-rose-500/15 text-rose-300"
-                          : "border-slate-600 bg-slate-800/60 text-slate-200 hover:border-rose-400 hover:text-rose-300"
-                      } ${favLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                ${
+                  isFavorite
+                    ? "border-rose-500 bg-rose-500/15 text-rose-300"
+                    : "border-slate-600 bg-slate-800/60 text-slate-200 hover:border-rose-400 hover:text-rose-300"
+                } ${favLoading ? "opacity-60 cursor-not-allowed" : ""}`}
             >
               <Heart
                 className={`w-3.5 h-3.5 ${
@@ -507,7 +502,6 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
               disabled={ratingLoading}
               className="bg-slate-900/80 border border-slate-600 text-[11px] rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-amber-300"
             >
-              {/* NONE = hapus rating */}
               <option value="">None</option>
               {RATING_OPTIONS.map((r) => (
                 <option key={r} value={r}>
