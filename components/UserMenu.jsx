@@ -65,7 +65,11 @@ export default function UserMenu() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
           credentials: "include",
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          Cookies.remove("ignite-user-data");
+          setUserData(null);
+          return;
+        }
 
         const data = await res.json();
 
