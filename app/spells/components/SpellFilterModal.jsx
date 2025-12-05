@@ -3,6 +3,30 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
+// ================== CONSTANTS & HELPERS ==================
+
+const SCHOOL_CODE_BY_LABEL = {
+  Abjuration: "abj",
+  Conjuration: "con",
+  Divination: "div",
+  Enchantment: "enc",
+  Evocation: "evo",
+  Illusion: "ill",
+  Necromancy: "nec",
+  Transmutation: "trs",
+};
+
+const SCHOOL_LABEL_BY_CODE = {
+  abj: "Abjuration",
+  con: "Conjuration",
+  div: "Divination",
+  enc: "Enchantment",
+  evo: "Evocation",
+  ill: "Illusion",
+  nec: "Necromancy",
+  trs: "Transmutation",
+};
+
 const FILTERS = {
   classes: [
     "Artificer",
@@ -45,6 +69,8 @@ const FILTERS = {
     "radiant",
     "slashing",
     "thunder",
+    "healing",
+    "temporary healing", // ✅ sudah termasuk
   ],
   school: [
     "Abjuration",
@@ -57,6 +83,7 @@ const FILTERS = {
     "Transmutation",
   ],
   ritual: false,
+  concentration: false, // ✅ concentration flag
 };
 
 const INITIAL_SELECTED = {
@@ -67,6 +94,7 @@ const INITIAL_SELECTED = {
   range: [],
   school: [],
   ritual: false,
+  concentration: false,
 };
 
 // ⚠️ Tambahan: untuk sync lowercase <-> label cast time
@@ -89,8 +117,24 @@ function normalizeCastTimeForModal(arr) {
   });
 }
 
+// ⚠️ Tambahan: untuk school, kalau dari parent pakai singkatan → jadikan label panjang di modal
+function normalizeSchoolForModal(arr) {
+  if (!Array.isArray(arr)) return [];
+
+  return arr.map((v) => {
+    const str = String(v);
+    const lower = str.toLowerCase();
+
+    if (SCHOOL_LABEL_BY_CODE[lower]) {
+      return SCHOOL_LABEL_BY_CODE[lower];
+    }
+
+    // Kalau sudah label panjang, biarkan
+    return str;
+  });
+}
+
 export default function SpellFilterModal({ onClose, onApply, value }) {
-  // merge value dari parent dengan default
   const getInitialFromValue = (val) => {
     const base = {
       ...INITIAL_SELECTED,
@@ -99,23 +143,22 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
 
     return {
       ...base,
-      // castTime dari parent bisa lowercase -> convert ke label modal
       castTime: normalizeCastTimeForModal(base.castTime),
+      school: normalizeSchoolForModal(base.school),
     };
   };
 
   const [selected, setSelected] = useState(getInitialFromValue(value));
 
-  // setiap kali value berubah (buka modal lagi), sync state lokal
   useEffect(() => {
     setSelected(getInitialFromValue(value));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   const toggleOption = (category, value) => {
     setSelected((prev) => {
-      if (category === "ritual") {
-        return { ...prev, ritual: !prev.ritual };
+      // ✅ Ritual & Concentration: boolean toggle
+      if (category === "ritual" || category === "concentration") {
+        return { ...prev, [category]: !prev[category] };
       }
 
       const current = prev[category] || [];
@@ -134,11 +177,19 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
   const handleApply = () => {
     const modified = {
       ...selected,
-      // ⬇️ castTime dikembalikan ke lowercase ke parent (buat filter logic)
+      // cast time dikirim lowercase → cocok dengan data
       castTime: (selected.castTime || []).map((ct) =>
         String(ct).toLowerCase()
       ),
+      // school: label panjang dikonversi ke singkatan (abj, con, dll) & lowercase
+      school: (selected.school || [])
+        .map((s) => {
+          const code = SCHOOL_CODE_BY_LABEL[s];
+          return code || String(s);
+        })
+        .map((s) => String(s).toLowerCase()),
       ritual: selected.ritual,
+      concentration: selected.concentration,
     };
 
     onApply(modified);
@@ -204,21 +255,37 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
 
         <div className="space-y-4">
           {Object.entries(FILTERS).map(([key, options]) => {
+            // ✅ concentration dihandle bareng ritual, jadi skip di loop
+            if (key === "concentration") return null;
+
             if (key === "ritual") {
               return (
                 <div key={key} className="border-t border-slate-700/60 pt-3">
                   <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
                     {sectionTitle(key)}
                   </div>
-                  <label className="inline-flex items-center gap-2 text-xs text-slate-200">
-                    <input
-                      type="checkbox"
-                      className="h-3 w-3 rounded border-slate-500 bg-transparent"
-                      checked={selected.ritual}
-                      onChange={() => toggleOption("ritual")}
-                    />
-                    <span>Ritual</span>
-                  </label>
+
+                  <div className="flex flex-wrap gap-4">
+                    <label className="inline-flex items-center gap-2 text-xs text-slate-200">
+                      <input
+                        type="checkbox"
+                        className="h-3 w-3 rounded border-slate-500 bg-transparent"
+                        checked={selected.ritual}
+                        onChange={() => toggleOption("ritual")}
+                      />
+                      <span>Ritual</span>
+                    </label>
+
+                    <label className="inline-flex items-center gap-2 text-xs text-slate-200">
+                      <input
+                        type="checkbox"
+                        className="h-3 w-3 rounded border-slate-500 bg-transparent"
+                        checked={selected.concentration}
+                        onChange={() => toggleOption("concentration")}
+                      />
+                      <span>Concentration</span>
+                    </label>
+                  </div>
                 </div>
               );
             }

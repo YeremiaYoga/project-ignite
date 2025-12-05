@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Diamond } from "lucide-react";
 import SpellDetail from "./components/SpellDetail";
 import SpellFilterModal from "./components/SpellFilterModal";
 import Cookies from "js-cookie";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
 // ======================== HELPERS ========================
+
 function cap(str) {
   if (!str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -35,8 +36,49 @@ function makeSlug(spell) {
   return `spell-${name}`;
 }
 
-// sekolah untuk tampilan + filter
-function getSpellSchoolKey(spell) {
+// ===== SCHOOL MAPS (kode <-> label) =====
+const SCHOOL_LABEL_BY_CODE = {
+  abj: "Abjuration",
+  con: "Conjuration",
+  div: "Divination",
+  enc: "Enchantment",
+  evo: "Evocation",
+  ill: "Illusion",
+  nec: "Necromancy",
+  trs: "Transmutation",
+};
+
+// raw (dari data) → kode
+const SCHOOL_CODE_BY_RAW = {
+  abj: "abj",
+  abjuration: "abj",
+
+  con: "con",
+  conj: "con",
+  conjuration: "con",
+
+  div: "div",
+  divination: "div",
+
+  enc: "enc",
+  ench: "enc",
+  enchantment: "enc",
+
+  evo: "evo",
+  evocation: "evo",
+
+  ill: "ill",
+  illusion: "ill",
+
+  nec: "nec",
+  necromancy: "nec",
+
+  trs: "trs",
+  transmutation: "trs",
+};
+
+// kode school utk filter
+function getSpellSchoolCode(spell) {
   const raw =
     spell.school ||
     spell.school_name ||
@@ -44,20 +86,17 @@ function getSpellSchoolKey(spell) {
     spell.raw_data?.system?.school;
 
   if (!raw) return "";
+
   const lower = String(raw).toLowerCase().trim();
+  return SCHOOL_CODE_BY_RAW[lower] || lower;
+}
 
-  const map = {
-    abjuration: "Abjuration",
-    conjuration: "Conjuration",
-    divination: "Divination",
-    enchantment: "Enchantment",
-    evocation: "Evocation",
-    illusion: "Illusion",
-    necromancy: "Necromancy",
-    transmutation: "Transmutation",
-  };
-
-  return map[lower] || cap(lower);
+// label school utk display
+function getSpellSchoolLabel(spell) {
+  const code = getSpellSchoolCode(spell);
+  if (!code) return "";
+  if (SCHOOL_LABEL_BY_CODE[code]) return SCHOOL_LABEL_BY_CODE[code];
+  return cap(code);
 }
 
 // sementara warna sekolah putih semua
@@ -191,6 +230,7 @@ function getRangeLabel(spell) {
 }
 
 // Range kategori utk filter: Self, Touch, Point, Area, Special
+// NOTE: Area hanya jika ada size, kalau tidak → Point
 function getRangeFilterKey(spell) {
   const range =
     spell.range || spell.format_data?.range || spell.raw_data?.system?.range;
@@ -202,32 +242,35 @@ function getRangeFilterKey(spell) {
 
   if (!range && !template) return "";
 
+  // Self / Touch dari object
   if (typeof range === "object" && range) {
     const units = (range.units || range.unit || "").toLowerCase();
     if (units === "self") return "Self";
     if (units === "touch") return "Touch";
   }
 
+  // Self / Touch dari string
   if (typeof range === "string") {
     const raw = range.toLowerCase();
     if (raw.includes("self")) return "Self";
     if (raw.includes("touch")) return "Touch";
   }
 
+  // Template → Area hanya kalau ada size
   if (template && typeof template === "object") {
-    const tType = (template.type || "").toLowerCase();
-    if (
-      tType === "cone" ||
-      tType === "line" ||
-      tType === "sphere" ||
-      tType === "cube" ||
-      tType === "cylinder"
-    ) {
+    const size = template.size ?? template.value;
+    const hasSize =
+      size != null && size !== "" && (Number.isNaN(Number(size)) || Number(size) !== 0);
+
+    if (hasSize) {
       return "Area";
     }
-    return "Area";
+
+    // template ada tapi tanpa size → dihitung Point
+    return "Point";
   }
 
+  // String mengandung bentuk area
   if (typeof range === "string") {
     const raw = range.toLowerCase();
     if (
@@ -243,6 +286,7 @@ function getRangeFilterKey(spell) {
     return "Point";
   }
 
+  // Object units mengandung bentuk area / special
   if (typeof range === "object" && range) {
     const units = (range.units || range.unit || "").toLowerCase();
 
@@ -263,51 +307,24 @@ function getRangeFilterKey(spell) {
   return "";
 }
 
-/**
- * Baca flag concentration dari duration object
- */
-function getConcentrationFlag(spell) {
-  const duration =
-    spell.duration ||
-    spell.format_data?.duration ||
-    spell.raw_data?.system?.duration;
+function hasProperty(spell, target) {
+  let props = spell.properties;
 
-  if (!duration) return false;
-
-  if (typeof duration === "object") {
-    if (typeof duration.concentration === "boolean") {
-      return duration.concentration;
-    }
-    if (typeof duration.concentration === "string") {
-      return duration.concentration.toLowerCase() === "true";
+  if (typeof props === "string") {
+    try {
+      props = JSON.parse(props);
+    } catch {
+      return false;
     }
   }
 
-  if (typeof duration === "string") {
-    return duration.toLowerCase().includes("concentration");
-  }
+  if (!Array.isArray(props)) return false;
 
-  return false;
+  const key = String(target).toLowerCase().trim();
+
+  return props.some((p) => String(p).toLowerCase().trim() === key);
 }
 
-// ritual utk filter
-function getRitualFlag(spell) {
-  if (typeof spell.ritual === "boolean") return spell.ritual;
-  if (typeof spell.ritual === "string")
-    return spell.ritual.toLowerCase() === "true";
-
-  const r =
-    spell.format_data?.ritual ??
-    spell.raw_data?.system?.components?.ritual ??
-    spell.raw_data?.system?.ritual;
-
-  if (typeof r === "boolean") return r;
-  if (typeof r === "string") return r.toLowerCase() === "true";
-
-  return false;
-}
-
-// damage types utk filter
 function getDamageTypes(spell) {
   const out = new Set();
 
@@ -397,8 +414,9 @@ export default function FoundrySpellView() {
     castTime: [],
     damageType: [],
     range: [],
-    school: [],
+    school: [],      // berisi kode: ["abj", "evo", ...]
     ritual: false,
+    concentration: false,
   });
 
   const [filterOpen, setFilterOpen] = useState(false);
@@ -446,7 +464,7 @@ export default function FoundrySpellView() {
         setLoading(true);
         setError("");
 
-        const isLoggedIn = !!Cookies.get("ignite-user-data"); 
+        const isLoggedIn = !!Cookies.get("ignite-user-data");
 
         const baseUrl = isLoggedIn
           ? `${API_BASE}/ignite/spells/all`
@@ -455,8 +473,7 @@ export default function FoundrySpellView() {
         const res = await fetch(baseUrl, {
           method: "GET",
           cache: "no-store",
-          credentials: "include", 
-    
+          credentials: "include",
         });
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -484,6 +501,7 @@ export default function FoundrySpellView() {
     }
 
     fetchSpells();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleSpellUpdate(updatedSpell) {
@@ -512,8 +530,9 @@ export default function FoundrySpellView() {
         ? "Cantrips"
         : lvlNum;
 
-      const schoolKey = getSpellSchoolKey(sp);
-      const schoolLower = schoolKey.toLowerCase();
+      const schoolLabel = getSpellSchoolLabel(sp);
+      const schoolCode = getSpellSchoolCode(sp);
+      const schoolLower = schoolLabel.toLowerCase();
 
       const matchesSearch =
         term === ""
@@ -546,10 +565,14 @@ export default function FoundrySpellView() {
 
       const matchesSchool =
         !filters.school.length ||
-        (schoolKey && filters.school.includes(schoolKey));
+        (schoolCode && filters.school.includes(schoolCode));
 
-      const isRitual = getRitualFlag(sp);
+      const isRitual = hasProperty(sp, "ritual");
       const matchesRitual = !filters.ritual || isRitual;
+
+      const isConcentration = hasProperty(sp, "concentration");
+      const matchesConcentration =
+        !filters.concentration || isConcentration;
 
       return (
         matchesSearch &&
@@ -559,7 +582,8 @@ export default function FoundrySpellView() {
         matchesRange &&
         matchesDamageType &&
         matchesSchool &&
-        matchesRitual
+        matchesRitual &&
+        matchesConcentration
       );
     });
   }, [spells, search, filters]);
@@ -584,7 +608,8 @@ export default function FoundrySpellView() {
     (filters.range.length ? 1 : 0) +
     (filters.damageType.length ? 1 : 0) +
     (filters.school.length ? 1 : 0) +
-    (filters.ritual ? 1 : 0);
+    (filters.ritual ? 1 : 0) +
+    (filters.concentration ? 1 : 0);
 
   const ListBlock = (
     <>
@@ -655,11 +680,12 @@ export default function FoundrySpellView() {
                 spell.raw_data?.img ||
                 "/assets/example_token.png";
 
-              const school = getSpellSchoolKey(spell) || "Unknown School";
+              const school = getSpellSchoolCode(spell) || "Unknown School";
               const schoolColor = getSchoolColor();
 
               const summary = getSpellSummary(spell);
-              const isConcentration = getConcentrationFlag(spell);
+              const isConcentration = hasProperty(spell, "concentration");
+              const isRitual = hasProperty(spell, "ritual");
 
               return (
                 <button
@@ -702,13 +728,26 @@ export default function FoundrySpellView() {
 
                   <div className="items-center gap-2 text-right text-[10px] text-slate-400 leading-tight shrink-0">
                     <div className="capitalize">{school}</div>
-                    <Diamond
-                      className={`w-4 h-4 ${
-                        isConcentration
-                          ? "text-slate-50 fill-slate-50"
-                          : "text-slate-500 fill-transparent"
-                      }`}
-                    />
+
+                    <div className="flex items-center gap-1 justify-end mt-1">
+                      {isConcentration && (
+                        <img
+                          src="https://019a0f6bb5a27dc5b6ab32a19a8ad5d6.phanneldeliver.my.id/foundryvtt/systems/dnd5e/icons/svg/statuses/concentrating.svg"
+                          className="w-4 h-4"
+                          alt="Concentration"
+                          title="Concentration"
+                        />
+                      )}
+
+                      {isRitual && (
+                        <img
+                          src="https://019a0f6bb5a27dc5b6ab32a19a8ad5d6.phanneldeliver.my.id/foundryvtt/systems/dnd5e/icons/svg/facilities/empower.svg"
+                          className="w-4 h-4"
+                          alt="Ritual"
+                          title="Ritual"
+                        />
+                      )}
+                    </div>
                   </div>
                 </button>
               );
@@ -740,8 +779,6 @@ export default function FoundrySpellView() {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          {/* ... header & swipe layout sama */}
-
           <div
             className="flex w-[200%] flex-1 min-h-0 transition-all duration-300 ease-in-out"
             style={{

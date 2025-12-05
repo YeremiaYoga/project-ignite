@@ -3,9 +3,20 @@
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { Heart } from "lucide-react";
-
+import {
+  SCHOOL_MAP,
+  PROPERTY_LABELS,
+  PROPERTY_DESCRIPTIONS,
+} from "../spellData";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 const RATING_OPTIONS = ["S", "A", "B", "C", "D", "F"];
+
+// ICONS
+const ICON_CONCENTRATION =
+  "https://019a0f6bb5a27dc5b6ab32a19a8ad5d6.phanneldeliver.my.id/foundryvtt/systems/dnd5e/icons/svg/statuses/concentrating.svg";
+
+const ICON_RITUAL =
+  "https://019a0f6bb5a27dc5b6ab32a19a8ad5d6.phanneldeliver.my.id/foundryvtt/systems/dnd5e/icons/svg/facilities/empower.svg";
 
 function safeText(v) {
   if (v == null) return "";
@@ -31,6 +42,22 @@ function safeText(v) {
 function cap(str) {
   if (!str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function mapRangeUnits(units) {
+  if (!units) return "";
+  const u = String(units).toLowerCase();
+  if (u === "mi" || u === "mile" || u === "miles") return "mile";
+  if (u === "spec" || u === "special") return "Special";
+  return units;
+}
+
+function mapDurationUnits(units) {
+  if (!units) return "";
+  const u = String(units).toLowerCase();
+  if (u === "inst") return "Instantaneous";
+  if (u === "perm") return "Permanent";
+  return units;
 }
 
 function getActivationLabel(spell) {
@@ -76,7 +103,8 @@ function getDurationLabel(spell) {
   if (typeof dur === "string") return dur;
 
   const value = dur.value;
-  const units = dur.units || dur.unit;
+  const rawUnits = dur.units || dur.unit;
+  const units = mapDurationUnits(rawUnits);
 
   if (!units && value == null) return safeText(dur);
 
@@ -110,10 +138,14 @@ function getRangeLabel(spell) {
     const m = raw.match(/^0+\s+([a-z]+.*)$/);
     if (m) return cap(m[1]);
 
+    if (raw === "mi" || raw === "mile" || raw === "miles") return "Mile";
+    if (raw === "spec" || raw === "special") return "Special";
+
     base = range;
   } else if (typeof range === "object") {
-    const units = range.units || range.unit;
+    const rawUnits = range.units || range.unit;
     const value = range.value;
+    const units = mapRangeUnits(rawUnits);
 
     if (!units && (value == null || value === "")) {
       base = "";
@@ -157,31 +189,75 @@ function getProperties(spell) {
 
   if (!raw) return [];
 
-  if (Array.isArray(raw)) {
-    return raw.map((x) => String(x).trim()).filter(Boolean);
-  }
+  let base = [];
 
-  if (typeof raw === "string") {
-    return raw
+  if (Array.isArray(raw)) {
+    base = raw.map((x) => String(x).trim()).filter(Boolean);
+  } else if (typeof raw === "string") {
+    base = raw
       .replace(/[\[\]"]/g, "")
       .split(/[;,]/)
       .map((x) => x.trim())
       .filter(Boolean);
-  }
-
-  if (typeof raw === "object") {
-    return Object.entries(raw)
+  } else if (typeof raw === "object") {
+    base = Object.entries(raw)
       .filter(([, v]) => !!v)
-      .map(([k]) => cap(k.replace(/_/g, " ")));
+      .map(([k]) => k.replace(/_/g, " "));
+  } else {
+    base = [String(raw).trim()].filter(Boolean);
   }
 
-  return [String(raw).trim()].filter(Boolean);
+  return base.map((p) => {
+    const key = String(p).toLowerCase().trim();
+    if (PROPERTY_LABELS[key]) return PROPERTY_LABELS[key];
+    return cap(p);
+  });
+}
+
+function getSchoolLabel(spell) {
+  const raw =
+    spell.school ||
+    spell.school_name ||
+    spell.format_data?.system?.school ||
+    spell.raw_data?.system?.school;
+
+  if (!raw) return "";
+
+  const code = String(raw).toLowerCase();
+  if (SCHOOL_MAP[code]) return SCHOOL_MAP[code];
+
+  return cap(String(raw));
+}
+
+function getMaterialLabel(spell) {
+  const mat =
+    spell.materials ||
+    spell.format_data?.system?.materials ||
+    spell.raw_data?.system?.materials;
+
+  if (!mat) return "";
+
+  if (typeof mat === "string") return mat.trim();
+
+  if (typeof mat === "object" && mat.value != null) {
+    return String(mat.value).trim();
+  }
+
+  return "";
+}
+
+function getSourceBook(spell) {
+  return (
+    spell.source_book ||
+    spell.format_data?.system?.source?.book ||
+    spell.raw_data?.system?.source?.book ||
+    ""
+  );
 }
 
 export default function SpellDetail({ spell, onSpellUpdate }) {
-  console.log(spell);
-  const emitUpdate = onSpellUpdate || (() => {});
 
+  const emitUpdate = onSpellUpdate || (() => {});
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -189,18 +265,17 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
 
-
-  const [myRating, setMyRating] = useState("");     
-  const [avgLetter, setAvgLetter] = useState("");    
-  const [avgScore, setAvgScore] = useState(null);    
-  const [ratingTotal, setRatingTotal] = useState(0); 
+  const [myRating, setMyRating] = useState("");
+  const [avgLetter, setAvgLetter] = useState("");
+  const [avgScore, setAvgScore] = useState(null);
+  const [ratingTotal, setRatingTotal] = useState(0);
   const [ratingLoading, setRatingLoading] = useState(false);
 
   const [activeProp, setActiveProp] = useState(null);
 
   useEffect(() => {
     const userCookie = Cookies.get("ignite-user-data");
-    console.log(userCookie);
+   
     setIsLoggedIn(Boolean(userCookie));
   }, []);
 
@@ -358,11 +433,12 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
   const levelLabel =
     Number(level) === 0 ? "Cantrip" : `Level ${Number(level) || level}`;
 
-  const school = spell.school || spell.school_name || "";
-
-  const activationLabel = getActivationLabel(spell);
-  const durationLabel = getDurationLabel(spell);
+  const schoolLabel = getSchoolLabel(spell);
+  const activationRaw = getActivationLabel(spell);
+  const durationRaw = getDurationLabel(spell);
   const rangeLabel = getRangeLabel(spell);
+  const materialLabel = getMaterialLabel(spell);
+  const sourceBook = getSourceBook(spell);
 
   const components =
     safeText(spell.components) ||
@@ -385,12 +461,49 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
       ? descriptionRaw
       : "<p>No description available.</p>";
 
+  const properties = getProperties(spell);
+  const propertiesLower = properties.map((p) => p.toLowerCase());
+
+  // fallback ke components jika ada
+  const compFlags =
+    spell.format_data?.system?.components ||
+    spell.raw_data?.system?.components ||
+    {};
+
+  const hasConcentration =
+    propertiesLower.includes("concentration") || !!compFlags.concentration;
+
+  const hasRitual = propertiesLower.includes("ritual") || !!compFlags.ritual;
+
+  // Subtitle: Level • School
   const subtitleParts = [];
   if (levelLabel) subtitleParts.push(levelLabel);
-  if (school) subtitleParts.push(school);
+  if (schoolLabel) subtitleParts.push(schoolLabel);
   const subtitle = subtitleParts.join(" • ");
 
-  const properties = getProperties(spell);
+  // Activation + Ritual text
+  let activationLabel = activationRaw;
+  if (activationLabel && hasRitual && !/ritual/i.test(activationLabel)) {
+    activationLabel = `${activationLabel} or Ritual`;
+  }
+
+  // Duration + Concentration text
+  let durationLabel = durationRaw;
+  if (
+    durationLabel &&
+    hasConcentration &&
+    !/^concentration/i.test(durationLabel)
+  ) {
+    durationLabel = `Concentration, up to ${durationLabel}`;
+  }
+
+  // ACTIVE PROPERTY PANEL
+  const activePropKey = activeProp ? activeProp.toLowerCase() : "";
+  const activeTitle =
+    PROPERTY_LABELS[activePropKey] ||
+    (activeProp ? cap(activeProp.replace(/_/g, " ")) : "");
+  const activeDescription =
+    PROPERTY_DESCRIPTIONS[activePropKey] || "No additional information.";
 
   return (
     <div className="flex flex-col h-full">
@@ -414,9 +527,24 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="lg:text-2xl font-semibold break-words leading-tight">
-                {name}
-              </h1>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="lg:text-2xl font-semibold break-words leading-tight">
+                  {name}
+                </h1>
+
+                {hasConcentration && (
+                  <img
+                    src={ICON_CONCENTRATION}
+                    alt="Concentration"
+                    className="w-5 h-5"
+                    title="Concentration" 
+                  />
+                )}
+
+                {hasRitual && (
+                  <img src={ICON_RITUAL} alt="Ritual" className="w-5 h-5" title="Ritual" />
+                )}
+              </div>
 
               {rangeLabel && (
                 <div className="text-xs text-slate-300 mt-1 break-words">
@@ -435,12 +563,23 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
                   Duration : {durationLabel}
                 </p>
               )}
+
+              {materialLabel && (
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  Material : {materialLabel}
+                </p>
+              )}
             </div>
 
-            <div className="flex flex-col items-end gap-2 shrink-0">
+            <div className="flex flex-col items-end gap-1 shrink-0">
               {subtitle && (
-                <p className="text-right text-xs text-slate-300 leading-tight">
+                <p className="text-right text-sm text-slate-300 leading-tight">
                   {subtitle}
+                </p>
+              )}
+              {sourceBook && (
+                <p className="text-right text-[11px] text-slate-400 leading-tight">
+                  {sourceBook}
                 </p>
               )}
             </div>
@@ -466,14 +605,14 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
             </span>
           </div>
 
-          {/* huruf rating putih */}
+     
           <div className="ml-3 px-2 py-0.5 rounded-full border border-slate-600 text-xs font-semibold text-white min-w-[28px] text-center">
             {avgLetter || "-"}
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* tombol favorite & select rating sejajar di pojok kanan, hanya ketika login */}
+  
           {isLoggedIn && (
             <button
               type="button"
@@ -567,12 +706,11 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
 
             {activeProp && (
               <div className="mt-2 text-[11px] text-slate-100 bg-slate-900/95 border border-slate-700 rounded-lg p-2">
-                <div className="font-semibold mb-1">
-                  {cap(activeProp.replace(/_/g, " "))}
-                </div>
-                <p className="leading-snug text-slate-300">
-                  No additional information.
-                </p>
+                <div className="font-semibold mb-1">{activeTitle}</div>
+                <div
+                  className="leading-snug text-slate-300 prose prose-invert prose-xs max-w-none"
+                  dangerouslySetInnerHTML={{ __html: activeDescription }}
+                />
               </div>
             )}
           </div>
