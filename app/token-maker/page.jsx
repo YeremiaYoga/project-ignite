@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import BorderList from "./components/BorderList"; 
-
+import BorderList from "./components/BorderList";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -31,12 +30,11 @@ export default function IgniteTokenMaker() {
   });
 
   const [imageFile, setImageFile] = useState(null);
-  const [imageObj, setImageObj] = useState(null); 
+  const [imageObj, setImageObj] = useState(null);
   const [borderObj, setBorderObj] = useState(null);
 
-
-  const [bgMode, setBgMode] = useState("color"); 
-  const [bgColor, setBgColor] = useState("#020617"); 
+  const [bgMode, setBgMode] = useState("color");
+  const [bgColor, setBgColor] = useState("#020617");
   const [bgImageObj, setBgImageObj] = useState(null);
 
   const [fgZoom, setFgZoom] = useState(DEFAULT_ZOOM);
@@ -49,12 +47,12 @@ export default function IgniteTokenMaker() {
 
   const [activeLayer, setActiveLayer] = useState("fg");
 
-  const canvasRef = useRef(null); 
-  const previewCanvasRef = useRef(null); 
+  const canvasRef = useRef(null);
+  const previewCanvasRef = useRef(null);
 
   const dragStateRef = useRef({
     dragging: false,
-    mode: null, 
+    mode: null,
     layer: "fg",
     startZoom: DEFAULT_ZOOM,
     startOffset: { x: 0, y: 0 },
@@ -64,8 +62,8 @@ export default function IgniteTokenMaker() {
     startMouse: { x: 0, y: 0 },
   });
 
-  const fgBoxRef = useRef(null); 
-  const bgBoxRef = useRef(null); 
+  const fgBoxRef = useRef(null);
+  const bgBoxRef = useRef(null);
 
   // ===========================
   //  LOAD TOKEN BORDERS
@@ -209,7 +207,6 @@ export default function IgniteTokenMaker() {
 
     ctx.drawImage(borderObj, bx, by, bw, bh);
   }
-
 
   function renderWorkspace(ctx) {
     const size = CANVAS_SIZE;
@@ -700,7 +697,7 @@ export default function IgniteTokenMaker() {
                   >
                     Color
                   </button>
-                  {/* <button
+                  <button
                     type="button"
                     onClick={() => setBgMode("image")}
                     className={`px-3 py-1 ${
@@ -710,7 +707,7 @@ export default function IgniteTokenMaker() {
                     }`}
                   >
                     Image
-                  </button> */}
+                  </button>
                 </div>
 
                 {/* Color picker */}
@@ -732,7 +729,7 @@ export default function IgniteTokenMaker() {
                 )}
 
                 {/* Background image upload */}
-                {/* {bgMode === "image" && (
+                {bgMode === "image" && (
                   <div className="space-y-1">
                     <label className="inline-flex items-center justify-center px-3 py-2 rounded-md border border-sky-500 bg-slate-900 hover:bg-slate-800 cursor-pointer text-xs font-medium text-sky-100">
                       <input
@@ -743,23 +740,22 @@ export default function IgniteTokenMaker() {
                       />
                       Upload Background Image
                     </label>
-                    {!bgImageObj && (
+                    {!bgImageObj ? (
                       <p className="text-[10px] text-slate-400">
-                        Belum ada background image.
+                        No background image added.
                       </p>
-                    )}
-                    {bgImageObj && (
+                    ) : (
                       <p className="text-[10px] text-slate-400">
-                        Gunakan canvas & zoom untuk atur posisi background
-                        (layer: Background).
+                        Adjust background using canvas & zoom (Background
+                        Layer).
                       </p>
                     )}
                   </div>
-                )} */}
+                )}
               </div>
 
               {/* LAYER SELECTION */}
-              {/* <div>
+              <div>
                 <div className="font-semibold text-sky-100 mb-1">
                   Edit Layer
                 </div>
@@ -793,9 +789,9 @@ export default function IgniteTokenMaker() {
                   </button>
                 </div>
                 <p className="mt-1 text-[10px] text-slate-500">
-                  Layer aktif akan punya garis dan handle di canvas.
+                  The active layer will show outlines and handles on the canvas.
                 </p>
-              </div> */}
+              </div>
 
               {/* Upload Foreground */}
               <div>
