@@ -8,6 +8,7 @@ import {
   PROPERTY_LABELS,
   PROPERTY_DESCRIPTIONS,
 } from "../spellData";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 const RATING_OPTIONS = ["S", "A", "B", "C", "D", "F"];
 
@@ -17,6 +18,122 @@ const ICON_CONCENTRATION =
 
 const ICON_RITUAL =
   "https://019a0f6bb5a27dc5b6ab32a19a8ad5d6.phanneldeliver.my.id/foundryvtt/systems/dnd5e/icons/svg/facilities/empower.svg";
+
+// 🔹 ICON MAP untuk classes
+const CLASS_ICON_DATA = {
+  artificer: {
+    src: "/assets/classIcon/artificer_icon.webp",
+    label: "Artificer",
+  },
+  barbarian: {
+    src: "/assets/classIcon/barbarian_icon.webp",
+    label: "Barbarian",
+  },
+  bard: {
+    src: "/assets/classIcon/bard_icon.webp",
+    label: "Bard",
+  },
+  blood_hunter: {
+    src: "/assets/classIcon/blood_hunter_icon.webp",
+    label: "Blood Hunter",
+  },
+  cleric: {
+    src: "/assets/classIcon/cleric_icon.webp",
+    label: "Cleric",
+  },
+  druid: {
+    src: "/assets/classIcon/druid_icon.webp",
+    label: "Druid",
+  },
+  fighter: {
+    src: "/assets/classIcon/fighter_icon.webp",
+    label: "Fighter",
+  },
+  illriger: {
+    src: "/assets/classIcon/illriger_icon.webp",
+    label: "Illriger",
+  },
+  monk: {
+    src: "/assets/classIcon/monk_icon.webp",
+    label: "Monk",
+  },
+  paladin: {
+    src: "/assets/classIcon/paladin_icon.webp",
+    label: "Paladin",
+  },
+  ranger: {
+    src: "/assets/classIcon/ranger_icon.webp",
+    label: "Ranger",
+  },
+  rogue: {
+    src: "/assets/classIcon/rogue_icon.webp",
+    label: "Rogue",
+  },
+  sorcerer: {
+    src: "/assets/classIcon/sorcerer_icon.webp",
+    label: "Sorcerer",
+  },
+  ua: {
+    src: "/assets/classIcon/UA_icon.webp",
+    label: "Unearthed Arcana",
+  },
+  warlock: {
+    src: "/assets/classIcon/warlock_icon.webp",
+    label: "Warlock",
+  },
+  wizard: {
+    src: "/assets/classIcon/wizard_icon.webp",
+    label: "Wizard",
+  },
+};
+
+// 🔹 ICON MAP untuk damage type
+const DAMAGE_ICON_DATA = {
+  acid: {
+    src: "/assets/damageType_icon/acid.webp",
+    label: "Acid",
+  },
+  cold: {
+    src: "/assets/damageType_icon/cold.webp",
+    label: "Cold",
+  },
+  fire: {
+    src: "/assets/damageType_icon/fire.webp",
+    label: "Fire",
+  },
+  force: {
+    src: "/assets/damageType_icon/force.webp",
+    label: "Force",
+  },
+  lightning: {
+    src: "/assets/damageType_icon/lightning.webp",
+    label: "Lightning",
+  },
+  necrotic: {
+    src: "/assets/damageType_icon/necrotic.webp",
+    label: "Necrotic",
+  },
+  poison: {
+    src: "/assets/damageType_icon/poison.webp",
+    label: "Poison",
+  },
+  radiant: {
+    src: "/assets/damageType_icon/radiant.webp",
+    label: "Radiant",
+  },
+  thunder: {
+    src: "/assets/damageType_icon/thunder.webp",
+    label: "Thunder",
+  },
+  physical: {
+    src: "/assets/damageType_icon/physical.webp",
+    label: "Physical",
+  },
+  physic: {
+    src: "/assets/damageType_icon/physic.webp",
+    label: "Psychic",
+  },
+};
 
 function safeText(v) {
   if (v == null) return "";
@@ -255,8 +372,134 @@ function getSourceBook(spell) {
   );
 }
 
-export default function SpellDetail({ spell, onSpellUpdate }) {
+// 🔹 Normalisasi nama class ke key icon
+function normalizeClassKey(name) {
+  if (!name) return "";
+  const n = String(name).trim().toLowerCase().replace(/[_-]+/g, " ");
 
+  if (n.includes("artificer")) return "artificer";
+  if (n.includes("barbarian")) return "barbarian";
+  if (n.includes("bard")) return "bard";
+  if (n.includes("blood") && n.includes("hunter")) return "blood_hunter";
+  if (n.includes("cleric")) return "cleric";
+  if (n.includes("druid")) return "druid";
+  if (n.includes("fighter")) return "fighter";
+  if (n.includes("illriger") || n.includes("illrigger")) return "illriger";
+  if (n.includes("monk")) return "monk";
+  if (n.includes("paladin")) return "paladin";
+  if (n.includes("ranger")) return "ranger";
+  if (n.includes("rogue")) return "rogue";
+  if (n.includes("sorcerer")) return "sorcerer";
+  if (n === "ua" || n.includes("unearthed")) return "ua";
+  if (n.includes("warlock")) return "warlock";
+  if (n.includes("wizard")) return "wizard";
+
+  return "";
+}
+
+// 🔹 Ambil daftar class yang punya icon
+function getClassEntries(spell) {
+  const raw =
+    spell.classes ||
+    spell.class ||
+    spell.format_data?.system?.classes ||
+    spell.raw_data?.system?.classes;
+
+  if (!raw) return [];
+
+  let list = [];
+
+  if (Array.isArray(raw)) {
+    list = raw;
+  } else if (typeof raw === "string") {
+    list = raw
+      .split(/[;,/]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  } else if (typeof raw === "object") {
+    list = Object.entries(raw)
+      .filter(([, v]) => !!v)
+      .map(([k]) => k);
+  }
+
+  const seen = new Set();
+  const result = [];
+
+  for (const item of list) {
+    const key = normalizeClassKey(item);
+    if (!key || seen.has(key)) continue;
+    const iconData = CLASS_ICON_DATA[key];
+    if (!iconData) continue;
+    seen.add(key);
+    result.push({ key, ...iconData });
+  }
+
+  return result;
+}
+
+// 🔹 Normalisasi nama damage ke key icon
+function normalizeDamageKey(name) {
+  if (!name) return "";
+  const n = String(name).trim().toLowerCase();
+
+  if (n.includes("acid")) return "acid";
+  if (n.includes("cold") || n.includes("frost") || n.includes("ice"))
+    return "cold";
+  if (n.includes("fire")) return "fire";
+  if (n.includes("force")) return "force";
+  if (n.includes("lightning") || n.includes("electric")) return "lightning";
+  if (n.includes("necrotic")) return "necrotic";
+  if (n.includes("poison")) return "poison";
+  if (n.includes("radiant")) return "radiant";
+  if (n.includes("thunder")) return "thunder";
+  if (n.includes("psychic")) return "physic";
+  if (n.includes("physical") || n.includes("bludgeon") || n.includes("slash") || n.includes("pierc"))
+    return "physical";
+
+  return "";
+}
+
+// 🔹 Ambil daftar damage type yang punya icon
+function getDamageEntries(spell) {
+  const raw =
+    spell.damage_type ||
+    spell.damageTypes ||
+    spell.format_data?.system?.damage?.damageType ||
+    spell.raw_data?.system?.damage?.damageType;
+
+  if (!raw) return [];
+
+  let list = [];
+
+  if (Array.isArray(raw)) {
+    list = raw;
+  } else if (typeof raw === "string") {
+    list = raw
+      .split(/[;,/]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  } else if (typeof raw === "object") {
+    list = Object.entries(raw)
+      .filter(([, v]) => !!v)
+      .map(([k]) => k);
+  }
+
+  const seen = new Set();
+  const result = [];
+
+  for (const item of list) {
+    const key = normalizeDamageKey(item);
+    if (!key || seen.has(key)) continue;
+    const iconData = DAMAGE_ICON_DATA[key];
+    if (!iconData) continue;
+    seen.add(key);
+    result.push({ key, ...iconData });
+  }
+
+  return result;
+}
+
+export default function SpellDetail({ spell, onSpellUpdate }) {
   const emitUpdate = onSpellUpdate || (() => {});
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -272,10 +515,11 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
   const [ratingLoading, setRatingLoading] = useState(false);
 
   const [activeProp, setActiveProp] = useState(null);
+  const [activeClassKey, setActiveClassKey] = useState(null);
+  const [activeDamageKey, setActiveDamageKey] = useState(null);
 
   useEffect(() => {
     const userCookie = Cookies.get("ignite-user-data");
-   
     setIsLoggedIn(Boolean(userCookie));
   }, []);
 
@@ -290,6 +534,8 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
       setRatingTotal(0);
       setFavLoading(false);
       setRatingLoading(false);
+      setActiveClassKey(null);
+      setActiveDamageKey(null);
       return;
     }
 
@@ -311,6 +557,8 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
 
     setFavLoading(false);
     setRatingLoading(false);
+    setActiveClassKey(null);
+    setActiveDamageKey(null);
   }, [spell?.id, spell?.__global_id, spell?.name]);
 
   async function handleToggleFavorite() {
@@ -445,6 +693,9 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
     safeText(spell.format_data?.system?.components?.value) ||
     safeText(spell.raw_data?.system?.components?.value);
 
+  const classEntries = getClassEntries(spell);
+  const damageEntries = getDamageEntries(spell);
+
   const imgSrc =
     spell.image ||
     spell.format_data?.img ||
@@ -508,10 +759,10 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
   return (
     <div className="flex flex-col h-full">
       {/* HEADER UTAMA */}
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3 sm:gap-4">
         {/* KIRI: GAMBAR */}
         <div className="shrink-0">
-          <div className="w-16 h-16 rounded-xl border border-slate-700 overflow-hidden">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border border-slate-700 overflow-hidden">
             <img
               src={imgSrc}
               alt={name}
@@ -525,10 +776,10 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
 
         {/* KANAN: INFO SPELL */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="lg:text-2xl font-semibold break-words leading-tight">
+                <h1 className="text-base sm:text-lg lg:text-2xl font-semibold break-words leading-tight">
                   {name}
                 </h1>
 
@@ -537,48 +788,53 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
                     src={ICON_CONCENTRATION}
                     alt="Concentration"
                     className="w-5 h-5"
-                    title="Concentration" 
+                    title="Concentration"
                   />
                 )}
 
                 {hasRitual && (
-                  <img src={ICON_RITUAL} alt="Ritual" className="w-5 h-5" title="Ritual" />
+                  <img
+                    src={ICON_RITUAL}
+                    alt="Ritual"
+                    className="w-5 h-5"
+                    title="Ritual"
+                  />
                 )}
               </div>
 
               {rangeLabel && (
-                <div className="text-xs text-slate-300 mt-1 break-words">
+                <div className="text-[11px] text-slate-300 mt-1 break-words">
                   <div>Range : {rangeLabel}</div>
                 </div>
               )}
 
               {activationLabel && (
-                <p className="text-[11px] text-slate-300 mt-1">
+                <p className="text-[11px] text-slate-300 mt-1 break-words">
                   Casting : {activationLabel}
                 </p>
               )}
 
               {durationLabel && (
-                <p className="text-[11px] text-slate-300 mt-0.5">
+                <p className="text-[11px] text-slate-300 mt-0.5 break-words">
                   Duration : {durationLabel}
                 </p>
               )}
 
               {materialLabel && (
-                <p className="text-[11px] text-slate-300 mt-0.5">
+                <p className="text-[11px] text-slate-300 mt-0.5 break-words">
                   Material : {materialLabel}
                 </p>
               )}
             </div>
 
-            <div className="flex flex-col items-end gap-1 shrink-0">
+            <div className="flex flex-col items-start sm:items-end gap-1 shrink-0 mt-1 sm:mt-0">
               {subtitle && (
-                <p className="text-right text-sm text-slate-300 leading-tight">
+                <p className="text-[12px] sm:text-sm text-slate-300 leading-tight">
                   {subtitle}
                 </p>
               )}
               {sourceBook && (
-                <p className="text-right text-[11px] text-slate-400 leading-tight">
+                <p className="text-[10px] text-slate-400 leading-tight">
                   {sourceBook}
                 </p>
               )}
@@ -587,9 +843,9 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
         </div>
       </div>
 
-      {/* BAR FAVORITES + AVG LETTER (di atas garis) */}
-      <div className="mt-3 mb-2 flex items-center justify-between text-[11px] text-slate-400">
-        <div className="flex items-center gap-2">
+      {/* BAR FAVORITES + AVG LETTER */}
+      <div className="mt-3 mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-[11px] text-slate-400">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-1">
             <Heart
               className={`w-3.5 h-3.5 ${
@@ -598,21 +854,19 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
                   : "text-slate-500"
               }`}
             />
-            <span>
+            <span className="truncate max-w-[180px]">
               {favoriteCount > 0
                 ? `${favoriteCount} favorites`
                 : "No favorites yet"}
             </span>
           </div>
 
-     
-          <div className="ml-3 px-2 py-0.5 rounded-full border border-slate-600 text-xs font-semibold text-white min-w-[28px] text-center">
+          <div className="px-2 py-0.5 rounded-full border border-slate-600 text-xs font-semibold text-white min-w-[28px] text-center">
             {avgLetter || "-"}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-  
+        <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
           {isLoggedIn && (
             <button
               type="button"
@@ -630,7 +884,9 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
                   isFavorite ? "text-rose-500 fill-rose-500" : "text-current"
                 }`}
               />
-              <span>{isFavorite ? "Favorited" : "Add to favorites"}</span>
+              <span className="whitespace-nowrap">
+                {isFavorite ? "Favorited" : "Add to favorites"}
+              </span>
             </button>
           )}
 
@@ -639,7 +895,7 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
               value={myRating}
               onChange={handleChangeRating}
               disabled={ratingLoading}
-              className="bg-slate-900/80 border border-slate-600 text-[11px] rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-amber-300"
+              className="bg-slate-900/80 border border-slate-600 text-[11px] rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-amber-300 min-w-[72px]"
             >
               <option value="">None</option>
               {RATING_OPTIONS.map((r) => (
@@ -659,20 +915,100 @@ export default function SpellDetail({ spell, onSpellUpdate }) {
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto pr-1">
           {components && (
-            <div className="mb-3 text-[11px] text-slate-300">
+            <div className="mb-2 text-[11px] text-slate-300 break-words">
               <span className="font-semibold text-slate-200">Components:</span>{" "}
               {components}
             </div>
           )}
 
-          <p className="text-sm uppercase tracking-wide text-slate-400 mb-1">
+          <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">
             Description
           </p>
 
           <div
-            className="text-sm leading-relaxed text-slate-100/90 prose prose-invert max-w-none"
+            className="text-[13px] leading-relaxed text-slate-100/90 prose prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: descriptionHtml }}
           />
+
+          <div className="my-2 h-px bg-gradient-to-r from-transparent via-indigo-300/50 to-transparent" />
+
+          {classEntries.length > 0 && (
+            <div className="mb-3 text-[11px] text-slate-300 ">
+              <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">
+                Classes
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {classEntries.map((cls) => {
+                  const isActive = activeClassKey === cls.key;
+                  return (
+                    <button
+                      key={cls.key}
+                      type="button"
+                      onClick={() =>
+                        setActiveClassKey((prev) =>
+                          prev === cls.key ? null : cls.key
+                        )
+                      }
+                      className={`relative w-7 h-7 rounded-md flex items-center justify-center bg-slate-900/60 border border-slate-700 hover:border-amber-300/70 transition ${
+                        isActive ? "ring-1 ring-amber-300" : ""
+                      }`}
+                    >
+                      <img
+                        src={cls.src}
+                        alt={cls.label}
+                        className="w-6 h-6 object-contain"
+                      />
+
+                      {isActive && (
+                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-slate-900 text-[10px] text-slate-100 border border-slate-600 whitespace-nowrap shadow-lg">
+                          {cls.label}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {damageEntries.length > 0 && (
+            <div className="mb-3 text-[11px] text-slate-300 ">
+              <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">
+                Damage Type
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {damageEntries.map((dmg) => {
+                  const isActive = activeDamageKey === dmg.key;
+                  return (
+                    <button
+                      key={dmg.key}
+                      type="button"
+                      onClick={() =>
+                        setActiveDamageKey((prev) =>
+                          prev === dmg.key ? null : dmg.key
+                        )
+                      }
+                      className={`relative w-7 h-7 rounded-md flex items-center justify-center bg-slate-900/60 border border-slate-700 hover:border-amber-300/70 transition ${
+                        isActive ? "ring-1 ring-amber-300" : ""
+                      }`}
+                    >
+                      <img
+                        src={dmg.src}
+                        alt={dmg.label}
+                        className="w-6 h-6 object-contain"
+                      />
+
+                      {isActive && (
+                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-slate-900 text-[10px] text-slate-100 border border-slate-600 whitespace-nowrap shadow-lg">
+                          {dmg.label}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {properties.length > 0 && (
