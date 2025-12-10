@@ -822,28 +822,26 @@ export default function Step1({ data = {}, onChange }) {
             />
           </div>
 
-          {data.character_type === "Player" && (
-            <InputField
-              label="Background"
-              type="selectSearch"
-              value={data.background_name}
-              onChange={(val) => {
-                const selected = backgroundOptions.find(
-                  (r) => r.id === val || r.value === val
-                );
-                onChange("background_id", selected?.id || "");
-                onChange("background_name", selected?.label || "");
-              }}
-              placeholder={
-                backgroundOptions.length ? "Select Background" : "Loading..."
-              }
-              options={backgroundOptions}
-              hint={{
-                icon: "book-open",
-                text: "Your character’s background or origin, such as Soldier, Sage, or Outlander. Defines their history, early skills, and the experiences that shaped them",
-              }}
-            />
-          )}
+          <InputField
+            label="Background"
+            type="selectSearch"
+            value={data.background_name}
+            onChange={(val) => {
+              const selected = backgroundOptions.find(
+                (r) => r.id === val || r.value === val
+              );
+              onChange("background_id", selected?.id || "");
+              onChange("background_name", selected?.label || "");
+            }}
+            placeholder={
+              backgroundOptions.length ? "Select Background" : "Loading..."
+            }
+            options={backgroundOptions}
+            hint={{
+              icon: "book-open",
+              text: "Your character’s background or origin, such as Soldier, Sage, or Outlander. Defines their history, early skills, and the experiences that shaped them",
+            }}
+          />
         </div>
       </div>
     </div>
