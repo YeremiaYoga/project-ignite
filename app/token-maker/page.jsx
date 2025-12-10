@@ -196,14 +196,14 @@ export default function IgniteTokenMaker() {
   // ===========================
   //  DRAW BORDER
   // ===========================
-  function drawBorder(ctx) {
+  function drawBorder(ctx, scale = BORDER_SCALE) {
     if (!borderObj) return;
     const size = CANVAS_SIZE;
 
-    const bw = size * BORDER_SCALE;
-    const bh = size * BORDER_SCALE;
-    const bx = size / 2 - bw / 2;
-    const by = size / 2 - bh / 2;
+    const bw = size * scale;
+    const bh = size * scale;
+    const bx = (size - bw) / 2;
+    const by = (size - bh) / 2;
 
     ctx.drawImage(borderObj, bx, by, bw, bh);
   }
@@ -293,18 +293,21 @@ export default function IgniteTokenMaker() {
   // ===========================
   //  RENDER TOKEN (PREVIEW & DL)
   // ===========================
-  function renderTokenToCanvas(ctx) {
+  // RENDER TOKEN (PREVIEW & DL) DENGAN OPSI CLIP
+  function renderTokenToCanvas(ctx, { withClip = true } = {}) {
     const size = CANVAS_SIZE;
     ctx.clearRect(0, 0, size, size);
 
     const radius = (size * BORDER_SCALE * INNER_FACTOR) / 2;
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(size / 2, size / 2, radius, 0, Math.PI * 2);
-    ctx.clip();
+    if (withClip) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, radius, 0, Math.PI * 2);
+      ctx.clip();
+    }
 
-    // background color
+    // background color (hanya di area clip kalau withClip = true)
     ctx.fillStyle = bgColor || "#020617";
     ctx.fillRect(0, 0, size, size);
 
@@ -332,7 +335,11 @@ export default function IgniteTokenMaker() {
       });
     }
 
-    ctx.restore();
+    if (withClip) {
+      ctx.restore();
+    }
+
+    // border selalu paling atas
     drawBorder(ctx);
   }
 
@@ -345,8 +352,10 @@ export default function IgniteTokenMaker() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // workspace (tanpa clip, untuk editing)
     renderWorkspace(ctx);
 
+    // preview (dengan clip lingkaran)
     const previewCanvas = previewCanvasRef.current;
     if (previewCanvas) {
       const pctx = previewCanvas.getContext("2d");
@@ -356,7 +365,9 @@ export default function IgniteTokenMaker() {
         tokenCanvas.height = CANVAS_SIZE;
         const tctx = tokenCanvas.getContext("2d");
         if (tctx) {
-          renderTokenToCanvas(tctx);
+          // ⬅️ ini pakai clip, jadi hasilnya kaya screenshot yang kamu kirim
+          renderTokenToCanvas(tctx, { withClip: true });
+
           pctx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
           pctx.drawImage(
             tokenCanvas,
@@ -563,18 +574,48 @@ export default function IgniteTokenMaker() {
   function downloadImage(type = "png") {
     if (!borderObj && !imageObj && !(bgMode === "image" && bgImageObj)) return;
 
-    const tokenCanvas = document.createElement("canvas");
-    tokenCanvas.width = CANVAS_SIZE;
-    tokenCanvas.height = CANVAS_SIZE;
-    const tctx = tokenCanvas.getContext("2d");
-    if (!tctx) return;
+    // 1. Render token seperti PREVIEW (pakai BORDER_SCALE = 0.7, ada clip lingkaran)
+    const previewCanvas = document.createElement("canvas");
+    previewCanvas.width = CANVAS_SIZE;
+    previewCanvas.height = CANVAS_SIZE;
+    const pctx = previewCanvas.getContext("2d");
+    if (!pctx) return;
 
-    renderTokenToCanvas(tctx);
+    // Fungsi ini versi yang sekarang kamu pakai untuk preview:
+    // - clip lingkaran
+    // - gambar bg, fg
+    // - gambar border dengan BORDER_SCALE (0.7)
+    renderTokenToCanvas(pctx);
 
+    // 2. Canvas FINAL 1x1 (untuk di-download)
+    const outCanvas = document.createElement("canvas");
+    outCanvas.width = CANVAS_SIZE;
+    outCanvas.height = CANVAS_SIZE;
+    const octx = outCanvas.getContext("2d");
+    if (!octx) return;
+
+    octx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+    // 3. Scale dari preview → border jadi pas ke tepi (scale 1)
+    const scale = 1 / BORDER_SCALE; // contoh: 1 / 0.7 ≈ 1.42857
+
+    octx.save();
+    octx.translate(CANVAS_SIZE / 2, CANVAS_SIZE / 2); // scale dari tengah
+    octx.scale(scale, scale);
+    octx.drawImage(
+      previewCanvas,
+      -CANVAS_SIZE / 2,
+      -CANVAS_SIZE / 2,
+      CANVAS_SIZE,
+      CANVAS_SIZE
+    );
+    octx.restore();
+
+    // 4. Export ke PNG / WEBP
     const mime = type === "webp" ? "image/webp" : "image/png";
     const ext = type === "webp" ? "webp" : "png";
 
-    tokenCanvas.toBlob(
+    outCanvas.toBlob(
       (blob) => {
         if (!blob) return;
         const url = URL.createObjectURL(blob);
