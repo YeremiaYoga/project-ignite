@@ -86,12 +86,7 @@ export default function Step2({ data, allData, onChange }) {
             placeholder="backstory"
             rows={12}
           />
-          {/* <RichTextEditor
-            value={data.backstory || ""}
-            onChange={(html) => onChange("backstory", html)}
-            placeholder="backstory"
-            rows={22}
-          /> */}
+
         </div>
 
         <div className="col-span-3 space-y-4">

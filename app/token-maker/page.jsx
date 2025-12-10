@@ -53,7 +53,7 @@ export default function IgniteTokenMakerPage() {
 
   const dragStateRef = useRef({
     dragging: false,
-    mode: null, // "move" | "scale" | "rotate"
+    mode: null, 
     layer: "fg",
     startZoom: DEFAULT_ZOOM,
     startOffset: { x: 0, y: 0 },
@@ -66,9 +66,7 @@ export default function IgniteTokenMakerPage() {
   const fgBoxRef = useRef(null);
   const bgBoxRef = useRef(null);
 
-  // ===========================
-  //  LOAD TOKEN BORDERS
-  // ===========================
+
   useEffect(() => {
     async function fetchBorders() {
       try {
@@ -94,9 +92,7 @@ export default function IgniteTokenMakerPage() {
     fetchBorders();
   }, []);
 
-  // ===========================
-  //  LOAD FOREGROUND IMAGE
-  // ===========================
+
   function handleFileChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -113,9 +109,7 @@ export default function IgniteTokenMakerPage() {
     img.src = url;
   }
 
-  // ===========================
-  //  LOAD BACKGROUND IMAGE
-  // ===========================
+
   function handleBgFileChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -135,9 +129,7 @@ export default function IgniteTokenMakerPage() {
     img.src = url;
   }
 
-  // ===========================
-  //  LOAD BORDER IMAGE
-  // ===========================
+
   useEffect(() => {
     if (!selectedBorder || selectedBorder.id === "none") {
       setBorderObj(null);
@@ -155,9 +147,7 @@ export default function IgniteTokenMakerPage() {
     img.src = selectedBorder.image_url;
   }, [selectedBorder]);
 
-  // ===========================
-  //  DRAW GENERIC LAYER IMAGE
-  // ===========================
+
   function drawLayerImage(
     ctx,
     { img, zoom, offset, rotation, boxRef, storeBox }
@@ -191,9 +181,7 @@ export default function IgniteTokenMakerPage() {
     ctx.restore();
   }
 
-  // ===========================
-  //  DRAW BORDER
-  // ===========================
+
   function drawBorder(ctx, scale = BORDER_SCALE) {
     if (!borderObj) return;
     const size = CANVAS_SIZE;
@@ -282,9 +270,7 @@ export default function IgniteTokenMakerPage() {
     }
   }
 
-  // ===========================
-  //  RENDER TOKEN (PREVIEW)
-  // ===========================
+
   function renderTokenToCanvas(ctx, { withClip = true } = {}) {
     const size = CANVAS_SIZE;
     ctx.clearRect(0, 0, size, size);
@@ -330,9 +316,7 @@ export default function IgniteTokenMakerPage() {
     drawBorder(ctx);
   }
 
-  // ===========================
-  //  EFFECT: redraw workspace & preview
-  // ===========================
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -382,9 +366,7 @@ export default function IgniteTokenMakerPage() {
     activeLayer,
   ]);
 
-  // ===========================
-  //  HANDLE POSITIONS / HIT TEST
-  // ===========================
+
   function getHandlePositions(box) {
     if (!box) return [];
     const { x, y, w, h, cx, cy } = box;
@@ -428,9 +410,7 @@ export default function IgniteTokenMakerPage() {
     return null;
   }
 
-  // ===========================
-  //  DRAG HANDLING (CSS→canvas)
-  // ===========================
+
   function getMousePosInCanvas(e) {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -531,9 +511,7 @@ export default function IgniteTokenMakerPage() {
     dragStateRef.current.mode = null;
   }
 
-  // ===========================
-  //  ZOOM BUTTONS
-  // ===========================
+
   function applyZoomFactor(factor) {
     if (activeLayer === "bg") {
       setBgZoom((current) => {
@@ -552,9 +530,7 @@ export default function IgniteTokenMakerPage() {
 
   const currentZoom = activeLayer === "bg" ? bgZoom : fgZoom;
 
-  // ===========================
-  //  DOWNLOAD PNG / WEBP
-  // ===========================
+
   function downloadImage(type = "png") {
     if (!borderObj && !imageObj && !(bgMode === "image" && bgImageObj)) return;
 

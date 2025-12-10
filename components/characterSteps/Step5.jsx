@@ -36,7 +36,6 @@ export default function Step5({ data, allData, onChange }) {
     "Thunder",
   ];
 
-  // Ability score yang dipilih di UI (bisa override nilai dari step5)
   const [assignedValues, setAssignedValues] = useState({
     str: null,
     dex: null,

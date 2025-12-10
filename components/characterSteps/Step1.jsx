@@ -21,7 +21,7 @@ export default function Step1({ data = {}, onChange }) {
   const [privateId, setPrivateId] = useState("");
   const [publicId, setPublicId] = useState("");
   const [showPrivate, setShowPrivate] = useState(false);
-
+  const MAX_FILE_SIZE = 3 * 1024 * 1024;
   console.log(data);
 
   useEffect(() => {
@@ -178,6 +178,11 @@ export default function Step1({ data = {}, onChange }) {
   const handleFile = (file, type) => {
     if (!file) return;
 
+    if (file.size > MAX_FILE_SIZE) {
+      alert("File is too large. Maximum allowed size is 3 MB.");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       if (type === "art") {
@@ -246,7 +251,7 @@ export default function Step1({ data = {}, onChange }) {
               </div>
             </div>
             <span className="text-xs text-gray-400 ml-auto block text-right">
-              (JPG/WEBP/etc, max 5MB)
+              (JPG/WEBP/etc, max 3MB)
             </span>
           </div>
           <div>
@@ -269,11 +274,11 @@ export default function Step1({ data = {}, onChange }) {
               </div>
             </div>
             <span className="text-xs text-gray-400 ml-auto block text-right">
-              (JPG/WEBP/etc, max 5MB)
+              (JPG/WEBP/etc, max 3MB)
             </span>
           </div>
         </div>
-  <div className="mt-[14px]">
+        <div className="mt-[14px]">
           <div className="mb-2 text-sm font-medium text-gray-200 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -405,7 +410,7 @@ export default function Step1({ data = {}, onChange }) {
       </div>
       <hr className="border-gray-700" />
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="space-y-4">
           <InputField
             label="Race"
@@ -634,7 +639,7 @@ export default function Step1({ data = {}, onChange }) {
           </div>
         </div>
 
-  <div className="space-y-4 lg:col-span-3 md:col-span-2">
+        <div className="space-y-4 lg:col-span-3 md:col-span-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
             <InputField
               label="Gender"

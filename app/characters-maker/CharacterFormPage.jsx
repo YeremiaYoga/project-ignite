@@ -5,14 +5,12 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Cookies from "js-cookie";
 
-// ✅ Desktop components
 import Step1Desktop from "@/components/characterSteps/Step1";
 import Step2Desktop from "@/components/characterSteps/Step2";
 import Step3Desktop from "@/components/characterSteps/Step3";
 import Step4Desktop from "@/components/characterSteps/Step4";
 import Step5Desktop from "@/components/characterSteps/Step5";
 
-// ✅ Mobile components (lazy load agar tidak berat di desktop)
 const Step1Mobile = dynamic(() =>
   import("@/components/characterSteps/mobile/Step1")
 );
@@ -44,7 +42,6 @@ export default function CharacterFormPage({ mode = "create" }) {
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  // ✅ Deteksi layar mobile (kurang dari 768px)
   useEffect(() => {
     const checkScreen = () => setIsMobile(window.innerWidth < 768);
     checkScreen();
@@ -52,7 +49,6 @@ export default function CharacterFormPage({ mode = "create" }) {
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
-  // ✅ Tentukan komponen step berdasarkan device
   const steps = [
     { title: "Step 1", component: isMobile ? Step1Mobile : Step1Desktop },
     { title: "Step 2", component: isMobile ? Step2Mobile : Step2Desktop },
@@ -61,7 +57,6 @@ export default function CharacterFormPage({ mode = "create" }) {
     { title: "Step 5", component: isMobile ? Step5Mobile : Step5Desktop },
   ];
 
-  // ✅ Fetch karakter untuk mode edit
   useEffect(() => {
     if (mode !== "edit" || !id) {
       setFormData(getDefaultForm());
@@ -127,9 +122,56 @@ export default function CharacterFormPage({ mode = "create" }) {
   const prevStep = () => goToStep(currentStep - 1);
 
   // ✅ Simpan character
+  // Helper: cek apakah URL YouTube
+  const isYoutubeUrl = (url) => {
+    if (!url) return true; // optional (kosong = lewati cek)
+    const str = String(url).trim().toLowerCase();
+    return str.includes("youtube.com") || str.includes("youtu.be");
+  };
+
+  // Helper: ambil YouTube video ID
+  const extractYoutubeId = (url) => {
+    if (!url) return null;
+    const patterns = [
+      /(?:youtube\.com\/.*v=)([^&#]+)/,
+      /youtu\.be\/([^&#]+)/,
+      /youtube\.com\/embed\/([^&#]+)/,
+    ];
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) return match[1].substring(0, 11); // jaga panjang
+    }
+    return null;
+  };
+
   const handleSubmit = async () => {
     try {
       if (!formData) return;
+
+      const mainThemeId = extractYoutubeId(formData.main_theme);
+      const combatThemeId = extractYoutubeId(formData.combat_theme);
+
+      if (
+        formData.main_theme &&
+        (!isYoutubeUrl(formData.main_theme) || !mainThemeId)
+      ) {
+        alert(
+          "Main Theme must be a valid YouTube link with a valid video ID."
+        );
+        return;
+      }
+
+      if (
+        formData.combat_theme &&
+        (!isYoutubeUrl(formData.combat_theme) || !combatThemeId)
+      ) {
+        alert(
+          "Combat Theme must be a valid YouTube link with a valid video ID."
+        );
+        return;
+      }
+
+
       setSaving(true);
 
       const form = new FormData();
@@ -155,7 +197,9 @@ export default function CharacterFormPage({ mode = "create" }) {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Save failed");
 
-      alert(`✅ Character ${mode === "edit" ? "updated" : "saved"}!`);
+      alert(
+        `✅ Character ${mode === "edit" ? "updated" : "saved"} successfully!`
+      );
       router.replace("/characters-maker");
     } catch (err) {
       console.error("❌ Save error:", err);
@@ -165,7 +209,6 @@ export default function CharacterFormPage({ mode = "create" }) {
     }
   };
 
-  // ✅ Loading state
   if (loading || !formData)
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
@@ -177,7 +220,6 @@ export default function CharacterFormPage({ mode = "create" }) {
 
   return (
     <main className="mx-auto w-full px-3 sm:max-w-6xl sm:px-6 py-6 sm:py-8 text-white min-h-screen">
-      {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0 mb-6">
         <button
           onClick={() => router.push("/characters-maker")}

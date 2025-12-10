@@ -2,35 +2,49 @@
 
 import InputField from "@/components/InputField";
 import MultipleInput from "@/components/MultipleInput.jsx";
-import { useState, useEffect } from "react";
-import { Eye, EyeOff, Upload } from "lucide-react";
 import {
   nationalityOptions,
   countryOptions,
 } from "../../data/characterOptions";
 import LabelWithHint from "@/components/LabelWithHint";
+
+function toYouTubeEmbed(url) {
+  if (!url) return null;
+
+  let clean = url.trim();
+  if (clean.endsWith(">")) {
+    clean = clean.slice(0, -1);
+  }
+
+  try {
+    const u = new URL(clean);
+
+    if (u.hostname.includes("youtu.be")) {
+      const id = u.pathname.replace("/", "");
+      if (!id) return null;
+      return `https://www.youtube.com/embed/${id}`;
+    }
+
+    if (u.hostname.includes("youtube.com")) {
+      const id = u.searchParams.get("v");
+      if (!id) return null;
+      return `https://www.youtube.com/embed/${id}`;
+    }
+  } catch (e) {
+    return null;
+  }
+
+  return null;
+}
+
 export default function Step3({ data, allData, onChange, mode }) {
-  useEffect(() => {
-    if (data.main_theme_ogg && typeof data.main_theme_ogg === "string") {
-      const mainUrl = data.main_theme_ogg.startsWith("http")
-        ? data.main_theme_ogg
-        : `${process.env.NEXT_PUBLIC_API_URL}${data.main_theme_ogg}`;
-      onChange("main_theme_ogg", mainUrl);
-    }
-
-    if (data.combat_theme_ogg && typeof data.combat_theme_ogg === "string") {
-      const combatUrl = data.combat_theme_ogg.startsWith("http")
-        ? data.combat_theme_ogg
-        : `${process.env.NEXT_PUBLIC_API_URL}${data.combat_theme_ogg}`;
-      onChange("combat_theme_ogg", combatUrl);
-    }
-
-    console.log(data.main_theme_ogg, data.combat_theme_ogg);
-  }, [data.main_theme_ogg, data.combat_theme_ogg]);
+  const mainThemeEmbed = toYouTubeEmbed(data.main_theme);
+  const combatThemeEmbed = toYouTubeEmbed(data.combat_theme);
 
   return (
     <div className="p-6 max-w-6xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
       <div className="grid grid-cols-5 gap-4">
+
         <div className="col-span-3">
           <div className="flex items-center justify-between mb-1">
             <LabelWithHint
@@ -54,6 +68,7 @@ export default function Step3({ data, allData, onChange, mode }) {
           />
         </div>
 
+
         <div className="space-y-3 col-span-2">
           <div>
             <LabelWithHint
@@ -61,91 +76,57 @@ export default function Step3({ data, allData, onChange, mode }) {
               icon="music"
               text="The central musical or emotional theme that embodies your character’s spirit. Often used in storytelling or media to represent their essence or emotional state."
             />
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={data.main_theme || ""}
-                onChange={(e) => onChange("main_theme", e.target.value)}
-                className="flex-1 h-10 px-3 rounded-lg bg-gray-800 border border-gray-700 
+            <input
+              type="text"
+              value={data.main_theme || ""}
+              onChange={(e) => onChange("main_theme", e.target.value)}
+              className="w-full h-10 px-3 rounded-lg bg-gray-800 border border-gray-700 
                  focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                placeholder="Enter Main Theme (www.youtube.com link)"
-              />
+              placeholder="(YouTube link: youtu.be or youtube.com)"
+            />
 
-              <input
-                type="file"
-                accept=".ogg"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    onChange("main_theme_ogg", file);
-                  }
-                }}
-                className="hidden"
-                id="mainThemeUpload"
-              />
-
-              <label
-                htmlFor="mainThemeUpload"
-                className="flex items-center justify-center w-10 h-10 rounded-lg 
-                 bg-blue-600 hover:bg-blue-700 cursor-pointer"
-              >
-                <Upload className="w-5 h-5 text-white" />
-              </label>
-            </div>
-
-            <div className="flex justify-end items-center gap-2 mt-2">
-              <p className="text-xs text-gray-400">
-                {data.main_theme_ogg ? data.main_theme_ogg.name : "\u00A0"}
-              </p>
-              <p className="text-xs text-gray-400">(OGG File Only)</p>
-            </div>
+            {/* {mainThemeEmbed && (
+              <div className="mt-2">
+                <iframe
+                  src={mainThemeEmbed}
+                  className="w-full h-48 rounded-lg border border-gray-800"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="Main Theme"
+                ></iframe>
+              </div>
+            )} */}
           </div>
 
+     
           <div>
             <LabelWithHint
               label="Combat Theme"
               icon="file-audio"
               text="A theme that represents your character’s energy and mindset in battle — whether it’s a calm duel rhythm or a chaotic storm of emotion and sound."
             />
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={data.combat_theme || ""}
-                onChange={(e) => onChange("combat_theme", e.target.value)}
-                className="flex-1 h-10 px-3 rounded-lg bg-gray-800 border border-gray-700 
+            <input
+              type="text"
+              value={data.combat_theme || ""}
+              onChange={(e) => onChange("combat_theme", e.target.value)}
+              className="w-full h-10 px-3 rounded-lg bg-gray-800 border border-gray-700 
                  focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                placeholder="Enter Combat Theme (www.youtube.com link)"
-              />
+              placeholder="(YouTube link: youtu.be or youtube.com)"
+            />
 
-              <input
-                type="file"
-                accept=".ogg"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    onChange("combat_theme_ogg", file);
-                  }
-                }}
-                className="hidden"
-                id="combatThemeUpload"
-              />
-
-              <label
-                htmlFor="combatThemeUpload"
-                className="flex items-center justify-center w-10 h-10 rounded-lg 
-                 bg-blue-600 hover:bg-blue-700 cursor-pointer"
-              >
-                <Upload className="w-5 h-5 text-white" />
-              </label>
-            </div>
-
-            <div className="flex justify-end items-center gap-2 mt-2">
-              <p className="text-xs text-gray-400">
-                {data.combat_theme_ogg ? data.combat_theme_ogg.name : "\u00A0"}
-              </p>
-              <p className="text-xs text-gray-400">(OGG File Only)</p>
-            </div>
+            {/* {combatThemeEmbed && (
+              <div className="mt-2">
+                <iframe
+                  src={combatThemeEmbed}
+                  className="w-full h-48 rounded-lg border border-gray-800"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="Combat Theme"
+                ></iframe>
+              </div>
+            )} */}
           </div>
+
 
           <InputField
             label="Nationality"
@@ -160,6 +141,7 @@ export default function Step3({ data, allData, onChange, mode }) {
             }}
           />
 
+     
           <div>
             <LabelWithHint
               label="Main Resident"
@@ -197,6 +179,7 @@ export default function Step3({ data, allData, onChange, mode }) {
           </div>
         </div>
       </div>
+
 
       <div className="grid grid-cols-9 gap-4">
         <div className="col-span-3">
@@ -250,14 +233,14 @@ export default function Step3({ data, allData, onChange, mode }) {
         </div>
       </div>
 
+
       <div className="grid grid-cols-7 gap-4">
         <div className="mt-1 col-span-3">
           <div className="flex items-center justify-between w-[92%]">
             <LabelWithHint
               label="Hobbies"
               icon="gamepad-2"
-              text="Recreational or personal interests pursued during downtime. Hobbies can reflect a character’s softer side, coping habits, or hidden talents.
-"
+              text="Recreational or personal interests pursued during downtime. Hobbies can reflect a character’s softer side, coping habits, or hidden talents."
             />
             <InputField
               type="toggleIcon"
@@ -266,7 +249,7 @@ export default function Step3({ data, allData, onChange, mode }) {
             />
           </div>
           <MultipleInput
-            labels="Hobbies"
+            labels=""
             label="Hobbies"
             items={data.hobbies || [""]}
             onChange={(items) => onChange("hobbies", items)}
@@ -278,7 +261,6 @@ export default function Step3({ data, allData, onChange, mode }) {
             icon="star"
             text="A personal or symbolic item your character is rarely seen without. It may carry emotional value, heritage, or magical properties tied to their story."
           />
-
           <MultipleInput
             labels=""
             label="Object"
