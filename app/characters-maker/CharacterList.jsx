@@ -49,6 +49,7 @@ export default function CharacterList({ username, searchTerm = "" }) {
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       const filtered = data.filter((char) => char.creator_name === username);
+      console.log(filtered);
       setCharacters(filtered);
       setAllCharacters(filtered);
     } catch (err) {
@@ -127,6 +128,7 @@ export default function CharacterList({ username, searchTerm = "" }) {
 
   // 🔍 Filter nama
   const filteredCharacters = characters.filter((char) =>
+  
     char.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

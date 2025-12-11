@@ -1,6 +1,6 @@
 // app/characters/[id]/page.jsx
 import { Suspense } from "react";
-import CharacterView from "./components/CharacterView";
+import CharacterView from "../../components/CharacterView";
 
 // Komponen async yang pakai params + siapkan DUMMY data
 async function CharacterDetailContent({ params }) {

@@ -26,7 +26,7 @@ export default function CharacterCard({
 }) {
   const [remaining, setRemaining] = useState("");
   const [showPrivate, setShowPrivate] = useState(false);
-
+  console.log(char);
   useEffect(() => {
     if (!isTrash || !char.deleted_at) return;
 
@@ -45,7 +45,10 @@ export default function CharacterCard({
       const formatted = `${dur.hours().toString().padStart(2, "0")}:${dur
         .minutes()
         .toString()
-        .padStart(2, "0")}:${dur.seconds().toString().padStart(2, "0")} remaining`;
+        .padStart(2, "0")}:${dur
+        .seconds()
+        .toString()
+        .padStart(2, "0")} remaining`;
       setRemaining(formatted);
     };
 
@@ -163,9 +166,8 @@ export default function CharacterCard({
         ) : (
           <>
             <button
-              onClick={() => onView?.(char.uuid)}
-              className="px-4 py-1 bg-blue-600 text-white rounded opacity-50 cursor-not-allowed"
-              disabled
+              onClick={() => onView?.(char.private_id)}
+              className="px-4 py-1 bg-blue-600 text-white rounded"
             >
               View
             </button>
