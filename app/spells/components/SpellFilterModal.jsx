@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
-
-// ================== CONSTANTS & HELPERS ==================
+import { X, SlidersHorizontal } from "lucide-react";
+import * as Slider from "@radix-ui/react-slider";
 
 const SCHOOL_CODE_BY_LABEL = {
   Abjuration: "abj",
@@ -26,6 +25,23 @@ const SCHOOL_LABEL_BY_CODE = {
   nec: "Necromancy",
   trs: "Transmutation",
 };
+
+// duration steps untuk slider (index 0..6)
+const DURATION_STEPS = [
+  { key: "turn", label: "Turn", sec: 1 },
+  { key: "round", label: "Round", sec: 6 },
+  { key: "minute", label: "Minute", sec: 360 },
+  { key: "hour", label: "Hour", sec: 3600 },
+  { key: "day", label: "Day", sec: 86400 },
+  { key: "month", label: "Month", sec: 2592000 },
+  { key: "year", label: "Year", sec: 31536000 },
+];
+
+const DURATION_MIN_INDEX_DEFAULT = 0;
+const DURATION_MAX_INDEX_DEFAULT = DURATION_STEPS.length - 1;
+
+const RANGE_MIN_DEFAULT = 0;
+const RANGE_MAX_DEFAULT = 999;
 
 const FILTERS = {
   classes: [
@@ -54,7 +70,7 @@ const FILTERS = {
     "Hour",
     "Special",
   ],
-  range: ["Self", "Touch", "Point", "Area", "Special"],
+  range: [],
   damageType: [
     "acid",
     "bludgeoning",
@@ -70,7 +86,7 @@ const FILTERS = {
     "slashing",
     "thunder",
     "healing",
-    "temporary healing", // ✅ sudah termasuk
+    "temporary healing",
   ],
   school: [
     "Abjuration",
@@ -83,7 +99,7 @@ const FILTERS = {
     "Transmutation",
   ],
   ritual: false,
-  concentration: false, // ✅ concentration flag
+  concentration: false,
 };
 
 const INITIAL_SELECTED = {
@@ -95,12 +111,23 @@ const INITIAL_SELECTED = {
   school: [],
   ritual: false,
   concentration: false,
+
+  favoritesOnly: false,
+
+  durationMinIndex: DURATION_MIN_INDEX_DEFAULT,
+  durationMaxIndex: DURATION_MAX_INDEX_DEFAULT,
+  durationIncludeInstant: true,
+  durationIncludePermanent: true,
+  durationIncludeSpecial: true,
+
+  rangeMin: RANGE_MIN_DEFAULT,
+  rangeMax: RANGE_MAX_DEFAULT,
+  rangeIncludeSelf: true,
+  rangeIncludeTouch: true,
 };
 
-// ⚠️ Tambahan: untuk sync lowercase <-> label cast time
 function normalizeCastTimeForModal(arr) {
   if (!Array.isArray(arr)) return [];
-
   const map = {
     action: "Action",
     "bonus action": "Bonus Action",
@@ -117,7 +144,6 @@ function normalizeCastTimeForModal(arr) {
   });
 }
 
-// ⚠️ Tambahan: untuk school, kalau dari parent pakai singkatan → jadikan label panjang di modal
 function normalizeSchoolForModal(arr) {
   if (!Array.isArray(arr)) return [];
 
@@ -129,7 +155,6 @@ function normalizeSchoolForModal(arr) {
       return SCHOOL_LABEL_BY_CODE[lower];
     }
 
-    // Kalau sudah label panjang, biarkan
     return str;
   });
 }
@@ -156,8 +181,11 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
 
   const toggleOption = (category, value) => {
     setSelected((prev) => {
-      // ✅ Ritual & Concentration: boolean toggle
-      if (category === "ritual" || category === "concentration") {
+      if (
+        category === "ritual" ||
+        category === "concentration" ||
+        category === "favoritesOnly"
+      ) {
         return { ...prev, [category]: !prev[category] };
       }
 
@@ -177,19 +205,38 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
   const handleApply = () => {
     const modified = {
       ...selected,
-      // cast time dikirim lowercase → cocok dengan data
-      castTime: (selected.castTime || []).map((ct) =>
-        String(ct).toLowerCase()
-      ),
-      // school: label panjang dikonversi ke singkatan (abj, con, dll) & lowercase
+      castTime: (selected.castTime || []).map((ct) => String(ct).toLowerCase()),
       school: (selected.school || [])
         .map((s) => {
           const code = SCHOOL_CODE_BY_LABEL[s];
           return code || String(s);
         })
         .map((s) => String(s).toLowerCase()),
-      ritual: selected.ritual,
-      concentration: selected.concentration,
+
+      favoritesOnly: !!selected.favoritesOnly,
+
+      durationMinIndex:
+        typeof selected.durationMinIndex === "number"
+          ? selected.durationMinIndex
+          : DURATION_MIN_INDEX_DEFAULT,
+      durationMaxIndex:
+        typeof selected.durationMaxIndex === "number"
+          ? selected.durationMaxIndex
+          : DURATION_MAX_INDEX_DEFAULT,
+      durationIncludeInstant: !!selected.durationIncludeInstant,
+      durationIncludePermanent: !!selected.durationIncludePermanent,
+      durationIncludeSpecial: !!selected.durationIncludeSpecial,
+
+      rangeMin:
+        typeof selected.rangeMin === "number"
+          ? selected.rangeMin
+          : RANGE_MIN_DEFAULT,
+      rangeMax:
+        typeof selected.rangeMax === "number"
+          ? selected.rangeMax
+          : RANGE_MAX_DEFAULT,
+      rangeIncludeSelf: !!selected.rangeIncludeSelf,
+      rangeIncludeTouch: !!selected.rangeIncludeTouch,
     };
 
     onApply(modified);
@@ -221,11 +268,66 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
         return "Damage Type";
       case "school":
         return "School";
-      case "ritual":
-        return "Other Filters";
       default:
         return key;
     }
+  };
+
+  const durationMinIdx = Math.max(
+    0,
+    Math.min(
+      DURATION_STEPS.length - 1,
+      selected.durationMinIndex ?? DURATION_MIN_INDEX_DEFAULT
+    )
+  );
+  const durationMaxIdx = Math.max(
+    durationMinIdx,
+    Math.min(
+      DURATION_STEPS.length - 1,
+      selected.durationMaxIndex ?? DURATION_MAX_INDEX_DEFAULT
+    )
+  );
+
+  const rangeMinVal =
+    typeof selected.rangeMin === "number"
+      ? selected.rangeMin
+      : RANGE_MIN_DEFAULT;
+  const rangeMaxVal = Math.max(
+    rangeMinVal,
+    typeof selected.rangeMax === "number"
+      ? selected.rangeMax
+      : RANGE_MAX_DEFAULT
+  );
+
+  // ====== HANDLER INPUT MANUAL RANGE (tetap dipakai, tapi input nempel di slider) ======
+  const handleRangeMinInputChange = (e) => {
+    const raw = e.target.value;
+    if (raw === "") {
+      setSelected((prev) => ({ ...prev, rangeMin: RANGE_MIN_DEFAULT }));
+      return;
+    }
+    let val = Number(raw);
+    if (Number.isNaN(val)) return;
+    val = Math.max(RANGE_MIN_DEFAULT, Math.min(RANGE_MAX_DEFAULT, val));
+    setSelected((prev) => ({
+      ...prev,
+      rangeMin: Math.min(val, prev.rangeMax ?? RANGE_MAX_DEFAULT),
+    }));
+  };
+
+  const handleRangeMaxInputChange = (e) => {
+    const raw = e.target.value;
+    if (raw === "") {
+      setSelected((prev) => ({ ...prev, rangeMax: RANGE_MAX_DEFAULT }));
+      return;
+    }
+    let val = Number(raw);
+    if (Number.isNaN(val)) return;
+    val = Math.max(RANGE_MIN_DEFAULT, Math.min(RANGE_MAX_DEFAULT, val));
+    setSelected((prev) => ({
+      ...prev,
+      rangeMax: Math.max(val, prev.rangeMin ?? RANGE_MIN_DEFAULT),
+    }));
   };
 
   return (
@@ -237,13 +339,13 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
       {/* BACKDROP */}
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
-      {/* MODAL */}
       <div className="relative z-10 w-full max-w-2xl rounded-xl border border-[#2a2f55] bg-[#050822] p-4 md:p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* HEADER */}
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-slate-100">
-            Filter Spells
-          </h3>
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+            <SlidersHorizontal className="w-4 h-4 text-slate-300" />
+            <span>Filter Spells</span>
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -254,41 +356,10 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
         </div>
 
         <div className="space-y-4">
+          {/* ====== FILTER UTAMA ====== */}
           {Object.entries(FILTERS).map(([key, options]) => {
-            // ✅ concentration dihandle bareng ritual, jadi skip di loop
-            if (key === "concentration") return null;
-
-            if (key === "ritual") {
-              return (
-                <div key={key} className="border-t border-slate-700/60 pt-3">
-                  <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-                    {sectionTitle(key)}
-                  </div>
-
-                  <div className="flex flex-wrap gap-4">
-                    <label className="inline-flex items-center gap-2 text-xs text-slate-200">
-                      <input
-                        type="checkbox"
-                        className="h-3 w-3 rounded border-slate-500 bg-transparent"
-                        checked={selected.ritual}
-                        onChange={() => toggleOption("ritual")}
-                      />
-                      <span>Ritual</span>
-                    </label>
-
-                    <label className="inline-flex items-center gap-2 text-xs text-slate-200">
-                      <input
-                        type="checkbox"
-                        className="h-3 w-3 rounded border-slate-500 bg-transparent"
-                        checked={selected.concentration}
-                        onChange={() => toggleOption("concentration")}
-                      />
-                      <span>Concentration</span>
-                    </label>
-                  </div>
-                </div>
-              );
-            }
+            if (key === "range") return null;
+            if (key === "ritual" || key === "concentration") return null;
 
             return (
               <div key={key}>
@@ -333,8 +404,259 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
               </div>
             );
           })}
+
+          {/* ====== OTHER FILTERS ====== */}
+          <div className="border-t border-slate-700/60 pt-3 space-y-2">
+            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
+              Other Filters
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              <label className="inline-flex items-center gap-2 text-xs text-slate-200">
+                <input
+                  type="checkbox"
+                  className="h-3 w-3 rounded border-slate-500 bg-transparent"
+                  checked={selected.ritual}
+                  onChange={() => toggleOption("ritual")}
+                />
+                <span>Ritual</span>
+              </label>
+
+              <label className="inline-flex items-center gap-2 text-xs text-slate-200">
+                <input
+                  type="checkbox"
+                  className="h-3 w-3 rounded border-slate-500 bg-transparent"
+                  checked={selected.concentration}
+                  onChange={() => toggleOption("concentration")}
+                />
+                <span>Concentration</span>
+              </label>
+
+              <label className="inline-flex items-center gap-2 text-xs text-slate-200">
+                <input
+                  type="checkbox"
+                  className="h-3 w-3 rounded border-slate-500 bg-transparent"
+                  checked={selected.favoritesOnly}
+                  onChange={() => toggleOption("favoritesOnly")}
+                />
+                <span>Favorites only</span>
+              </label>
+            </div>
+          </div>
+
+          {/* ====== DURATION (teks dibesarkan) ====== */}
+          <div className="border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+                Duration
+              </div>
+              <div className="text-xs text-slate-300">
+                {DURATION_STEPS[durationMinIdx].label} –{" "}
+                {DURATION_STEPS[durationMaxIdx].label}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-300 w-14 text-right">
+                  {DURATION_STEPS[durationMinIdx].label}
+                </span>
+
+                <Slider.Root
+                  className="relative flex-1 flex items-center h-5"
+                  min={0}
+                  max={DURATION_STEPS.length - 1}
+                  step={1}
+                  value={[durationMinIdx, durationMaxIdx]}
+                  onValueChange={([min, max]) => {
+                    const clampedMin = Math.max(
+                      0,
+                      Math.min(DURATION_STEPS.length - 1, min)
+                    );
+                    const clampedMax = Math.max(
+                      clampedMin,
+                      Math.min(DURATION_STEPS.length - 1, max)
+                    );
+                    setSelected((prev) => ({
+                      ...prev,
+                      durationMinIndex: clampedMin,
+                      durationMaxIndex: clampedMax,
+                    }));
+                  }}
+                >
+                  <Slider.Track className="bg-slate-700 relative grow rounded-full h-1">
+                    <Slider.Range className="absolute bg-emerald-500 rounded-full h-1" />
+                  </Slider.Track>
+                  <Slider.Thumb
+                    className="block w-3 h-3 bg-emerald-400 rounded-full border border-emerald-200 shadow"
+                    aria-label="Minimum duration"
+                  />
+                  <Slider.Thumb
+                    className="block w-3 h-3 bg-emerald-400 rounded-full border border-emerald-200 shadow"
+                    aria-label="Maximum duration"
+                  />
+                </Slider.Root>
+
+                <span className="text-xs text-slate-300 w-14">
+                  {DURATION_STEPS[durationMaxIdx].label}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-700/60 mt-2">
+                {[
+                  {
+                    key: "durationIncludeInstant",
+                    label: "Instantaneous",
+                    short: "Inst",
+                  },
+                  {
+                    key: "durationIncludePermanent",
+                    label: "Permanent",
+                    short: "Perm",
+                  },
+                  {
+                    key: "durationIncludeSpecial",
+                    label: "Special",
+                    short: "Special",
+                  },
+                ].map((cfg) => {
+                  const active = selected[cfg.key];
+                  return (
+                    <button
+                      key={cfg.key}
+                      type="button"
+                      onClick={() =>
+                        setSelected((prev) => ({
+                          ...prev,
+                          [cfg.key]: !prev[cfg.key],
+                        }))
+                      }
+                      className={`px-2.5 py-1 rounded-md border text-[11px] transition ${
+                        active
+                          ? "border-emerald-500 bg-emerald-500/20 text-emerald-100"
+                          : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
+                      }`}
+                    >
+                      {cfg.short}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* ====== RANGE (slider + input angka di kiri/kanan) ====== */}
+          <div className="border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+                Range
+              </div>
+              <div className="text-[11px] text-slate-300">
+                {rangeMinVal} ft – {rangeMaxVal} ft
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                {/* input MIN di kiri slider */}
+                <div className="flex items-center gap-1 w-24">
+                  <input
+                    type="number"
+                    min={RANGE_MIN_DEFAULT}
+                    max={RANGE_MAX_DEFAULT}
+                    value={rangeMinVal}
+                    onChange={handleRangeMinInputChange}
+                    className="w-full rounded-md border border-slate-600 bg-[#02051b] px-2 py-1 text-xs text-slate-100 outline-none focus:ring-1 focus:ring-sky-500"
+                  />
+                  <span className="text-xs text-slate-400">ft</span>
+                </div>
+
+                {/* SLIDER */}
+                <Slider.Root
+                  className="relative flex-1 flex items-center h-5"
+                  min={RANGE_MIN_DEFAULT}
+                  max={RANGE_MAX_DEFAULT}
+                  step={5}
+                  value={[rangeMinVal, rangeMaxVal]}
+                  onValueChange={([min, max]) => {
+                    const clampedMin = Math.max(
+                      RANGE_MIN_DEFAULT,
+                      Math.min(RANGE_MAX_DEFAULT, min)
+                    );
+                    const clampedMax = Math.max(
+                      clampedMin,
+                      Math.min(RANGE_MAX_DEFAULT, max)
+                    );
+                    setSelected((prev) => ({
+                      ...prev,
+                      rangeMin: clampedMin,
+                      rangeMax: clampedMax,
+                    }));
+                  }}
+                >
+                  <Slider.Track className="bg-slate-700 relative grow rounded-full h-1">
+                    <Slider.Range className="absolute bg-sky-500 rounded-full h-1" />
+                  </Slider.Track>
+                  <Slider.Thumb
+                    className="block w-3 h-3 bg-sky-400 rounded-full border border-sky-200 shadow"
+                    aria-label="Minimum range"
+                  />
+                  <Slider.Thumb
+                    className="block w-3 h-3 bg-sky-400 rounded-full border border-sky-200 shadow"
+                    aria-label="Maximum range"
+                  />
+                </Slider.Root>
+
+                {/* input MAX di kanan slider */}
+                <div className="flex items-center gap-1 w-24">
+                  <input
+                    type="number"
+                    min={RANGE_MIN_DEFAULT}
+                    max={RANGE_MAX_DEFAULT}
+                    value={rangeMaxVal}
+                    onChange={handleRangeMaxInputChange}
+                    className="w-full rounded-md border border-slate-600 bg-[#02051b] px-2 py-1 text-xs text-slate-100 outline-none focus:ring-1 focus:ring-sky-500"
+                  />
+                  <span className="text-xs text-slate-400">ft</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3 pt-2 border-t border-slate-700/60 mt-2">
+                <label className="inline-flex items-center gap-2 text-xs text-slate-200">
+                  <input
+                    type="checkbox"
+                    className="h-3 w-3 rounded border-slate-500 bg-transparent"
+                    checked={selected.rangeIncludeSelf}
+                    onChange={() =>
+                      setSelected((prev) => ({
+                        ...prev,
+                        rangeIncludeSelf: !prev.rangeIncludeSelf,
+                      }))
+                    }
+                  />
+                  <span>Include Self</span>
+                </label>
+
+                <label className="inline-flex items-center gap-2 text-xs text-slate-200">
+                  <input
+                    type="checkbox"
+                    className="h-3 w-3 rounded border-slate-500 bg-transparent"
+                    checked={selected.rangeIncludeTouch}
+                    onChange={() =>
+                      setSelected((prev) => ({
+                        ...prev,
+                        rangeIncludeTouch: !prev.rangeIncludeTouch,
+                      }))
+                    }
+                  />
+                  <span>Include Touch</span>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
 
+        {/* FOOTER BUTTONS */}
         <div className="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-slate-700/60">
           <button
             type="button"
@@ -362,3 +684,5 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
     </div>
   );
 }
+
+export { DURATION_STEPS, RANGE_MIN_DEFAULT, RANGE_MAX_DEFAULT };
