@@ -19,7 +19,7 @@ export default function RichTextAdvanced({
   value = "",
   onChange,
   placeholder = "Write something...",
-  rows = 14,
+  rows = 12,
 }) {
   const ref = useRef(null);
   const [heading, setHeading] = useState("p");
@@ -45,8 +45,6 @@ export default function RichTextAdvanced({
       }
     }
   }, [value]);
-
-  
 
   const exec = (cmd, val = null) => {
     if (!isFocused) return; // ⛔ hanya jalan kalau editor ini aktif
@@ -135,18 +133,17 @@ export default function RichTextAdvanced({
     });
   };
 
-const handleHeadingChange = (e) => {
-  const tag = e.target.value;
-  setHeading(tag);
+  const handleHeadingChange = (e) => {
+    const tag = e.target.value;
+    setHeading(tag);
 
-  if (!isFocused) ref.current?.focus(); // pastikan fokus dulu
-  // ✅ execCommand butuh format "<h1>" bukan "h1"
-  document.execCommand("formatBlock", false, `<${tag}>`);
+    if (!isFocused) ref.current?.focus(); // pastikan fokus dulu
+    // ✅ execCommand butuh format "<h1>" bukan "h1"
+    document.execCommand("formatBlock", false, `<${tag}>`);
 
-  if (ref.current) onChange?.(ref.current.innerHTML);
-  updateActiveStates();
-};
-
+    if (ref.current) onChange?.(ref.current.innerHTML);
+    updateActiveStates();
+  };
 
   useEffect(() => {
     const listener = () => updateActiveStates();
@@ -159,6 +156,32 @@ const handleHeadingChange = (e) => {
     if (ref.current) onChange?.(ref.current.innerHTML);
   };
 
+  const handlePaste = (e) => {
+    e.preventDefault();
+
+    if (!ref.current) return;
+    if (!isFocused) ref.current.focus();
+
+    const clipboard = e.clipboardData || window.clipboardData;
+
+    const text = clipboard.getData("text/plain") || "";
+
+    const escaped = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    const blocks = escaped
+      .split(/\n{2,}/)
+      .map((b) => b.replace(/\n/g, "<br/>"));
+    const html = blocks.map((b) => `<p>${b || "<br/>"}</p>`).join("");
+
+    document.execCommand("insertHTML", false, html);
+
+    onChange?.(ref.current.innerHTML);
+    updateActiveStates();
+  };
+
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-800 text-gray-100">
       {/* Toolbar */}
@@ -168,7 +191,7 @@ const handleHeadingChange = (e) => {
           <select
             value={heading}
             onChange={handleHeadingChange}
-            className="bg-gray-800 text-gray-100 text-sm rounded px-1 py-0.5 outline-none appearance-none"
+            className="bg-gray-800 text-gray-100 text-xs rounded px-1 py-0.5 outline-none appearance-none"
             title="Heading Style"
           >
             <option value="p">Normal</option>
@@ -182,23 +205,77 @@ const handleHeadingChange = (e) => {
         </div>
 
         {/* Text style */}
-        <ToolbarButton icon={<Bold size={16} />} title="Bold" active={active.bold} onClick={() => exec("bold")} />
-        <ToolbarButton icon={<Italic size={16} />} title="Italic" active={active.italic} onClick={() => exec("italic")} />
-        <ToolbarButton icon={<Underline size={16} />} title="Underline" active={active.underline} onClick={() => exec("underline")} />
-        <ToolbarButton icon={<Strikethrough size={16} />} title="Strikethrough" active={active.strikeThrough} onClick={() => exec("strikeThrough")} />
+        <ToolbarButton
+          icon={<Bold size={12} />}
+          title="Bold"
+          active={active.bold}
+          onClick={() => exec("bold")}
+        />
+        <ToolbarButton
+          icon={<Italic size={12} />}
+          title="Italic"
+          active={active.italic}
+          onClick={() => exec("italic")}
+        />
+        <ToolbarButton
+          icon={<Underline size={12} />}
+          title="Underline"
+          active={active.underline}
+          onClick={() => exec("underline")}
+        />
+        <ToolbarButton
+          icon={<Strikethrough size={12} />}
+          title="Strikethrough"
+          active={active.strikeThrough}
+          onClick={() => exec("strikeThrough")}
+        />
 
         {/* Alignment */}
-        <ToolbarButton icon={<AlignLeft size={16} />} title="Align Left" active={active.justifyLeft} onClick={() => exec("justifyLeft")} />
-        <ToolbarButton icon={<AlignCenter size={16} />} title="Align Center" active={active.justifyCenter} onClick={() => exec("justifyCenter")} />
-        <ToolbarButton icon={<AlignRight size={16} />} title="Align Right" active={active.justifyRight} onClick={() => exec("justifyRight")} />
-        <ToolbarButton icon={<AlignJustify size={16} />} title="Justify" active={active.justifyFull} onClick={() => exec("justifyFull")} />
+        <ToolbarButton
+          icon={<AlignLeft size={12} />}
+          title="Align Left"
+          active={active.justifyLeft}
+          onClick={() => exec("justifyLeft")}
+        />
+        <ToolbarButton
+          icon={<AlignCenter size={12} />}
+          title="Align Center"
+          active={active.justifyCenter}
+          onClick={() => exec("justifyCenter")}
+        />
+        <ToolbarButton
+          icon={<AlignRight size={12} />}
+          title="Align Right"
+          active={active.justifyRight}
+          onClick={() => exec("justifyRight")}
+        />
+        <ToolbarButton
+          icon={<AlignJustify size={12} />}
+          title="Justify"
+          active={active.justifyFull}
+          onClick={() => exec("justifyFull")}
+        />
 
         {/* Lists */}
-        <ToolbarButton icon={<List size={16} />} title="Bullet List" active={active.unorderedList} onClick={() => exec("insertUnorderedList")} />
-        <ToolbarButton icon={<ListOrdered size={16} />} title="Numbered List" active={active.orderedList} onClick={() => exec("insertOrderedList")} />
+        <ToolbarButton
+          icon={<List size={12} />}
+          title="Bullet List"
+          active={active.unorderedList}
+          onClick={() => exec("insertUnorderedList")}
+        />
+        <ToolbarButton
+          icon={<ListOrdered size={12} />}
+          title="Numbered List"
+          active={active.orderedList}
+          onClick={() => exec("insertOrderedList")}
+        />
 
         {/* Table */}
-        <ToolbarButton icon={<Table size={16} />} title="Insert Table" onClick={insertTable} />
+        <ToolbarButton
+          icon={<Table size={12} />}
+          title="Insert Table"
+          onClick={insertTable}
+        />
       </div>
 
       {/* Editable area */}
@@ -206,9 +283,10 @@ const handleHeadingChange = (e) => {
         ref={ref}
         contentEditable
         suppressContentEditableWarning
-        onFocus={() => setIsFocused(true)}   // ✅ per editor
-        onBlur={() => setIsFocused(false)}   // ✅ per editor
+        onFocus={() => setIsFocused(true)} // ✅ per editor
+        onBlur={() => setIsFocused(false)} // ✅ per editor
         onInput={handleInput}
+        onPaste={handlePaste}
         className="p-3 outline-none text-gray-100 leading-relaxed text-xs"
         style={{
           minHeight: rows * 20,

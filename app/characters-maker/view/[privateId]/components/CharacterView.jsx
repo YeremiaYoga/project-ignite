@@ -13,19 +13,14 @@ export default function CharacterView({ character }) {
     type,
     role,
     chapters = [],
-
-    // BIO
-    basic_info = [],
-    bio_info = [],
-    meta_info = [],
-
-    // RELATIONSHIP
-    relationship_info = [],
-
-    // DETAILS
-    details_info = [],
+    bio_data = [],
+    relationship_data = [],
+    details_data = [],
+    combat_data = [],
+    personality_data = [],
+    meta_data = [],
     ability_scores = {},
-  } = character;
+  } = character || {};
 
   const token_url =
     tokenFromDb ||
@@ -34,72 +29,170 @@ export default function CharacterView({ character }) {
   const [activeImageTab, setActiveImageTab] = useState("portrait");
   const [activeInfoTab, setActiveInfoTab] = useState("Bio");
 
-  // ====== Factions pindah dari meta_info ke relationship ======
+  // ---------- Helpers ----------
+  const isPlainObject = (v) => v && typeof v === "object" && !Array.isArray(v);
 
-  // cari block "Factions & Affiliations" di meta_info (case-insensitive)
-  const factionsMetaBlock = meta_info.find(
+  const renderAnyValue = (v) => {
+    if (v === null || v === undefined) return "-";
+    if (typeof v === "string" || typeof v === "number") return String(v);
+    if (typeof v === "boolean") return v ? "Yes" : "No";
+
+    if (Array.isArray(v)) {
+      // array of primitives
+      if (v.every((x) => typeof x === "string" || typeof x === "number")) {
+        return v.map(String).join(", ");
+      }
+
+      return JSON.stringify(v, null, 2);
+    }
+
+    // object -> stringify
+    return JSON.stringify(v, null, 2);
+  };
+
+  const renderKeyValueObject = (obj) => {
+    const entries = Object.entries(obj || {});
+    if (!entries.length) {
+      return <div className="text-[12px] text-slate-500 italic">No data.</div>;
+    }
+
+    return (
+      <div className="space-y-2">
+        {entries.map(([k, v]) => (
+          <div key={k} className="text-[13px] text-slate-100">
+            <span className="text-slate-400 capitalize">{k}:</span>{" "}
+            <span className="text-slate-100">{renderAnyValue(v)}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // ---------- Factions injector (tetap) ----------
+  const factionsBioBlock = bio_data.find(
     (b) =>
-      typeof b.label === "string" &&
+      typeof b?.label === "string" &&
       b.label.toLowerCase() === "factions & affiliations"
   );
 
-  // meta_info tanpa factions (untuk tab Bio)
-  const metaInfoWithoutFactions = meta_info.filter(
+  const bioDataWithoutFactions = bio_data.filter(
     (b) =>
       !(
-        typeof b.label === "string" &&
+        typeof b?.label === "string" &&
         b.label.toLowerCase() === "factions & affiliations"
       )
   );
 
-  // mapping factions menjadi format relationship
   let factionsRelationshipBlock = null;
-  if (factionsMetaBlock) {
-    const rawItems = Array.isArray(factionsMetaBlock.items)
-      ? factionsMetaBlock.items
-      : factionsMetaBlock.value
-      ? [factionsMetaBlock.value]
+  if (factionsBioBlock) {
+    const rawItems = Array.isArray(factionsBioBlock.items)
+      ? factionsBioBlock.items
+      : factionsBioBlock.value
+      ? [factionsBioBlock.value]
       : [];
 
-    const relItems = rawItems
-      .filter(Boolean)
-      .map((item) =>
-        typeof item === "string" || typeof item === "number"
-          ? {
-              name: String(item),
-              relationship: "Affiliation",
-              status: null,
-              notes: null,
-            }
-          : {
-              name: item.name ?? item.label ?? "Unknown",
-              relationship: item.relationship ?? "Affiliation",
-              status: item.status ?? null,
-              notes: item.notes ?? null,
-            }
-      );
+    const relItems = rawItems.filter(Boolean).map((item) =>
+      typeof item === "string" || typeof item === "number"
+        ? {
+            name: String(item),
+            relationship: "Affiliation",
+            status: null,
+            notes: null,
+          }
+        : {
+            name: item.name ?? item.label ?? "Unknown",
+            relationship: item.relationship ?? "Affiliation",
+            status: item.status ?? null,
+            notes: item.notes ?? null,
+          }
+    );
 
     factionsRelationshipBlock = {
-      label: factionsMetaBlock.label || "Factions & Affiliations",
+      label: factionsBioBlock.label || "Factions & Affiliations",
       items: relItems,
     };
   }
 
-  // gabungkan relationship_info dari DB + factions yang dipindah
-  const combinedRelationshipInfo = factionsRelationshipBlock
-    ? [...relationship_info, factionsRelationshipBlock]
-    : relationship_info;
+  const combinedRelationshipData = factionsRelationshipBlock
+    ? [...relationship_data, factionsRelationshipBlock]
+    : relationship_data;
 
-  // ========== GENERIC BLOCK RENDERER (Bio, Meta, Details) ==========
+  // ---------- Ability grid (tetap) ----------
+  const renderAbilityScoresSection = () => {
+    if (!ability_scores || Object.keys(ability_scores).length === 0) {
+      return (
+        <div className="text-[12px] text-slate-500 italic">
+          No ability scores.
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {["STR", "DEX", "CON", "INT", "WIS", "CHA"].map((key) => {
+            const score = ability_scores[key]?.score ?? "-";
+            const mod = ability_scores[key]?.mod ?? 0;
+            const modText =
+              typeof mod === "number" ? (mod >= 0 ? `+${mod}` : `${mod}`) : mod;
+
+            return (
+              <div
+                key={key}
+                className="bg-[#111827] border border-slate-800 rounded-lg px-3 py-3 flex flex-col items-center"
+              >
+                <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">
+                  {key}
+                </div>
+                <div className="text-xl text-slate-50 font-semibold leading-none">
+                  {score}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">{modText}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   const renderBlocks = (blocks = []) => {
-    if (!blocks || !blocks.length) return null;
+    if (!blocks || !blocks.length) {
+      return <div className="text-[12px] text-slate-500 italic">No data.</div>;
+    }
 
     return (
       <div className="space-y-5">
         {blocks.map((block, idx) => {
+          const labelLower =
+            typeof block?.label === "string" ? block.label.toLowerCase() : "";
+
           const isNotableQuotes =
-            block.label?.toLowerCase() === "notable quotes" &&
-            Array.isArray(block.items);
+            labelLower === "notable quotes" && Array.isArray(block.items);
+
+          const isAbilityScores = labelLower === "ability scores";
+
+          const items = Array.isArray(block.items) ? block.items : null;
+          const looksLikeRelationshipItems =
+            items &&
+            items.some(
+              (it) =>
+                isPlainObject(it) &&
+                ("name" in it ||
+                  "relationship" in it ||
+                  "notes" in it ||
+                  "status" in it)
+            );
+
+          const looksLikeQuoteObjects =
+            items &&
+            items.some(
+              (it) => isPlainObject(it) && ("quote" in it || "author" in it)
+            );
+          const isFearsWeakness =
+            labelLower === "fears & weakness" ||
+            labelLower === "fears & weaknesses";
+          const isMotivation = labelLower === "motivation";
 
           return (
             <div key={idx}>
@@ -109,20 +202,151 @@ export default function CharacterView({ character }) {
                 </div>
               )}
 
-              {isNotableQuotes ? (
+              {isAbilityScores ? (
+                renderAbilityScoresSection()
+              ) : isNotableQuotes ? (
                 <div className="space-y-2">
-                  {block.items.map((quote, qIdx) => (
+                  {block.items.map((q, qIdx) => (
                     <div
                       key={qIdx}
                       className="bg-[#0b1120] border border-slate-800/80 border-l-4 border-l-[#d4a574] px-4 py-3 rounded-md text-[13px] text-slate-100 italic"
                     >
-                      {quote}
+                      {q}
                     </div>
                   ))}
                 </div>
-              ) : Array.isArray(block.items) ? (
+              ) : looksLikeQuoteObjects ? (
+                <div className="space-y-2">
+                  {items.map((q, qIdx) => {
+                    if (!q) return null;
+                    const quoteText =
+                      typeof q === "string" ? q : q.quote || q.text || "";
+                    const author = typeof q === "object" ? q.author : null;
+
+                    return (
+                      <div
+                        key={qIdx}
+                        className="bg-[#0b1120] border border-slate-800/80 border-l-4 border-l-[#d4a574] px-4 py-3 rounded-md"
+                      >
+                        <div className="text-[13px] text-slate-100 italic">
+                          {quoteText || "-"}
+                        </div>
+                        {author && (
+                          <div className="text-[11px] text-slate-400 mt-1">
+                            — {author}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : isFearsWeakness && items ? (
+                <ul className="space-y-2">
+                  {items.map((it, i2) => {
+                    if (!it) return null;
+
+                    // normalize: string atau object
+                    const text =
+                      typeof it === "string"
+                        ? it
+                        : it.name ||
+                          it.fear ||
+                          it["fear/weak"] ||
+                          it.text ||
+                          "";
+
+                    const from =
+                      typeof it === "object" && it
+                        ? it.from || it.source || ""
+                        : "";
+
+                    if (!String(text).trim()) return null;
+
+                    return (
+                      <li key={i2} className="text-[13px] text-slate-100">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-start gap-2">
+                            <span className="text-[#f4b974] mt-[2px]">•</span>
+                            <span className="leading-snug">{text}</span>
+                          </div>
+
+                          {from && (
+                            <div className="text-[11px] text-slate-400 ml-5">
+                              from {from}
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : isMotivation && items ? (
+                <div className="space-y-3">
+                  {items.map((it, i2) => {
+                    if (!it) return null;
+
+                    const text =
+                      typeof it === "string"
+                        ? it
+                        : it.motivation || it.text || it.description || "";
+
+                    const from =
+                      typeof it === "object" && it ? it.from || "" : "";
+
+                    if (!String(text).trim()) return null;
+
+                    return (
+                      <div key={i2} className="text-[13px] text-slate-100">
+                        <div className="leading-snug">{text}</div>
+                        {from && (
+                          <div className="text-[11px] text-slate-400 mt-1">
+                            from {from}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : looksLikeRelationshipItems ? (
+                <ul className="space-y-2">
+                  {items.map((item, i2) => {
+                    if (!item) return null;
+                    const { name, status, notes, relationship } = item || {};
+                    const displayName =
+                      name || item.label || item.title || "Unknown";
+
+                    return (
+                      <li key={i2} className="text-[13px] text-slate-100">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-medium">{displayName}</span>
+
+                            {(relationship || item.relationship) && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#111827] border border-slate-700 text-[#f4b974] uppercase tracking-wide">
+                                {relationship || item.relationship}
+                              </span>
+                            )}
+
+                            {(status || item.status) && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-200 uppercase tracking-wide">
+                                {status || item.status}
+                              </span>
+                            )}
+                          </div>
+
+                          {(notes || item.notes) && (
+                            <p className="text-[12px] text-slate-300 leading-snug">
+                              {notes || item.notes}
+                            </p>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : items ? (
                 <ul className="space-y-1.5">
-                  {block.items.map((item, i2) => (
+                  {items.map((item, i2) => (
                     <li
                       key={i2}
                       className="text-[13px] text-slate-100 flex items-start"
@@ -131,14 +355,21 @@ export default function CharacterView({ character }) {
                       <span>
                         {typeof item === "string" || typeof item === "number"
                           ? item
-                          : item?.text ?? JSON.stringify(item)}
+                          : isPlainObject(item)
+                          ? item.text ??
+                            item.value ??
+                            item.name ??
+                            JSON.stringify(item)
+                          : String(item)}
                       </span>
                     </li>
                   ))}
                 </ul>
+              ) : isPlainObject(block.value) ? (
+                renderKeyValueObject(block.value)
               ) : (
                 <div className="text-[13px] text-slate-100">
-                  {block.value}
+                  {renderAnyValue(block.value)}
                 </div>
               )}
             </div>
@@ -148,7 +379,6 @@ export default function CharacterView({ character }) {
     );
   };
 
-  // ========== RELATIONSHIP RENDERER (array of object: {name, status, relationship, notes}) ==========
   const renderRelationshipBlocks = (blocks = []) => {
     if (!blocks || !blocks.length) {
       return (
@@ -173,31 +403,31 @@ export default function CharacterView({ character }) {
                 {block.items.map((item, i2) => {
                   if (!item) return null;
                   const { name, status, notes, relationship } = item || {};
+                  const displayName =
+                    name || item.label || item.title || "Unknown";
 
                   return (
                     <li key={i2} className="text-[13px] text-slate-100">
                       <div className="flex flex-col gap-0.5">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-medium">
-                            {name || "Unknown"}
-                          </span>
+                          <span className="font-medium">{displayName}</span>
 
-                          {relationship && (
+                          {(relationship || item.relationship) && (
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#111827] border border-slate-700 text-[#f4b974] uppercase tracking-wide">
-                              {relationship}
+                              {relationship || item.relationship}
                             </span>
                           )}
 
-                          {status && (
+                          {(status || item.status) && (
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-200 uppercase tracking-wide">
-                              {status}
+                              {status || item.status}
                             </span>
                           )}
                         </div>
 
-                        {notes && (
+                        {(notes || item.notes) && (
                           <p className="text-[12px] text-slate-300 leading-snug">
-                            {notes}
+                            {notes || item.notes}
                           </p>
                         )}
                       </div>
@@ -243,6 +473,7 @@ export default function CharacterView({ character }) {
           <h1 className="text-2xl md:text-3xl font-semibold text-[#f7ce8a] mb-1">
             {name}
           </h1>
+
           <div className="text-sm md:text-base text-slate-400 mb-4">
             {subtitle}
           </div>
@@ -256,7 +487,7 @@ export default function CharacterView({ character }) {
           )}
         </div>
 
-        {/* ===== MAIN GRID ===== */}
+        {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
           {/* LEFT – CHAPTERS */}
           <div className="space-y-4">
@@ -362,86 +593,42 @@ export default function CharacterView({ character }) {
                     })}
                   </div>
 
+                  <div className="flex border-b border-slate-800">
+                    {["Combat", "Personality", "Meta-Data"].map((t) => {
+                      const isActive = activeInfoTab === t;
+                      return (
+                        <button
+                          key={t}
+                          className={
+                            isActive
+                              ? "flex-1 px-3 py-2.5 text-xs md:text-sm font-medium bg-[#151a2b] text-[#f7ce8a]"
+                              : "flex-1 px-3 py-2.5 text-xs md:text-sm text-slate-400 hover:text-slate-100 hover:bg-[#101323] transition"
+                          }
+                          onClick={() => setActiveInfoTab(t)}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
+                  </div>
+
                   {/* TAB CONTENT */}
                   <div className="p-5 space-y-5 bg-[#050816]">
-                    {/* ========= BIO ========= */}
                     {activeInfoTab === "Bio" && (
-                      <>
-                        {/* basic info grid */}
-                        <div className="space-y-3">
-                          {basic_info.map((row, idx) => (
-                            <div
-                              key={idx}
-                              className="grid grid-cols-[110px_minmax(0,1fr)] gap-3 text-[13px]"
-                            >
-                              <div className="text-slate-400">
-                                {row.label}
-                              </div>
-                              <div className="text-slate-100">
-                                {row.value}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* bio_info + meta_info (tanpa Factions & Affiliations) */}
-                        {renderBlocks([...bio_info, ...metaInfoWithoutFactions])}
-                      </>
+                      <>{renderBlocks(bioDataWithoutFactions)}</>
                     )}
 
-                    {/* ========= RELATIONSHIP ========= */}
                     {activeInfoTab === "Relationship" &&
-                      renderRelationshipBlocks(combinedRelationshipInfo)}
+                      renderRelationshipBlocks(combinedRelationshipData)}
 
-                    {/* ========= DETAILS ========= */}
                     {activeInfoTab === "Details" && (
-                      <>
-                        {/* Ability Scores di atas */}
-                        {ability_scores &&
-                          Object.keys(ability_scores).length > 0 && (
-                            <div>
-                              <div className="text-[11px] text-slate-400 uppercase tracking-wider mb-2">
-                                Ability Scores
-                              </div>
-                              <div className="grid grid-cols-3 gap-2 mb-4">
-                                {["STR", "DEX", "CON", "INT", "WIS", "CHA"].map(
-                                  (key) => {
-                                    const score =
-                                      ability_scores[key]?.score ?? "-";
-                                    const mod = ability_scores[key]?.mod ?? 0;
-                                    const modText =
-                                      typeof mod === "number"
-                                        ? mod >= 0
-                                          ? `+${mod}`
-                                          : `${mod}`
-                                        : mod;
-
-                                    return (
-                                      <div
-                                        key={key}
-                                        className="bg-[#111827] border border-slate-800 rounded-lg px-3 py-3 flex flex-col items-center"
-                                      >
-                                        <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">
-                                          {key}
-                                        </div>
-                                        <div className="text-xl text-slate-50 font-semibold leading-none">
-                                          {score}
-                                        </div>
-                                        <div className="text-[11px] text-slate-400 mt-1">
-                                          {modText}
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                        {/* detail lainnya */}
-                        {renderBlocks(details_info)}
-                      </>
+                      <>{renderBlocks(details_data)}</>
                     )}
+
+                    {activeInfoTab === "Combat" && renderBlocks(combat_data)}
+                    {activeInfoTab === "Personality" &&
+                      renderBlocks(personality_data)}
+                    {activeInfoTab === "Meta-Data" && renderBlocks(meta_data)}
                   </div>
                 </div>
               </div>

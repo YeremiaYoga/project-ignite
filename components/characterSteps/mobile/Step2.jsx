@@ -208,11 +208,15 @@ export default function Step2Mobile({ data, allData, onChange }) {
           />
         </div>
         <MultipleInput
+          labels=""
           label="Fear or Weakness"
           type="object"
-          fields={["fear/weak", "from"]}
+          fields={["fear_weak", "from"]}
+          textareaFields={["from"]}
+          textareaRows={2}
+          textareaPlaceholder="From..."
           items={
-            data.fear_weakness && data.fear_weakness.length
+            data.fear_weakness?.length
               ? data.fear_weakness
               : [{ fear_weak: "", from: "" }]
           }
@@ -235,9 +239,12 @@ export default function Step2Mobile({ data, allData, onChange }) {
           />
         </div>
         <MultipleInput
+          labels=""
           label="Motivation Item"
           type="object"
           fields={["motivation", "from", "how"]}
+          textareaFields={["from", "how"]}
+          textareaRows={2}
           items={
             data.motivation && data.motivation.length
               ? data.motivation

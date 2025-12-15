@@ -20,6 +20,9 @@ export default function Step4({ data, allData, onChange }) {
           <MultipleInput
             labels="Notable Accomplishments"
             label="Notable"
+            type="string"
+            textareaRows={5}
+            textareaPlaceholder="Write a notable accomplishment..."
             items={data.notable_accomplishments || [""]}
             onChange={(items) => onChange("notable_accomplishments", items)}
             hint={{

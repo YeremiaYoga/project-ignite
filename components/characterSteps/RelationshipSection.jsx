@@ -24,7 +24,9 @@ export default function RelationshipSection({
   relationshipOptions = [],
 }) {
   const members =
-    data[keyName] && data[keyName].length > 0 ? data[keyName] : [{}];
+    Array.isArray(data[keyName]) && data[keyName].length > 0
+      ? data[keyName]
+      : [{}];
 
   const handleUpdate = (index, key, val) => {
     const updated = [...members];
@@ -35,7 +37,7 @@ export default function RelationshipSection({
   const handleRemove = (index) => {
     const updated = [...members];
     updated.splice(index, 1);
-    onChange(keyName, updated);
+    onChange(keyName, updated.length ? updated : [{}]);
   };
 
   return (
@@ -47,8 +49,9 @@ export default function RelationshipSection({
       {members.map((member, index) => (
         <div
           key={index}
-          className="mb-4 space-y-2 p-3 border border-gray-700 rounded-lg relative"
+          className="mb-4 space-y-3 p-3 border border-gray-700 rounded-lg relative bg-gray-900"
         >
+          {/* REMOVE */}
           <button
             type="button"
             className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-md"
@@ -57,6 +60,7 @@ export default function RelationshipSection({
             <X size={14} />
           </button>
 
+          {/* TOP ROW */}
           <div className="grid grid-cols-10 gap-2">
             <div className="col-span-5">
               <InputField
@@ -65,6 +69,7 @@ export default function RelationshipSection({
                 onChange={(val) => handleUpdate(index, "name", val)}
               />
             </div>
+
             <div className="col-span-2">
               <InputField
                 type="select"
@@ -78,6 +83,7 @@ export default function RelationshipSection({
                 onChange={(val) => handleUpdate(index, "status", val)}
               />
             </div>
+
             <div className="col-span-3">
               <InputField
                 type={keyName === "special_relationship" ? "text" : "select"}
@@ -97,18 +103,22 @@ export default function RelationshipSection({
             </div>
           </div>
 
+          {/* ID LINK + NOTES */}
           <div className="grid grid-cols-16 gap-2">
-            <div className="col-span-4 flex items-center gap-4">
+            <div className="col-span-4 flex items-center gap-3">
               <InputField
-                label=""
                 placeholder="ID Link"
                 value={member.id_link || ""}
                 onChange={(val) => handleUpdate(index, "id_link", val)}
               />
+
               <button
                 type="button"
                 className="h-10 w-10 flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-500 text-white"
-                onClick={() => console.log("Upload for:", member.id_link)}
+                onClick={() =>
+                  console.log("Upload clicked for:", member.id_link)
+                }
+                title="Upload / Link"
               >
                 <Upload size={18} />
               </button>
@@ -116,23 +126,31 @@ export default function RelationshipSection({
 
             <div className="col-span-12">
               <InputField
-                type="text"
-                placeholder="Write notes here..."
+                type="textarea"
                 value={member.notes || ""}
                 onChange={(val) => handleUpdate(index, "notes", val)}
+                placeholder="Write notes here..."
+                rows={2}
               />
             </div>
           </div>
         </div>
       ))}
 
+      {/* ADD BUTTON */}
       <button
         type="button"
         className="mt-2 px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm"
         onClick={() =>
           onChange(keyName, [
             ...members,
-            { name: "", status: "", relationship: "", id_link: "", notes: "" },
+            {
+              name: "",
+              status: "",
+              relationship: "",
+              id_link: "",
+              notes: "",
+            },
           ])
         }
       >

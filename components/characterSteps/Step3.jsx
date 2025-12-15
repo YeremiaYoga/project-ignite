@@ -44,7 +44,6 @@ export default function Step3({ data, allData, onChange, mode }) {
   return (
     <div className="p-6 max-w-6xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
       <div className="grid grid-cols-5 gap-4">
-
         <div className="col-span-3">
           <div className="flex items-center justify-between mb-1">
             <LabelWithHint
@@ -64,10 +63,26 @@ export default function Step3({ data, allData, onChange, mode }) {
             value={data.apperance || ""}
             onChange={(val) => onChange("apperance", val)}
             placeholder="Write apperance here..."
-            rows={15}
+            rows={7}
           />
+          <div className="md:col-span-1">
+            <div className="flex items-center justify-between mb-2">
+              <LabelWithHint
+                label="Side Note"
+                icon="notebook-pen"
+                text="This is where you put any side notes that you want your reader, or Dungeon Master. Usually for any small notes that you stack, so is easier and clearer what you are seeking for"
+              />
+            </div>
+            <InputField
+              label=""
+              type="textarea"
+              value={data.side_notes || ""}
+              onChange={(val) => onChange("side_notes", val)}
+              placeholder="side note"
+              rows={7}
+            />
+          </div>
         </div>
-
 
         <div className="space-y-3 col-span-2">
           <div>
@@ -98,7 +113,6 @@ export default function Step3({ data, allData, onChange, mode }) {
             )} */}
           </div>
 
-     
           <div>
             <LabelWithHint
               label="Combat Theme"
@@ -127,7 +141,6 @@ export default function Step3({ data, allData, onChange, mode }) {
             )} */}
           </div>
 
-
           <InputField
             label="Nationality"
             type={mode ? "select" : "text"}
@@ -141,7 +154,6 @@ export default function Step3({ data, allData, onChange, mode }) {
             }}
           />
 
-     
           <div>
             <LabelWithHint
               label="Main Resident"
@@ -179,7 +191,6 @@ export default function Step3({ data, allData, onChange, mode }) {
           </div>
         </div>
       </div>
-
 
       <div className="grid grid-cols-9 gap-4">
         <div className="col-span-3">
@@ -232,7 +243,6 @@ export default function Step3({ data, allData, onChange, mode }) {
           />
         </div>
       </div>
-
 
       <div className="grid grid-cols-7 gap-4">
         <div className="mt-1 col-span-3">

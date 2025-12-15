@@ -18,6 +18,7 @@ export default function InputField({
   const [query, setQuery] = useState(value || "");
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef();
+  const textareaRef = useRef(null);
 
   const resolveLucideIcon = (iconName) => {
     if (!iconName) return Info;
@@ -41,8 +42,8 @@ export default function InputField({
       : options;
 
   const handleSelect = (opt) => {
-    onChange(opt.value ?? opt);          // lempar value ke parent
-    setQuery(opt.label ?? opt);         // tampilkan label di input
+    onChange(opt.value ?? opt); // lempar value ke parent
+    setQuery(opt.label ?? opt); // tampilkan label di input
     setIsOpen(false);
   };
 
@@ -155,15 +156,19 @@ export default function InputField({
         <textarea
           value={value}
           onChange={(e) => !disabled && onChange(e.target.value)}
+          onInput={(e) => {
+            e.target.style.height = "auto";
+            e.target.style.height = e.target.scrollHeight + "px";
+          }}
           placeholder={placeholder}
           rows={rows}
           disabled={disabled}
-          className={`w-full p-3 rounded-lg border text-sm resize-none outline-none
-            ${
-              disabled
-                ? "bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed opacity-60"
-                : "bg-gray-800 border-gray-700 focus:ring-2 focus:ring-blue-500"
-            }`}
+          className={`w-full p-3 rounded-lg border text-sm outline-none overflow-hidden
+    ${
+      disabled
+        ? "bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed opacity-60"
+        : "bg-gray-800 border-gray-700 focus:ring-2 focus:ring-blue-500"
+    }`}
         />
       ) : type === "select" ? (
         <select

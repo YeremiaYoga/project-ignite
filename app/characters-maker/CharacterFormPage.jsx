@@ -155,9 +155,7 @@ export default function CharacterFormPage({ mode = "create" }) {
         formData.main_theme &&
         (!isYoutubeUrl(formData.main_theme) || !mainThemeId)
       ) {
-        alert(
-          "Main Theme must be a valid YouTube link with a valid video ID."
-        );
+        alert("Main Theme must be a valid YouTube link with a valid video ID.");
         return;
       }
 
@@ -170,7 +168,6 @@ export default function CharacterFormPage({ mode = "create" }) {
         );
         return;
       }
-
 
       setSaving(true);
 
@@ -422,5 +419,6 @@ function getDefaultForm() {
     personality_combat_style: "",
     skill_prof: [],
     incumbency_id: "",
+    side_notes:"",
   };
 }

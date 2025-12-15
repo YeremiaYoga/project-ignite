@@ -27,44 +27,42 @@ export default function Step2({ data, allData, onChange }) {
           </p>
         </div>
 
-        {allData?.character_type === "NPC" && (
-          <div className="col-span-3">
-            <LabelWithHint
-              label="Personality Traits"
-              icon="brain"
-              text="Highlights defining aspects of your character’s personality — including habits, virtues, flaws, or mental tendencies. These traits can influence decision-making, behavior, and serve as the foundation for the character, affecting how they respond under stress or emotional strain."
+        <div className="col-span-3">
+          <LabelWithHint
+            label="Personality Traits"
+            icon="brain"
+            text="Highlights defining aspects of your character’s personality — including habits, virtues, flaws, or mental tendencies. These traits can influence decision-making, behavior, and serve as the foundation for the character, affecting how they respond under stress or emotional strain."
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <InputField
+              type="selectImage"
+              value={data.personality_traits?.[0] || ""}
+              onChange={(val) => {
+                const updated = [...(data.personality_traits || [])];
+                updated[0] = val;
+                onChange("personality_traits", updated);
+              }}
+              options={allTraitsWithImages.filter(
+                (t) => t.value !== data.personality_traits?.[1]
+              )}
+              placeholder="Select Trait"
             />
-            <div className="grid grid-cols-2 gap-2">
-              <InputField
-                type="selectImage"
-                value={data.personality_traits?.[0] || ""}
-                onChange={(val) => {
-                  const updated = [...(data.personality_traits || [])];
-                  updated[0] = val;
-                  onChange("personality_traits", updated);
-                }}
-                options={allTraitsWithImages.filter(
-                  (t) => t.value !== data.personality_traits?.[1]
-                )}
-                placeholder="Select Trait"
-              />
 
-              <InputField
-                type="selectImage"
-                value={data.personality_traits?.[1] || ""}
-                onChange={(val) => {
-                  const updated = [...(data.personality_traits || [])];
-                  updated[1] = val;
-                  onChange("personality_traits", updated);
-                }}
-                options={allTraitsWithImages.filter(
-                  (t) => t.value !== data.personality_traits?.[0]
-                )}
-                placeholder="Select Trait"
-              />
-            </div>
+            <InputField
+              type="selectImage"
+              value={data.personality_traits?.[1] || ""}
+              onChange={(val) => {
+                const updated = [...(data.personality_traits || [])];
+                updated[1] = val;
+                onChange("personality_traits", updated);
+              }}
+              options={allTraitsWithImages.filter(
+                (t) => t.value !== data.personality_traits?.[0]
+              )}
+              placeholder="Select Trait"
+            />
           </div>
-        )}
+        </div>
 
         <div className="col-span-9">
           <div className="flex items-center justify-between mb-1">
@@ -86,7 +84,6 @@ export default function Step2({ data, allData, onChange }) {
             placeholder="backstory"
             rows={12}
           />
-
         </div>
 
         <div className="col-span-3 space-y-4">
@@ -240,9 +237,12 @@ From: The origin — what caused or instilled this fear."
             labels=""
             label="Fear or Weakness"
             type="object"
-            fields={["fear/weak", "from"]}
+            fields={["fear_weak", "from"]}
+            textareaFields={["from"]}
+            textareaRows={2}
+            textareaPlaceholder="From..."
             items={
-              data.fear_weakness && data.fear_weakness.length
+              data.fear_weakness?.length
                 ? data.fear_weakness
                 : [{ fear_weak: "", from: "" }]
             }
@@ -272,6 +272,8 @@ How Gained: The process or realization that turned it into a lasting conviction.
             label="Motivation Item"
             type="object"
             fields={["motivation", "from", "how"]}
+            textareaFields={["from", "how"]}
+            textareaRows={2}
             items={
               data.motivation && data.motivation.length
                 ? data.motivation
