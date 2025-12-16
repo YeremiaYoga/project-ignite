@@ -323,7 +323,7 @@ export default function RichTextAdvanced({
             </div>
 
             <p className="text-xs text-gray-300 mb-3">
-              Paste a <b>public/published</b> Google Doc link or fileId. Private docs require Google login (later upgrade).
+              Paste a <b>public/published</b> Google Doc link .
             </p>
 
             <input
