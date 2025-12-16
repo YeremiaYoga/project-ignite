@@ -83,6 +83,7 @@ export default function Step2({ data, allData, onChange }) {
             onChange={(v) => onChange("backstory", v)}
             placeholder="backstory"
             rows={12}
+            gdoc={true}
           />
         </div>
 

@@ -338,7 +338,7 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
 
   const personality_data = [
     // { label: "Main Personality", value: db.main_personality },
-    { label: "Main Personality", value: "-" },
+    { label: "Main Personality", value: db.main_personality },
     { label: "Personality", items: safeArr(db.detailed_personality) },
     { label: "Fears & Weakness", items: fearsItems },
     { label: "Motivation", items: motivationItems },
@@ -347,10 +347,10 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
 
   // ================= META DATA (dipindah dari Bio) =================
   const meta_data = [
-    { label: "Voice Style", value: "-" },
+    { label: "Voice Style", value: db.voice_style },
     { label: "Created", value: fmtDate(db.created_at) },
     { label: "Created By", value: db.creator_name || "-" },
-    { label: "Modified At", value: "-" },
+    { label: "Modified At", value: fmtDate(db.updated_at) },
   ];
 
   return {
