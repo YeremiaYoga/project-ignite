@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 import InputField from "@/components/InputField";
 import Cookies from "js-cookie";
-import { Link, FileKey, Clipboard, Eye, EyeOff, Info } from "lucide-react";
+import { Link, FileKey, Clipboard, Eye, EyeOff } from "lucide-react";
 import { countryOptions, alignmentOptions } from "../../data/characterOptions";
 import LabelWithHint from "@/components/LabelWithHint";
 
@@ -21,25 +21,65 @@ export default function Step1({ data = {}, onChange }) {
   const [privateId, setPrivateId] = useState("");
   const [publicId, setPublicId] = useState("");
   const [showPrivate, setShowPrivate] = useState(false);
-  const MAX_FILE_SIZE = 3 * 1024 * 1024;
-  console.log(data);
 
+  const MAX_FILE_SIZE = 3 * 1024 * 1024;
+
+  /* =========================
+     HELPERS: HEIGHT + WEIGHT
+     ========================= */
+
+  const cmToFeetInch = (cmVal) => {
+    const cm = Number(cmVal);
+    if (!Number.isFinite(cm) || cm <= 0) return { feet: "", inch: "" };
+
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inch = Math.round(totalInches - feet * 12);
+
+    if (inch === 12) return { feet: String(feet + 1), inch: "0" };
+    return { feet: String(feet), inch: String(inch) };
+  };
+
+  const feetInchToCm = (feetVal, inchVal) => {
+    const ft = Number(feetVal);
+    const inch = Number(inchVal);
+
+    const totalInches =
+      (Number.isFinite(ft) ? ft : 0) * 12 + (Number.isFinite(inch) ? inch : 0);
+
+    const cm = Math.round(totalInches * 2.54);
+    return cm > 0 ? String(cm) : "";
+  };
+
+  const kgToLb = (kgVal) => {
+    const kg = Number(kgVal);
+    if (!Number.isFinite(kg) || kg <= 0) return "";
+    return String(Math.round(kg * 2.20462262));
+  };
+
+  const lbToKg = (lbVal) => {
+    const lb = Number(lbVal);
+    if (!Number.isFinite(lb) || lb <= 0) return "";
+    return String(Math.round((lb / 2.20462262) * 10) / 10); // 1 decimal
+  };
+
+  /* =========================
+     INIT: TALES MODE
+     ========================= */
   useEffect(() => {
     const mode = Cookies.get("ignite-tales-mode");
     setTalesMode(mode === "true");
   }, []);
 
+  /* =========================
+     SYNC: previews + ogg urls
+     ========================= */
   useEffect(() => {
-    if (!artPreview && data.art_image) {
-      setArtPreview(data.art_image);
-    }
-    if (!tokenPreview && data.token_image) {
-      setTokenPreview(data.token_image);
-    }
+    if (!artPreview && data.art_image) setArtPreview(data.art_image);
+    if (!tokenPreview && data.token_image) setTokenPreview(data.token_image);
 
     if (data.art_image && !data.art) onChange("art", data.art_image);
-    if (data.token_image && !data.token_art)
-      onChange("token_art", data.token_image);
+    if (data.token_image && !data.token_art) onChange("token_art", data.token_image);
 
     if (data.main_theme_ogg && typeof data.main_theme_ogg === "string") {
       const mainUrl = data.main_theme_ogg.startsWith("http")
@@ -54,6 +94,7 @@ export default function Step1({ data = {}, onChange }) {
         : `${process.env.NEXT_PUBLIC_API_URL}${data.combat_theme_ogg}`;
       onChange("combat_theme_ogg", combatUrl);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     data.art_image,
     data.token_image,
@@ -61,6 +102,9 @@ export default function Step1({ data = {}, onChange }) {
     data.combat_theme_ogg,
   ]);
 
+  /* =========================
+     INIT: ids
+     ========================= */
   useEffect(() => {
     if (data.private_id || data.public_id) return;
 
@@ -75,22 +119,24 @@ export default function Step1({ data = {}, onChange }) {
       return s;
     };
 
-    const privateId = randomString(22);
-    const publicId = randomString(18);
+    const newPrivate = randomString(22);
+    const newPublic = randomString(18);
 
-    setPrivateId(privateId);
-    setPublicId(publicId);
+    setPrivateId(newPrivate);
+    setPublicId(newPublic);
 
-    onChange("private_id", privateId);
-    onChange("public_id", publicId);
+    onChange("private_id", newPrivate);
+    onChange("public_id", newPublic);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.private_id, data.public_id]);
 
+  /* =========================
+     FETCH: races + backgrounds
+     ========================= */
   useEffect(() => {
     async function fetchData() {
       try {
-        const resRaces = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/races`
-        );
+        const resRaces = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/races`);
         if (!resRaces.ok) throw new Error("Failed to fetch races");
         const races = await resRaces.json();
 
@@ -99,7 +145,6 @@ export default function Step1({ data = {}, onChange }) {
             label: r.name,
             value: r.id,
             id: r.id,
-            // image: r.image || r.main_image || "/assets/races/default.webp",
             description: r.description,
           }))
         );
@@ -108,9 +153,7 @@ export default function Step1({ data = {}, onChange }) {
           `${process.env.NEXT_PUBLIC_API_URL}/api/backgrounds`
         );
         if (!resBackgrounds.ok)
-          throw new Error(
-            `Failed to fetch backgrounds: ${resBackgrounds.status}`
-          );
+          throw new Error(`Failed to fetch backgrounds: ${resBackgrounds.status}`);
 
         const backgrounds = await resBackgrounds.json();
 
@@ -119,7 +162,6 @@ export default function Step1({ data = {}, onChange }) {
             label: b.name,
             value: b.id,
             id: b.id,
-            // image: b.image || "/assets/backgrounds/default.webp",
             description: b.description || "",
           }))
         );
@@ -131,6 +173,9 @@ export default function Step1({ data = {}, onChange }) {
     fetchData();
   }, []);
 
+  /* =========================
+     FETCH: subraces by race
+     ========================= */
   useEffect(() => {
     if (!data.race_id) {
       setSubraceOptions([]);
@@ -170,6 +215,53 @@ export default function Step1({ data = {}, onChange }) {
     fetchSubraces();
   }, [data.race_id]);
 
+  /* =========================
+     ✅ AUTO NORMALIZE height/weight based on unit
+     - fixes case: unit imperial but only cm/kg filled
+     ========================= */
+  useEffect(() => {
+    // HEIGHT
+    const hu = data.height_unit || "metric";
+    const h = data.height || {};
+
+    if (
+      hu === "imperial" &&
+      (h.feet === "" || h.feet == null) &&
+      (h.inch === "" || h.inch == null) &&
+      h.centimeter
+    ) {
+      const conv = cmToFeetInch(h.centimeter);
+      onChange("height", { ...(h || {}), feet: conv.feet, inch: conv.inch });
+    }
+
+    if (
+      hu === "metric" &&
+      (!h.centimeter || h.centimeter === "") &&
+      (h.feet || h.inch)
+    ) {
+      const cm = feetInchToCm(h.feet, h.inch);
+      onChange("height", { ...(h || {}), centimeter: cm });
+    }
+
+    // WEIGHT
+    const wu = data.weight_unit || "metric";
+    const w = data.weight || {};
+
+    if (wu === "imperial" && (!w.pounds || w.pounds === "") && w.kilogram) {
+      const lb = kgToLb(w.kilogram);
+      onChange("weight", { ...(w || {}), pounds: lb });
+    }
+
+    if (wu === "metric" && (!w.kilogram || w.kilogram === "") && w.pounds) {
+      const kg = lbToKg(w.pounds);
+      onChange("weight", { ...(w || {}), kilogram: kg });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.height_unit, data.weight_unit, JSON.stringify(data.height), JSON.stringify(data.weight)]);
+
+  /* =========================
+     ACTIONS
+     ========================= */
   const copyToClipboard = (id) => {
     navigator.clipboard.writeText(id);
     alert("ID copied to clipboard!");
@@ -200,6 +292,7 @@ export default function Step1({ data = {}, onChange }) {
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto bg-gray-900 text-gray-100 rounded-xl shadow-lg space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {/* LEFT */}
         <div className="space-y-4 md:col-span-2 lg:col-span-2">
           <InputField
             label="Nickname"
@@ -211,6 +304,8 @@ export default function Step1({ data = {}, onChange }) {
               text: "The name your character is commonly known by. It can be an alias, title, or shortened version of their full name — often used by friends, allies, or in informal situations. (Exp : Edward, Alexander, Misa, or Michael)",
             }}
           />
+
+          {/* FULL NAME */}
           <div>
             <div className="flex items-center justify-between mb-1">
               <LabelWithHint
@@ -232,12 +327,17 @@ export default function Step1({ data = {}, onChange }) {
             />
           </div>
 
+          {/* ART UPLOAD */}
           <div>
             <div className="flex items-center gap-4 text-sm">
               <span className="font-medium">Art :</span>
               <div className="flex items-center gap-3 ml-auto">
                 <span className="text-gray-300 text-sm truncate max-w-[140px] sm:max-w-[200px]">
-                  {data.art ? data.art.name : "No file chosen"}
+                  {data.art && typeof data.art === "object"
+                    ? data.art.name
+                    : data.art
+                    ? "Saved image"
+                    : "No file chosen"}
                 </span>
                 <label className="cursor-pointer px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
                   Upload
@@ -254,12 +354,18 @@ export default function Step1({ data = {}, onChange }) {
               (JPG/WEBP/etc, max 3MB)
             </span>
           </div>
+
+          {/* TOKEN UPLOAD */}
           <div>
             <div className="flex items-center gap-4 text-sm">
               <span className="font-medium">Token :</span>
               <div className="flex items-center gap-3 ml-auto">
                 <span className="text-gray-300 text-sm truncate max-w-[140px] sm:max-w-[200px]">
-                  {data.token_art ? data.token_art.name : "No file chosen"}
+                  {data.token_art && typeof data.token_art === "object"
+                    ? data.token_art.name
+                    : data.token_art
+                    ? "Saved image"
+                    : "No file chosen"}
                 </span>
 
                 <label className="cursor-pointer px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
@@ -278,8 +384,11 @@ export default function Step1({ data = {}, onChange }) {
             </span>
           </div>
         </div>
+
+        {/* MIDDLE: IDs + ART PREVIEW */}
         <div className="mt-[14px]">
           <div className="mb-2 text-sm font-medium text-gray-200 space-y-3">
+            {/* PUBLIC */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <div className="relative group">
@@ -291,17 +400,21 @@ export default function Step1({ data = {}, onChange }) {
                   </div>
                 </div>
 
-                <span className="text-xs">{data.public_id}</span>
+                <span className="text-xs break-all">
+                  {data.public_id || publicId}
+                </span>
               </div>
 
               <button
-                onClick={() => copyToClipboard(data.public_id)}
+                onClick={() => copyToClipboard(data.public_id || publicId)}
                 className="text-gray-400 hover:text-gray-200 transition-colors"
                 title="Copy Public ID"
               >
                 <Clipboard className="w-4 h-4" />
               </button>
             </div>
+
+            {/* PRIVATE */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <div className="relative group">
@@ -316,8 +429,10 @@ export default function Step1({ data = {}, onChange }) {
 
                 <span className="font-mono text-xs select-all">
                   {showPrivate
-                    ? data.private_id
-                    : "•".repeat(Math.min(data.private_id?.length || 8, 12))}
+                    ? data.private_id || privateId
+                    : "•".repeat(
+                        Math.min((data.private_id || privateId)?.length || 8, 12)
+                      )}
                 </span>
               </div>
 
@@ -334,7 +449,7 @@ export default function Step1({ data = {}, onChange }) {
                   )}
                 </button>
                 <button
-                  onClick={() => copyToClipboard(data.private_id)}
+                  onClick={() => copyToClipboard(data.private_id || privateId)}
                   className="text-gray-400 hover:text-gray-200 transition-colors"
                   title="Copy Private ID"
                 >
@@ -357,16 +472,17 @@ export default function Step1({ data = {}, onChange }) {
               <span className="text-gray-500 text-sm">[ Art Preview ]</span>
             )}
           </div>
+
           <div className="flex justify-center mt-2">
             <LabelWithHint
               label="Art"
               icon="palette"
-              text="The main artwork that represents your character in full detail. Used in profiles, sheets, and campaign showcases. Choose an image that captures your character’s essence.
-"
+              text="The main artwork that represents your character in full detail. Used in profiles, sheets, and campaign showcases. Choose an image that captures your character’s essence."
             />
           </div>
         </div>
 
+        {/* RIGHT: WIKI + TOKEN PREVIEW */}
         <div className="mt-6">
           <div className="flex items-center justify-end mb-2 text-sm font-medium text-gray-200">
             <InputField
@@ -380,7 +496,6 @@ export default function Step1({ data = {}, onChange }) {
                   );
                   if (!confirmOpen) return;
                 }
-
                 onChange("wiki_visibility", v);
               }}
             />
@@ -399,6 +514,7 @@ export default function Step1({ data = {}, onChange }) {
               <span className="text-gray-500 text-sm">[ Token Preview ]</span>
             )}
           </div>
+
           <div className="flex justify-center mt-2">
             <LabelWithHint
               label="Token"
@@ -408,8 +524,10 @@ export default function Step1({ data = {}, onChange }) {
           </div>
         </div>
       </div>
+
       <hr className="border-gray-700" />
 
+      {/* RACE + ALIGNMENT */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="space-y-4">
           <InputField
@@ -499,6 +617,7 @@ export default function Step1({ data = {}, onChange }) {
 
       <hr className="border-gray-700" />
 
+      {/* STATUS + PERSONAL */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <div className="space-y-4 lg:col-span-2 md:col-span-2">
           <InputField
@@ -513,6 +632,7 @@ export default function Step1({ data = {}, onChange }) {
             }}
           />
 
+          {/* Birth Year */}
           <div>
             <LabelWithHint
               label="Birth Year"
@@ -524,23 +644,21 @@ export default function Step1({ data = {}, onChange }) {
                 type="number"
                 value={data.birth_year || ""}
                 onChange={(e) => onChange("birth_year", e.target.value)}
-                className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
               />
 
               {talesMode ? (
                 <select
                   value={data.birth_year_type || ""}
                   onChange={(e) => onChange("birth_year_type", e.target.value)}
-                  className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-              focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                 >
                   <option value="">Select</option>
                   <option value="AC">AC (After Calamity)</option>
                   <option value="CE">CE (Calamity Era)</option>
                   <option value="AV">AV (After Vallarian)</option>
                   <option value="AL">AL (After Liberation)</option>
-                  <option value="AF">AF (After Lament of the Fallen) </option>
+                  <option value="AF">AF (After Lament of the Fallen)</option>
                   <option value="BC">BC (Before Chronicles)</option>
                 </select>
               ) : (
@@ -549,8 +667,7 @@ export default function Step1({ data = {}, onChange }) {
                   value={data.birth_year_type || ""}
                   onChange={(e) => onChange("birth_year_type", e.target.value)}
                   placeholder="Type"
-                  className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-              focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                 />
               )}
             </div>
@@ -559,11 +676,7 @@ export default function Step1({ data = {}, onChange }) {
           {(data.status === "Dead" || data.status === "Unknown") && (
             <div>
               <LabelWithHint
-                label={
-                  data.status === "Unknown"
-                    ? "Presume Death Year"
-                    : "Death Year"
-                }
+                label={data.status === "Unknown" ? "Presume Death Year" : "Death Year"}
                 icon="clock"
                 text="The year your character passed away, if applicable. Leave blank if the character is still alive or their fate is unknown."
               />
@@ -572,17 +685,14 @@ export default function Step1({ data = {}, onChange }) {
                   type="number"
                   value={data.death_year || ""}
                   onChange={(e) => onChange("death_year", e.target.value)}
-                  className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                 />
+
                 {talesMode ? (
                   <select
                     value={data.death_year_type || ""}
-                    onChange={(e) =>
-                      onChange("death_year_type", e.target.value)
-                    }
-                    className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                    onChange={(e) => onChange("death_year_type", e.target.value)}
+                    className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   >
                     <option value="">Select</option>
                     <option value="AC">AC (After Calamity)</option>
@@ -596,19 +706,17 @@ export default function Step1({ data = {}, onChange }) {
                   <input
                     type="text"
                     value={data.death_year_type || ""}
-                    onChange={(e) =>
-                      onChange("death_year_type", e.target.value)
-                    }
+                    onChange={(e) => onChange("death_year_type", e.target.value)}
                     placeholder="Type"
-                    className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-            focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                    className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
                 )}
               </div>
             </div>
           )}
 
-          <div className="flex  gap-4">
+          {/* Birthplace */}
+          <div className="flex gap-4">
             <InputField
               label="Birth Place"
               value={data.birth_place}
@@ -619,6 +727,7 @@ export default function Step1({ data = {}, onChange }) {
                 text: "The town, city, or specific location where your character was born. Adds depth to their personal history and connection to the world.",
               }}
             />
+
             {talesMode ? (
               <InputField
                 label="Birth Country"
@@ -639,7 +748,9 @@ export default function Step1({ data = {}, onChange }) {
           </div>
         </div>
 
+        {/* RIGHT */}
         <div className="space-y-4 lg:col-span-3 md:col-span-2">
+          {/* Gender + Height */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
             <InputField
               label="Gender"
@@ -654,73 +765,80 @@ export default function Step1({ data = {}, onChange }) {
               }}
             />
 
+            {/* ✅ HEIGHT (FIXED) */}
             <div>
               <LabelWithHint
                 label="Height"
                 icon="ruler"
                 text="Your character’s height. Adds visual and descriptive detail to your character’s physical presence."
               />
+
               <div className="flex gap-2 items-end">
                 {data.height_unit === "imperial" ? (
                   <div className="flex gap-2 flex-1">
                     <input
                       type="number"
                       placeholder="Feet"
-                      value={data.height?.feet || ""}
+                      value={data.height?.feet ?? ""}
                       min={0}
-                      onChange={(e) =>
-                        onChange("height", {
-                          ...data.height,
-                          feet: e.target.value,
-                        })
-                      }
-                      className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const next = { ...(data.height || {}), feet: val };
+                        next.centimeter = feetInchToCm(next.feet, next.inch);
+                        onChange("height", next);
+                      }}
+                      className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
+
                     <input
                       type="number"
                       placeholder="Inch"
-                      value={data.height?.inch || ""}
+                      value={data.height?.inch ?? ""}
                       min={0}
                       max={11}
-                      onChange={(e) =>
-                        onChange("height", {
-                          ...data.height,
-                          inch: e.target.value,
-                        })
-                      }
-                      className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-          focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const next = { ...(data.height || {}), inch: val };
+                        next.centimeter = feetInchToCm(next.feet, next.inch);
+                        onChange("height", next);
+                      }}
+                      className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
                   </div>
                 ) : (
                   <input
                     type="number"
                     placeholder="Cm"
-                    value={data.height?.centimeter || ""}
-                    onChange={(e) =>
-                      onChange("height", {
-                        ...data.height,
-                        centimeter: e.target.value,
-                      })
-                    }
-                    className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                    value={data.height?.centimeter ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const next = { ...(data.height || {}), centimeter: val };
+                      const conv = cmToFeetInch(val);
+                      next.feet = conv.feet;
+                      next.inch = conv.inch;
+                      onChange("height", next);
+                    }}
+                    className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
                 )}
 
                 <select
-                  value={data.height_unit || ""}
+                  value={data.height_unit || "metric"}
                   onChange={(e) => {
-                    const newUnit = e.target.value;
+                    const unit = e.target.value;
+                    const h = data.height || {};
 
-                    onChange("height_unit", newUnit);
+                    onChange("height_unit", unit);
 
-                    const newHeight = { feet: "", inch: "", centimeter: "" };
-                    onChange("height", newHeight);
+                    if (unit === "imperial") {
+                      const conv = cmToFeetInch(h.centimeter);
+                      onChange("height", { ...h, feet: conv.feet, inch: conv.inch });
+                    } else {
+                      const cm = feetInchToCm(h.feet, h.inch);
+                      onChange("height", { ...h, centimeter: cm });
+                    }
                   }}
-                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-      focus:ring-2 focus:ring-blue-500 outline-none text-xs"
+                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
                   <option value="metric">Cm</option>
                   <option value="imperial">Ft/In</option>
@@ -729,6 +847,7 @@ export default function Step1({ data = {}, onChange }) {
             </div>
           </div>
 
+          {/* Pronoun + Weight */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
             <InputField
               label="Pronoun"
@@ -749,12 +868,14 @@ export default function Step1({ data = {}, onChange }) {
               }}
             />
 
+            {/* ✅ WEIGHT (kept as-is, but now auto-normalized too) */}
             <div>
               <LabelWithHint
                 label="Weight"
                 icon="scale"
                 text="Your character’s weight. Used mainly for descriptive purposes or when physical statistics are relevant."
               />
+
               <div className="flex gap-2 items-end">
                 <input
                   type="number"
@@ -766,31 +887,37 @@ export default function Step1({ data = {}, onChange }) {
                   }
                   onChange={(e) => {
                     const val = e.target.value;
-                    const newWeight =
-                      data.weight_unit === "imperial"
-                        ? { ...(data.weight || {}), pounds: val }
-                        : { ...(data.weight || {}), kilogram: val };
-                    onChange("weight", newWeight);
+
+                    if (data.weight_unit === "imperial") {
+                      const next = { ...(data.weight || {}), pounds: val };
+                      next.kilogram = lbToKg(val);
+                      onChange("weight", next);
+                    } else {
+                      const next = { ...(data.weight || {}), kilogram: val };
+                      next.pounds = kgToLb(val);
+                      onChange("weight", next);
+                    }
                   }}
-                  className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                 />
 
                 <select
-                  value={data.weight_unit || ""}
+                  value={data.weight_unit || "metric"}
                   onChange={(e) => {
                     const unit = e.target.value;
+                    const w = data.weight || {};
 
-                    const newWeight =
-                      unit === "imperial"
-                        ? { pounds: data.weight?.pounds ?? "", kilogram: "" }
-                        : { pounds: "", kilogram: data.weight?.kilogram ?? "" };
-
-                    onChange("weight_unit", unit);
-                    onChange("weight", newWeight);
+                    if (unit === "imperial") {
+                      const lb = kgToLb(w.kilogram);
+                      onChange("weight_unit", unit);
+                      onChange("weight", { ...w, pounds: lb });
+                    } else {
+                      const kg = lbToKg(w.pounds);
+                      onChange("weight_unit", unit);
+                      onChange("weight", { ...w, kilogram: kg });
+                    }
                   }}
-                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 
-        focus:ring-2 focus:ring-blue-500 outline-none text-xs"
+                  className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
                   <option value="imperial">Lb</option>
                   <option value="metric">Kg</option>
@@ -799,6 +926,7 @@ export default function Step1({ data = {}, onChange }) {
             </div>
           </div>
 
+          {/* Skin + Hair */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField
               label="Skin Colour"
@@ -810,6 +938,7 @@ export default function Step1({ data = {}, onChange }) {
                 text: "Describes your character’s skin tone or complexion. Used for artistic, descriptive, or visual reference.",
               }}
             />
+
             <InputField
               label="Hair"
               type="text"
@@ -833,9 +962,7 @@ export default function Step1({ data = {}, onChange }) {
               onChange("background_id", selected?.id || "");
               onChange("background_name", selected?.label || "");
             }}
-            placeholder={
-              backgroundOptions.length ? "Select Background" : "Loading..."
-            }
+            placeholder={backgroundOptions.length ? "Select Background" : "Loading..."}
             options={backgroundOptions}
             hint={{
               icon: "book-open",

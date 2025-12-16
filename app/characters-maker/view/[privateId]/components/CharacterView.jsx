@@ -42,7 +42,6 @@ export default function CharacterView({ character }) {
       if (v.every((x) => typeof x === "string" || typeof x === "number")) {
         return v.map(String).join(", ");
       }
-
       return JSON.stringify(v, null, 2);
     }
 
@@ -68,6 +67,118 @@ export default function CharacterView({ character }) {
     );
   };
 
+  // ---------- Bio "Profile table" (Full Name -> Hair) from bio_data ----------
+  const normalizeLabel = (s) =>
+    String(s || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[_-]/g, " ")
+      .replace(/\s+/g, " ");
+
+  const BIO_LABEL_ALIASES = {
+    full_name: ["full name", "fullname"],
+    also_known_as: ["also known as", "aka", "nickname", "alias"],
+    race: ["race", "spesies/race", "species", "ancestry"],
+    gender: ["gender"],
+    alignment: ["alignment"],
+    birthplace: ["birthplace", "birth place", "place of birth"],
+    born: ["born", "birth", "birth year", "born year"],
+    height: ["height"],
+    weight: ["weight"],
+    skin: ["skin", "skin colour", "skin color"],
+    hair: ["hair"],
+  };
+
+  const findBioRowByAliases = (aliases = []) => {
+    if (!Array.isArray(bio_data) || !bio_data.length) return null;
+    return (
+      bio_data.find((b) => {
+        const lbl = normalizeLabel(b?.label);
+        return aliases.some((a) => normalizeLabel(a) === lbl);
+      }) || null
+    );
+  };
+
+  const getBioValueByAliases = (aliases = []) => {
+    const row = findBioRowByAliases(aliases);
+    if (!row) return "";
+
+    if (row.value !== undefined && row.value !== null) return row.value;
+
+    if (Array.isArray(row.items)) {
+      if (
+        row.items.every((x) => typeof x === "string" || typeof x === "number")
+      )
+        return row.items.map(String).join(", ");
+      return row.items;
+    }
+
+    return "";
+  };
+
+  const PROFILE_KEYS = [
+    { key: "full_name", left: "Full Name" },
+    { key: "also_known_as", left: "Also Known As" },
+    { key: "race", left: "Race" },
+    { key: "gender", left: "Gender" },
+    { key: "alignment", left: "Alignment" },
+    { key: "birthplace", left: "Birthplace" },
+    { key: "born", left: "Born" },
+    { key: "height", left: "Height" },
+    { key: "weight", left: "Weight" },
+    { key: "skin", left: "Skin" },
+    { key: "hair", left: "Hair" },
+  ];
+
+  const renderBioProfileTable = () => {
+    const rows = PROFILE_KEYS.map(({ key, left }) => ({
+      left,
+      right: getBioValueByAliases(BIO_LABEL_ALIASES[key]),
+    })).filter((r) => {
+      const v = r.right;
+      if (v === null || v === undefined) return false;
+      if (typeof v === "string") return v.trim().length > 0;
+      if (typeof v === "number") return true;
+      if (typeof v === "boolean") return true;
+      if (Array.isArray(v)) return v.length > 0;
+      if (isPlainObject(v)) return Object.keys(v).length > 0;
+      return String(v).trim().length > 0;
+    });
+
+    if (!rows.length) return null;
+
+    return (
+      <div className="rounded-lg overflow-hidden">
+        <div className="">
+          {rows.map((r) => (
+            <div
+              key={r.left}
+              className="grid grid-cols-[140px_minmax(0,1fr)] gap-4  py-2"
+            >
+              <div className="text-[12px] text-slate-400">{r.left}</div>
+              <div className="text-[13px] text-slate-100 font-medium">
+                {typeof r.right === "string" || typeof r.right === "number"
+                  ? String(r.right)
+                  : renderAnyValue(r.right)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // buang row-profile dari renderBlocks (biar gak double)
+  const isProfileLabel = (label) => {
+    const lbl = normalizeLabel(label);
+    const allAliases = Object.values(BIO_LABEL_ALIASES).flat();
+    return allAliases.some((a) => normalizeLabel(a) === lbl);
+  };
+
+  const bioDataWithoutProfile = (
+    Array.isArray(bio_data) ? bio_data : []
+  ).filter((b) => !isProfileLabel(b?.label));
+
   // ---------- Factions injector (tetap) ----------
   const factionsBioBlock = bio_data.find(
     (b) =>
@@ -75,7 +186,7 @@ export default function CharacterView({ character }) {
       b.label.toLowerCase() === "factions & affiliations"
   );
 
-  const bioDataWithoutFactions = bio_data.filter(
+  const bioDataWithoutFactions = bioDataWithoutProfile.filter(
     (b) =>
       !(
         typeof b?.label === "string" &&
@@ -244,8 +355,6 @@ export default function CharacterView({ character }) {
                 <ul className="space-y-2">
                   {items.map((it, i2) => {
                     if (!it) return null;
-
-                    // normalize: string atau object
                     const text =
                       typeof it === "string"
                         ? it
@@ -293,14 +402,19 @@ export default function CharacterView({ character }) {
                     const from =
                       typeof it === "object" && it ? it.from || "" : "";
 
+                    const how =
+                      typeof it === "object" && it ? it.how || "" : "";
+
                     if (!String(text).trim()) return null;
 
                     return (
                       <div key={i2} className="text-[13px] text-slate-100">
                         <div className="leading-snug">{text}</div>
-                        {from && (
-                          <div className="text-[11px] text-slate-400 mt-1">
-                            from {from}
+
+                        {(from || how) && (
+                          <div className="text-[11px] text-slate-400 mt-1 space-y-1">
+                            {from && <div>from {from}</div>}
+                            {how && <div>how {how}</div>}
                           </div>
                         )}
                       </div>
@@ -615,7 +729,13 @@ export default function CharacterView({ character }) {
                   {/* TAB CONTENT */}
                   <div className="p-5 space-y-5 bg-[#050816]">
                     {activeInfoTab === "Bio" && (
-                      <>{renderBlocks(bioDataWithoutFactions)}</>
+                      <div className="space-y-5">
+                        {/* TABLE: Full Name -> Hair (from bio_data) */}
+                        {renderBioProfileTable()}
+
+                        {/* the rest of bio (excluding profile rows + excluding factions) */}
+                        {renderBlocks(bioDataWithoutFactions)}
+                      </div>
                     )}
 
                     {activeInfoTab === "Relationship" &&

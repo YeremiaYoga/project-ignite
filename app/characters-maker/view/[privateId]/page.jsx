@@ -49,8 +49,12 @@ function fmtDate(v) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+  return d.toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
+
 
 function joinWithAnd(arr = []) {
   const a = safeArr(arr)

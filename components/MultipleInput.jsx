@@ -16,20 +16,27 @@ export default function MultipleInput({
   type = "string", // "string" | "object"
   fields = ["name"],
 
-  // textarea support
-  textareaFields = [], // khusus object
+  textareaFields = [],
   textareaRows = 4,
+
+  // ✅ textareaPlaceholder can be:
+  // - string: same for all textarea fields
+  // - object: { fieldName: "placeholder" }
+  // - array: ["placeholder for fields[0]", "placeholder for fields[1]"]
   textareaPlaceholder = "Write here...",
 
   // select support
   selectOptions = null,
 
   columns = 1,
+
+  // ✅ per-field placeholder for INPUT (non-textarea)
+  // object or array
+  fieldPlaceholders = null,
 }) {
   /* ================= HELPERS ================= */
 
-  const makeEmptyObject = () =>
-    Object.fromEntries(fields.map((f) => [f, ""]));
+  const makeEmptyObject = () => Object.fromEntries(fields.map((f) => [f, ""]));
 
   const initEntries = () => {
     if (Array.isArray(items) && items.length) return items;
@@ -87,6 +94,57 @@ export default function MultipleInput({
   const isTextareaField = (field) =>
     Array.isArray(textareaFields) && textareaFields.includes(field);
 
+  const prettyField = (field) =>
+    field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+  // ✅ normal input placeholder per field
+  const getFieldPlaceholder = (field, fieldIndex) => {
+    // object mapping
+    if (
+      fieldPlaceholders &&
+      !Array.isArray(fieldPlaceholders) &&
+      typeof fieldPlaceholders === "object"
+    ) {
+      const p = fieldPlaceholders[field];
+      if (typeof p === "string") return p;
+    }
+
+    // array by index (fields order)
+    if (Array.isArray(fieldPlaceholders)) {
+      const p = fieldPlaceholders[fieldIndex];
+      if (typeof p === "string") return p;
+    }
+
+    return prettyField(field);
+  };
+
+  // ✅ textarea placeholder per field
+  // rules:
+  // - if textareaPlaceholder is string => same for all
+  // - if object => by field name
+  // - if array => by fields index
+  const getTextareaPlaceholder = (field, fieldIndex) => {
+    if (typeof textareaPlaceholder === "string") return textareaPlaceholder;
+
+    if (
+      textareaPlaceholder &&
+      !Array.isArray(textareaPlaceholder) &&
+      typeof textareaPlaceholder === "object"
+    ) {
+      const p = textareaPlaceholder[field];
+      if (typeof p === "string") return p;
+      return "Write here...";
+    }
+
+    if (Array.isArray(textareaPlaceholder)) {
+      const p = textareaPlaceholder[fieldIndex];
+      if (typeof p === "string") return p;
+      return "Write here...";
+    }
+
+    return "Write here...";
+  };
+
   /* ================= RENDER ================= */
 
   return (
@@ -130,34 +188,29 @@ export default function MultipleInput({
                   columns === 2 ? "grid-cols-2" : "grid-cols-1"
                 }`}
               >
-                {fields.map((field) => (
+                {fields.map((field, fieldIndex) => (
                   <div key={field}>
                     {isTextareaField(field) ? (
                       <InputField
                         type="textarea"
                         value={item?.[field] || ""}
                         onChange={(val) => updateItem(index, field, val)}
-                        placeholder={textareaPlaceholder}
+                        placeholder={getTextareaPlaceholder(field, fieldIndex)}
                         rows={textareaRows}
                       />
                     ) : (
                       <InputField
                         type="text"
                         value={item?.[field] || ""}
-                        onChange={(val) =>
-                          updateItem(index, field, val)
-                        }
-                        placeholder={field
-                          .replace(/_/g, " ")
-                          .replace(/\b\w/g, (c) => c.toUpperCase())}
+                        onChange={(val) => updateItem(index, field, val)}
+                        placeholder={getFieldPlaceholder(field, fieldIndex)}
                       />
                     )}
                   </div>
                 ))}
               </div>
-
-            /* ===== STRING MODE ===== */
-            ) : selectOptions ? (
+            ) : /* ===== STRING MODE ===== */
+            selectOptions ? (
               <select
                 value={item ?? ""}
                 onChange={(e) => updateItem(index, e.target.value)}
@@ -165,10 +218,7 @@ export default function MultipleInput({
               >
                 <option value="">Select {label}</option>
                 {selectOptions.map((opt) => (
-                  <option
-                    key={opt.value ?? opt}
-                    value={opt.value ?? opt}
-                  >
+                  <option key={opt.value ?? opt} value={opt.value ?? opt}>
                     {opt.label ?? opt}
                   </option>
                 ))}
@@ -178,7 +228,11 @@ export default function MultipleInput({
                 type="textarea"
                 value={item ?? ""}
                 onChange={(val) => updateItem(index, val)}
-                placeholder={textareaPlaceholder || label}
+                placeholder={
+                  typeof textareaPlaceholder === "string"
+                    ? textareaPlaceholder
+                    : "Write here..."
+                }
                 rows={textareaRows}
               />
             ) : (

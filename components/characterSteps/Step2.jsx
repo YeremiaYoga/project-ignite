@@ -270,11 +270,16 @@ How Gained: The process or realization that turned it into a lasting conviction.
           </div>
           <MultipleInput
             labels=""
-            label="Motivation Item"
+            label="Motivation"
             type="object"
             fields={["motivation", "from", "how"]}
             textareaFields={["from", "how"]}
             textareaRows={2}
+            textareaPlaceholder={{
+              from: "From where does it come from",
+              how: "How does one wish to achieve",
+              motivation: "Motivation",
+            }}
             items={
               data.motivation && data.motivation.length
                 ? data.motivation

@@ -25,8 +25,6 @@ export default function RichTextAdvanced({
   onChange,
   placeholder = "Write something...",
   rows = 12,
-
-  // ✅ NEW
   gdoc = false,
 }) {
   const ref = useRef(null);
@@ -46,26 +44,73 @@ export default function RichTextAdvanced({
     orderedList: false,
   });
 
-  // ✅ NEW - GDoc modal state
+  // GDoc modal state
   const [gdocOpen, setGdocOpen] = useState(false);
   const [gdocUrl, setGdocUrl] = useState("");
   const [gdocLoading, setGdocLoading] = useState(false);
   const [gdocError, setGdocError] = useState("");
 
-  // ✅ Sinkronisasi data dari DB
-  useEffect(() => {
-    if (ref.current && typeof value === "string") {
-      if (ref.current.innerHTML !== value) {
-        ref.current.innerHTML = value || "";
+  // ===========================
+  // ✅ Helper: detect current block tag from selection
+  // ===========================
+  const getCurrentBlockTag = () => {
+    try {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return "p";
+
+      let node = sel.anchorNode;
+      if (!node) return "p";
+
+      // If text node, go to parent element
+      if (node.nodeType === 3) node = node.parentNode;
+
+      // Walk up until editor root
+      while (node && node !== ref.current) {
+        const tag = node.nodeName?.toLowerCase();
+        if (["p", "h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) {
+          return tag;
+        }
+        node = node.parentNode;
       }
+
+      return "p";
+    } catch {
+      return "p";
+    }
+  };
+
+  // Sinkronisasi data dari parent/DB
+  useEffect(() => {
+    if (!ref.current || typeof value !== "string") return;
+    if (ref.current.innerHTML !== value) {
+      ref.current.innerHTML = value || "";
     }
   }, [value]);
+
+  const updateActiveStates = () => {
+    if (!isFocused) return;
+    setActive({
+      bold: document.queryCommandState("bold"),
+      italic: document.queryCommandState("italic"),
+      underline: document.queryCommandState("underline"),
+      strikeThrough: document.queryCommandState("strikeThrough"),
+      justifyLeft: document.queryCommandState("justifyLeft"),
+      justifyCenter: document.queryCommandState("justifyCenter"),
+      justifyRight: document.queryCommandState("justifyRight"),
+      justifyFull: document.queryCommandState("justifyFull"),
+      unorderedList: document.queryCommandState("insertUnorderedList"),
+      orderedList: document.queryCommandState("insertOrderedList"),
+    });
+  };
 
   const exec = (cmd, val = null) => {
     if (!isFocused) return;
     document.execCommand(cmd, false, val);
     if (ref.current) onChange?.(ref.current.innerHTML);
     updateActiveStates();
+
+    // ✅ keep heading in sync after exec (optional but nice)
+    setHeading(getCurrentBlockTag());
   };
 
   const insertTable = () => {
@@ -126,46 +171,32 @@ export default function RichTextAdvanced({
 
     document.execCommand("insertHTML", false, html.trim());
     onChange?.(ref.current?.innerHTML);
-  };
-
-  const updateActiveStates = () => {
-    if (!isFocused) return;
-    setActive({
-      bold: document.queryCommandState("bold"),
-      italic: document.queryCommandState("italic"),
-      underline: document.queryCommandState("underline"),
-      strikeThrough: document.queryCommandState("strikeThrough"),
-      justifyLeft: document.queryCommandState("justifyLeft"),
-      justifyCenter: document.queryCommandState("justifyCenter"),
-      justifyRight: document.queryCommandState("justifyRight"),
-      justifyFull: document.queryCommandState("justifyFull"),
-      unorderedList: document.queryCommandState("insertUnorderedList"),
-      orderedList: document.queryCommandState("insertOrderedList"),
-    });
+    updateActiveStates();
+    setHeading(getCurrentBlockTag());
   };
 
   const handleHeadingChange = (e) => {
-    const tag = e.target.value;
+    const tag = e.target.value; // "p" | "h1" | ...
     setHeading(tag);
 
-    if (!isFocused) ref.current?.focus();
-    document.execCommand("formatBlock", false, `<${tag}>`);
+    if (!ref.current) return;
+    if (!isFocused) ref.current.focus();
 
-    if (ref.current) onChange?.(ref.current.innerHTML);
+    // ✅ IMPORTANT: formatBlock expects "h1" not "<h1>"
+    document.execCommand("formatBlock", false, tag);
+
+    onChange?.(ref.current.innerHTML);
     updateActiveStates();
   };
 
-  useEffect(() => {
-    const listener = () => updateActiveStates();
-    document.addEventListener("selectionchange", listener);
-    document.execCommand("defaultParagraphSeparator", false, "p");
-    return () => document.removeEventListener("selectionchange", listener);
-  }, []);
-
   const handleInput = () => {
     if (ref.current) onChange?.(ref.current.innerHTML);
+
+    // ✅ as you type, keep heading synced
+    setHeading(getCurrentBlockTag());
   };
 
+  // Paste plain text -> convert to <p> blocks
   const handlePaste = (e) => {
     e.preventDefault();
 
@@ -189,9 +220,24 @@ export default function RichTextAdvanced({
 
     onChange?.(ref.current.innerHTML);
     updateActiveStates();
+    setHeading(getCurrentBlockTag());
   };
 
-  // ✅ NEW - GDoc import
+  // ✅ selectionchange: sync active states + heading dropdown
+  useEffect(() => {
+    const listener = () => {
+      if (!isFocused) return;
+      updateActiveStates();
+      setHeading(getCurrentBlockTag());
+    };
+
+    document.addEventListener("selectionchange", listener);
+    document.execCommand("defaultParagraphSeparator", false, "p");
+
+    return () => document.removeEventListener("selectionchange", listener);
+  }, [isFocused]);
+
+  // ✅ Import GDoc -> wrap with [data-gdoc]
   const handleImportGdoc = async () => {
     try {
       setGdocLoading(true);
@@ -208,11 +254,15 @@ export default function RichTextAdvanced({
         throw new Error(json?.error || "Failed to import Google Doc");
       }
 
-      // set editor html
+      const wrapped = `<div data-gdoc="true">${json.html || ""}</div>`;
+
       if (ref.current) {
-        ref.current.innerHTML = json.html || "";
+        ref.current.innerHTML = wrapped;
       }
-      onChange?.(json.html || "");
+      onChange?.(wrapped);
+
+      // sync heading to current cursor position (defaults to p)
+      setHeading("p");
 
       setGdocOpen(false);
       setGdocUrl("");
@@ -249,25 +299,75 @@ export default function RichTextAdvanced({
         </div>
 
         {/* Text style */}
-        <ToolbarButton icon={<Bold size={12} />} title="Bold" active={active.bold} onClick={() => exec("bold")} />
-        <ToolbarButton icon={<Italic size={12} />} title="Italic" active={active.italic} onClick={() => exec("italic")} />
-        <ToolbarButton icon={<Underline size={12} />} title="Underline" active={active.underline} onClick={() => exec("underline")} />
-        <ToolbarButton icon={<Strikethrough size={12} />} title="Strikethrough" active={active.strikeThrough} onClick={() => exec("strikeThrough")} />
+        <ToolbarButton
+          icon={<Bold size={12} />}
+          title="Bold"
+          active={active.bold}
+          onClick={() => exec("bold")}
+        />
+        <ToolbarButton
+          icon={<Italic size={12} />}
+          title="Italic"
+          active={active.italic}
+          onClick={() => exec("italic")}
+        />
+        <ToolbarButton
+          icon={<Underline size={12} />}
+          title="Underline"
+          active={active.underline}
+          onClick={() => exec("underline")}
+        />
+        <ToolbarButton
+          icon={<Strikethrough size={12} />}
+          title="Strikethrough"
+          active={active.strikeThrough}
+          onClick={() => exec("strikeThrough")}
+        />
 
         {/* Alignment */}
-        <ToolbarButton icon={<AlignLeft size={12} />} title="Align Left" active={active.justifyLeft} onClick={() => exec("justifyLeft")} />
-        <ToolbarButton icon={<AlignCenter size={12} />} title="Align Center" active={active.justifyCenter} onClick={() => exec("justifyCenter")} />
-        <ToolbarButton icon={<AlignRight size={12} />} title="Align Right" active={active.justifyRight} onClick={() => exec("justifyRight")} />
-        <ToolbarButton icon={<AlignJustify size={12} />} title="Justify" active={active.justifyFull} onClick={() => exec("justifyFull")} />
+        <ToolbarButton
+          icon={<AlignLeft size={12} />}
+          title="Align Left"
+          active={active.justifyLeft}
+          onClick={() => exec("justifyLeft")}
+        />
+        <ToolbarButton
+          icon={<AlignCenter size={12} />}
+          title="Align Center"
+          active={active.justifyCenter}
+          onClick={() => exec("justifyCenter")}
+        />
+        <ToolbarButton
+          icon={<AlignRight size={12} />}
+          title="Align Right"
+          active={active.justifyRight}
+          onClick={() => exec("justifyRight")}
+        />
+        <ToolbarButton
+          icon={<AlignJustify size={12} />}
+          title="Justify"
+          active={active.justifyFull}
+          onClick={() => exec("justifyFull")}
+        />
 
         {/* Lists */}
-        <ToolbarButton icon={<List size={12} />} title="Bullet List" active={active.unorderedList} onClick={() => exec("insertUnorderedList")} />
-        <ToolbarButton icon={<ListOrdered size={12} />} title="Numbered List" active={active.orderedList} onClick={() => exec("insertOrderedList")} />
+        <ToolbarButton
+          icon={<List size={12} />}
+          title="Bullet List"
+          active={active.unorderedList}
+          onClick={() => exec("insertUnorderedList")}
+        />
+        <ToolbarButton
+          icon={<ListOrdered size={12} />}
+          title="Numbered List"
+          active={active.orderedList}
+          onClick={() => exec("insertOrderedList")}
+        />
 
         {/* Table */}
         <ToolbarButton icon={<Table size={12} />} title="Insert Table" onClick={insertTable} />
 
-        {/* ✅ NEW - GDoc button (conditional) */}
+        {/* GDoc button */}
         {gdoc && (
           <button
             type="button"
@@ -289,7 +389,12 @@ export default function RichTextAdvanced({
         ref={ref}
         contentEditable
         suppressContentEditableWarning
-        onFocus={() => setIsFocused(true)}
+        onFocus={() => {
+          setIsFocused(true);
+          // sync right away when focusing
+          setHeading(getCurrentBlockTag());
+          updateActiveStates();
+        }}
         onBlur={() => setIsFocused(false)}
         onInput={handleInput}
         onPaste={handlePaste}
@@ -298,7 +403,7 @@ export default function RichTextAdvanced({
         data-placeholder={placeholder}
       />
 
-      {/* ✅ NEW - GDoc Modal */}
+      {/* GDoc Modal */}
       {gdocOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
           <div
@@ -309,7 +414,9 @@ export default function RichTextAdvanced({
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Link2 size={16} className="text-emerald-400" />
-                <p className="text-sm font-semibold">Import from Google Doc (Public)</p>
+                <p className="text-sm font-semibold">
+                  Import from Google Doc (Public)
+                </p>
               </div>
 
               <button
@@ -323,7 +430,8 @@ export default function RichTextAdvanced({
             </div>
 
             <p className="text-xs text-gray-300 mb-3">
-              Paste a <b>public/published</b> Google Doc link .
+              Paste your shared Google Doc link. This only works on the{" "}
+              <b>shared/public</b> version.
             </p>
 
             <input
@@ -337,10 +445,17 @@ export default function RichTextAdvanced({
               <div className="mt-2 rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-200">
                 {gdocError}
                 <div className="text-[11px] text-gray-300 mt-1">
-                  set doc to <b>Anyone with the link (Viewer)</b> or <b>Publish to web</b>.
+                  Set doc to <b>Anyone with the link (Viewer)</b> or{" "}
+                  <b>Publish to web</b>.
                 </div>
               </div>
             )}
+
+            <p className="mt-2 rounded-md border-l-4 border-amber-400 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
+              ⚠️ <span className="font-semibold">Warning:</span> This action
+              will <span className="font-semibold">overwrite</span> your current
+              backstory.
+            </p>
 
             <div className="mt-4 flex items-center justify-end gap-2">
               <button
@@ -365,7 +480,7 @@ export default function RichTextAdvanced({
         </div>
       )}
 
-      {/* Scoped global CSS */}
+      {/* CSS */}
       <style jsx global>{`
         [contenteditable][data-placeholder]:empty:before {
           content: attr(data-placeholder);
@@ -373,6 +488,7 @@ export default function RichTextAdvanced({
           pointer-events: none;
         }
 
+        /* Base editor */
         [contenteditable] {
           font-family: inherit;
           font-size: 12px;
@@ -380,36 +496,32 @@ export default function RichTextAdvanced({
           color: #f3f4f6;
         }
 
+        /* Default heading styles (manual content / non-gdoc) */
         [contenteditable] h1 {
           font-size: 26px;
           font-weight: 700;
           margin: 0.75rem 0;
         }
-
         [contenteditable] h2 {
           font-size: 24px;
           font-weight: 600;
           margin: 0.6rem 0;
         }
-
         [contenteditable] h3 {
           font-size: 21px;
           font-weight: 600;
           margin: 0.5rem 0;
         }
-
         [contenteditable] h4 {
           font-size: 18px;
           font-weight: 500;
           margin: 0.4rem 0;
         }
-
         [contenteditable] h5 {
           font-size: 15px;
           font-weight: 500;
           margin: 0.3rem 0;
         }
-
         [contenteditable] h6 {
           font-size: 12px;
           font-weight: 500;
@@ -425,13 +537,11 @@ export default function RichTextAdvanced({
           margin: 0.5rem 0 0.5rem 1.5rem;
           padding-left: 1rem;
         }
-
         [contenteditable] ol {
           list-style-type: decimal;
           margin: 0.5rem 0 0.5rem 1.5rem;
           padding-left: 1rem;
         }
-
         [contenteditable] li {
           margin: 0.2rem 0;
         }
@@ -441,10 +551,52 @@ export default function RichTextAdvanced({
           border: 1px solid gray;
           margin-top: 4px;
         }
-
         [contenteditable] td {
           border: 1px solid gray;
           padding: 6px;
+        }
+
+        /* ===========================
+           ✅ GDoc-only font sizing
+           =========================== */
+
+        /* Body text inside imported GDoc wrapper forced to 12px */
+        [contenteditable] [data-gdoc] {
+          font-size: 12px !important; /* text-xs */
+          line-height: 1.6 !important;
+        }
+
+        /* Prevent Google Docs inline font-size from overriding */
+        [contenteditable] [data-gdoc] * {
+          font-size: inherit !important;
+          line-height: inherit !important;
+          font-family: inherit !important;
+        }
+
+        /* Keep headings inside GDoc as headings (override the inherit rule) */
+        [contenteditable] [data-gdoc] h1 {
+          font-size: 26px !important;
+          font-weight: 700;
+        }
+        [contenteditable] [data-gdoc] h2 {
+          font-size: 24px !important;
+          font-weight: 600;
+        }
+        [contenteditable] [data-gdoc] h3 {
+          font-size: 21px !important;
+          font-weight: 600;
+        }
+        [contenteditable] [data-gdoc] h4 {
+          font-size: 18px !important;
+          font-weight: 500;
+        }
+        [contenteditable] [data-gdoc] h5 {
+          font-size: 15px !important;
+          font-weight: 500;
+        }
+        [contenteditable] [data-gdoc] h6 {
+          font-size: 12px !important;
+          font-weight: 500;
         }
       `}</style>
     </div>

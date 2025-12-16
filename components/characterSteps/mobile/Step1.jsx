@@ -614,34 +614,38 @@ export default function Step1({ data = {}, onChange }) {
                 icon="ruler"
                 text="Character height detail."
               />
+
               <div className="flex gap-2 items-end">
                 {data.height_unit === "imperial" ? (
                   <div className="flex gap-2 flex-1">
                     <input
                       type="number"
                       placeholder="Feet"
-                      value={data.height?.feet || ""}
+                      value={data.height?.feet ?? ""}
                       min={0}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const val = e.target.value;
                         onChange("height", {
-                          ...data.height,
-                          feet: e.target.value,
-                        })
-                      }
+                          ...(data.height || {}),
+                          feet: val,
+                        });
+                      }}
                       className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
+
                     <input
                       type="number"
                       placeholder="Inch"
-                      value={data.height?.inch || ""}
+                      value={data.height?.inch ?? ""}
                       min={0}
                       max={11}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const val = e.target.value;
                         onChange("height", {
-                          ...data.height,
-                          inch: e.target.value,
-                        })
-                      }
+                          ...(data.height || {}),
+                          inch: val,
+                        });
+                      }}
                       className="w-1/2 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
                   </div>
@@ -649,24 +653,32 @@ export default function Step1({ data = {}, onChange }) {
                   <input
                     type="number"
                     placeholder="Cm"
-                    value={data.height?.centimeter || ""}
-                    onChange={(e) =>
+                    value={data.height?.centimeter ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
                       onChange("height", {
-                        ...data.height,
-                        centimeter: e.target.value,
-                      })
-                    }
+                        ...(data.height || {}),
+                        centimeter: val,
+                      });
+                    }}
                     className="flex-1 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
                 )}
 
                 <select
-                  value={data.height_unit || ""}
+                  value={data.height_unit || "metric"}
                   onChange={(e) => {
-                    const newUnit = e.target.value;
-                    onChange("height_unit", newUnit);
-                    const newHeight = { feet: "", inch: "", centimeter: "" };
-                    onChange("height", newHeight);
+                    const unit = e.target.value;
+
+                    onChange("height_unit", unit);
+
+                    // reset height sama seperti weight
+                    onChange(
+                      "height",
+                      unit === "imperial"
+                        ? { feet: "", inch: "", centimeter: "" }
+                        : { feet: "", inch: "", centimeter: "" }
+                    );
                   }}
                   className="w-20 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-xs"
                 >
