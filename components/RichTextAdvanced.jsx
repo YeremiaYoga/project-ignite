@@ -337,7 +337,7 @@ export default function RichTextAdvanced({
               <div className="mt-2 rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-200">
                 {gdocError}
                 <div className="text-[11px] text-gray-300 mt-1">
-                  Tip: set doc to <b>Anyone with the link (Viewer)</b> or <b>Publish to web</b>.
+                  set doc to <b>Anyone with the link (Viewer)</b> or <b>Publish to web</b>.
                 </div>
               </div>
             )}
