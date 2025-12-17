@@ -444,7 +444,6 @@ export default function Step5({ data, allData, onChange }) {
             />
           )}
 
-          {/* Abilities dari Combat Style */}
           {selectedStyle?.abilities?.length > 0 && (
             <div className="mt-4">
               <div className="text-xs text-gray-400 mb-1">Abilities</div>

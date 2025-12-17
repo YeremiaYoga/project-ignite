@@ -1,8 +1,9 @@
-// app/characters-maker/view/[privateId]/page.jsx
+// app/characters-maker/view/[publicId]/page.jsx
 import { Suspense } from "react";
 import CharacterView from "./components/CharacterView";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+
 function htmlToPlainText(html = "") {
   if (!html) return "";
   return html
@@ -37,8 +38,9 @@ function extractChaptersFromBackstory(html = "") {
 }
 
 function mkAbility(val) {
-  const num = typeof val === "number" ? val : 10;
-  return { score: num, mod: Math.floor((num - 10) / 2) };
+  const num = typeof val === "number" ? val : Number(val);
+  const safe = Number.isFinite(num) ? num : 10;
+  return { score: safe, mod: Math.floor((safe - 10) / 2) };
 }
 
 function safeArr(v) {
@@ -83,6 +85,38 @@ function lbsToKg(lbs) {
   return Math.round((Number(lbs) || 0) / 2.20462);
 }
 
+/**
+ * VISIBILITY RULES (yang dipakai):
+ * - full_name_visibility
+ * - backstory_visibility
+ * - fear_weakness_visibility
+ * - motivation_visibility
+ * - apperance_visibility
+ * - hobbies_visibility
+ *
+ * Kecuali wiki_visibility: IGNORE
+ * Incumbency: JANGAN dimasking dulu
+ */
+function isVisible(flag) {
+  // default: kalau flag missing => dianggap visible
+  return flag !== false;
+}
+function unknown() {
+  return "Unknown";
+}
+function unknownObj() {
+  return { name: "Unknown", notes: "", status: "Unknown", relationship: "" };
+}
+function unknownQuoteObj() {
+  return { quote: "Unknown", author: "Unknown" };
+}
+function unknownFWObj() {
+  return { name: "Unknown", from: "" };
+}
+function unknownMotObj() {
+  return { motivation: "Unknown", from: "", how: "" };
+}
+
 function mapDbCharacterToViewModel(db, idFromRoute) {
   if (!db) {
     return {
@@ -113,20 +147,29 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
     };
   }
 
-  console.log(db);
+  const VIS = {
+    full_name: isVisible(db.full_name_visibility),
+    backstory: isVisible(db.backstory_visibility),
+    fear_weakness: isVisible(db.fear_weakness_visibility),
+    motivation: isVisible(db.motivation_visibility),
+    appearance: isVisible(db.apperance_visibility),
+    hobbies: isVisible(db.hobbies_visibility),
+  };
 
-  const name =
-    (db.full_name_visibility ? db.full_name : null) ||
-    db.full_name ||
-    db.name ||
-    "Unknown Name";
+  // =========================
+  // IDENTITY (mask full name)
+  // =========================
+  const name = VIS.full_name
+    ? (db.full_name || db.full_name || db.name || "Unknown Name")
+    : "Unknown Name";
+
   const subtitle = `${db.race_name || "Unknown Race"} ${
     db.background_name || ""
   }`.trim()
     ? `${db.race_name || "Unknown Race"} ${db.background_name || ""} from ${
         db.main_resident?.resident || db.birth_place || "-"
       }`
-    : TEMPLATE_CHARACTER.subtitle;
+    : "-";
 
   const quote =
     typeof db.notable_quotes === "string" ? db.notable_quotes.trim() : "";
@@ -135,8 +178,8 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
   const token_url = db.token_image || "";
 
   const type = db.character_type || "NPC";
-
   const role = `${db.background_name || "-"} • ${db.status || "-"}`;
+
   const ability_scores = {
     STR: mkAbility(db.str),
     DEX: mkAbility(db.dex),
@@ -146,15 +189,24 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
     CHA: mkAbility(db.cha),
   };
 
-  const chapters =
-    typeof db.backstory === "string" && db.backstory.trim()
+  // =========================
+  // BACKSTORY (mask chapters)
+  // =========================
+  const chapters = VIS.backstory
+    ? typeof db.backstory === "string" && db.backstory.trim()
       ? extractChaptersFromBackstory(db.backstory)
-      : [];
+      : []
+    : [{ title: "Backstory", body: unknown() }];
+
   const side_notes =
     typeof db.side_notes === "string" && db.side_notes.trim()
       ? db.side_notes.trim()
       : "";
 
+  // =========================
+  // HEIGHT / WEIGHT
+  // (NO visibility gate, karena kamu cuma minta yang ada *_visibility)
+  // =========================
   const hFt = db.height?.feet;
   const hIn = db.height?.inch;
   const hCm = db.height?.centimeter;
@@ -168,7 +220,6 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
     heightVal = `${hFt || 0}' ${hIn || 0}" (${cm} cm)`;
   }
 
-  // Weight convert kg ↔ lbs
   const wKg = db.weight?.kilogram;
   const wLbs = db.weight?.pounds;
 
@@ -181,6 +232,10 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
     weightVal = `${wLbs} lbs (${kg} kg)`;
   }
 
+  // =========================
+  // BIRTH / DEATH
+  // (NO visibility gate)
+  // =========================
   const birthPlace =
     db.birth_place || db.birth_country
       ? `${db.birth_place || ""}${
@@ -213,6 +268,11 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
       : "-";
   const otherResList = safeArr(db.other_resident);
 
+  // =========================
+  // BIO DATA
+  // - Full Name masked by full_name_visibility
+  // - Appearance masked by apperance_visibility
+  // =========================
   const bio_data = [
     { label: "Full Name", value: name },
     { label: "Also Known As", value: db.name || "-" },
@@ -248,7 +308,6 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
       ? [{ label: "Other Resident", items: otherResList }]
       : []),
 
-    // Occupations with and-rule
     {
       label: "Current Occupation",
       value: joinWithAnd(safeArr(db.current_occupation)),
@@ -258,13 +317,21 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
       value: joinWithAnd(safeArr(db.previous_occupation)),
     },
 
-    ...(db.apperance ? [{ label: "Appearance", value: db.apperance }] : []),
+    // ✅ Appearance masking
+    ...(VIS.appearance
+      ? db.apperance
+        ? [{ label: "Appearance", value: db.apperance }]
+        : []
+      : [{ label: "Appearance", value: unknown() }]),
 
     ...(safeArr(db.notable_details).length
       ? [{ label: "Notable Details", items: safeArr(db.notable_details) }]
       : []),
   ];
 
+  // =========================
+  // RELATIONSHIP DATA (NO visibility gate)
+  // =========================
   const familyItems = safeArr(db.family);
   const parentItems = familyItems.filter((item) => {
     if (!item) return false;
@@ -338,7 +405,6 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
     { label: "Notable Quotes", items: quote ? [quote] : [] },
     { label: "Quotes About Them", items: quotesOthersList },
 
-    // ✅ INI YANG BARU
     ...(connectionEvents.length
       ? [
           {
@@ -374,35 +440,48 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
     { label: "Signature Weapons", items: signatureWeaponList },
   ];
 
-  const fearsItems = safeArr(db.fear_weakness)
-    .map((fw) => ({
-      name: fw?.fear_weak || fw?.["fear/weak"] || "",
-      from: fw?.from || "",
-    }))
-    .filter((x) => String(x.name).trim().length > 0);
+  // =========================
+  // FEARS & WEAKNESS (mask fear_weakness_visibility)
+  // =========================
+  const fearsItems = VIS.fear_weakness
+    ? safeArr(db.fear_weakness)
+        .map((fw) => ({
+          name: fw?.fear_weak || fw?.["fear/weak"] || fw?.fear_weakness || "",
+          from: fw?.from || "",
+        }))
+        .filter((x) => String(x.name).trim().length > 0)
+    : [unknownFWObj()];
 
-  const motivationItems = safeArr(db.motivation)
-    .map((m) => ({
-      motivation: m?.motivation || "",
-      from: m?.from || "",
-      how: m?.how || "",
-    }))
-    .filter((x) => String(x.motivation).trim().length > 0);
+  // =========================
+  // MOTIVATION (mask motivation_visibility)
+  // =========================
+  const motivationItems = VIS.motivation
+    ? safeArr(db.motivation)
+        .map((m) => ({
+          motivation: m?.motivation || "",
+          from: m?.from || "",
+          how: m?.how || "",
+        }))
+        .filter((x) => String(x.motivation).trim().length > 0)
+    : [unknownMotObj()];
+
+  // =========================
+  // HOBBIES (mask hobbies_visibility)
+  // =========================
+  const hobbiesItems = VIS.hobbies ? safeArr(db.hobbies) : [unknown()];
 
   const personality_data = [
-    // { label: "Main Personality", value: db.main_personality },
     { label: "Main Personality", value: db.main_personality },
     { label: "Personality", items: safeArr(db.detailed_personality) },
     { label: "Fears & Weakness", items: fearsItems },
     { label: "Motivation", items: motivationItems },
-    { label: "Hobbies", items: safeArr(db.hobbies) },
+    { label: "Hobbies", items: hobbiesItems },
   ];
 
-  // ================= META DATA (dipindah dari Bio) =================
+  // ================= META DATA =================
   const meta_data = [
     { label: "Voice Style", value: db.voice_style },
 
-    // ✅ NEW: youtube links
     { label: "Main Theme", value: db.main_theme || "" },
     { label: "Combat Theme", value: db.combat_theme || "" },
 
@@ -423,48 +502,47 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
     chapters,
     side_notes,
     ability_scores,
+
+    // ✅ incumbency tidak dimasking dulu (sesuai permintaan)
     incumbency: db.incumbency || null,
-    // split tetap
+
     bio_data,
     relationship_data,
     details_data,
     combat_data,
     personality_data,
     meta_data,
+
     private_id: db.private_id || idFromRoute,
     public_id: db.public_id || db.publicId || "",
   };
 }
 
-/* ================= SERVER COMPONENT ================= */
+async function CharacterDetailContent({ params }) {
+  const { publicId } = await params;
 
-async function CharacterDetailContent(props) {
-  const { privateId } = await props.params;
 
-  const res = await fetch(`${API_BASE}/characters/private/${privateId}`, {
+  const res = await fetch(`${API_BASE}/characters/public/${publicId}`, {
     method: "GET",
     cache: "no-store",
-    credentials: "include",
   });
 
   if (!res.ok) {
-    const character = mapDbCharacterToViewModel(null, privateId);
+    const character = mapDbCharacterToViewModel(null, publicId);
     return <CharacterView character={character} />;
   }
 
   const json = await res.json();
   const dbChar = json?.data || null;
 
-  const character = mapDbCharacterToViewModel(dbChar, privateId);
+  const character = mapDbCharacterToViewModel(dbChar, publicId);
   return <CharacterView character={character} />;
 }
 
 export default function CharacterDetailPage(props) {
   return (
     <Suspense
-      fallback={
-        <div className="p-6 text-gray-200 text-sm">Loading character…</div>
-      }
+      fallback={<div className="p-6 text-gray-200 text-sm">Loading…</div>}
     >
       <CharacterDetailContent {...props} />
     </Suspense>

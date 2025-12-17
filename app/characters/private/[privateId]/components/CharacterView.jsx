@@ -65,8 +65,6 @@ export default function CharacterView({ character }) {
       ta.remove();
     }
 
-
-
     setShareOpen(false);
   };
 
@@ -1104,7 +1102,6 @@ export default function CharacterView({ character }) {
     <main className="min-h-screen bg-[#050816] text-gray-100">
       <div className="relative max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between gap-3 mb-6 text-sm">
-          {/* LEFT: Overview */}
           <div className="flex flex-wrap items-center gap-2">
             {["Overview"].map((tab, idx) => {
               const isActive = idx === 0;
@@ -1124,7 +1121,7 @@ export default function CharacterView({ character }) {
             })}
           </div>
 
-          <div className="relative">
+          {/* <div className="relative">
             <button
               type="button"
               onClick={() => setShareOpen((v) => !v)}
@@ -1133,7 +1130,6 @@ export default function CharacterView({ character }) {
               Share
             </button>
 
-            {/* Mini modal */}
             {shareOpen && (
               <div
                 className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-[#0b1120] shadow-xl overflow-hidden z-50"
@@ -1143,7 +1139,6 @@ export default function CharacterView({ character }) {
                   Share Options
                 </div>
 
-                {/* PUBLIC */}
                 <button
                   type="button"
                   onClick={() => shareUrl("public")}
@@ -1160,7 +1155,6 @@ export default function CharacterView({ character }) {
                   </div>
                 </button>
 
-                {/* PRIVATE */}
                 <button
                   type="button"
                   onClick={() => shareUrl("private")}
@@ -1186,10 +1180,9 @@ export default function CharacterView({ character }) {
                 </button>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
 
-        {/* TITLE + QUOTE */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-semibold text-[#f7ce8a] mb-1">
             {name}
@@ -1208,12 +1201,9 @@ export default function CharacterView({ character }) {
           )}
         </div>
 
-        {/* MAIN GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
-          {/* LEFT */}
-          <LeftChapters chapters={chapters} side_notes={side_notes} />
 
-          {/* RIGHT */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
+          <LeftChapters chapters={chapters} side_notes={side_notes} />
           <RightSidebar
             name={name}
             type={type}

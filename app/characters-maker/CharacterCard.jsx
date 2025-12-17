@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Copy, Eye, EyeOff } from "lucide-react";
+import { Copy, Eye, EyeOff, Share2, Link, Lock } from "lucide-react";
 import { IBM_Plex_Mono } from "next/font/google";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -26,7 +26,12 @@ export default function CharacterCard({
 }) {
   const [remaining, setRemaining] = useState("");
   const [showPrivate, setShowPrivate] = useState(false);
+
+  // ✅ SHARE state
+  const [shareOpen, setShareOpen] = useState(false);
+
   console.log(char);
+
   useEffect(() => {
     if (!isTrash || !char.deleted_at) return;
 
@@ -56,6 +61,41 @@ export default function CharacterCard({
     const interval = setInterval(calculateRemaining, 1000);
     return () => clearInterval(interval);
   }, [char.deleted_at, isTrash]);
+
+  // ✅ Share URL helper (public/private)
+  const shareUrl = async (mode) => {
+    const base = typeof window !== "undefined" ? window.location.origin : "";
+
+    const publicId = char?.public_id || char?.publicId || "";
+    const privateId = char?.private_id || char?.privateId || "";
+
+    const url =
+      mode === "public"
+        ? publicId
+          ? `${base}/characters/${publicId}`
+          : ""
+        : privateId
+        ? `${base}/characters/private/${privateId}`
+        : "";
+
+    if (!url) return;
+
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+
+    setShareOpen(false);
+  };
+
+  const publicDisabled = !(char?.public_id || char?.publicId);
+  const privateDisabled = !(char?.private_id || char?.privateId);
 
   return (
     <div
@@ -171,6 +211,70 @@ export default function CharacterCard({
             >
               View
             </button>
+
+            {/* ✅ SHARE di sebelah View */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShareOpen((v) => !v)}
+                className="p-2 bg-slate-800 text-white rounded hover:bg-slate-900 inline-flex items-center gap-2"
+              >
+                <Share2 size={18} />
+              </button>
+
+              {shareOpen && (
+                <>
+                  {/* click-outside overlay */}
+                  <button
+                    type="button"
+                    onClick={() => setShareOpen(false)}
+                    className="fixed inset-0 z-40 cursor-default"
+                    aria-label="Close share menu"
+                  />
+
+                  <div className="absolute left-0 z-50 mt-2 w-52 overflow-hidden rounded-md border border-slate-700 bg-white shadow-xl">
+                    <button
+                      type="button"
+                      onClick={() => shareUrl("public")}
+                      disabled={publicDisabled}
+                      className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs ${
+                        publicDisabled
+                          ? "cursor-not-allowed text-gray-400"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                      title={
+                        publicDisabled
+                          ? "No public_id available"
+                          : "Copy Public Link"
+                      }
+                    >
+                      <Link size={14} />
+                      Copy Public Link
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => shareUrl("private")}
+                      disabled={privateDisabled}
+                      className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs ${
+                        privateDisabled
+                          ? "cursor-not-allowed text-gray-400"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                      title={
+                        privateDisabled
+                          ? "No private_id available"
+                          : "Copy Private Link"
+                      }
+                    >
+                      <Lock size={14} />
+                      Copy Private Link
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
               onClick={() => onEdit?.(char.uuid)}
               className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700"

@@ -1,305 +1,464 @@
-// app/characters/[id]/page.jsx
+// app/characters-maker/view/[privateId]/page.jsx
 import { Suspense } from "react";
-import CharacterView from "../../components/CharacterView";
+import CharacterView from "./components/CharacterView";
 
-// Komponen async yang pakai params + siapkan DUMMY data
-async function CharacterDetailContent({ params }) {
-  // Sesuai warning Next: params diperlakukan async
-  const { id } = await params;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+function htmlToPlainText(html = "") {
+  if (!html) return "";
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/h[1-6]>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
-  // === DUMMY DATA SEMENTARA ===
-  const character = {
-    id,
-    name: "Elyra Mondralin",
-    subtitle: "Human Artisan from Takao",
-    quote:
-      "“If every life is a thread, then maybe Talia doesn't just weave us forward and protect us. Maybe She listens to us, too.”",
-    portrait_url:
-      "http://019a0f6bb5a27dc5b6ab32a19a8ad5d6.phanneldeliver.my.id/characters/ojbOUkwRojYraXc1fK/1762759335406MjhCwvb8.png",
-    token_url:
-      "http://019a0f6bb5a27dc5b6ab32a19a8ad5d6.phanneldeliver.my.id/characters/ojbOUkwRojYraXc1fK/1765345940856ObRxWaz4.webp",
-    type: "NPC",
-    role: "Artisan",
+function extractChaptersFromBackstory(html = "") {
+  if (!html) return [];
+  const chapters = [];
+  const regex = /<h1[^>]*>([\s\S]*?)<\/h1>([\s\S]*?)(?=<h1|\s*$)/gi;
 
-    // ====== ABILITY SCORES (DETAILS TAB) ======
-    ability_scores: {
-      STR: { score: 8, mod: -1 },
-      DEX: { score: 10, mod: 0 },
-      CON: { score: 12, mod: 1 },
-      INT: { score: 14, mod: 2 },
-      WIS: { score: 14, mod: 2 },
-      CHA: { score: 15, mod: 2 },
-    },
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    const rawTitle = match[1] || "";
+    const bodyHtml = match[2] || "";
+    const title = htmlToPlainText(rawTitle).replace(/\n+/g, " ").trim();
+    const body = htmlToPlainText(bodyHtml).trim();
+    if (title || body) chapters.push({ title: title || "Chapter", body });
+  }
 
-    // ====== CHAPTERS (LEFT SIDE) ======
-    chapters: [
-      {
-        title: "Chapter I: Early Life & Takao",
-        body: `In the quiet valley of Takao of the Country Delstainvia, among its hills stood a small cloth and clothes shop, owned by two kind souls Astaria Edenria (Father) and Liebhaberin Endenria (Mother) from the distant land of Mondral.
+  if (!chapters.length) {
+    const body = htmlToPlainText(html);
+    if (body) return [{ title: "Backstory", body }];
+  }
 
-Their daughter, Elyra Edenria, grew up among threads and laughter. Hands always dusted with dye, hair smelling faintly of lavender and smoke. Her parents taught her the art of weaving, but also its patience. "A good cloth," her mother would say, "isn't made by force. It listens. It waits." Elyra believed her mother was talking about more than fabric.
+  return chapters;
+}
 
-Sometimes, as she worked the loom, she'd pause to watch how a single misplaced thread could change the whole pattern. "Maybe people are like that too," she thought. "Each one changes the world, even just a little."`,
-      },
-      {
-        title: "Chapter II: The Pathstrider of Talia",
-        body: `The Edenria family kept a small shrine above their hearth. A polished silver mirror, framed with brass. It was a humble altar to Talia, the Weaver, the goddess who bound past, present, and future through her eternal loom.
+function mkAbility(val) {
+  const num = typeof val === "number" ? val : 10;
+  return { score: num, mod: Math.floor((num - 10) / 2) };
+}
 
-"If every life is a thread," she often wondered, "then maybe Talia doesn't just weave us forward and protect us. Maybe She listens to us, too.... Although she is the Silent Goddess, hard for me to tell haha" Which she laugh nervously to.
+function safeArr(v) {
+  return Array.isArray(v) ? v : [];
+}
 
-On still evenings whenever she is alone, the candle burned low, Elyra sometimes thought she saw her reflection blink a moment too late, or smile just before she did. It frightened her once. Then it comforted her now. She doesn't know why it does, but it makes her feel safe.`,
-      },
-      {
-        title: "Chapter III: The Plagues Which Pull Her Threads",
-        body: `The peace of Takao rarely changed, which is until several travelers from the East came. They spoke of a strange magical plague spreading through Delstainvia's borderlands: spells failing, reflections moving on their own, and people losing whole days of memory as if time itself had skipped.
+function fmtDate(v) {
+  if (!v) return "-";
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
 
-Most in the village dismissed it as distant rumor as there are only a couple of folks who bestow this tale. But when Elyra prayed that night, the flame before Talia's mirror bent sideways, and for an instant, she saw the reflection of her own hands, unraveling into light. "Something is off... This is not just a simple rumor... This is something else," she whispered.
+function joinWithAnd(arr = []) {
+  const a = safeArr(arr)
+    .map((x) => String(x).trim())
+    .filter(Boolean);
 
-No voice answered her, but she felt it. A gentle pull, like the tug of a thread asking to be followed. That quiet, patient feeling she'd always known at the loom was now inside her, urging her to move.`,
-      },
-      {
-        title: "Chapter IV: The Reason She Walks",
-        body: `Elyra left Takao at dawn. The sky was pale and the river mist low. She carried only what she could: a travel cloak, her prayer mirror wrapped in cloth, a spool of blue silk tied around her wrist, and her mother's quiet blessing. "If the world is fraying," Liebhaberin told her, "then mend it where you can, my love. Even a single stitch can save a pattern."
+  if (a.length === 0) return "-";
+  if (a.length === 1) return a[0];
+  if (a.length === 2) return `${a[0]}, and ${a[1]}`;
+  return `${a.slice(0, -1).join(", ")}, and ${a[a.length - 1]}`;
+}
 
-Her father, Astaria, pressed a hand to her shoulder. "Please stay safe..." he said softly although trying to act tough as he doesn't want to show weakness towards his own daughter in this uncertain time, but he knew there is high chance she might get hurt if she head East.
+function cmToFtIn(cm) {
+  const totalIn = Number(cm) / 2.54;
+  const ft = Math.floor(totalIn / 12);
+  const inch = Math.round(totalIn - ft * 12);
+  return { ft, inch };
+}
+function ftInToCm(ft, inch) {
+  const totalIn = (Number(ft) || 0) * 12 + (Number(inch) || 0);
+  return Math.round(totalIn * 2.54);
+}
+function kgToLbs(kg) {
+  return Math.round((Number(kg) || 0) * 2.20462);
+}
+function lbsToKg(lbs) {
+  return Math.round((Number(lbs) || 0) / 2.20462);
+}
 
-She then walk forward towards the direction East heading towards a meeting place where she may meet with someone who have been searching for Adventurer to help out the situation of the Magical Plague which many dismiss, but she wish to give it a try.`,
+function mapDbCharacterToViewModel(db, idFromRoute) {
+  if (!db) {
+    return {
+      id: idFromRoute,
+      name: "Unknown Name",
+      subtitle: "-",
+      quote: "",
+      portrait_url: "",
+      token_url: "",
+      type: "NPC",
+      role: "",
+      chapters: [],
+      ability_scores: {
+        STR: mkAbility(10),
+        DEX: mkAbility(10),
+        CON: mkAbility(10),
+        INT: mkAbility(10),
+        WIS: mkAbility(10),
+        CHA: mkAbility(10),
       },
-    ],
+      incumbency: null,
+      bio_data: [],
+      relationship_data: [],
+      details_data: [],
+      combat_data: [],
+      personality_data: [],
+      meta_data: [],
+    };
+  }
 
-    // =====================================================================
-    // ============================ TAB BIO ================================
-    // =====================================================================
+  console.log(db);
 
-    // grid kiri-kanan
-    basic_info: [
-      { label: "Full Name", value: "Elyra Mondralin" },
-      { label: "Also Known As", value: "Elyra Edenria" },
-      { label: "Race", value: "Human" },
-      { label: "Gender", value: "Female (She/Her)" },
-      { label: "Alignment", value: "Lawful Good" },
-      { label: "Birthplace", value: "Takao, Delstainvia" },
-      { label: "Born", value: "1620 AC" },
-      { label: "Height", value: `5'6"` },
-      { label: "Weight", value: "121 lbs" },
-      { label: "Skin", value: "Pale Fair White" },
-      { label: "Hair", value: "Black" },
-    ],
+  const name =
+    (db.full_name_visibility ? db.full_name : null) ||
+    db.full_name ||
+    db.name ||
+    "Unknown Name";
+  const subtitle = `${db.race_name || "Unknown Race"} ${
+    db.background_name || ""
+  }`.trim()
+    ? `${db.race_name || "Unknown Race"} ${db.background_name || ""} from ${
+        db.main_resident?.resident || db.birth_place || "-"
+      }`
+    : TEMPLATE_CHARACTER.subtitle;
 
-    // blok tambahan bio di bawah basic_info
-    bio_info: [
-      {
-        label: "Core Identity",
-        items: [
-          "Gentle artisan raised in a family-run cloth and dye shop.",
-          "Devoted follower of Talia, the Weaver.",
-          "Guided by visions and subtle omens from mirrors and threads.",
-        ],
-      },
-      {
-        label: "Faith & Devotion",
-        items: [
-          "Maintains a personal shrine to Talia using a silver mirror framed with brass.",
-          "Often interprets small coincidences as guidance from the Silent Goddess.",
-        ],
-      },
-    ],
+  const quote =
+    typeof db.notable_quotes === "string" ? db.notable_quotes.trim() : "";
 
-    // meta info bio (Type, Status, Titles, dll + Created / Created By)
-    meta_info: [
-      { label: "NPC Info", value: "NPC, currently alive." },
-      { label: "Type", value: "NPC" },
-      { label: "Status", value: "Alive" },
-      {
-        label: "Titles",
-        items: [
-          "Pathstrider of Talia",
-          "Daughter of the Loom",
-          "Threadweaver of Takao",
-          "The Mirror's Friend",
-        ],
-      },
-      { label: "Background", value: "Artisan" },
-      {
-        label: "Deity",
-        value: "Talia, the Weaver (The Silent Goddess)",
-      },
-      {
-        label: "Factions & Affiliations",
-        items: ["Follower of Talia, the Weaver"],
-      },
-      { label: "World", value: "Delstainvia" },
-      { label: "Campaign", value: "The Magical Plague" },
-      { label: "Level", value: "Commoner (Level 1)" },
-      {
-        label: "Current Occupation",
-        value: "Wandering Pilgrim and Adventurer",
-      },
-      {
-        label: "Previous Occupation",
-        value: "Weaver and Cloth Shop Assistant",
-      },
-      {
-        label: "Residence",
-        value: "Takao, Delstainvia (former)",
-      },
-      {
-        label: "Economic Standing",
-        value: "Modest / Working Class",
-      },
-      {
-        label: "Social Class",
-        value: "Commoners / Workers",
-      },
-      {
-        label: "Personality",
-        items: [
-          "Kind, patient, and contemplative.",
-          "Friendly and gentle in disposition.",
-          "Curious about the mysteries of magic and reality.",
-        ],
-      },
-      { label: "Created", value: "November 10, 2024" },
-      { label: "Created By", value: "Candle Note" },
-    ],
+  const portrait_url = db.art_image || "";
+  const token_url = db.token_image || "";
 
-    // =====================================================================
-    // ========================= TAB RELATIONSHIP ==========================
-    // =====================================================================
+  const type = db.character_type || "NPC";
 
-    relationship_info: [
-      {
-        label: "Parents",
-        items: [
-          "Astaria Edenria (Father) – Cloth merchant from Mondral.",
-          "Liebhaberin Endenria (Mother) – Master weaver and dyer.",
-        ],
-      },
-      {
-        label: "Family Members",
-        items: [
-          "Astaria Edenria (Father) – Manages trade and travelling routes.",
-          "Liebhaberin Endenria (Mother) – Designer of unique dyed fabrics.",
-        ],
-      },
-      {
-        label: "Friends",
-        items: [
-          "Mirabel Thornweave – Childhood friend in Takao.",
-          "Archivist Valindra – Mentor figure who nurtured Elyra's curiosity about magic and history.",
-        ],
-      },
-      {
-        label: "Allies",
-        items: [
-          "The Harpers – Potential contacts encountered during her journey.",
-          "Local priests of Talia in various temples across Delstainvia.",
-        ],
-      },
-      {
-        label: "Enemies",
-        items: [
-          "Unknown forces behind the Magical Plague.",
-          "Those who would exploit the weakening of reality for personal gain.",
-        ],
-      },
-    ],
-
-    // =====================================================================
-    // ============================ TAB DETAILS ============================
-    // =====================================================================
-
-    details_info: [
-      {
-        label: "Size",
-        value: "Medium",
-      },
-      {
-        label: "Creature Type",
-        value: "Humanoid",
-      },
-      {
-        label: "Skills",
-        items: [
-          "Investigation (trained)",
-          "Persuasion (proficient)",
-          "Medicine (proficient)",
-          "Athletics (trained)",
-        ],
-      },
-      {
-        label: "Signature Object",
-        value: "Silver prayer mirror framed in brass, dedicated to Talia.",
-      },
-      {
-        label: "Signature Weapon",
-        value: "Simple quarterstaff (for travel).",
-      },
-      {
-        label: "Notable Items",
-        items: [
-          "Prayer mirror of Talia (heirloom).",
-          "Spool of blue silk (tied around her wrist).",
-          "Travel cloak (gift from parents).",
-          "Weaver's toolkit.",
-        ],
-      },
-      {
-        label: "Motivation",
-        items: [
-          "To understand the magical plague threatening Delstainvia and prevent the unraveling of reality itself.",
-          "To prove that even common folk can mend what has been broken.",
-        ],
-      },
-      {
-        label: "Fears & Weaknesses",
-        items: [
-          "Losing control of the thread visions she experiences.",
-          "Failing to stop the plague and watching her homeland suffer.",
-          "Being unable to interpret Talia's silent guidance.",
-          "The possibility that fate cannot be changed.",
-        ],
-      },
-      {
-        label: "Hobbies",
-        items: [
-          "Weaving intricate patterns and tapestries.",
-          "Studying ancient texts about fate and divination.",
-          "Mirror meditation and prayer.",
-          "Collecting unusual threads and dyes.",
-        ],
-      },
-      {
-        label: "Notable Accomplishments",
-        items: [
-          "Successfully predicted a minor magical disturbance through thread divination.",
-          "Left home to pursue a greater calling despite her fears.",
-          "Recognized by Talia through visions in the mirror.",
-        ],
-      },
-      {
-        label: "Notable Quotes",
-        items: [
-          `"A good cloth isn't made by force. It listens. It waits."`,
-          `"Maybe people are like threads too. Each one changes the world, even just a little."`,
-          `"Something is off... This is not just a simple rumor... This is something else."`,
-        ],
-      },
-      {
-        label: "Quotes About Her",
-        items: [
-          `"That girl sees things others don't. Always staring at patterns like they're talking to her." – Village elder`,
-          `"If the world is fraying, then mend it where you can, my love. Even a single stitch can save a pattern." – Liebhaberin Endenria (mother)`,
-          `"Please stay safe..." – Astaria Edenria (father)`,
-        ],
-      },
-    ],
+  const role = `${db.background_name || "-"} • ${db.status || "-"}`;
+  const ability_scores = {
+    STR: mkAbility(db.str),
+    DEX: mkAbility(db.dex),
+    CON: mkAbility(db.con),
+    INT: mkAbility(db.int),
+    WIS: mkAbility(db.wis),
+    CHA: mkAbility(db.cha),
   };
 
+  const chapters =
+    typeof db.backstory === "string" && db.backstory.trim()
+      ? extractChaptersFromBackstory(db.backstory)
+      : [];
+  const side_notes =
+    typeof db.side_notes === "string" && db.side_notes.trim()
+      ? db.side_notes.trim()
+      : "";
+
+  const hFt = db.height?.feet;
+  const hIn = db.height?.inch;
+  const hCm = db.height?.centimeter;
+
+  let heightVal = "-";
+  if (hCm && Number(hCm) > 0) {
+    const { ft, inch } = cmToFtIn(hCm);
+    heightVal = `${hCm} cm (${ft}' ${inch}")`;
+  } else if (hFt || hIn) {
+    const cm = ftInToCm(hFt, hIn);
+    heightVal = `${hFt || 0}' ${hIn || 0}" (${cm} cm)`;
+  }
+
+  // Weight convert kg ↔ lbs
+  const wKg = db.weight?.kilogram;
+  const wLbs = db.weight?.pounds;
+
+  let weightVal = "-";
+  if (wKg && Number(wKg) > 0) {
+    const lbs = kgToLbs(wKg);
+    weightVal = `${wKg} kg (${lbs} lbs)`;
+  } else if (wLbs) {
+    const kg = lbsToKg(wLbs);
+    weightVal = `${wLbs} lbs (${kg} kg)`;
+  }
+
+  const birthPlace =
+    db.birth_place || db.birth_country
+      ? `${db.birth_place || ""}${
+          db.birth_country ? `, ${db.birth_country}` : ""
+        }`.trim()
+      : "-";
+
+  const bornVal = db.birth_year
+    ? `${db.birth_year}${
+        db.birth_year_type ? ` ${db.birth_year_type}` : ""
+      }`.trim()
+    : "-";
+
+  const deathVal = db.death_year
+    ? `${db.death_year}${
+        db.death_year_type ? ` ${db.death_year_type}` : ""
+      }`.trim()
+    : "";
+
+  const titlesList = safeArr(db.titles)
+    .map((t) =>
+      t?.name ? `${t.name}${t.from ? ` from ${t.from}` : ""}` : null
+    )
+    .filter(Boolean);
+
+  const mainRes = db.main_resident;
+  const mainResVal =
+    mainRes?.resident && mainRes?.country
+      ? `${mainRes.resident}, ${mainRes.country}`
+      : "-";
+  const otherResList = safeArr(db.other_resident);
+
+  const bio_data = [
+    { label: "Full Name", value: name },
+    { label: "Also Known As", value: db.name || "-" },
+
+    { label: "Spesies/Race", value: db.race_name || "-" },
+
+    {
+      label: "Gender",
+      value:
+        db.gender && db.pronoun
+          ? `${db.gender} (${db.pronoun})`
+          : db.gender || "-",
+    },
+    { label: "Alignment", value: db.alignment || "-" },
+
+    { label: "Birthplace", value: birthPlace },
+    { label: "Status", value: db.status || "-" },
+    { label: "Born", value: bornVal },
+    ...(deathVal ? [{ label: "Death", value: deathVal }] : []),
+
+    { label: "Height", value: heightVal },
+    { label: "Weight", value: weightVal },
+
+    { label: "Skin", value: db.skin_colour || "-" },
+    { label: "Hair", value: db.hair || "-" },
+
+    ...(titlesList.length ? [{ label: "Titles", items: titlesList }] : []),
+
+    { label: "Wayfarer (Path)", value: db.wayfarer || "-" },
+
+    { label: "Current Residents", value: mainResVal },
+    ...(otherResList.length
+      ? [{ label: "Other Resident", items: otherResList }]
+      : []),
+
+    // Occupations with and-rule
+    {
+      label: "Current Occupation",
+      value: joinWithAnd(safeArr(db.current_occupation)),
+    },
+    {
+      label: "Previous Occupation",
+      value: joinWithAnd(safeArr(db.previous_occupation)),
+    },
+
+    ...(db.apperance ? [{ label: "Appearance", value: db.apperance }] : []),
+
+    ...(safeArr(db.notable_details).length
+      ? [{ label: "Notable Details", items: safeArr(db.notable_details) }]
+      : []),
+  ];
+
+  const familyItems = safeArr(db.family);
+  const parentItems = familyItems.filter((item) => {
+    if (!item) return false;
+    const rel = String(item.relationship || "").toLowerCase();
+    return rel === "mother" || rel === "father" || rel === "parent";
+  });
+
+  const relationship_data = [
+    ...(parentItems.length ? [{ label: "Parents", items: parentItems }] : []),
+    { label: "Family", items: familyItems },
+    { label: "Friends", items: safeArr(db.friends) },
+    { label: "Allies", items: safeArr(db.allies) },
+    { label: "Enemies", items: safeArr(db.enemies) },
+    { label: "Subordinates", items: safeArr(db.subordinates) },
+    { label: "Affiliations", items: safeArr(db.affiliations) },
+    { label: "Special Relationships", items: safeArr(db.special_relationship) },
+  ];
+
+  // ================= SHARED (for Combat) =================
+  const skills =
+    safeArr(db.skill_prof).length > 0
+      ? db.skill_prof
+          .map((s) => {
+            const name = s?.name ? String(s.name) : "";
+            const v = typeof s?.value === "number" ? s.value : 0;
+            const suffix = v > 0 ? " (trained)" : v < 0 ? " (penalty)" : "";
+            return `${name}${suffix}`.trim();
+          })
+          .filter(Boolean)
+      : [];
+
+  const signatureWeaponList = safeArr(db.signature_weapon);
+
+  const signatureObjectList = safeArr(db.signature_object);
+  const accomplishmentsList = safeArr(db.notable_accomplishments);
+
+  const quotesOthersList = safeArr(db.quotes_from_others)
+    .map((q) => ({
+      quote: q?.quote || "",
+      author: q?.author || "Unknown",
+    }))
+    .filter((x) => x.quote);
+
+  const connectionEvents = Array.isArray(db.connection_towards_events)
+    ? db.connection_towards_events
+    : [];
+
+  const details_data = [
+    { label: "Vision", value: db.vision || "-" },
+    { label: "Disposition", value: db.disposition || "-" },
+
+    { label: "Nationality", value: db.nationality || db.birth_country || "-" },
+
+    {
+      label: "Previous Economical Standing",
+      value: db.previous_economical_standing || "-",
+    },
+    {
+      label: "Current Economical Standing",
+      value: db.current_last_economical_standing || "-",
+    },
+    {
+      label: "Previous Social Classes",
+      value: db.previous_social_classes || "-",
+    },
+    {
+      label: "Current Social Classes",
+      value: db.current_social_classes || "-",
+    },
+
+    { label: "Notable Quotes", items: quote ? [quote] : [] },
+    { label: "Quotes About Them", items: quotesOthersList },
+
+    // ✅ INI YANG BARU
+    ...(connectionEvents.length
+      ? [
+          {
+            label: "Connections Towards Events",
+            items: connectionEvents,
+          },
+        ]
+      : []),
+
+    { label: "Signature Objects", items: signatureObjectList },
+    { label: "Notable Accomplishments", items: accomplishmentsList },
+  ];
+
+  const isNpc = String(db.character_type || "").toLowerCase() === "npc";
+
+  const cv = Number(db.combat_value ?? db.level ?? 0);
+  const crVal = cv ? cv / 2 : null;
+  const levelVal = isNpc
+    ? crVal !== null
+      ? `CR ${Number.isInteger(crVal) ? crVal : crVal.toFixed(1)}`
+      : "-"
+    : db.level ?? "-";
+
+  const combat_data = [
+    { label: "Ability Scores" },
+    { label: "Level", value: levelVal },
+    { label: "Size", value: db.size?.general || "-" },
+    { label: "Creature Type", value: db.creature_type || "-" },
+
+    { label: "Damage Type", value: db.damage_type || "-" },
+
+    { label: "Skills", items: skills },
+    { label: "Signature Weapons", items: signatureWeaponList },
+  ];
+
+  const fearsItems = safeArr(db.fear_weakness)
+    .map((fw) => ({
+      name: fw?.fear_weak || fw?.["fear/weak"] || "",
+      from: fw?.from || "",
+    }))
+    .filter((x) => String(x.name).trim().length > 0);
+
+  const motivationItems = safeArr(db.motivation)
+    .map((m) => ({
+      motivation: m?.motivation || "",
+      from: m?.from || "",
+      how: m?.how || "",
+    }))
+    .filter((x) => String(x.motivation).trim().length > 0);
+
+  const personality_data = [
+    // { label: "Main Personality", value: db.main_personality },
+    { label: "Main Personality", value: db.main_personality },
+    { label: "Personality", items: safeArr(db.detailed_personality) },
+    { label: "Fears & Weakness", items: fearsItems },
+    { label: "Motivation", items: motivationItems },
+    { label: "Hobbies", items: safeArr(db.hobbies) },
+  ];
+
+  // ================= META DATA (dipindah dari Bio) =================
+  const meta_data = [
+    { label: "Voice Style", value: db.voice_style },
+
+    // ✅ NEW: youtube links
+    { label: "Main Theme", value: db.main_theme || "" },
+    { label: "Combat Theme", value: db.combat_theme || "" },
+
+    { label: "Created", value: fmtDate(db.created_at) },
+    { label: "Created By", value: db.creator_name || "-" },
+    { label: "Modified At", value: fmtDate(db.updated_at) },
+  ];
+
+  return {
+    id: db.id || idFromRoute,
+    name,
+    subtitle: subtitle || "-",
+    quote,
+    portrait_url,
+    token_url,
+    type,
+    role,
+    chapters,
+    side_notes,
+    ability_scores,
+    incumbency: db.incumbency || null,
+    // split tetap
+    bio_data,
+    relationship_data,
+    details_data,
+    combat_data,
+    personality_data,
+    meta_data,
+    private_id: db.private_id || idFromRoute,
+    public_id: db.public_id || db.publicId || "",
+  };
+}
+
+/* ================= SERVER COMPONENT ================= */
+
+async function CharacterDetailContent(props) {
+  const { privateId } = await props.params;
+
+  const res = await fetch(`${API_BASE}/characters/private/${privateId}`, {
+    method: "GET",
+    cache: "no-store",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const character = mapDbCharacterToViewModel(null, privateId);
+    return <CharacterView character={character} />;
+  }
+
+  const json = await res.json();
+  const dbChar = json?.data || null;
+
+  const character = mapDbCharacterToViewModel(dbChar, privateId);
   return <CharacterView character={character} />;
 }
 
-// Page utama pakai Suspense
 export default function CharacterDetailPage(props) {
   return (
     <Suspense

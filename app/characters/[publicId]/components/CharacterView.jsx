@@ -25,8 +25,6 @@ export default function CharacterView({ character }) {
     ability_scores = {},
     incumbency = null,
   } = character || {};
-  const hasPublic = !!(character?.public_id || character?.publicId);
-  const hasPrivate = !!(character?.private_id || character?.privateId);
 
   const token_url =
     tokenFromDb ||
@@ -34,41 +32,6 @@ export default function CharacterView({ character }) {
 
   const [activeImageTab, setActiveImageTab] = useState("portrait");
   const [activeInfoTab, setActiveInfoTab] = useState("Bio");
-
-  const [shareOpen, setShareOpen] = useState(false);
-
-  const shareUrl = async (mode) => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-
-    const publicId = character?.public_id || character?.publicId || "";
-    const privateId = character?.private_id || character?.privateId || "";
-
-    const url =
-      mode === "public"
-        ? publicId
-          ? `${base}/characters/${publicId}`
-          : ""
-        : privateId
-        ? `${base}/characters/private/${privateId}`
-        : "";
-
-    if (!url) return;
-
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch (e) {
-      const ta = document.createElement("textarea");
-      ta.value = url;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
-    }
-
-
-
-    setShareOpen(false);
-  };
 
   const isPlainObject = (v) => v && typeof v === "object" && !Array.isArray(v);
 
@@ -429,7 +392,7 @@ export default function CharacterView({ character }) {
   const getAbilityDesc = (ab) => ab?.description || ab?.desc || ab?.text || "";
 
   const renderIncumbencySection = () => {
-    console.log(incumbency);
+
     if (!incumbency || !incumbency.name) {
       return (
         <div className="text-[12px] text-slate-500 italic">
@@ -1101,10 +1064,9 @@ export default function CharacterView({ character }) {
   };
 
   return (
-    <main className="min-h-screen bg-[#050816] text-gray-100">
-      <div className="relative max-w-7xl mx-auto px-6 py-8">
+    <main className="min-h-screen bg-[#050816] text-gray-100 w-full max-w-7xl">
+      <div className="relative w-full mx-auto px-6 py-8">
         <div className="flex items-center justify-between gap-3 mb-6 text-sm">
-          {/* LEFT: Overview */}
           <div className="flex flex-wrap items-center gap-2">
             {["Overview"].map((tab, idx) => {
               const isActive = idx === 0;
@@ -1123,73 +1085,8 @@ export default function CharacterView({ character }) {
               );
             })}
           </div>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShareOpen((v) => !v)}
-              className="px-4 py-1.5 rounded-full border border-slate-700 bg-[#0b1120] text-slate-200 hover:bg-[#111827] hover:text-[#f7ce8a] transition"
-            >
-              Share
-            </button>
-
-            {/* Mini modal */}
-            {shareOpen && (
-              <div
-                className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-[#0b1120] shadow-xl overflow-hidden z-50"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="px-3 py-2 text-[11px] text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                  Share Options
-                </div>
-
-                {/* PUBLIC */}
-                <button
-                  type="button"
-                  onClick={() => shareUrl("public")}
-                  disabled={!hasPublic}
-                  className={[
-                    "w-full text-left px-3 py-2 text-sm transition",
-                    "hover:bg-[#111827] text-slate-100",
-                    !hasPublic ? "opacity-50 cursor-not-allowed" : "",
-                  ].join(" ")}
-                >
-                  Share Public
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    Share public character page
-                  </div>
-                </button>
-
-                {/* PRIVATE */}
-                <button
-                  type="button"
-                  onClick={() => shareUrl("private")}
-                  disabled={!hasPrivate}
-                  className={[
-                    "w-full text-left px-3 py-2 text-sm transition border-t border-slate-800",
-                    "hover:bg-[#111827] text-slate-100",
-                    !hasPrivate ? "opacity-50 cursor-not-allowed" : "",
-                  ].join(" ")}
-                >
-                  Share Private
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    Share private character page
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShareOpen(false)}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-[#111827] transition text-slate-300 border-t border-slate-800"
-                >
-                  Close
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* TITLE + QUOTE */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-semibold text-[#f7ce8a] mb-1">
             {name}
@@ -1208,12 +1105,8 @@ export default function CharacterView({ character }) {
           )}
         </div>
 
-        {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
-          {/* LEFT */}
           <LeftChapters chapters={chapters} side_notes={side_notes} />
-
-          {/* RIGHT */}
           <RightSidebar
             name={name}
             type={type}
