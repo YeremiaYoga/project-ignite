@@ -69,14 +69,17 @@ export default function CharacterCard({
     const publicId = char?.public_id || char?.publicId || "";
     const privateId = char?.private_id || char?.privateId || "";
 
-    const url =
-      mode === "public"
-        ? publicId
-          ? `${base}/characters/${publicId}`
-          : ""
-        : privateId
-        ? `${base}/characters/private/${privateId}`
-        : "";
+    const url = (() => {
+      if (mode === "public") {
+        return publicId ? `${base}/characters/${publicId}` : "";
+      }
+
+      if (mode === "area") {
+        return privateId ? `${base}/characters/area/${privateId}` : "";
+      }
+
+      return privateId ? `${base}/characters/private/${privateId}` : "";
+    })();
 
     if (!url) return;
 
@@ -270,6 +273,24 @@ export default function CharacterCard({
                       <Lock size={14} />
                       Copy Private Link
                     </button>
+                    {/* <button
+                      type="button"
+                      onClick={() => shareUrl("area")}
+                      disabled={privateDisabled}
+                      className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs ${
+                        privateDisabled
+                          ? "cursor-not-allowed text-gray-400"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                      title={
+                        privateDisabled
+                          ? "No private_id available"
+                          : "Copy Private Link"
+                      }
+                    >
+                      <Lock size={14} />
+                      Copy Area Link
+                    </button> */}
                   </div>
                 </>
               )}

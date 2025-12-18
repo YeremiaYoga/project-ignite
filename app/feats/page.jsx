@@ -1,17 +1,17 @@
-import fs from "fs";
-import path from "path";
-import FeatsClient from "./FeatsClient";
+// app/feats/page.jsx
+import { Suspense } from "react";
+import FoundryFeatView from "./FoundryFeatView";
 
-export default function FeatsPage() {
-  const dir = path.join(process.cwd(), "data/feats");
-
-  const folders = fs.readdirSync(dir);
-
-  const feats = folders.map((folder) => {
-    const filePath = path.join(dir, folder, "featData.json");
-    const raw = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(raw);
-  });
-
-  return <FeatsClient feats={feats} />;
+export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-slate-200">
+          Loading feats...
+        </div>
+      }
+    >
+      <FoundryFeatView />
+    </Suspense>
+  );
 }
