@@ -1,6 +1,6 @@
 // spellMeta.js
 
-// SCHOOL MAP
+
 export const SCHOOL_MAP = {
   abj: "Abjuration",
   con: "Conjuration",
