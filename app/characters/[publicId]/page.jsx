@@ -351,17 +351,19 @@ function mapDbCharacterToViewModel(db, idFromRoute) {
   ];
 
   // ================= SHARED (for Combat) =================
-  const skills =
-    safeArr(db.skill_prof).length > 0
-      ? db.skill_prof
-          .map((s) => {
-            const name = s?.name ? String(s.name) : "";
-            const v = typeof s?.value === "number" ? s.value : 0;
-            const suffix = v > 0 ? " (trained)" : v < 0 ? " (penalty)" : "";
-            return `${name}${suffix}`.trim();
-          })
-          .filter(Boolean)
-      : [];
+  const PROF_MAP = {
+    0.5: "Half Proficient",
+    1: "Proficient",
+    2: "Expertise",
+  };
+
+  const skills = (db.skill_prof || [])
+    .map((s) => {
+      const name = s?.name || "";
+      const label = PROF_MAP[s?.value] ? ` (${PROF_MAP[s.value]})` : "";
+      return `${name}${label}`.trim();
+    })
+    .filter(Boolean);
 
   const signatureWeaponList = safeArr(db.signature_weapon);
 
