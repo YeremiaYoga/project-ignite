@@ -8,8 +8,8 @@ export default function RightSidebar({
   token_url,
   activeImageTab,
   setActiveImageTab,
-  activeInfoTab,
-  setActiveInfoTab,
+  // activeInfoTab,
+  // setActiveInfoTab,
   renderBioProfileTable,
   renderBlocks,
   renderRelationshipBlocks,
@@ -82,78 +82,61 @@ export default function RightSidebar({
             </div>
           </div>
 
-          {/* INFO TABS */}
+          {/* ALL INFO SECTIONS (NO TABS) */}
           <div className="border-t border-slate-800 bg-[#050816]">
-            <div className="flex border-b border-slate-800">
-              {["Bio", "Relationship", "Details"].map((t) => {
-                const isActive = activeInfoTab === t;
-                return (
-                  <button
-                    key={t}
-                    className={
-                      isActive
-                        ? "flex-1 px-3 py-2.5 text-xs md:text-sm font-medium bg-[#151a2b] text-[#f7ce8a]"
-                        : "flex-1 px-3 py-2.5 text-xs md:text-sm text-slate-400 hover:text-slate-100 hover:bg-[#101323] transition"
-                    }
-                    onClick={() => setActiveInfoTab(t)}
-                  >
-                    {t}
-                  </button>
-                );
-              })}
-            </div>
+            <div className="p-5 space-y-6 bg-[#050816]">
+              {/* BIO */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-semibold tracking-wide text-slate-300 uppercase">
+                  Bio
+                </h3>
+                {renderBioProfileTable()}
+                {renderBlocks(bioDataWithoutFactions)}
+              </section>
 
-            <div className="flex border-b border-slate-800">
-              {["Combat", "Personality", "Meta-Data"].map((t) => {
-                const isActive = activeInfoTab === t;
-                return (
-                  <button
-                    key={t}
-                    className={
-                      isActive
-                        ? "flex-1 px-3 py-2.5 text-xs md:text-sm font-medium bg-[#151a2b] text-[#f7ce8a]"
-                        : "flex-1 px-3 py-2.5 text-xs md:text-sm text-slate-400 hover:text-slate-100 hover:bg-[#101323] transition"
-                    }
-                    onClick={() => setActiveInfoTab(t)}
-                  >
-                    {t}
-                  </button>
-                );
-              })}
-            </div>
+              {/* RELATIONSHIP */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-semibold tracking-wide text-slate-300 uppercase">
+                  Relationship
+                </h3>
+                {renderRelationshipBlocks(combinedRelationshipData)}
+              </section>
 
-            {/* TAB CONTENT */}
-            <div className="p-5 space-y-5 bg-[#050816]">
-              {activeInfoTab === "Bio" && (
-                <div className="space-y-5">
-                  {renderBioProfileTable()}
-                  {renderBlocks(bioDataWithoutFactions)}
-                </div>
-              )}
+              {/* DETAILS */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-semibold tracking-wide text-slate-300 uppercase">
+                  Details
+                </h3>
+                {renderDetailsProfileTable()}
+                {renderBlocks(detailsDataWithoutProfile)}
+              </section>
 
-              {activeInfoTab === "Relationship" &&
-                renderRelationshipBlocks(combinedRelationshipData)}
+              {/* COMBAT */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-semibold tracking-wide text-slate-300 uppercase">
+                  Combat
+                </h3>
+                {renderAbilityScoresSection()}
+                {renderIncumbencySection()}
+                {renderCombatProfileTable()}
+                {renderBlocks(combatDataWithoutProfile)}
+              </section>
 
-              {activeInfoTab === "Details" && (
-                <>
-                  {renderDetailsProfileTable()}
-                  {renderBlocks(detailsDataWithoutProfile)}
-                </>
-              )}
+              {/* PERSONALITY */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-semibold tracking-wide text-slate-300 uppercase">
+                  Personality
+                </h3>
+                {renderBlocks(personality_data)}
+              </section>
 
-              {activeInfoTab === "Combat" && (
-                <div className="space-y-5">
-                  {renderAbilityScoresSection()}
-                  {renderIncumbencySection()}
-                  {renderCombatProfileTable()}
-                  {renderBlocks(combatDataWithoutProfile)}
-                </div>
-              )}
-
-              {activeInfoTab === "Personality" &&
-                renderBlocks(personality_data)}
-
-              {activeInfoTab === "Meta-Data" && renderMetaData()}
+              {/* META-DATA */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-semibold tracking-wide text-slate-300 uppercase">
+                  Meta-Data
+                </h3>
+                {renderMetaData()}
+              </section>
             </div>
           </div>
         </div>

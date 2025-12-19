@@ -48,8 +48,8 @@ export default function CharacterView({ character }) {
         return publicId ? `${base}/characters/${publicId}` : "";
       }
 
-      if (mode === "area") {
-        return privateId ? `${base}/characters/area/${privateId}` : "";
+      if (mode === "aria") {
+        return privateId ? `${base}/characters/aria/${privateId}` : "";
       }
 
       return privateId ? `${base}/characters/private/${privateId}` : "";
@@ -1177,9 +1177,9 @@ export default function CharacterView({ character }) {
                     Share private character page
                   </div>
                 </button>
-                {/* <button
+                <button
                   type="button"
-                  onClick={() => shareUrl("private")}
+                  onClick={() => shareUrl("aria")}
                   disabled={!hasPrivate}
                   className={[
                     "w-full text-left px-3 py-2 text-sm transition border-t border-slate-800",
@@ -1187,11 +1187,11 @@ export default function CharacterView({ character }) {
                     !hasPrivate ? "opacity-50 cursor-not-allowed" : "",
                   ].join(" ")}
                 >
-                  Share Area
+                  Share Aria
                   <div className="text-[11px] text-slate-400 mt-0.5">
-                    Share Area character page
+                    Share Aria character page
                   </div>
-                </button> */}
+                </button>
 
                 <button
                   type="button"

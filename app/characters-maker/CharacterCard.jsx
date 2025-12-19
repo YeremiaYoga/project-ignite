@@ -74,8 +74,8 @@ export default function CharacterCard({
         return publicId ? `${base}/characters/${publicId}` : "";
       }
 
-      if (mode === "area") {
-        return privateId ? `${base}/characters/area/${privateId}` : "";
+      if (mode === "aria") {
+        return privateId ? `${base}/characters/aria/${privateId}` : "";
       }
 
       return privateId ? `${base}/characters/private/${privateId}` : "";
@@ -273,9 +273,9 @@ export default function CharacterCard({
                       <Lock size={14} />
                       Copy Private Link
                     </button>
-                    {/* <button
+                    <button
                       type="button"
-                      onClick={() => shareUrl("area")}
+                      onClick={() => shareUrl("aria")}
                       disabled={privateDisabled}
                       className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs ${
                         privateDisabled
@@ -289,8 +289,8 @@ export default function CharacterCard({
                       }
                     >
                       <Lock size={14} />
-                      Copy Area Link
-                    </button> */}
+                      Copy Aria Link
+                    </button>
                   </div>
                 </>
               )}
