@@ -1,7 +1,7 @@
 // app/feats/FoundryFeatView.jsx
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Cookies from "js-cookie";
 import { SlidersHorizontal } from "lucide-react";
@@ -20,7 +20,8 @@ function makeSlug(feat) {
   return `feat-${name || "unknown"}`;
 }
 
-function getFeatSummary(feat) {
+// (masih ada kalau mau dipakai lagi nanti)
+export function getFeatSummary(feat) {
   const desc = (feat.description || feat.feat || "")
     .replace(/\s+/g, " ")
     .trim();
@@ -28,6 +29,33 @@ function getFeatSummary(feat) {
   if (desc.length <= 100) return desc;
   return desc.slice(0, 100) + "…";
 }
+
+// ambil level dari prerequisites
+function getFeatLevel(feat) {
+  const lvl =
+    feat?.prerequisites && typeof feat.prerequisites.level === "number"
+      ? feat.prerequisites.level
+      : null;
+  return lvl;
+}
+
+// ambil repeatable boolean
+function getFeatRepeatable(feat) {
+  return !!(feat?.prerequisites && feat.prerequisites.repeatable === true);
+}
+
+// ambil kind / type label (General, Origin, dll)
+function getFeatKind(feat) {
+  return (feat.subtype || feat.feat_type || "").trim();
+}
+
+// SORT OPTIONS – cuma name & level
+const SORT_OPTIONS = [
+  { value: "name_asc", label: "Name (A → Z)" },
+  { value: "name_desc", label: "Name (Z → A)" },
+  // { value: "level_asc", label: "Level (Low → High)" },
+  // { value: "level_desc", label: "Level (High → Low)" },
+];
 
 export default function FoundryFeatView() {
   const router = useRouter();
@@ -43,12 +71,15 @@ export default function FoundryFeatView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // 🔹 Filter: Level min/max, Kind (General/Origin), Repeatable (true/false)
   const [filters, setFilters] = useState({
-    type: "",
-    category: "",
+    type: [], // dari modal
+    levelMin: null,
+    levelMax: null,
+    repeatable: false,
   });
 
-  const [sortMode, setSortMode] = useState("created_desc");
+  const [sortMode, setSortMode] = useState("name_asc");
   const [filterOpen, setFilterOpen] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
@@ -93,14 +124,13 @@ export default function FoundryFeatView() {
     return () => clearTimeout(t);
   }, [search]);
 
-  // === FETCH FEATS (public vs private) ===
+  // === FETCH FEATS (tanpa filter level/kind/repeatable, itu client-side) ===
   useEffect(() => {
     async function fetchFeats() {
       try {
         setLoading(true);
         setError("");
 
-        // 🔹 sama seperti spells: cek cookie
         const isLoggedIn = !!Cookies.get("ignite-user-data");
         const baseUrl = isLoggedIn
           ? `${API_BASE}/ignite/feats/all`
@@ -111,10 +141,8 @@ export default function FoundryFeatView() {
         if (debouncedSearch.trim() !== "") {
           params.set("q", debouncedSearch.trim());
         }
-        if (filters.type) params.set("type", filters.type);
-        if (filters.category) params.set("category", filters.category);
 
-        // mapping sort mode ke sort_by + sort_order (sesuai controller)
+        // API sorting simpel (name / created), level sort di client kalau perlu
         let sort_by = "created_at";
         let sort_order = "desc";
 
@@ -127,19 +155,8 @@ export default function FoundryFeatView() {
             sort_by = "name";
             sort_order = "desc";
             break;
-          case "source_asc":
-            sort_by = "source";
-            sort_order = "asc";
-            break;
-          case "source_desc":
-            sort_by = "source";
-            sort_order = "desc";
-            break;
-          case "created_asc":
-            sort_by = "created_at";
-            sort_order = "asc";
-            break;
-          case "created_desc":
+          case "level_asc":
+          case "level_desc":
           default:
             sort_by = "created_at";
             sort_order = "desc";
@@ -165,7 +182,6 @@ export default function FoundryFeatView() {
 
         setFeats(arr);
 
-        // sync feat dari URL ?feat=...
         const urlSlug = searchParams.get("feat");
         if (urlSlug) {
           const found = arr.find((ft) => makeSlug(ft) === urlSlug);
@@ -175,7 +191,6 @@ export default function FoundryFeatView() {
           }
         }
 
-        // kalau sebelumnya sudah pilih, sinkron ke data baru
         if (selected) {
           const still = arr.find(
             (ft) => (ft.id || ft.name) === (selected.id || selected.name)
@@ -186,7 +201,6 @@ export default function FoundryFeatView() {
           }
         }
 
-        // default pilih pertama
         if (arr.length > 0) setSelected(arr[0]);
         else setSelected(null);
       } catch (err) {
@@ -201,7 +215,7 @@ export default function FoundryFeatView() {
 
     fetchFeats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, filters.type, filters.category, sortMode]);
+  }, [debouncedSearch, sortMode]);
 
   function handleSelect(feat, fromMobile = false) {
     setSelected(feat);
@@ -216,15 +230,73 @@ export default function FoundryFeatView() {
     }
   }
 
+  // === CLIENT-SIDE FILTER & LEVEL SORT ===
+  const processedFeats = useMemo(() => {
+    let arr = Array.isArray(feats) ? [...feats] : [];
+
+    // === FILTER: LEVEL RANGE ===
+    if (typeof filters.levelMin === "number") {
+      arr = arr.filter((ft) => {
+        const lvl = getFeatLevel(ft);
+        if (lvl == null) return false;
+        return lvl >= filters.levelMin;
+      });
+    }
+
+    if (typeof filters.levelMax === "number") {
+      arr = arr.filter((ft) => {
+        const lvl = getFeatLevel(ft);
+        if (lvl == null) return false;
+        return lvl <= filters.levelMax;
+      });
+    }
+
+    if (filters.type && filters.type.length > 0) {
+      const typeLower = filters.type.map((t) => t.toLowerCase());
+      arr = arr.filter((ft) => {
+        const kind = getFeatKind(ft).toLowerCase();
+        return kind && typeLower.includes(kind);
+      });
+    }
+
+    if (filters.repeatable) {
+      arr = arr.filter((ft) => getFeatRepeatable(ft) === true);
+    }
+
+    if (sortMode === "level_asc" || sortMode === "level_desc") {
+      arr.sort((a, b) => {
+        const la = getFeatLevel(a) ?? 0;
+        const lb = getFeatLevel(b) ?? 0;
+        return sortMode === "level_asc" ? la - lb : lb - la;
+      });
+    }
+
+    return arr;
+  }, [
+    feats,
+    filters.levelMin,
+    filters.levelMax,
+    filters.type,
+    filters.repeatable,
+    sortMode,
+  ]);
+
+  const hasActiveFilter =
+    (filters.type && filters.type.length > 0) ||
+    typeof filters.levelMin === "number" ||
+    typeof filters.levelMax === "number" ||
+    filters.repeatable === true;
+
   const ListBlock = (
     <>
       <div className="flex gap-2 mb-4 shrink-0">
+        {/* Search by name */}
         <div className="flex-1 relative">
           <input
             type="text"
-            placeholder="Search feats..."
+            placeholder="Search feats by name..."
             value={search}
-            // onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-xl pl-3 pr-3 py-2 text-xs outline-none 
               focus:ring-2 focus:ring-indigo-500/70 transition"
           />
@@ -235,30 +307,29 @@ export default function FoundryFeatView() {
           )}
         </div>
 
-        {/* Sort */}
-        {/* <select
+        {/* Sort: Name & Level only */}
+        <select
           value={sortMode}
           onChange={(e) => setSortMode(e.target.value)}
           className="hidden sm:block px-2 py-2 text-[11px] rounded-xl bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800"
         >
-          <option value="created_desc">Newest</option>
-          <option value="created_asc">Oldest</option>
-          <option value="name_asc">Name (A → Z)</option>
-          <option value="name_desc">Name (Z → A)</option>
-          <option value="source_asc">Source (A → Z)</option>
-          <option value="source_desc">Source (Z → A)</option>
-        </select> */}
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
 
         {/* Filter modal button */}
         <button
           type="button"
-        //   onClick={() => setFilterOpen(true)}
+          onClick={() => setFilterOpen(true)}
           className="relative p-2 text-xs font-medium bg-slate-900 border border-slate-700 rounded-xl 
             hover:bg-slate-800 hover:border-indigo-400 hover:text-indigo-200 transition flex items-center justify-center"
           aria-label="Open feat filter"
         >
           <SlidersHorizontal className="w-4 h-4" />
-          {(filters.type || filters.category) && (
+          {hasActiveFilter && (
             <span className="absolute -top-1 -right-1 bg-emerald-500 text-[#050b26] text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
               1
             </span>
@@ -277,7 +348,7 @@ export default function FoundryFeatView() {
               <div
                 key={i}
                 className="w-full px-4 py-3 flex items-center justify-between gap-3 text-xs 
-                    border-b border-slate-800/50 bg-slate-950/70 animate-pulse"
+                  border-b border-slate-800/50 bg-slate-950/70 animate-pulse"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-md bg-slate-800/80 border border-slate-700" />
@@ -290,17 +361,18 @@ export default function FoundryFeatView() {
             ))
           ) : error ? (
             <div className="p-4 text-xs text-rose-300">Error: {error}</div>
-          ) : feats.length === 0 ? (
+          ) : processedFeats.length === 0 ? (
             <div className="p-4 text-xs text-slate-400">No feats found.</div>
           ) : (
-            feats.map((feat) => {
+            processedFeats.map((feat) => {
               const key = feat.id || feat.name;
               const isActive =
                 selected &&
                 (selected.id || selected.name) === (feat.id || feat.name);
 
               const imgSrc = feat.image || "/assets/example_token.png";
-              const summary = getFeatSummary(feat);
+              const level = getFeatLevel(feat);
+              const kindLabel = getFeatKind(feat) || "";
 
               return (
                 <button
@@ -308,13 +380,13 @@ export default function FoundryFeatView() {
                   type="button"
                   onClick={() => handleSelect(feat, true)}
                   className={`w-full text-left px-4 py-3 flex items-center justify-between gap-3 text-xs 
-                        border-b border-slate-800/50 bg-gradient-to-r 
-                        ${
-                          isActive
-                            ? "from-indigo-600/40 to-slate-900/70"
-                            : "from-slate-950/80 to-slate-900/40 hover:from-slate-900 hover:to-slate-900/70"
-                        }
-                        transition`}
+                    border-b border-slate-800/50 bg-gradient-to-r 
+                    ${
+                      isActive
+                        ? "from-indigo-600/40 to-slate-900/70"
+                        : "from-slate-950/80 to-slate-900/40 hover:from-slate-900 hover:to-slate-900/70"
+                    }
+                    transition`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-md overflow-hidden border border-slate-600">
@@ -329,18 +401,28 @@ export default function FoundryFeatView() {
                     </div>
 
                     <div className="flex flex-col min-w-0">
+                      {/* Nama feat */}
                       <span className="font-semibold text-slate-100 break-words">
                         {feat.name || "Unnamed feat"}
                       </span>
-                      <span className="text-[11px] text-slate-300 break-words">
-                        {summary}
-                      </span>
+
+                      {/* Prereq level di bawah nama */}
+                      {typeof level === "number" && (
+                        <span className="text-[11px] text-slate-200">
+                          Prerequisites: Level {level}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  <div className="text-right text-[10px] text-slate-400 leading-tight shrink-0">
-                    {feat.source && (
-                      <div className="line-clamp-2">{feat.source}</div>
+           
+                  <div className="text-right text-[10px] text-slate-300 leading-tight shrink-0">
+                    {kindLabel && (
+                      <div className="inline-flex px-2 py-[2px] rounded-full border border-slate-600 bg-slate-900/70">
+                        <span className="uppercase tracking-wide">
+                          {kindLabel}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </button>
@@ -354,8 +436,8 @@ export default function FoundryFeatView() {
 
   return (
     <div className="min-h-screen text-slate-50 flex justify-center w-full">
-      <div className="w-full max-w-7xl h-[90vh] bg-slate-950/80 border border-slate-700 rounded-none shadow-xl backdrop-blur-md overflow-hidden">
-        {/* DESKTOP VIEW */}
+      <div className="w-full max-w-7xl h-[90vh] bg-slate-950/80 border border-slate-700 overflow-hidden">
+        {/* DESKTOP */}
         <div className="hidden md:flex gap-4 h-full">
           <div className="w-[30%] h-full bg-slate-900/80 border-slate-800 p-4 flex flex-col min-h-0">
             {ListBlock}
@@ -366,7 +448,7 @@ export default function FoundryFeatView() {
           </div>
         </div>
 
-        {/* MOBILE VIEW */}
+        {/* MOBILE */}
         <div
           className="md:hidden relative h-full flex flex-col min-h-0"
           onTouchStart={onTouchStart}

@@ -12,7 +12,6 @@ export const SCHOOL_MAP = {
   trs: "Transmutation",
 };
 
-// PROPERTY LABELS
 export const PROPERTY_LABELS = {
   vocal: "Vocal",
   verbal: "Vocal",

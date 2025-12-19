@@ -4,7 +4,7 @@
 import { useState } from "react";
 import LeftChapters from "./LeftChapters";
 import RightSidebar from "./RightSidebar";
-
+import { useRouter } from "next/navigation";
 export default function CharacterView({ character }) {
   const {
     name,
@@ -25,7 +25,8 @@ export default function CharacterView({ character }) {
     ability_scores = {},
     incumbency = null,
   } = character || {};
-  const hasPublic = !!(character?.public_id || character?.publicId);
+  const router = useRouter(); // ⬅️ DI SINI
+ 
   const hasPrivate = !!(character?.private_id || character?.privateId);
 
   const token_url =
@@ -37,35 +38,11 @@ export default function CharacterView({ character }) {
 
   const [shareOpen, setShareOpen] = useState(false);
 
-  const shareUrl = async (mode) => {
-    const base = typeof window !== "undefined" ? window.location.origin : "";
-
-    const publicId = character?.public_id || character?.publicId || "";
+  const handleGoAriaMode = () => {
     const privateId = character?.private_id || character?.privateId || "";
+    if (!privateId) return;
 
-    const url =
-      mode === "public"
-        ? publicId
-          ? `${base}/characters/${publicId}`
-          : ""
-        : privateId
-        ? `${base}/characters/private/${privateId}`
-        : "";
-
-    if (!url) return;
-
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch (e) {
-      const ta = document.createElement("textarea");
-      ta.value = url;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
-    }
-
-    setShareOpen(false);
+    router.push(`/characters/aria/${privateId}`);
   };
 
   const isPlainObject = (v) => v && typeof v === "object" && !Array.isArray(v);
@@ -1120,67 +1097,19 @@ export default function CharacterView({ character }) {
               );
             })}
           </div>
-
-          {/* <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShareOpen((v) => !v)}
-              className="px-4 py-1.5 rounded-full border border-slate-700 bg-[#0b1120] text-slate-200 hover:bg-[#111827] hover:text-[#f7ce8a] transition"
-            >
-              Share
-            </button>
-
-            {shareOpen && (
-              <div
-                className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-[#0b1120] shadow-xl overflow-hidden z-50"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="px-3 py-2 text-[11px] text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                  Share Options
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => shareUrl("public")}
-                  disabled={!hasPublic}
-                  className={[
-                    "w-full text-left px-3 py-2 text-sm transition",
-                    "hover:bg-[#111827] text-slate-100",
-                    !hasPublic ? "opacity-50 cursor-not-allowed" : "",
-                  ].join(" ")}
-                >
-                  Share Public
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    Share public character page
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => shareUrl("private")}
-                  disabled={!hasPrivate}
-                  className={[
-                    "w-full text-left px-3 py-2 text-sm transition border-t border-slate-800",
-                    "hover:bg-[#111827] text-slate-100",
-                    !hasPrivate ? "opacity-50 cursor-not-allowed" : "",
-                  ].join(" ")}
-                >
-                  Share Private
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    Share private character page
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShareOpen(false)}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-[#111827] transition text-slate-300 border-t border-slate-800"
-                >
-                  Close
-                </button>
-              </div>
-            )}
-          </div> */}
+          <button
+            type="button"
+            onClick={handleGoAriaMode}
+            disabled={!hasPrivate}
+            className={[
+              "px-4 py-1.5 rounded-full border text-sm transition",
+              hasPrivate
+                ? "border-slate-700 bg-[#0b1120] text-slate-200 hover:bg-[#111827] hover:text-[#f7ce8a]"
+                : "border-slate-800 bg-slate-900 text-slate-500 cursor-not-allowed",
+            ].join(" ")}
+          >
+            Aria Mode
+          </button>
         </div>
 
         <div className="mb-6">
@@ -1200,7 +1129,6 @@ export default function CharacterView({ character }) {
             </div>
           )}
         </div>
-
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
           <LeftChapters chapters={chapters} side_notes={side_notes} />
