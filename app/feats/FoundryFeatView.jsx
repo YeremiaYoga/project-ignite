@@ -20,7 +20,6 @@ function makeSlug(feat) {
   return `feat-${name || "unknown"}`;
 }
 
-// (masih ada kalau mau dipakai lagi nanti)
 export function getFeatSummary(feat) {
   const desc = (feat.description || feat.feat || "")
     .replace(/\s+/g, " ")
@@ -39,7 +38,7 @@ function getFeatLevel(feat) {
   return lvl;
 }
 
-// ambil repeatable boolean
+// ambil repeatable boolean (masih dipakai di detail/list kalau perlu)
 function getFeatRepeatable(feat) {
   return !!(feat?.prerequisites && feat.prerequisites.repeatable === true);
 }
@@ -53,8 +52,8 @@ function getFeatKind(feat) {
 const SORT_OPTIONS = [
   { value: "name_asc", label: "Name (A → Z)" },
   { value: "name_desc", label: "Name (Z → A)" },
-  // { value: "level_asc", label: "Level (Low → High)" },
-  // { value: "level_desc", label: "Level (High → Low)" },
+  { value: "level_asc", label: "Level (Low → High)" },
+  { value: "level_desc", label: "Level (High → Low)" },
 ];
 
 export default function FoundryFeatView() {
@@ -71,12 +70,12 @@ export default function FoundryFeatView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 🔹 Filter: Level min/max, Kind (General/Origin), Repeatable (true/false)
+  // 🔹 Filter: Feat Type, Level min/max, Repeatable
   const [filters, setFilters] = useState({
-    type: [], // dari modal
-    levelMin: null,
-    levelMax: null,
-    repeatable: false,
+    type: [], // ["Epic Boon", "Fighting Style", "General Feat", "Origin Feat"]
+    levelMin: null, // 0–20
+    levelMax: null, // 0–20
+    repeatable: false, // true / false
   });
 
   const [sortMode, setSortMode] = useState("name_asc");
@@ -124,7 +123,7 @@ export default function FoundryFeatView() {
     return () => clearTimeout(t);
   }, [search]);
 
-  // === FETCH FEATS (tanpa filter level/kind/repeatable, itu client-side) ===
+  // === FETCH FEATS – search + filter + sort via API ===
   useEffect(() => {
     async function fetchFeats() {
       try {
@@ -142,7 +141,27 @@ export default function FoundryFeatView() {
           params.set("q", debouncedSearch.trim());
         }
 
-        // API sorting simpel (name / created), level sort di client kalau perlu
+
+        if (filters.type && filters.type.length > 0) {
+  
+          params.set("feat_type", filters.type.join(","));
+        }
+
+
+        // 🎯 Level Range
+        if (typeof filters.levelMin === "number") {
+          params.set("level_min", String(filters.levelMin));
+        }
+        if (typeof filters.levelMax === "number") {
+          params.set("level_max", String(filters.levelMax));
+        }
+
+        // 🎯 Repeatable
+        if (filters.repeatable) {
+          params.set("repeatable", "true");
+        }
+
+        // 🎛 Sort: API handle name / created_at, level sort nanti di client
         let sort_by = "created_at";
         let sort_order = "desc";
 
@@ -168,7 +187,7 @@ export default function FoundryFeatView() {
 
         const query = params.toString();
         const url = query ? `${baseUrl}?${query}` : baseUrl;
-
+        console.log(url);
         const res = await fetch(url, {
           method: "GET",
           cache: "no-store",
@@ -182,6 +201,7 @@ export default function FoundryFeatView() {
 
         setFeats(arr);
 
+        // Sinkron selected dari URL / feat lama
         const urlSlug = searchParams.get("feat");
         if (urlSlug) {
           const found = arr.find((ft) => makeSlug(ft) === urlSlug);
@@ -215,7 +235,7 @@ export default function FoundryFeatView() {
 
     fetchFeats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, sortMode]);
+  }, [debouncedSearch, sortMode, filters]);
 
   function handleSelect(feat, fromMobile = false) {
     setSelected(feat);
@@ -230,38 +250,9 @@ export default function FoundryFeatView() {
     }
   }
 
-  // === CLIENT-SIDE FILTER & LEVEL SORT ===
+  // === CLIENT-SIDE: hanya untuk LEVEL SORT ===
   const processedFeats = useMemo(() => {
     let arr = Array.isArray(feats) ? [...feats] : [];
-
-    // === FILTER: LEVEL RANGE ===
-    if (typeof filters.levelMin === "number") {
-      arr = arr.filter((ft) => {
-        const lvl = getFeatLevel(ft);
-        if (lvl == null) return false;
-        return lvl >= filters.levelMin;
-      });
-    }
-
-    if (typeof filters.levelMax === "number") {
-      arr = arr.filter((ft) => {
-        const lvl = getFeatLevel(ft);
-        if (lvl == null) return false;
-        return lvl <= filters.levelMax;
-      });
-    }
-
-    if (filters.type && filters.type.length > 0) {
-      const typeLower = filters.type.map((t) => t.toLowerCase());
-      arr = arr.filter((ft) => {
-        const kind = getFeatKind(ft).toLowerCase();
-        return kind && typeLower.includes(kind);
-      });
-    }
-
-    if (filters.repeatable) {
-      arr = arr.filter((ft) => getFeatRepeatable(ft) === true);
-    }
 
     if (sortMode === "level_asc" || sortMode === "level_desc") {
       arr.sort((a, b) => {
@@ -272,14 +263,7 @@ export default function FoundryFeatView() {
     }
 
     return arr;
-  }, [
-    feats,
-    filters.levelMin,
-    filters.levelMax,
-    filters.type,
-    filters.repeatable,
-    sortMode,
-  ]);
+  }, [feats, sortMode]);
 
   const hasActiveFilter =
     (filters.type && filters.type.length > 0) ||
@@ -415,7 +399,6 @@ export default function FoundryFeatView() {
                     </div>
                   </div>
 
-           
                   <div className="text-right text-[10px] text-slate-300 leading-tight shrink-0">
                     {kindLabel && (
                       <div className="inline-flex px-2 py-[2px] rounded-full border border-slate-600 bg-slate-900/70">

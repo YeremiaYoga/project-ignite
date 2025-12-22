@@ -12,6 +12,7 @@ import {
   LogOut,
   Copy,
   Check,
+  SquareLibrary,
 } from "lucide-react";
 import ProfileModal from "./ProfileModal";
 import FriendListModal from "./FriendListModal"; // 🔹 NEW
@@ -437,15 +438,24 @@ export default function UserMenu() {
                   <BookUser className="w-4 h-4" />
                   <span>Characters</span>
                 </button>
-
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
                   }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left opacity-60 cursor-not-allowed"
                 >
+                  <SquareLibrary className="w-4 h-4" />
+                  <span>Group</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/creator");
+                  }}
+                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-800 transition text-left"
+                >
                   <Earth className="w-4 h-4" />
-                  <span>Campaigns / Worlds</span>
+                  <span>Creator Portal</span>
                 </button>
 
                 <button

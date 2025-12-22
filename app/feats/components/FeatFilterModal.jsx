@@ -1,4 +1,4 @@
-// app/feats/components/FeatFilterModal.jsx
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,15 +8,18 @@ import * as Slider from "@radix-ui/react-slider";
 const LEVEL_MIN_DEFAULT = 0;
 const LEVEL_MAX_DEFAULT = 20;
 
-// type feat yang bisa dipilih (bisa multiple)
-// untuk sekarang: General & Origin, nanti tinggal tambah kalau perlu
-const TYPE_OPTIONS = ["General", "Origin"];
+const TYPE_OPTIONS = [
+  { label: "General Feat", value: "general" },
+  { label: "Origin Feat", value: "origin" },
+  { label: "Epic Boon", value: "boon" },
+  { label: "Fighting Style", value: "fighting" },
+];
 
 const INITIAL_FILTERS = {
-  type: [], // multiple (["General","Origin",...])
+  type: [],
   levelMinIndex: LEVEL_MIN_DEFAULT,
   levelMaxIndex: LEVEL_MAX_DEFAULT,
-  repeatable: false, // toggle: hanya tampilkan feat repeatable
+  repeatable: false,
 };
 
 export default function FeatFilterModal({ onClose, onApply, value }) {
@@ -48,7 +51,7 @@ export default function FeatFilterModal({ onClose, onApply, value }) {
 
     return {
       ...INITIAL_FILTERS,
-      type: typeArr,
+      type: typeArr, // sekarang isinya value: "general" / "origin" / "boon" / "fighting"
       repeatable: !!base.repeatable,
       levelMinIndex,
       levelMaxIndex: Math.max(levelMinIndex, levelMaxIndex),
@@ -78,16 +81,16 @@ export default function FeatFilterModal({ onClose, onApply, value }) {
         : LEVEL_MAX_DEFAULT;
 
     onApply({
-      type: filters.type, // array, contoh: ["General","Origin"]
+      type: filters.type, // contoh: ["general"] atau ["boon"]
       levelMin,
       levelMax,
-      repeatable: !!filters.repeatable, // true = hanya feat repeatable
+      repeatable: !!filters.repeatable,
     });
 
     onClose?.();
   };
 
-  // toggle pill Type
+  // toggle pill Type (pakai value)
   const toggleType = (val) => {
     setFilters((prev) => {
       const current = prev.type || [];
@@ -99,7 +102,6 @@ export default function FeatFilterModal({ onClose, onApply, value }) {
     });
   };
 
-  // toggle repeatable
   const toggleRepeatable = () => {
     setFilters((prev) => ({
       ...prev,
@@ -107,7 +109,6 @@ export default function FeatFilterModal({ onClose, onApply, value }) {
     }));
   };
 
-  // value slider level
   const levelMinVal =
     typeof filters.levelMinIndex === "number"
       ? clamp(filters.levelMinIndex, LEVEL_MIN_DEFAULT, LEVEL_MAX_DEFAULT)
@@ -147,20 +148,20 @@ export default function FeatFilterModal({ onClose, onApply, value }) {
         </div>
 
         <div className="space-y-4">
-          {/* ===== TYPE (PILLS, MULTI) ===== */}
+          {/* ===== TYPE (PILLS) ===== */}
           <div>
             <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
               Type
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {TYPE_OPTIONS.map((val) => {
-                const active = filters.type.includes(val);
+              {TYPE_OPTIONS.map((opt) => {
+                const active = filters.type.includes(opt.value);
                 return (
                   <button
-                    key={val}
+                    key={opt.value}
                     type="button"
-                    // onClick={() => toggleType(val)}
+                    onClick={() => toggleType(opt.value)}
                     className={`px-2.5 py-1 rounded-md border text-xs transition
                       ${
                         active
@@ -168,13 +169,14 @@ export default function FeatFilterModal({ onClose, onApply, value }) {
                           : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
                       }`}
                   >
-                    {val}
+                    {opt.label}
                   </button>
                 );
               })}
             </div>
           </div>
 
+          {/* LEVEL RANGE */}
           <div className="border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
@@ -231,10 +233,10 @@ export default function FeatFilterModal({ onClose, onApply, value }) {
                   {levelMaxVal}
                 </span>
               </div>
-
-          
             </div>
           </div>
+
+          {/* REPEATABLE */}
           <div>
             <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
               Prerequisite Repeatable

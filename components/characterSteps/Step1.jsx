@@ -79,7 +79,8 @@ export default function Step1({ data = {}, onChange }) {
     if (!tokenPreview && data.token_image) setTokenPreview(data.token_image);
 
     if (data.art_image && !data.art) onChange("art", data.art_image);
-    if (data.token_image && !data.token_art) onChange("token_art", data.token_image);
+    if (data.token_image && !data.token_art)
+      onChange("token_art", data.token_image);
 
     if (data.main_theme_ogg && typeof data.main_theme_ogg === "string") {
       const mainUrl = data.main_theme_ogg.startsWith("http")
@@ -94,7 +95,6 @@ export default function Step1({ data = {}, onChange }) {
         : `${process.env.NEXT_PUBLIC_API_URL}${data.combat_theme_ogg}`;
       onChange("combat_theme_ogg", combatUrl);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     data.art_image,
     data.token_image,
@@ -102,9 +102,6 @@ export default function Step1({ data = {}, onChange }) {
     data.combat_theme_ogg,
   ]);
 
-  /* =========================
-     INIT: ids
-     ========================= */
   useEffect(() => {
     if (data.private_id || data.public_id) return;
 
@@ -127,16 +124,14 @@ export default function Step1({ data = {}, onChange }) {
 
     onChange("private_id", newPrivate);
     onChange("public_id", newPublic);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.private_id, data.public_id]);
 
-  /* =========================
-     FETCH: races + backgrounds
-     ========================= */
   useEffect(() => {
     async function fetchData() {
       try {
-        const resRaces = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/races`);
+        const resRaces = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/races`
+        );
         if (!resRaces.ok) throw new Error("Failed to fetch races");
         const races = await resRaces.json();
 
@@ -153,7 +148,9 @@ export default function Step1({ data = {}, onChange }) {
           `${process.env.NEXT_PUBLIC_API_URL}/api/backgrounds`
         );
         if (!resBackgrounds.ok)
-          throw new Error(`Failed to fetch backgrounds: ${resBackgrounds.status}`);
+          throw new Error(
+            `Failed to fetch backgrounds: ${resBackgrounds.status}`
+          );
 
         const backgrounds = await resBackgrounds.json();
 
@@ -215,10 +212,6 @@ export default function Step1({ data = {}, onChange }) {
     fetchSubraces();
   }, [data.race_id]);
 
-  /* =========================
-     ✅ AUTO NORMALIZE height/weight based on unit
-     - fixes case: unit imperial but only cm/kg filled
-     ========================= */
   useEffect(() => {
     // HEIGHT
     const hu = data.height_unit || "metric";
@@ -257,7 +250,12 @@ export default function Step1({ data = {}, onChange }) {
       onChange("weight", { ...(w || {}), kilogram: kg });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.height_unit, data.weight_unit, JSON.stringify(data.height), JSON.stringify(data.weight)]);
+  }, [
+    data.height_unit,
+    data.weight_unit,
+    JSON.stringify(data.height),
+    JSON.stringify(data.weight),
+  ]);
 
   /* =========================
      ACTIONS
@@ -358,7 +356,19 @@ export default function Step1({ data = {}, onChange }) {
           {/* TOKEN UPLOAD */}
           <div>
             <div className="flex items-center gap-4 text-sm">
-              <span className="font-medium">Token :</span>
+              <div>
+                <span className="font-medium">Token :</span>
+                <div className="mt-3 flex justify-end">
+                  <a
+                    href="/token-maker"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-xs text-white"
+                  >
+                    Token Maker
+                  </a>
+                </div>
+              </div>
               <div className="flex items-center gap-3 ml-auto">
                 <span className="text-gray-300 text-sm truncate max-w-[140px] sm:max-w-[200px]">
                   {data.token_art && typeof data.token_art === "object"
@@ -431,7 +441,10 @@ export default function Step1({ data = {}, onChange }) {
                   {showPrivate
                     ? data.private_id || privateId
                     : "•".repeat(
-                        Math.min((data.private_id || privateId)?.length || 8, 12)
+                        Math.min(
+                          (data.private_id || privateId)?.length || 8,
+                          12
+                        )
                       )}
                 </span>
               </div>
@@ -676,7 +689,11 @@ export default function Step1({ data = {}, onChange }) {
           {(data.status === "Dead" || data.status === "Unknown") && (
             <div>
               <LabelWithHint
-                label={data.status === "Unknown" ? "Presume Death Year" : "Death Year"}
+                label={
+                  data.status === "Unknown"
+                    ? "Presume Death Year"
+                    : "Death Year"
+                }
                 icon="clock"
                 text="The year your character passed away, if applicable. Leave blank if the character is still alive or their fate is unknown."
               />
@@ -691,7 +708,9 @@ export default function Step1({ data = {}, onChange }) {
                 {talesMode ? (
                   <select
                     value={data.death_year_type || ""}
-                    onChange={(e) => onChange("death_year_type", e.target.value)}
+                    onChange={(e) =>
+                      onChange("death_year_type", e.target.value)
+                    }
                     className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   >
                     <option value="">Select</option>
@@ -706,7 +725,9 @@ export default function Step1({ data = {}, onChange }) {
                   <input
                     type="text"
                     value={data.death_year_type || ""}
-                    onChange={(e) => onChange("death_year_type", e.target.value)}
+                    onChange={(e) =>
+                      onChange("death_year_type", e.target.value)
+                    }
                     placeholder="Type"
                     className="w-24 h-12 px-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                   />
@@ -832,7 +853,11 @@ export default function Step1({ data = {}, onChange }) {
 
                     if (unit === "imperial") {
                       const conv = cmToFeetInch(h.centimeter);
-                      onChange("height", { ...h, feet: conv.feet, inch: conv.inch });
+                      onChange("height", {
+                        ...h,
+                        feet: conv.feet,
+                        inch: conv.inch,
+                      });
                     } else {
                       const cm = feetInchToCm(h.feet, h.inch);
                       onChange("height", { ...h, centimeter: cm });
@@ -962,7 +987,9 @@ export default function Step1({ data = {}, onChange }) {
               onChange("background_id", selected?.id || "");
               onChange("background_name", selected?.label || "");
             }}
-            placeholder={backgroundOptions.length ? "Select Background" : "Loading..."}
+            placeholder={
+              backgroundOptions.length ? "Select Background" : "Loading..."
+            }
             options={backgroundOptions}
             hint={{
               icon: "book-open",
