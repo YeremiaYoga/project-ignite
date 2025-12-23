@@ -9,7 +9,7 @@ export default function CharacterList({ username, searchTerm = "" }) {
   const router = useRouter();
   const [characters, setCharacters] = useState([]); // hanya yang active
   const [allCharacters, setAllCharacters] = useState([]); // semua, untuk slot
-  const [characterLimit, setCharacterLimit] = useState(5);
+  const [characterLimit, setCharacterLimit] = useState(12);
   const [localMode, setLocalMode] = useState(false);
 
   // 🧩 Ambil karakter aktif (untuk ditampilkan)
@@ -57,7 +57,6 @@ export default function CharacterList({ username, searchTerm = "" }) {
     }
   }, [username]);
 
-  // 🧮 Ambil info user (character_limit)
   const fetchUserData = useCallback(async () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
@@ -66,7 +65,7 @@ export default function CharacterList({ username, searchTerm = "" }) {
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const json = await res.json();
       if (json?.user?.character_limit !== undefined) {
-        setCharacterLimit(json.user.character_limit ?? 5);
+        setCharacterLimit(json.user.character_limit);
       }
     } catch (err) {
       console.error("Failed to fetch user data:", err);
