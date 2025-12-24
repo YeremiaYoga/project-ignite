@@ -44,10 +44,7 @@ export default function EraListPage() {
       });
 
       const json = await res.json().catch(() => ({}));
-      console.log(json);
-
-      const lim = json?.user.era_limit;
-      console.log(lim);
+      const lim = json?.user?.era_limit;
       setEraLimit(typeof lim === "number" ? lim : null);
     } catch (e) {
       console.warn("load limit error:", e);
@@ -84,13 +81,11 @@ export default function EraListPage() {
     loadLimit();
   }, []);
 
-  // --------- Slots (Character-limit style circles) ----------
+  // --------- Slots ----------
   const usedSlots = rows.length;
   const totalSlots = typeof eraLimit === "number" ? eraLimit : 0;
   const isLimited = typeof eraLimit === "number";
-  const remainingSlots = isLimited
-    ? Math.max(0, totalSlots - usedSlots)
-    : 999999;
+  const remainingSlots = isLimited ? Math.max(0, totalSlots - usedSlots) : 999999;
   const isLimitReached = isLimited && usedSlots >= totalSlots;
 
   const fmtDate = (d) => {
@@ -102,29 +97,35 @@ export default function EraListPage() {
   };
 
   return (
-    <div className="h-full w-full p-6 space-y-4">
+    <div className="h-full w-full p-4 md:p-6 space-y-4">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
         <div>
           <p className="text-[11px] uppercase tracking-widest text-slate-500">
             Creator Panel
           </p>
-
-          <h1 className="text-xl font-semibold text-slate-100 mt-1">
-            Timelines
-          </h1>
+          <h1 className="text-xl font-semibold text-slate-100 mt-1">Timelines</h1>
         </div>
-        <div className="rounded-2xl  bg-slate-950/40 p-4">
-          <div className="flex flex-col items-center">
-           
 
-            {isLimited ? (
-              <>
-                <div className="flex gap-2 flex-wrap justify-center">
+        {/* Limit box */}
+        <div className="rounded-2xl bg-slate-950/40 p-3 md:p-4 w-full md:w-auto">
+          <div className="flex items-center md:flex-col md:items-center gap-3 md:gap-2">
+            <div className="flex-1 md:flex-none">
+              <p className="text-[11px] uppercase tracking-widest text-slate-500">
+                Slots
+              </p>
+              <p className="text-xs text-slate-300 mt-1">
+                {isLimited ? `${usedSlots} / ${totalSlots} used` : "Unlimited"}
+              </p>
+            </div>
+
+            <div className="flex-1 md:flex-none flex justify-end md:justify-center">
+              {isLimited ? (
+                <div className="flex gap-2 flex-wrap justify-end md:justify-center">
                   {[...Array(totalSlots)].map((_, i) => (
                     <div
                       key={i}
-                      className={`w-6 h-6 rounded-full border-2 transition-all duration-200 ${
+                      className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-2 transition-all duration-200 ${
                         i < usedSlots
                           ? "bg-indigo-600 border-indigo-600"
                           : "bg-transparent border-slate-600"
@@ -133,25 +134,26 @@ export default function EraListPage() {
                     />
                   ))}
                 </div>
-
-                {remainingSlots <= 0 && (
-                  <p className="text-xs text-red-400 mt-2">
-                    You have reached your timeline limit.
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="text-xs text-slate-400">Unlimited</p>
-            )}
+              ) : (
+                <p className="text-xs text-slate-400">Unlimited</p>
+              )}
+            </div>
           </div>
+
+          {isLimited && remainingSlots <= 0 && (
+            <p className="text-xs text-red-400 mt-2">
+              You have reached your timeline limit.
+            </p>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Add button */}
+        <div className="flex items-center justify-end md:justify-start">
           {isLimitReached ? (
             <button
               type="button"
               disabled
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 text-slate-400 text-xs cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 text-slate-400 text-xs cursor-not-allowed w-full md:w-auto justify-center"
               title="Timeline limit reached"
             >
               <Plus className="w-4 h-4" />
@@ -160,7 +162,7 @@ export default function EraListPage() {
           ) : (
             <Link
               href="/creator/timeline/era/create"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs w-full md:w-auto justify-center"
             >
               <Plus className="w-4 h-4" />
               Add Timeline
@@ -169,8 +171,8 @@ export default function EraListPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
+      {/* ===== DESKTOP TABLE (md+) ===== */}
+      <div className="hidden md:block rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800 bg-gradient-to-r from-slate-950/60 via-slate-950/40 to-indigo-950/20">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -262,6 +264,84 @@ export default function EraListPage() {
           <div className="px-5 py-4 text-xs text-slate-400 border-t border-slate-800">
             Loading...
           </div>
+        )}
+      </div>
+
+      {/* ===== MOBILE CARDS (<md) ===== */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4 text-xs text-slate-400">
+            Loading...
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4 text-sm text-slate-400">
+            No timelines found.
+          </div>
+        ) : (
+          rows.map((r) => (
+            <div
+              key={r.id}
+              className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden"
+            >
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-100 truncate">
+                      {r.name || "-"}
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Share ID:{" "}
+                      <span className="text-slate-300">{r.share_id || "-"}</span>
+                    </p>
+                  </div>
+
+                  <div className="text-[11px] text-slate-500 text-right shrink-0">
+                    <div>Updated</div>
+                    <div className="text-slate-300">
+                      {r.updated_at ? fmtDate(r.updated_at) : "-"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+                    <p className="text-[11px] text-slate-500">Epoch</p>
+                    <p className="text-xs text-slate-200 mt-1">
+                      {r.epoch
+                        ? `${r.epoch?.private ?? ""} / ${r.epoch?.public ?? ""}`
+                        : "-"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+                    <p className="text-[11px] text-slate-500">ID</p>
+                    <p className="text-xs text-slate-200 mt-1 truncate">
+                      {r.id}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <Link
+                    href={`/creator/timeline/era/update/${r.id}`}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 text-xs"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => onDelete(r.id)}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 text-xs text-red-200"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>

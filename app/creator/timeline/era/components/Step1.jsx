@@ -1,9 +1,32 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 import InputField from "@/components/InputField";
-import RichTextAdvanced from "@/components/RichTextAdvanced";
+import RichTextAdvanced from "@/components/InputField"; // ✅ pastikan ini benar (kalau salah, balikin ke RichTextAdvanced)
 import PillsInput from "./PillsInput";
+
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 function pickValue(v) {
   if (v && typeof v === "object" && "target" in v) return v.target?.value;
@@ -16,6 +39,86 @@ function pickNumber(v, fallback = null) {
   return Number.isNaN(n) ? fallback : n;
 }
 
+/** ✅ Sortable card wrapper */
+function SortableEraCard({ id, children }) {
+  const { setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.75 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative">
+      {children}
+    </div>
+  );
+}
+
+/** ✅ Header actions: move up/down + drag + delete */
+function CardHeaderActions({
+  id,
+  index,
+  total,
+  onMoveUp,
+  onMoveDown,
+  onDelete,
+}) {
+  const { attributes, listeners } = useSortable({ id });
+
+  return (
+    <div className="flex items-center gap-1">
+      {/* 🔼 Move Up */}
+      <button
+        type="button"
+        disabled={index === 0}
+        onClick={onMoveUp}
+        title="Move up"
+        className="w-9 h-9 rounded-xl border border-slate-700 bg-slate-900/60 hover:bg-slate-800
+          disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+      >
+        <ChevronUp className="w-4 h-4 text-slate-200" />
+      </button>
+
+      {/* 🔽 Move Down */}
+      <button
+        type="button"
+        disabled={index === total - 1}
+        onClick={onMoveDown}
+        title="Move down"
+        className="w-9 h-9 rounded-xl border border-slate-700 bg-slate-900/60 hover:bg-slate-800
+          disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+      >
+        <ChevronDown className="w-4 h-4 text-slate-200" />
+      </button>
+
+      {/* ⠿ Drag Handle */}
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        title="Drag to reorder"
+        className="w-9 h-9 rounded-xl border border-slate-700 bg-slate-900/60 hover:bg-slate-800
+          flex items-center justify-center cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-4 h-4 text-slate-300" />
+      </button>
+
+      {/* 🗑 Delete */}
+      <button
+        type="button"
+        onClick={onDelete}
+        title="Delete"
+        className="w-9 h-9 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/15
+          flex items-center justify-center"
+      >
+        <Trash2 className="w-4 h-4 text-red-200" />
+      </button>
+    </div>
+  );
+}
+
 export default function Step1({
   form,
   setForm,
@@ -26,17 +129,51 @@ export default function Step1({
   removeOtherName,
   newEra,
 }) {
-  // ✅ Only 1 "current" per list (era / other_era)
+  // ✅ DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  // ✅ Only 1 current per list
   const setCurrentInList = (listName, key, nextVal) => {
     setForm((p) => {
       const arr = Array.isArray(p[listName]) ? p[listName] : [];
       const nextArr = arr.map((it) => {
         if (it._key === key) return { ...it, current: !!nextVal };
-        // kalau nyalain satu -> yang lain harus false
         if (nextVal) return { ...it, current: false };
-        // kalau matiin -> yang lain tetap
         return it;
       });
+      return { ...p, [listName]: nextArr };
+    });
+  };
+
+  // ✅ reorder helper (DnD)
+  const reorderListByKeys = (listName, activeId, overId) => {
+    if (!overId || activeId === overId) return;
+
+    setForm((p) => {
+      const arr = Array.isArray(p[listName]) ? p[listName] : [];
+      const oldIndex = arr.findIndex((x) => x._key === activeId);
+      const newIndex = arr.findIndex((x) => x._key === overId);
+      if (oldIndex < 0 || newIndex < 0) return p;
+
+      const nextArr = arrayMove(arr, oldIndex, newIndex);
+      return { ...p, [listName]: nextArr };
+    });
+  };
+
+  // ✅ move up/down (tap buttons)
+  const moveItem = (listName, key, direction) => {
+    setForm((p) => {
+      const arr = Array.isArray(p[listName]) ? p[listName] : [];
+      const index = arr.findIndex((x) => x._key === key);
+      if (index < 0) return p;
+
+      const target = direction === "up" ? index - 1 : index + 1;
+      if (target < 0 || target >= arr.length) return p;
+
+      const nextArr = arrayMove(arr, index, target);
       return { ...p, [listName]: nextArr };
     });
   };
@@ -44,26 +181,21 @@ export default function Step1({
   return (
     <div className="space-y-4">
       {/* Timeline Basics */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
+      <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4 md:p-5">
         <p className="text-[11px] uppercase tracking-widest text-slate-500">
           Timeline Basics
         </p>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <InputField
             label="Timeline Name"
             value={form.name}
             onChange={(v) => setForm((p) => ({ ...p, name: pickValue(v) }))}
           />
-          <InputField
-            label="Share ID"
-            value={form.share_id}
-            disabled
-            onChange={() => {}}
-          />
+          <InputField label="Share ID" value={form.share_id} disabled />
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
           <InputField
             label="Epoch Private"
             type="number"
@@ -89,9 +221,9 @@ export default function Step1({
         </div>
       </div>
 
-      {/* Eras */}
+      {/* ================= Eras ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="px-4 md:px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3">
           <p className="text-sm font-semibold text-slate-100">Eras</p>
           <button
             type="button"
@@ -103,114 +235,132 @@ export default function Step1({
           </button>
         </div>
 
-        <div className="p-4 space-y-3">
-          {(form.era || []).map((e) => (
-            <div
-              key={e._key}
-              className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-3"
+        <div className="p-3 md:p-4 space-y-3">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={({ active, over }) =>
+              reorderListByKeys("era", active?.id, over?.id)
+            }
+          >
+            <SortableContext
+              items={(form.era || []).map((x) => x._key)}
+              strategy={verticalListSortingStrategy}
             >
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-400">Era</p>
-                <button
-                  type="button"
-                  onClick={() => removeListItem("era", e._key, newEra)}
-                  className="w-9 h-9 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 flex items-center justify-center"
-                >
-                  <Trash2 className="w-4 h-4 text-red-200" />
-                </button>
-              </div>
+              {(form.era || []).map((e, idx) => (
+                <SortableEraCard key={e._key} id={e._key}>
+                  <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs text-slate-400">Era</p>
+                      <CardHeaderActions
+                        id={e._key}
+                        index={idx}
+                        total={(form.era || []).length}
+                        onMoveUp={() => moveItem("era", e._key, "up")}
+                        onMoveDown={() => moveItem("era", e._key, "down")}
+                        onDelete={() => removeListItem("era", e._key, newEra)}
+                      />
+                    </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <InputField
-                  label="Name"
-                  value={e.name}
-                  onChange={(v) =>
-                    patchListItem("era", e._key, { name: pickValue(v) })
-                  }
-                />
-                <InputField
-                  label="Shorten"
-                  value={e.shorten}
-                  onChange={(v) =>
-                    patchListItem("era", e._key, { shorten: pickValue(v) })
-                  }
-                />
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <InputField
+                        label="Name"
+                        value={e.name}
+                        onChange={(v) =>
+                          patchListItem("era", e._key, { name: pickValue(v) })
+                        }
+                      />
+                      <InputField
+                        label="Shorten"
+                        value={e.shorten}
+                        onChange={(v) =>
+                          patchListItem("era", e._key, {
+                            shorten: pickValue(v),
+                          })
+                        }
+                      />
+                    </div>
 
-              {/* ✅ CURRENT (only one per list) */}
-              <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3">
-                <div>
-                  <p className="text-xs font-medium text-slate-200">
-                    Current Era
-                  </p>
-                  <p className="text-[11px] text-slate-500">
-                    Only one era can be marked as current.
-                  </p>
-                </div>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3">
+                      <div>
+                        <p className="text-xs font-medium text-slate-200">
+                          Current Era
+                        </p>
+                        <p className="text-[11px] text-slate-500">
+                          Only one era can be marked as current.
+                        </p>
+                      </div>
 
-                <label className="inline-flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={!!e.current}
-                    onChange={(ev) =>
-                      setCurrentInList("era", e._key, ev.target.checked)
-                    }
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-900"
-                  />
-                  <span className="text-xs text-slate-300">Set as current</span>
-                </label>
-              </div>
+                      <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={!!e.current}
+                          onChange={(ev) =>
+                            setCurrentInList("era", e._key, ev.target.checked)
+                          }
+                          className="h-4 w-4 rounded border-slate-700 bg-slate-900"
+                        />
+                        <span className="text-xs text-slate-300">
+                          Set as current
+                        </span>
+                      </label>
+                    </div>
 
-              <PillsInput
-                label="Era Other Names"
-                value={e.other_name || []}
-                inputValue={e._other_name_input || ""}
-                onInputChange={(val) =>
-                  patchListItem("era", e._key, { _other_name_input: val })
-                }
-                onAdd={() => addOtherName("era", e._key)}
-                onRemove={(idx) => removeOtherName("era", e._key, idx)}
-              />
+                    <PillsInput
+                      label="Era Other Names"
+                      value={e.other_name || []}
+                      inputValue={e._other_name_input || ""}
+                      onInputChange={(val) =>
+                        patchListItem("era", e._key, { _other_name_input: val })
+                      }
+                      onAdd={() => addOtherName("era", e._key)}
+                      onRemove={(i) => removeOtherName("era", e._key, i)}
+                    />
 
-              <div className="grid grid-cols-2 gap-3">
-                <InputField
-                  label="Start"
-                  type="number"
-                  value={e.start ?? ""}
-                  onChange={(v) =>
-                    patchListItem("era", e._key, {
-                      start: pickNumber(v, null),
-                    })
-                  }
-                />
-                <InputField
-                  label="End (optional)"
-                  type="number"
-                  value={e.end ?? ""}
-                  onChange={(v) =>
-                    patchListItem("era", e._key, { end: pickNumber(v, null) })
-                  }
-                />
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <InputField
+                        label="Start"
+                        type="number"
+                        value={e.start ?? ""}
+                        onChange={(v) =>
+                          patchListItem("era", e._key, {
+                            start: pickNumber(v, null),
+                          })
+                        }
+                      />
+                      <InputField
+                        label="End (optional)"
+                        type="number"
+                        value={e.end ?? ""}
+                        onChange={(v) =>
+                          patchListItem("era", e._key, {
+                            end: pickNumber(v, null),
+                          })
+                        }
+                      />
+                    </div>
 
-              <div>
-                <p className="text-xs text-slate-300 mb-2">Description</p>
-                <RichTextAdvanced
-                  value={e.description || ""}
-                  onChange={(val) =>
-                    patchListItem("era", e._key, { description: val })
-                  }
-                  rows={8}
-                />
-              </div>
-            </div>
-          ))}
+                    <div>
+                      <p className="text-xs text-slate-300 mb-2">Description</p>
+                      <RichTextAdvanced
+                        value={e.description || ""}
+                        onChange={(val) =>
+                          patchListItem("era", e._key, { description: val })
+                        }
+                        rows={8}
+                      />
+                    </div>
+                  </div>
+                </SortableEraCard>
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
       </div>
 
-      {/* Other Eras */}
+      {/* ================= Other Eras ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="px-4 md:px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3">
           <p className="text-sm font-semibold text-slate-100">Other Eras</p>
           <button
             type="button"
@@ -222,110 +372,109 @@ export default function Step1({
           </button>
         </div>
 
-        <div className="p-4 space-y-3">
-          {(form.other_era || []).map((e) => (
-            <div
-              key={e._key}
-              className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-3"
+        <div className="p-3 md:p-4 space-y-3">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={({ active, over }) =>
+              reorderListByKeys("other_era", active?.id, over?.id)
+            }
+          >
+            <SortableContext
+              items={(form.other_era || []).map((x) => x._key)}
+              strategy={verticalListSortingStrategy}
             >
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-400">Other Era</p>
-                <button
-                  type="button"
-                  onClick={() => removeListItem("other_era", e._key, newEra)}
-                  className="w-9 h-9 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 flex items-center justify-center"
-                >
-                  <Trash2 className="w-4 h-4 text-red-200" />
-                </button>
-              </div>
+              {(form.other_era || []).map((e, idx) => (
+                <SortableEraCard key={e._key} id={e._key}>
+                  <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs text-slate-400">Other Era</p>
+                      <CardHeaderActions
+                        id={e._key}
+                        index={idx}
+                        total={(form.other_era || []).length}
+                        onMoveUp={() => moveItem("other_era", e._key, "up")}
+                        onMoveDown={() => moveItem("other_era", e._key, "down")}
+                        onDelete={() =>
+                          removeListItem("other_era", e._key, newEra)
+                        }
+                      />
+                    </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <InputField
-                  label="Name"
-                  value={e.name}
-                  onChange={(v) =>
-                    patchListItem("other_era", e._key, { name: pickValue(v) })
-                  }
-                />
-                <InputField
-                  label="Shorten"
-                  value={e.shorten}
-                  onChange={(v) =>
-                    patchListItem("other_era", e._key, { shorten: pickValue(v) })
-                  }
-                />
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <InputField
+                        label="Name"
+                        value={e.name}
+                        onChange={(v) =>
+                          patchListItem("other_era", e._key, {
+                            name: pickValue(v),
+                          })
+                        }
+                      />
+                      <InputField
+                        label="Shorten"
+                        value={e.shorten}
+                        onChange={(v) =>
+                          patchListItem("other_era", e._key, {
+                            shorten: pickValue(v),
+                          })
+                        }
+                      />
+                    </div>
 
-              {/* ✅ CURRENT (only one per list) */}
-              <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3">
-                <div>
-                  <p className="text-xs font-medium text-slate-200">
-                    Current Other Era
-                  </p>
-                  <p className="text-[11px] text-slate-500">
-                    Only one other era can be marked as current.
-                  </p>
-                </div>
+                    <PillsInput
+                      label="Other Era Other Names"
+                      value={e.other_name || []}
+                      inputValue={e._other_name_input || ""}
+                      onInputChange={(val) =>
+                        patchListItem("other_era", e._key, {
+                          _other_name_input: val,
+                        })
+                      }
+                      onAdd={() => addOtherName("other_era", e._key)}
+                      onRemove={(i) => removeOtherName("other_era", e._key, i)}
+                    />
 
-                <label className="inline-flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={!!e.current}
-                    onChange={(ev) =>
-                      setCurrentInList("other_era", e._key, ev.target.checked)
-                    }
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-900"
-                  />
-                  <span className="text-xs text-slate-300">Set as current</span>
-                </label>
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <InputField
+                        label="Start"
+                        type="number"
+                        value={e.start ?? ""}
+                        onChange={(v) =>
+                          patchListItem("other_era", e._key, {
+                            start: pickNumber(v, null),
+                          })
+                        }
+                      />
+                      <InputField
+                        label="End (optional)"
+                        type="number"
+                        value={e.end ?? ""}
+                        onChange={(v) =>
+                          patchListItem("other_era", e._key, {
+                            end: pickNumber(v, null),
+                          })
+                        }
+                      />
+                    </div>
 
-              <PillsInput
-                label="Other Era Other Names"
-                value={e.other_name || []}
-                inputValue={e._other_name_input || ""}
-                onInputChange={(val) =>
-                  patchListItem("other_era", e._key, { _other_name_input: val })
-                }
-                onAdd={() => addOtherName("other_era", e._key)}
-                onRemove={(idx) => removeOtherName("other_era", e._key, idx)}
-              />
-
-              <div className="grid grid-cols-2 gap-3">
-                <InputField
-                  label="Start"
-                  type="number"
-                  value={e.start ?? ""}
-                  onChange={(v) =>
-                    patchListItem("other_era", e._key, {
-                      start: pickNumber(v, null),
-                    })
-                  }
-                />
-                <InputField
-                  label="End (optional)"
-                  type="number"
-                  value={e.end ?? ""}
-                  onChange={(v) =>
-                    patchListItem("other_era", e._key, {
-                      end: pickNumber(v, null),
-                    })
-                  }
-                />
-              </div>
-
-              <div>
-                <p className="text-xs text-slate-300 mb-2">Description</p>
-                <RichTextAdvanced
-                  value={e.description || ""}
-                  onChange={(val) =>
-                    patchListItem("other_era", e._key, { description: val })
-                  }
-                  rows={8}
-                />
-              </div>
-            </div>
-          ))}
+                    <div>
+                      <p className="text-xs text-slate-300 mb-2">Description</p>
+                      <RichTextAdvanced
+                        value={e.description || ""}
+                        onChange={(val) =>
+                          patchListItem("other_era", e._key, {
+                            description: val,
+                          })
+                        }
+                        rows={8}
+                      />
+                    </div>
+                  </div>
+                </SortableEraCard>
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
       </div>
     </div>

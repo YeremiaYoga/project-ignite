@@ -1,18 +1,11 @@
-import LeftIconBar from "./components/LeftIconBar";
-import CreatorMenuPanel from "./components/CreatorMenuPanel";
+import CreatorSideNav from "./components/CreatorSideNav";
 
 export default function CreatorLayout({ children }) {
   return (
     <div className="h-screen w-screen bg-slate-950 text-slate-100 flex overflow-hidden">
-      <LeftIconBar />
+      <CreatorSideNav />
 
-      <div className="flex-1 flex h-full overflow-hidden">
-        <CreatorMenuPanel />
-
-        <main className="flex-1 p-6 overflow-hidden">
-          {children}
-        </main>
-      </div>
+      <main className="flex-1 md:p-6 overflow-hidden">{children}</main>
     </div>
   );
 }

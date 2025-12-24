@@ -12,4 +12,14 @@ export const MENU_CONFIG = [
       { label: "Event", href: "/creator/timeline/event" },
     ],
   },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    href: "/creator/dashboard",
+    icon: Hourglass,
+    items: [
+      { label: "Testing", href: "/creator/dashboard/testing" },
+      { label: "Testing 1", href: "/creator/dashboard/testing-1" },
+    ],
+  },
 ];
