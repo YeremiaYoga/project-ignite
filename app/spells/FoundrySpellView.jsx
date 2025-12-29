@@ -144,7 +144,7 @@ export default function FoundrySpellView() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [homebrewOptions, setHomebrewOptions] = useState([]);
   const [filters, setFilters] = useState({
     classes: [],
     levels: [],
@@ -152,6 +152,7 @@ export default function FoundrySpellView() {
     damageType: [],
     range: [], // kategori (Self/Touch/Point/Area/Special)
     school: [], // ["abj", "evo", ...]
+    homebrews: [],
     ritual: false,
     concentration: false,
 
@@ -179,6 +180,41 @@ export default function FoundrySpellView() {
   const touchDeltaX = useRef(0);
 
   // detect mobile
+
+  useEffect(() => {
+    async function fetchHomebrews() {
+      try {
+        const url = `${API_BASE}/ignite/homebrew/all`;
+
+        const res = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error(`Homebrew HTTP ${res.status}`);
+
+        const json = await res.json();
+        const arr = Array.isArray(json.data) ? json.data : [];
+        console.log(arr);
+
+        arr.sort((a, b) => {
+          const ac = (a.code || "").toLowerCase();
+          const bc = (b.code || "").toLowerCase();
+          if (ac && bc) return ac.localeCompare(bc);
+          return String(a.name || "").localeCompare(String(b.name || ""));
+        });
+
+        setHomebrewOptions(arr);
+      } catch (e) {
+        console.warn("⚠️ fetchHomebrews failed:", e?.message || e);
+        setHomebrewOptions([]);
+      }
+    }
+
+    if (API_BASE) fetchHomebrews();
+  }, []);
+
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
     const update = () => setIsMobile(mq.matches);
@@ -240,7 +276,9 @@ export default function FoundrySpellView() {
             params.set("levels", levelNums.join(","));
           }
         }
-
+        if (filters.homebrews && filters.homebrews.length > 0) {
+          params.set("homebrews", filters.homebrews.join(","));
+        }
         if (filters.range && filters.range.length > 0) {
           params.set("ranges", filters.range.join(","));
         }
@@ -341,7 +379,7 @@ export default function FoundrySpellView() {
 
         const query = params.toString();
         const url = query ? `${baseUrl}?${query}` : baseUrl;
-
+        console.log(url);
         const res = await fetch(url, {
           method: "GET",
           cache: "no-store",
@@ -403,6 +441,7 @@ export default function FoundrySpellView() {
     filters.concentration,
 
     // NEW: ikut trigger fetch untuk filter baru
+    filters.homebrews,
     filters.favoritesOnly,
     filters.durationMinIndex,
     filters.durationMaxIndex,
@@ -442,7 +481,6 @@ export default function FoundrySpellView() {
     }
   }
 
-  // hitung jumlah filter aktif (kasar, tapi cukup buat badge)
   const baseFilterCount =
     (filters.classes.length ? 1 : 0) +
     (filters.levels.length ? 1 : 0) +
@@ -456,7 +494,6 @@ export default function FoundrySpellView() {
   let extraFilterCount = 0;
   if (filters.favoritesOnly) extraFilterCount++;
 
-  // duration filter berubah dari default?
   if (
     filters.durationMinIndex !== DURATION_MIN_INDEX_DEFAULT ||
     filters.durationMaxIndex !== DURATION_MAX_INDEX_DEFAULT ||
@@ -467,7 +504,6 @@ export default function FoundrySpellView() {
     extraFilterCount++;
   }
 
-  // range filter berubah dari default?
   if (
     filters.rangeMin !== RANGE_MIN_DEFAULT ||
     filters.rangeMax !== RANGE_MAX_DEFAULT ||
@@ -476,6 +512,7 @@ export default function FoundrySpellView() {
   ) {
     extraFilterCount++;
   }
+  if (filters.homebrews && filters.homebrews.length > 0) extraFilterCount++;
 
   const activeFilterCount = baseFilterCount + extraFilterCount;
 
@@ -697,6 +734,7 @@ export default function FoundrySpellView() {
       {filterOpen && (
         <SpellFilterModal
           value={filters}
+          homebrewOptions={homebrewOptions}
           onClose={() => setFilterOpen(false)}
           onApply={(newFilters) => {
             setFilters(newFilters);

@@ -26,7 +26,6 @@ const SCHOOL_LABEL_BY_CODE = {
   trs: "Transmutation",
 };
 
-// duration steps untuk slider (index 0..6)
 const DURATION_STEPS = [
   { key: "turn", label: "Turn", sec: 1 },
   { key: "round", label: "Round", sec: 6 },
@@ -109,11 +108,12 @@ const INITIAL_SELECTED = {
   damageType: [],
   range: [],
   school: [],
+
   ritual: false,
   concentration: false,
 
   favoritesOnly: false,
-
+  homebrews: [],
   durationMinIndex: DURATION_MIN_INDEX_DEFAULT,
   durationMaxIndex: DURATION_MAX_INDEX_DEFAULT,
   durationIncludeInstant: true,
@@ -159,7 +159,12 @@ function normalizeSchoolForModal(arr) {
   });
 }
 
-export default function SpellFilterModal({ onClose, onApply, value }) {
+export default function SpellFilterModal({
+  onClose,
+  onApply,
+  value,
+  homebrewOptions = [],
+}) {
   const getInitialFromValue = (val) => {
     const base = {
       ...INITIAL_SELECTED,
@@ -404,6 +409,41 @@ export default function SpellFilterModal({ onClose, onApply, value }) {
               </div>
             );
           })}
+          {/* ====== HOMEBREW ====== */}
+          <div>
+            <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+              Homebrew
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {homebrewOptions.filter((hb) => hb?.code).length === 0 ? (
+                <span className="text-xs text-slate-500">No homebrew code</span>
+              ) : (
+                homebrewOptions
+                  .filter((hb) => hb?.code)
+                  .map((hb) => {
+                    const code = String(hb.code || "").trim();
+                    const active = (selected.homebrews || []).includes(code);
+
+                    return (
+                      <button
+                        key={hb.id || code}
+                        type="button"
+                        onClick={() => toggleOption("homebrews", code)}
+                        className={`px-2.5 py-1 rounded-md border text-xs transition ${
+                          active
+                            ? "border-amber-500 bg-amber-500/20 text-amber-100"
+                            : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
+                        }`}
+                        title={hb.name || code} // hover masih bisa lihat nama
+                      >
+                        {code}
+                      </button>
+                    );
+                  })
+              )}
+            </div>
+          </div>
 
           {/* ====== OTHER FILTERS ====== */}
           <div className="border-t border-slate-700/60 pt-3 space-y-2">
