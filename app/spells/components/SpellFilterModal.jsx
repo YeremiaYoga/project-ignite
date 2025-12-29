@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X, SlidersHorizontal } from "lucide-react";
 import * as Slider from "@radix-ui/react-slider";
 
@@ -59,6 +59,7 @@ const FILTERS = {
     "Warlock",
     "Wizard",
   ],
+  // ⚠️ levels UI tetap tampil Cantrips, 1..9 (tapi state kita simpan string "0".."9")
   levels: ["Cantrips", 1, 2, 3, 4, 5, 6, 7, 8, 9],
   castTime: [
     "Action",
@@ -97,23 +98,110 @@ const FILTERS = {
     "Necromancy",
     "Transmutation",
   ],
-  ritual: false,
-  concentration: false,
 };
 
+function uniq(arr) {
+  return Array.from(
+    new Set(
+      (arr || []).filter((x) => x !== null && x !== undefined && x !== "")
+    )
+  );
+}
+function removeFrom(arr, v) {
+  return (arr || []).filter((x) => x !== v);
+}
+
+// tri-state cycle for options: 0(off) -> 1(ONLY/whitelist) -> 2(BLACKLIST) -> 0(off)
+function cycleTriState(prev, key, value) {
+  const onlyKey = `${key}Only`;
+  const blackKey = `${key}Blacklist`;
+
+  const only = uniq(prev[onlyKey]);
+  const black = uniq(prev[blackKey]);
+
+  const inOnly = only.includes(value);
+  const inBlack = black.includes(value);
+
+  // OFF -> ONLY
+  if (!inOnly && !inBlack) {
+    return {
+      ...prev,
+      [onlyKey]: [...only, value],
+      [blackKey]: black,
+    };
+  }
+
+  // ONLY -> BLACKLIST
+  if (inOnly && !inBlack) {
+    return {
+      ...prev,
+      [onlyKey]: removeFrom(only, value),
+      [blackKey]: [...black, value],
+    };
+  }
+
+  // BLACKLIST -> OFF
+  return {
+    ...prev,
+    [onlyKey]: only,
+    [blackKey]: removeFrom(black, value),
+  };
+}
+
+function cycleFlag(prev, flagKey) {
+  const cur = Number(prev[flagKey] ?? 0);
+  const next = cur === 0 ? 1 : cur === 1 ? 2 : 0;
+  return { ...prev, [flagKey]: next };
+}
+
+// Homebrew cycle: 0(off) -> 1(include) -> 2(only) -> 0(off)
+function cycleHomebrew(prev, code) {
+  const include = uniq(prev.homebrewInclude);
+  const only = uniq(prev.homebrewOnly);
+
+  const inInclude = include.includes(code);
+  const inOnly = only.includes(code);
+
+  if (!inInclude && !inOnly) {
+    return { ...prev, homebrewInclude: [...include, code], homebrewOnly: only };
+  }
+  if (inInclude && !inOnly) {
+    return {
+      ...prev,
+      homebrewInclude: removeFrom(include, code),
+      homebrewOnly: [...only, code],
+    };
+  }
+  return {
+    ...prev,
+    homebrewInclude: include,
+    homebrewOnly: removeFrom(only, code),
+  };
+}
+
 const INITIAL_SELECTED = {
-  classes: [],
-  levels: [],
-  castTime: [],
-  damageType: [],
-  range: [],
-  school: [],
-
-  ritual: false,
-  concentration: false,
-
   favoritesOnly: false,
-  homebrews: [],
+
+  // ✅ tri-state lists for all filter categories:
+  classesOnly: [],
+  classesBlacklist: [],
+  levelsOnly: [], // stored as string "0".."9"
+  levelsBlacklist: [],
+  castTimeOnly: [],
+  castTimeBlacklist: [],
+  damageTypeOnly: [],
+  damageTypeBlacklist: [],
+  schoolOnly: [],
+  schoolBlacklist: [],
+
+  // ✅ tri-state flag (0/1/2)
+  ritualMode: 0,
+  concentrationMode: 0,
+
+  // ✅ Homebrew include/only/off
+  homebrewInclude: [],
+  homebrewOnly: [],
+
   durationMinIndex: DURATION_MIN_INDEX_DEFAULT,
   durationMaxIndex: DURATION_MAX_INDEX_DEFAULT,
   durationIncludeInstant: true,
@@ -137,7 +225,6 @@ function normalizeCastTimeForModal(arr) {
     hour: "Hour",
     special: "Special",
   };
-
   return arr.map((v) => {
     const lower = String(v).toLowerCase();
     return map[lower] || v;
@@ -146,17 +233,27 @@ function normalizeCastTimeForModal(arr) {
 
 function normalizeSchoolForModal(arr) {
   if (!Array.isArray(arr)) return [];
-
   return arr.map((v) => {
     const str = String(v);
     const lower = str.toLowerCase();
-
-    if (SCHOOL_LABEL_BY_CODE[lower]) {
-      return SCHOOL_LABEL_BY_CODE[lower];
-    }
-
+    if (SCHOOL_LABEL_BY_CODE[lower]) return SCHOOL_LABEL_BY_CODE[lower];
     return str;
   });
+}
+
+// normalize levels to string "0".."9"
+function normalizeLevelsForModal(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr
+    .map((v) => {
+      if (v === "Cantrips") return "0";
+      const n = Number(v);
+      if (!Number.isNaN(n)) return String(n);
+      const s = String(v).trim();
+      if (s === "0") return "0";
+      return s;
+    })
+    .filter((x) => x !== "" && x != null);
 }
 
 export default function SpellFilterModal({
@@ -166,15 +263,67 @@ export default function SpellFilterModal({
   homebrewOptions = [],
 }) {
   const getInitialFromValue = (val) => {
-    const base = {
-      ...INITIAL_SELECTED,
-      ...(val || {}),
-    };
+    const base = { ...INITIAL_SELECTED, ...(val || {}) };
+
+    // backward compat (kalau dulu masih pakai arrays biasa)
+    const legacyClasses = Array.isArray(base.classes) ? base.classes : [];
+    const legacyLevels = Array.isArray(base.levels) ? base.levels : [];
+    const legacyCast = Array.isArray(base.castTime) ? base.castTime : [];
+    const legacyDmg = Array.isArray(base.damageType) ? base.damageType : [];
+    const legacySchool = Array.isArray(base.school) ? base.school : [];
+    const legacyHB = Array.isArray(base.homebrews) ? base.homebrews : [];
 
     return {
       ...base,
-      castTime: normalizeCastTimeForModal(base.castTime),
-      school: normalizeSchoolForModal(base.school),
+
+      // legacy -> ONLY (whitelist)
+      classesOnly: uniq(
+        base.classesOnly?.length ? base.classesOnly : legacyClasses
+      ),
+      levelsOnly: uniq(
+        normalizeLevelsForModal(
+          base.levelsOnly?.length ? base.levelsOnly : legacyLevels
+        )
+      ),
+
+      castTimeOnly: uniq(
+        base.castTimeOnly?.length
+          ? normalizeCastTimeForModal(base.castTimeOnly)
+          : normalizeCastTimeForModal(legacyCast)
+      ),
+      damageTypeOnly: uniq(
+        base.damageTypeOnly?.length ? base.damageTypeOnly : legacyDmg
+      ),
+      schoolOnly: uniq(
+        base.schoolOnly?.length
+          ? normalizeSchoolForModal(base.schoolOnly)
+          : normalizeSchoolForModal(legacySchool)
+      ),
+
+      classesBlacklist: uniq(base.classesBlacklist),
+      levelsBlacklist: uniq(
+        normalizeLevelsForModal(base.levelsBlacklist || [])
+      ),
+      castTimeBlacklist: uniq(
+        normalizeCastTimeForModal(base.castTimeBlacklist || [])
+      ),
+      damageTypeBlacklist: uniq(base.damageTypeBlacklist),
+      schoolBlacklist: uniq(
+        normalizeSchoolForModal(base.schoolBlacklist || [])
+      ),
+
+      ritualMode: Number(base.ritualMode ?? 0),
+      concentrationMode: Number(base.concentrationMode ?? 0),
+
+      // homebrew legacy -> include
+      homebrewInclude: uniq(
+        base.homebrewInclude?.length ? base.homebrewInclude : legacyHB
+      ).map((x) => String(x).trim().toLowerCase()),
+      homebrewOnly: uniq(base.homebrewOnly).map((x) =>
+        String(x).trim().toLowerCase()
+      ),
+
+      favoritesOnly: !!base.favoritesOnly,
     };
   };
 
@@ -182,41 +331,52 @@ export default function SpellFilterModal({
 
   useEffect(() => {
     setSelected(getInitialFromValue(value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  const toggleOption = (category, value) => {
-    setSelected((prev) => {
-      if (
-        category === "ritual" ||
-        category === "concentration" ||
-        category === "favoritesOnly"
-      ) {
-        return { ...prev, [category]: !prev[category] };
-      }
-
-      const current = prev[category] || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-
-      return { ...prev, [category]: updated };
-    });
-  };
-
-  const handleReset = () => {
-    setSelected(INITIAL_SELECTED);
-  };
+  // ✅ reset konsisten
+  const handleReset = () => setSelected(getInitialFromValue({}));
 
   const handleApply = () => {
     const modified = {
       ...selected,
-      castTime: (selected.castTime || []).map((ct) => String(ct).toLowerCase()),
-      school: (selected.school || [])
-        .map((s) => {
-          const code = SCHOOL_CODE_BY_LABEL[s];
-          return code || String(s);
-        })
+
+      classesOnly: uniq(selected.classesOnly),
+      classesBlacklist: uniq(selected.classesBlacklist),
+
+      levelsOnly: uniq(selected.levelsOnly).map(String),
+      levelsBlacklist: uniq(selected.levelsBlacklist).map(String),
+
+      castTimeOnly: uniq(selected.castTimeOnly).map((v) =>
+        String(v).toLowerCase()
+      ),
+      castTimeBlacklist: uniq(selected.castTimeBlacklist).map((v) =>
+        String(v).toLowerCase()
+      ),
+
+      damageTypeOnly: uniq(selected.damageTypeOnly).map((v) =>
+        String(v).toLowerCase()
+      ),
+      damageTypeBlacklist: uniq(selected.damageTypeBlacklist).map((v) =>
+        String(v).toLowerCase()
+      ),
+
+      schoolOnly: uniq(selected.schoolOnly)
+        .map((s) => SCHOOL_CODE_BY_LABEL[s] || String(s))
         .map((s) => String(s).toLowerCase()),
+      schoolBlacklist: uniq(selected.schoolBlacklist)
+        .map((s) => SCHOOL_CODE_BY_LABEL[s] || String(s))
+        .map((s) => String(s).toLowerCase()),
+
+      ritualMode: Number(selected.ritualMode ?? 0),
+      concentrationMode: Number(selected.concentrationMode ?? 0),
+
+      homebrews: uniq(selected.homebrewInclude).map((x) =>
+        String(x).trim().toLowerCase()
+      ),
+      homebrewOnly: uniq(selected.homebrewOnly).map((x) =>
+        String(x).trim().toLowerCase()
+      ),
 
       favoritesOnly: !!selected.favoritesOnly,
 
@@ -304,7 +464,6 @@ export default function SpellFilterModal({
       : RANGE_MAX_DEFAULT
   );
 
-  // ====== HANDLER INPUT MANUAL RANGE (tetap dipakai, tapi input nempel di slider) ======
   const handleRangeMinInputChange = (e) => {
     const raw = e.target.value;
     if (raw === "") {
@@ -335,17 +494,60 @@ export default function SpellFilterModal({
     }));
   };
 
+  // state getter for tri-state options: 0/1/2
+  const optionState = (key, value) => {
+    const onlyKey = `${key}Only`;
+    const blackKey = `${key}Blacklist`;
+    if ((selected[blackKey] || []).includes(value)) return 2;
+    if ((selected[onlyKey] || []).includes(value)) return 1;
+    return 0;
+  };
+
+  // ✅ normalize values stored for each key (levels -> "0".."9", castTime/school -> modal labels)
+  const normalizeValueForKey = (key, value) => {
+    if (key === "levels") {
+      if (value === "Cantrips") return "0";
+      return String(value);
+    }
+    if (key === "castTime") {
+      const arr = normalizeCastTimeForModal([value]);
+      return arr[0];
+    }
+    if (key === "school") {
+      const arr = normalizeSchoolForModal([value]);
+      return arr[0];
+    }
+    return value;
+  };
+
+  // ✅ homebrew codes (lowercase, trim)
+  const homebrewCodes = useMemo(() => {
+    return (homebrewOptions || [])
+      .filter((hb) => hb?.code)
+      .map((hb) => ({
+        ...hb,
+        code: String(hb.code || "")
+          .trim()
+          .toLowerCase(),
+      }))
+      .filter((hb) => hb.code.length > 0);
+  }, [homebrewOptions]);
+
+  const homebrewStateOf = (code) => {
+    if ((selected.homebrewOnly || []).includes(code)) return 2;
+    if ((selected.homebrewInclude || []).includes(code)) return 1;
+    return 0;
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
       aria-modal="true"
       role="dialog"
     >
-      {/* BACKDROP */}
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
       <div className="relative z-10 w-full max-w-2xl rounded-xl border border-[#2a2f55] bg-[#050822] p-4 md:p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
-        {/* HEADER */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-100">
             <SlidersHorizontal className="w-4 h-4 text-slate-300" />
@@ -361,11 +563,10 @@ export default function SpellFilterModal({
         </div>
 
         <div className="space-y-4">
-          {/* ====== FILTER UTAMA ====== */}
+          {/* ===== FILTER UTAMA (tri-state) ===== */}
           {Object.entries(FILTERS).map(([key, options]) => {
             if (key === "range") return null;
-            if (key === "ritual" || key === "concentration") return null;
-
+            if (key === "school") return null;
             return (
               <div key={key}>
                 <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
@@ -376,10 +577,12 @@ export default function SpellFilterModal({
                   {(options || []).length === 0 ? (
                     <span className="text-xs text-slate-500">No options</span>
                   ) : (
-                    options.map((value) => {
-                      const active = (selected[key] || []).includes(value);
+                    options.map((rawVal) => {
+                      const value = normalizeValueForKey(key, rawVal);
+                      const state = optionState(key, value); // 0/1/2
 
-                      const activeColor =
+                      // base color per key (for ONLY)
+                      const onlyColor =
                         key === "levels"
                           ? "border-emerald-500 bg-emerald-500/20 text-emerald-100"
                           : key === "classes"
@@ -388,19 +591,44 @@ export default function SpellFilterModal({
                           ? "border-rose-500 bg-rose-500/20 text-rose-100"
                           : "border-sky-500 bg-sky-500/20 text-sky-100";
 
+                      const blackColor =
+                        "border-slate-500 bg-slate-500/10 text-slate-300";
+
+                      const cls =
+                        state === 2
+                          ? blackColor
+                          : state === 1
+                          ? onlyColor
+                          : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]";
+
+                      const badge =
+                        state === 1 ? (
+                          <span className="ml-1 inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[9px] bg-white/5 border border-white/10">
+                            ONLY
+                          </span>
+                        ) : state === 2 ? (
+                          <span className="ml-1 inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[9px] bg-slate-600/15 border border-slate-500/30">
+                            NO
+                          </span>
+                        ) : null;
+
                       return (
                         <button
-                          key={`${key}-${value}`}
+                          key={`${key}-${String(rawVal)}`}
                           type="button"
-                          onClick={() => toggleOption(key, value)}
-                          className={`px-2.5 py-1 rounded-md border text-xs capitalize transition
-                            ${
-                              active
-                                ? activeColor
-                                : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
-                            }`}
+                          onClick={() =>
+                            setSelected((prev) =>
+                              cycleTriState(prev, key, value)
+                            )
+                          }
+                          className={`px-2.5 py-1 rounded-md border text-xs capitalize transition ${cls}`}
                         >
-                          {renderButtonLabel(key, value)}
+                          {key === "levels"
+                            ? rawVal === "Cantrips"
+                              ? "Cantrips"
+                              : `${rawVal}th`
+                            : renderButtonLabel(key, rawVal)}
+                          {badge}
                         </button>
                       );
                     })
@@ -409,82 +637,92 @@ export default function SpellFilterModal({
               </div>
             );
           })}
-          {/* ====== HOMEBREW ====== */}
-          <div>
-            <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-              Homebrew
-            </div>
 
-            <div className="flex flex-wrap gap-2">
-              {homebrewOptions.filter((hb) => hb?.code).length === 0 ? (
-                <span className="text-xs text-slate-500">No homebrew code</span>
-              ) : (
-                homebrewOptions
-                  .filter((hb) => hb?.code)
-                  .map((hb) => {
-                    const code = String(hb.code || "").trim();
-                    const active = (selected.homebrews || []).includes(code);
-
-                    return (
-                      <button
-                        key={hb.id || code}
-                        type="button"
-                        onClick={() => toggleOption("homebrews", code)}
-                        className={`px-2.5 py-1 rounded-md border text-xs transition ${
-                          active
-                            ? "border-amber-500 bg-amber-500/20 text-amber-100"
-                            : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
-                        }`}
-                        title={hb.name || code} // hover masih bisa lihat nama
-                      >
-                        {code}
-                      </button>
-                    );
-                  })
-              )}
-            </div>
-          </div>
-
-          {/* ====== OTHER FILTERS ====== */}
           <div className="border-t border-slate-700/60 pt-3 space-y-2">
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
               Other Filters
             </div>
 
-            <div className="flex flex-wrap gap-4">
-              <label className="inline-flex items-center gap-2 text-xs text-slate-200">
-                <input
-                  type="checkbox"
-                  className="h-3 w-3 rounded border-slate-500 bg-transparent"
-                  checked={selected.ritual}
-                  onChange={() => toggleOption("ritual")}
-                />
-                <span>Ritual</span>
-              </label>
+            <div className="flex flex-wrap gap-2">
+              {/* Ritual tri-state */}
+              {(() => {
+                const s = Number(selected.ritualMode ?? 0);
+                const cls =
+                  s === 1
+                    ? "border-emerald-500 bg-emerald-500/20 text-emerald-100"
+                    : s === 2
+                    ? "border-slate-500 bg-slate-500/10 text-slate-300"
+                    : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]";
+                const badge = s === 1 ? "ONLY" : s === 2 ? "NO" : "";
 
-              <label className="inline-flex items-center gap-2 text-xs text-slate-200">
-                <input
-                  type="checkbox"
-                  className="h-3 w-3 rounded border-slate-500 bg-transparent"
-                  checked={selected.concentration}
-                  onChange={() => toggleOption("concentration")}
-                />
-                <span>Concentration</span>
-              </label>
+                return (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelected((p) => cycleFlag(p, "ritualMode"))
+                    }
+                    className={`px-2.5 py-1 rounded-md border text-xs transition ${cls}`}
+                  >
+                    Ritual{" "}
+                    {badge ? (
+                      <span className="ml-1 inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[9px] bg-white/5 border border-white/10">
+                        {badge}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })()}
 
-              <label className="inline-flex items-center gap-2 text-xs text-slate-200">
-                <input
-                  type="checkbox"
-                  className="h-3 w-3 rounded border-slate-500 bg-transparent"
-                  checked={selected.favoritesOnly}
-                  onChange={() => toggleOption("favoritesOnly")}
-                />
-                <span>Favorites only</span>
-              </label>
+              {/* Concentration tri-state */}
+              {(() => {
+                const s = Number(selected.concentrationMode ?? 0);
+                const cls =
+                  s === 1
+                    ? "border-sky-500 bg-sky-500/20 text-sky-100"
+                    : s === 2
+                    ? "border-slate-500 bg-slate-500/10 text-slate-300"
+                    : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]";
+                const badge = s === 1 ? "ONLY" : s === 2 ? "NO" : "";
+
+                return (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelected((p) => cycleFlag(p, "concentrationMode"))
+                    }
+                    className={`px-2.5 py-1 rounded-md border text-xs transition ${cls}`}
+                  >
+                    Concentration{" "}
+                    {badge ? (
+                      <span className="ml-1 inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[9px] bg-white/5 border border-white/10">
+                        {badge}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })()}
+
+              {/* Favorites boolean */}
+              <button
+                type="button"
+                onClick={() =>
+                  setSelected((p) => ({
+                    ...p,
+                    favoritesOnly: !p.favoritesOnly,
+                  }))
+                }
+                className={`px-2.5 py-1 rounded-md border text-xs transition ${
+                  selected.favoritesOnly
+                    ? "border-amber-500 bg-amber-500/20 text-amber-100"
+                    : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
+                }`}
+              >
+                Favorites only
+              </button>
             </div>
           </div>
 
-          {/* ====== DURATION (teks dibesarkan) ====== */}
+          {/* ===== DURATION ===== */}
           <div className="border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
@@ -544,21 +782,9 @@ export default function SpellFilterModal({
 
               <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-700/60 mt-2">
                 {[
-                  {
-                    key: "durationIncludeInstant",
-                    label: "Instantaneous",
-                    short: "Inst",
-                  },
-                  {
-                    key: "durationIncludePermanent",
-                    label: "Permanent",
-                    short: "Perm",
-                  },
-                  {
-                    key: "durationIncludeSpecial",
-                    label: "Special",
-                    short: "Special",
-                  },
+                  { key: "durationIncludeInstant", short: "Inst" },
+                  { key: "durationIncludePermanent", short: "Perm" },
+                  { key: "durationIncludeSpecial", short: "Special" },
                 ].map((cfg) => {
                   const active = selected[cfg.key];
                   return (
@@ -585,7 +811,7 @@ export default function SpellFilterModal({
             </div>
           </div>
 
-          {/* ====== RANGE (slider + input angka di kiri/kanan) ====== */}
+          {/* ===== RANGE ===== */}
           <div className="border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
@@ -598,7 +824,6 @@ export default function SpellFilterModal({
 
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                {/* input MIN di kiri slider */}
                 <div className="flex items-center gap-1 w-24">
                   <input
                     type="number"
@@ -611,7 +836,6 @@ export default function SpellFilterModal({
                   <span className="text-xs text-slate-400">ft</span>
                 </div>
 
-                {/* SLIDER */}
                 <Slider.Root
                   className="relative flex-1 flex items-center h-5"
                   min={RANGE_MIN_DEFAULT}
@@ -647,7 +871,6 @@ export default function SpellFilterModal({
                   />
                 </Slider.Root>
 
-                {/* input MAX di kanan slider */}
                 <div className="flex items-center gap-1 w-24">
                   <input
                     type="number"
@@ -694,9 +917,112 @@ export default function SpellFilterModal({
               </div>
             </div>
           </div>
+          {/* ===== SCHOOL (tri-state) — moved below Range ===== */}
+          <div className="mt-4">
+            <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+              School
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {(FILTERS.school || []).map((rawVal) => {
+                const key = "school";
+                const value = normalizeValueForKey(key, rawVal);
+                const state = optionState(key, value);
+
+                const onlyColor = "border-sky-500 bg-sky-500/20 text-sky-100";
+                const blackColor =
+                  "border-slate-500 bg-slate-500/10 text-slate-300";
+
+                const cls =
+                  state === 2
+                    ? blackColor
+                    : state === 1
+                    ? onlyColor
+                    : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]";
+
+                const badge =
+                  state === 1 ? (
+                    <span className="ml-1 inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[9px] bg-white/5 border border-white/10">
+                      ONLY
+                    </span>
+                  ) : state === 2 ? (
+                    <span className="ml-1 inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[9px] bg-slate-600/15 border border-slate-500/30">
+                      NO
+                    </span>
+                  ) : null;
+
+                return (
+                  <button
+                    key={`school-${String(rawVal)}`}
+                    type="button"
+                    onClick={() =>
+                      setSelected((prev) =>
+                        cycleTriState(prev, "school", value)
+                      )
+                    }
+                    className={`px-2.5 py-1 rounded-md border text-xs transition ${cls}`}
+                  >
+                    {renderButtonLabel("school", rawVal)}
+                    {badge}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ===== HOME BREW (include/only/off) ===== */}
+          <div>
+            <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+              Homebrew
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {homebrewCodes.length === 0 ? (
+                <span className="text-xs text-slate-500">No homebrew code</span>
+              ) : (
+                homebrewCodes.map((hb) => {
+                  const code = hb.code; // already lowercase
+                  const state = homebrewStateOf(code); // 0/1/2
+
+                  const cls =
+                    state === 2
+                      ? "border-fuchsia-500 bg-fuchsia-500/20 text-fuchsia-100"
+                      : state === 1
+                      ? "border-amber-500 bg-amber-500/20 text-amber-100"
+                      : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]";
+
+                  const badge =
+                    state === 2 ? (
+                      <span className="ml-1 inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[9px] bg-fuchsia-600/30 border border-fuchsia-500/50">
+                        ONLY
+                      </span>
+                    ) : state === 1 ? (
+                      <span className="ml-1 inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[9px] bg-amber-600/30 border border-amber-500/50">
+                        +INC
+                      </span>
+                    ) : null;
+
+                  return (
+                    <button
+                      key={hb.id || code}
+                      type="button"
+                      onClick={() =>
+                        setSelected((prev) => cycleHomebrew(prev, code))
+                      }
+                      className={`px-2.5 py-1 rounded-md border text-xs transition ${cls}`}
+                      title={hb.name || code}
+                    >
+                      {code}
+                      {badge}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* FOOTER BUTTONS */}
+        {/* FOOTER */}
         <div className="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-slate-700/60">
           <button
             type="button"

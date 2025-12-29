@@ -1,22 +1,46 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import SpellDetail from "./components/SpellDetail";
 import SpellFilterModal from "./components/SpellFilterModal";
 import Cookies from "js-cookie";
-import { SlidersHorizontal } from "lucide-react"; // 🔹 icon filter
+import { SlidersHorizontal } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
 // ======================== HELPERS ========================
-
 function makeSlug(spell) {
   const name = (spell.name || "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
   return `spell-${name}`;
+}
+
+function uniq(arr) {
+  return Array.from(new Set((arr || []).filter((x) => x !== null && x !== undefined)));
+}
+
+// "ONLY/BLACKLIST" active?
+function hasListFiltersActive(onlyArr, blackArr) {
+  return (Array.isArray(onlyArr) && onlyArr.length > 0) || (Array.isArray(blackArr) && blackArr.length > 0);
+}
+
+function normalizeCastTimeKeyForBackend(v) {
+  // Modal biasanya pakai label: "Action", "Bonus Action", ...
+  // Backend expect lowercase: "action", "bonus action", ...
+  return String(v || "").trim().toLowerCase();
+}
+
+function normalizeSchoolKeyForBackend(v) {
+  // Modal kamu sudah map label -> code, tapi kalau ada yang kebawa label,
+  // minimal kita lowercase-kan.
+  return String(v || "").trim().toLowerCase();
+}
+
+function normalizeHomebrewCode(v) {
+  return String(v || "").trim().toLowerCase();
 }
 
 function getSpellSummary(spell) {
@@ -44,8 +68,7 @@ function getSpellSummary(spell) {
     };
     const typeLabel = map[type] || (type ? String(type) : "");
     if (typeLabel) {
-      actLabel =
-        value && Number(value) !== 0 ? `${value} ${typeLabel}` : typeLabel;
+      actLabel = value && Number(value) !== 0 ? `${value} ${typeLabel}` : typeLabel;
     }
   }
 
@@ -77,7 +100,6 @@ function getSpellSchoolCode(spell) {
     spell.raw_data?.system?.school;
 
   if (!raw) return "";
-
   return String(raw).toLowerCase();
 }
 
@@ -119,7 +141,6 @@ const RANGE_MIN_DEFAULT = 0;
 const RANGE_MAX_DEFAULT = 999;
 
 // ======================== SORT OPTIONS ========================
-// 🔹 Name, Level, Rating, Favorites
 const SORT_OPTIONS = [
   { value: "name-asc", label: "Name (A → Z)" },
   { value: "name-desc", label: "Name (Z → A)" },
@@ -130,6 +151,41 @@ const SORT_OPTIONS = [
   { value: "favorites-desc", label: "Favorites (Most → Least)" },
   { value: "favorites-asc", label: "Favorites (Least → Most)" },
 ];
+
+const INITIAL_FILTERS = {
+  favoritesOnly: false,
+
+  // tri-state list (modal output)
+  classesOnly: [],
+  classesBlacklist: [],
+  levelsOnly: [],
+  levelsBlacklist: [],
+  castTimeOnly: [],
+  castTimeBlacklist: [],
+  damageTypeOnly: [],
+  damageTypeBlacklist: [],
+  schoolOnly: [],
+  schoolBlacklist: [],
+
+  // tri-state flag
+  ritualMode: 0,
+  concentrationMode: 0,
+
+  // homebrew: include / only
+  homebrewInclude: [],
+  homebrewOnly: [],
+
+  durationMinIndex: DURATION_MIN_INDEX_DEFAULT,
+  durationMaxIndex: DURATION_MAX_INDEX_DEFAULT,
+  durationIncludeInstant: true,
+  durationIncludePermanent: true,
+  durationIncludeSpecial: true,
+
+  rangeMin: RANGE_MIN_DEFAULT,
+  rangeMax: RANGE_MAX_DEFAULT,
+  rangeIncludeSelf: true,
+  rangeIncludeTouch: true,
+};
 
 export default function FoundrySpellView() {
   const router = useRouter();
@@ -145,30 +201,9 @@ export default function FoundrySpellView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [homebrewOptions, setHomebrewOptions] = useState([]);
-  const [filters, setFilters] = useState({
-    classes: [],
-    levels: [],
-    castTime: [],
-    damageType: [],
-    range: [], // kategori (Self/Touch/Point/Area/Special)
-    school: [], // ["abj", "evo", ...]
-    homebrews: [],
-    ritual: false,
-    concentration: false,
 
-    favoritesOnly: false,
-
-    durationMinIndex: DURATION_MIN_INDEX_DEFAULT,
-    durationMaxIndex: DURATION_MAX_INDEX_DEFAULT,
-    durationIncludeInstant: true,
-    durationIncludePermanent: true,
-    durationIncludeSpecial: true,
-
-    rangeMin: RANGE_MIN_DEFAULT,
-    rangeMax: RANGE_MAX_DEFAULT,
-    rangeIncludeSelf: true,
-    rangeIncludeTouch: true,
-  });
+  // ✅ filters shape sesuai modal
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
 
   const [sortMode, setSortMode] = useState("name-asc");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -179,8 +214,7 @@ export default function FoundrySpellView() {
   const touchStartX = useRef(null);
   const touchDeltaX = useRef(0);
 
-  // detect mobile
-
+  // ===== fetch homebrew options =====
   useEffect(() => {
     async function fetchHomebrews() {
       try {
@@ -196,7 +230,6 @@ export default function FoundrySpellView() {
 
         const json = await res.json();
         const arr = Array.isArray(json.data) ? json.data : [];
-        console.log(arr);
 
         arr.sort((a, b) => {
           const ac = (a.code || "").toLowerCase();
@@ -215,6 +248,7 @@ export default function FoundrySpellView() {
     if (API_BASE) fetchHomebrews();
   }, []);
 
+  // ===== detect mobile =====
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
     const update = () => setIsMobile(mq.matches);
@@ -245,6 +279,7 @@ export default function FoundrySpellView() {
     if (pane === "detail" && dx > THRESH) setPane("list");
   };
 
+  // ===== debounce search =====
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearch(search);
@@ -252,6 +287,12 @@ export default function FoundrySpellView() {
     return () => clearTimeout(t);
   }, [search]);
 
+  // ===== memo deps (stabil) =====
+  const filterDeps = useMemo(() => {
+    return JSON.stringify(filters || {});
+  }, [filters]);
+
+  // ===== fetch spells =====
   useEffect(() => {
     async function fetchSpells() {
       try {
@@ -268,110 +309,107 @@ export default function FoundrySpellView() {
         if (debouncedSearch.trim() !== "") {
           params.set("search", debouncedSearch.trim());
         }
-        if (filters.levels && filters.levels.length > 0) {
-          const levelNums = filters.levels
-            .map((lv) => (lv === "Cantrips" ? 0 : Number(lv)))
-            .filter((n) => !Number.isNaN(n));
-          if (levelNums.length > 0) {
-            params.set("levels", levelNums.join(","));
-          }
-        }
-        if (filters.homebrews && filters.homebrews.length > 0) {
-          params.set("homebrews", filters.homebrews.join(","));
-        }
-        if (filters.range && filters.range.length > 0) {
-          params.set("ranges", filters.range.join(","));
-        }
 
-        if (filters.classes && filters.classes.length > 0) {
-          params.set("classes", filters.classes.join(","));
-        }
-        if (filters.castTime && filters.castTime.length > 0) {
-          params.set("castTimes", filters.castTime.join(","));
-        }
+        // ========================
+        // ✅ TRI-STATE LIST PARAMS
+        // ========================
+        const classesOnly = uniq(filters.classesOnly);
+        const classesBlacklist = uniq(filters.classesBlacklist);
+        if (classesOnly.length) params.set("classesOnly", classesOnly.join(","));
+        if (classesBlacklist.length) params.set("classesBlacklist", classesBlacklist.join(","));
 
-        if (filters.damageType && filters.damageType.length > 0) {
-          params.set("damageTypes", filters.damageType.join(","));
-        }
+        // IMPORTANT: levels sebaiknya string angka "0".."9"
+        // Kalau modal kamu pakai "Cantrips", convert ke "0"
+        const normalizeLevel = (lv) => {
+          const s = String(lv).trim();
+          if (s.toLowerCase() === "cantrips" || s.toLowerCase() === "cantrip") return "0";
+          // "1" / 1 -> "1"
+          return String(Number(s));
+        };
 
-        if (filters.school && filters.school.length > 0) {
-          params.set("schools", filters.school.join(","));
-        }
-        if (filters.ritual) {
-          params.set("ritual", "true");
-        }
-        if (filters.concentration) {
-          params.set("concentration", "true");
-        }
+        const levelsOnly = uniq(filters.levelsOnly).map(normalizeLevel).filter((x) => x !== "NaN");
+        const levelsBlacklist = uniq(filters.levelsBlacklist).map(normalizeLevel).filter((x) => x !== "NaN");
+        if (levelsOnly.length) params.set("levelsOnly", levelsOnly.join(","));
+        if (levelsBlacklist.length) params.set("levelsBlacklist", levelsBlacklist.join(","));
 
-        if (filters.favoritesOnly) {
-          params.set("favoritesOnly", "true");
-        }
+        const castTimeOnly = uniq(filters.castTimeOnly).map(normalizeCastTimeKeyForBackend);
+        const castTimeBlacklist = uniq(filters.castTimeBlacklist).map(normalizeCastTimeKeyForBackend);
+        if (castTimeOnly.length) params.set("castTimeOnly", castTimeOnly.join(","));
+        if (castTimeBlacklist.length) params.set("castTimeBlacklist", castTimeBlacklist.join(","));
 
-        // ======== DURATION SLIDER (index -> seconds) ========
+        const damageTypeOnly = uniq(filters.damageTypeOnly).map((v) => String(v).trim().toLowerCase());
+        const damageTypeBlacklist = uniq(filters.damageTypeBlacklist).map((v) => String(v).trim().toLowerCase());
+        if (damageTypeOnly.length) params.set("damageTypeOnly", damageTypeOnly.join(","));
+        if (damageTypeBlacklist.length) params.set("damageTypeBlacklist", damageTypeBlacklist.join(","));
+
+        const schoolOnly = uniq(filters.schoolOnly).map(normalizeSchoolKeyForBackend);
+        const schoolBlacklist = uniq(filters.schoolBlacklist).map(normalizeSchoolKeyForBackend);
+        if (schoolOnly.length) params.set("schoolOnly", schoolOnly.join(","));
+        if (schoolBlacklist.length) params.set("schoolBlacklist", schoolBlacklist.join(","));
+
+        // ========================
+        // ✅ TRI-STATE FLAGS
+        // ========================
+        params.set("ritualMode", String(Number(filters.ritualMode ?? 0)));
+        params.set("concentrationMode", String(Number(filters.concentrationMode ?? 0)));
+
+        // ========================
+        // ✅ HOME BREW (backend expect: homebrews + homebrewOnly)
+        // ========================
+        const hbInclude = uniq(filters.homebrewInclude).map(normalizeHomebrewCode);
+        const hbOnly = uniq(filters.homebrewOnly).map(normalizeHomebrewCode);
+        if (hbInclude.length) params.set("homebrews", hbInclude.join(","));
+        if (hbOnly.length) params.set("homebrewOnly", hbOnly.join(","));
+
+        // ========================
+        // ✅ FAVORITES
+        // ========================
+        if (filters.favoritesOnly) params.set("favoritesOnly", "true");
+
+        // ========================
+        // ✅ DURATION (index -> seconds)
+        // ========================
         if (
           typeof filters.durationMinIndex === "number" &&
           typeof filters.durationMaxIndex === "number"
         ) {
-          const minIdx = Math.max(
-            0,
-            Math.min(DURATION_STEPS.length - 1, filters.durationMinIndex)
-          );
-          const maxIdx = Math.max(
-            minIdx,
-            Math.min(DURATION_STEPS.length - 1, filters.durationMaxIndex)
-          );
-
-          const minSec = DURATION_STEPS[minIdx].sec;
-          const maxSec = DURATION_STEPS[maxIdx].sec;
-
-          params.set("minDurationSec", String(minSec));
-          params.set("maxDurationSec", String(maxSec));
+          const minIdx = Math.max(0, Math.min(DURATION_STEPS.length - 1, filters.durationMinIndex));
+          const maxIdx = Math.max(minIdx, Math.min(DURATION_STEPS.length - 1, filters.durationMaxIndex));
+          params.set("minDurationSec", String(DURATION_STEPS[minIdx].sec));
+          params.set("maxDurationSec", String(DURATION_STEPS[maxIdx].sec));
         }
 
         const durationFlags = [];
         if (filters.durationIncludeInstant) durationFlags.push("inst");
         if (filters.durationIncludePermanent) durationFlags.push("perm");
         if (filters.durationIncludeSpecial) durationFlags.push("special");
-        if (durationFlags.length > 0) {
-          params.set("durationFlags", durationFlags.join(","));
-        }
+        if (durationFlags.length) params.set("durationFlags", durationFlags.join(","));
 
-        if (typeof filters.rangeMin === "number") {
-          params.set("minRange", String(filters.rangeMin));
-        }
-        if (typeof filters.rangeMax === "number") {
-          params.set("maxRange", String(filters.rangeMax));
-        }
+        // ========================
+        // ✅ RANGE
+        // ========================
+        if (typeof filters.rangeMin === "number") params.set("minRange", String(filters.rangeMin));
+        if (typeof filters.rangeMax === "number") params.set("maxRange", String(filters.rangeMax));
 
         const rangeFlags = [];
         if (filters.rangeIncludeSelf) rangeFlags.push("self");
         if (filters.rangeIncludeTouch) rangeFlags.push("touch");
-        if (rangeFlags.length > 0) {
-          params.set("rangeFlags", rangeFlags.join(","));
-        }
+        if (rangeFlags.length) params.set("rangeFlags", rangeFlags.join(","));
 
-        // sorting (name, level, rating, favorites)
+        // ========================
+        // ✅ SORTING
+        // ========================
         if (sortMode) {
           const [field, dir] = sortMode.split("-");
-          let sortBy = "name";
-          let sortDir = dir === "desc" ? "desc" : "asc";
-
-          switch (field) {
-            case "level":
-              sortBy = "level";
-              break;
-            case "rating":
-              sortBy = "rating";
-              break;
-            case "favorites":
-              sortBy = "favorites";
-              break;
-            case "name":
-            default:
-              sortBy = "name";
-              break;
-          }
+          const sortDir = dir === "desc" ? "desc" : "asc";
+          const sortBy =
+            field === "level"
+              ? "level"
+              : field === "rating"
+              ? "rating"
+              : field === "favorites"
+              ? "favorites"
+              : "name";
 
           params.set("sortBy", sortBy);
           params.set("sortDir", sortDir);
@@ -379,7 +417,9 @@ export default function FoundrySpellView() {
 
         const query = params.toString();
         const url = query ? `${baseUrl}?${query}` : baseUrl;
-        console.log(url);
+
+     
+
         const res = await fetch(url, {
           method: "GET",
           cache: "no-store",
@@ -390,11 +430,10 @@ export default function FoundrySpellView() {
 
         const json = await res.json();
         const arr = Array.isArray(json.spells) ? json.spells : [];
-
         setSpells(arr);
 
+        // URL param selection
         const urlSlug = searchParams.get("spell");
-
         if (urlSlug) {
           const found = arr.find((sp) => makeSlug(sp) === urlSlug);
           if (found) {
@@ -403,11 +442,11 @@ export default function FoundrySpellView() {
           }
         }
 
+        // keep selected if still exists
         if (selected) {
           const still = arr.find(
             (sp) =>
-              (sp.__global_id || sp.id) ===
-              (selected.__global_id || selected.id)
+              (sp.__global_id || sp.id) === (selected.__global_id || selected.id)
           );
           if (still) {
             setSelected(still);
@@ -428,39 +467,13 @@ export default function FoundrySpellView() {
 
     fetchSpells();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    debouncedSearch,
-    sortMode,
-    filters.levels,
-    filters.range,
-    filters.classes,
-    filters.castTime,
-    filters.damageType,
-    filters.school,
-    filters.ritual,
-    filters.concentration,
-
-    // NEW: ikut trigger fetch untuk filter baru
-    filters.homebrews,
-    filters.favoritesOnly,
-    filters.durationMinIndex,
-    filters.durationMaxIndex,
-    filters.durationIncludeInstant,
-    filters.durationIncludePermanent,
-    filters.durationIncludeSpecial,
-    filters.rangeMin,
-    filters.rangeMax,
-    filters.rangeIncludeSelf,
-    filters.rangeIncludeTouch,
-  ]);
+  }, [debouncedSearch, sortMode, filterDeps]);
 
   function handleSpellUpdate(updatedSpell) {
     if (!updatedSpell || !updatedSpell.id) return;
 
     setSpells((prev) =>
-      prev.map((sp) =>
-        sp.id === updatedSpell.id ? { ...sp, ...updatedSpell } : sp
-      )
+      prev.map((sp) => (sp.id === updatedSpell.id ? { ...sp, ...updatedSpell } : sp))
     );
 
     setSelected((prev) =>
@@ -476,45 +489,44 @@ export default function FoundrySpellView() {
 
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
 
-    if (isMobile && fromMobile) {
-      setPane("detail");
-    }
+    if (isMobile && fromMobile) setPane("detail");
   }
 
-  const baseFilterCount =
-    (filters.classes.length ? 1 : 0) +
-    (filters.levels.length ? 1 : 0) +
-    (filters.castTime.length ? 1 : 0) +
-    (filters.range.length ? 1 : 0) +
-    (filters.damageType.length ? 1 : 0) +
-    (filters.school.length ? 1 : 0) +
-    (filters.ritual ? 1 : 0) +
-    (filters.concentration ? 1 : 0);
+  // ===== filter badge count =====
+  const activeFilterCount = useMemo(() => {
+    let n = 0;
 
-  let extraFilterCount = 0;
-  if (filters.favoritesOnly) extraFilterCount++;
+    if (hasListFiltersActive(filters.classesOnly, filters.classesBlacklist)) n++;
+    if (hasListFiltersActive(filters.levelsOnly, filters.levelsBlacklist)) n++;
+    if (hasListFiltersActive(filters.castTimeOnly, filters.castTimeBlacklist)) n++;
+    if (hasListFiltersActive(filters.damageTypeOnly, filters.damageTypeBlacklist)) n++;
+    if (hasListFiltersActive(filters.schoolOnly, filters.schoolBlacklist)) n++;
 
-  if (
-    filters.durationMinIndex !== DURATION_MIN_INDEX_DEFAULT ||
-    filters.durationMaxIndex !== DURATION_MAX_INDEX_DEFAULT ||
-    !filters.durationIncludeInstant ||
-    !filters.durationIncludePermanent ||
-    !filters.durationIncludeSpecial
-  ) {
-    extraFilterCount++;
-  }
+    if (Number(filters.ritualMode || 0) !== 0) n++;
+    if (Number(filters.concentrationMode || 0) !== 0) n++;
 
-  if (
-    filters.rangeMin !== RANGE_MIN_DEFAULT ||
-    filters.rangeMax !== RANGE_MAX_DEFAULT ||
-    !filters.rangeIncludeSelf ||
-    !filters.rangeIncludeTouch
-  ) {
-    extraFilterCount++;
-  }
-  if (filters.homebrews && filters.homebrews.length > 0) extraFilterCount++;
+    if (hasListFiltersActive(filters.homebrewInclude, filters.homebrewOnly)) n++;
+    if (filters.favoritesOnly) n++;
 
-  const activeFilterCount = baseFilterCount + extraFilterCount;
+    // duration changed?
+    if (
+      filters.durationMinIndex !== DURATION_MIN_INDEX_DEFAULT ||
+      filters.durationMaxIndex !== DURATION_MAX_INDEX_DEFAULT ||
+      !filters.durationIncludeInstant ||
+      !filters.durationIncludePermanent ||
+      !filters.durationIncludeSpecial
+    ) n++;
+
+    // range changed?
+    if (
+      filters.rangeMin !== RANGE_MIN_DEFAULT ||
+      filters.rangeMax !== RANGE_MAX_DEFAULT ||
+      !filters.rangeIncludeSelf ||
+      !filters.rangeIncludeTouch
+    ) n++;
+
+    return n;
+  }, [filters]);
 
   const ListBlock = (
     <>
@@ -525,7 +537,7 @@ export default function FoundrySpellView() {
             placeholder="Search spells..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-xl pl-3 pr-3 py-2 text-xs outline-none 
+            className="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-xl pl-3 pr-3 py-2 text-xs outline-none
               focus:ring-2 focus:ring-indigo-500/70 transition"
           />
           {search !== debouncedSearch && (
@@ -535,7 +547,6 @@ export default function FoundrySpellView() {
           )}
         </div>
 
-        {/* Sorting (Name / Level / Rating / Favorites) */}
         <select
           value={sortMode}
           onChange={(e) => setSortMode(e.target.value)}
@@ -548,11 +559,10 @@ export default function FoundrySpellView() {
           ))}
         </select>
 
-        {/* 🔹 Filter button pakai icon saja */}
         <button
           type="button"
           onClick={() => setFilterOpen(true)}
-          className="relative p-2 text-xs font-medium bg-slate-900 border border-slate-700 rounded-xl 
+          className="relative p-2 text-xs font-medium bg-slate-900 border border-slate-700 rounded-xl
             hover:bg-slate-800 hover:border-indigo-400 hover:text-indigo-200 transition flex items-center justify-center"
           aria-label="Open spell filter"
         >
@@ -575,7 +585,7 @@ export default function FoundrySpellView() {
             [...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="w-full px-4 py-3 flex items-center justify-between gap-3 text-xs 
+                className="w-full px-4 py-3 flex items-center justify-between gap-3 text-xs
                     border-b border-slate-800/50 bg-slate-950/70 animate-pulse"
               >
                 <div className="flex items-center gap-3">
@@ -596,8 +606,7 @@ export default function FoundrySpellView() {
               const key = spell.__global_id || spell.id || spell.name;
               const isActive =
                 selected &&
-                (selected.__global_id || selected.id) ===
-                  (spell.__global_id || spell.id);
+                (selected.__global_id || selected.id) === (spell.__global_id || spell.id);
 
               const imgSrc =
                 spell.image ||
@@ -617,8 +626,8 @@ export default function FoundrySpellView() {
                   key={key}
                   type="button"
                   onClick={() => handleSelect(spell, true)}
-                  className={`w-full text-left px-4 py-3 flex items-center justify-between gap-3 text-xs 
-                        border-b border-slate-800/50 bg-gradient-to-r 
+                  className={`w-full text-left px-4 py-3 flex items-center justify-between gap-3 text-xs
+                        border-b border-slate-800/50 bg-gradient-to-r
                         ${
                           isActive
                             ? "from-indigo-600/40 to-slate-900/70"
@@ -707,8 +716,7 @@ export default function FoundrySpellView() {
           <div
             className="flex w-[200%] flex-1 min-h-0 transition-all duration-300 ease-in-out"
             style={{
-              transform:
-                pane === "list" ? "translateX(0%)" : "translateX(-50%)",
+              transform: pane === "list" ? "translateX(0%)" : "translateX(-50%)",
             }}
           >
             <section className="w-1/2 min-w-[50%] h-full p-4 flex flex-col min-h-0">
@@ -718,10 +726,7 @@ export default function FoundrySpellView() {
             <section className="w-1/2 min-w-[50%] h-full p-4 flex flex-col min-h-0">
               <div className="flex-1 bg-slate-900/80 rounded-xl border border-slate-800 p-4 overflow-auto">
                 {selected ? (
-                  <SpellDetail
-                    spell={selected}
-                    onSpellUpdate={handleSpellUpdate}
-                  />
+                  <SpellDetail spell={selected} onSpellUpdate={handleSpellUpdate} />
                 ) : (
                   <p className="text-sm text-slate-400">Select a spell</p>
                 )}
@@ -737,7 +742,11 @@ export default function FoundrySpellView() {
           homebrewOptions={homebrewOptions}
           onClose={() => setFilterOpen(false)}
           onApply={(newFilters) => {
-            setFilters(newFilters);
+            // ✅ pastikan shape sama dengan INITIAL_FILTERS
+            setFilters((prev) => ({
+              ...prev,
+              ...newFilters,
+            }));
             setFilterOpen(false);
           }}
         />
