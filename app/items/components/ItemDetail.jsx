@@ -19,24 +19,19 @@ export default function ItemDetail({ item, onFavoriteChange }) {
   const noop = () => {};
   const emitFavoriteChange = onFavoriteChange || noop;
 
-  // ==== LOGIN STATE (DARI COOKIE) ====
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // ==== FAVORITE STATE ====
   const [favCount, setFavCount] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
 
-  // ==== TOOLTIP PROPERTY (ON CLICK) ====
   const [activeProperty, setActiveProperty] = useState(null);
 
-  // --- Cek login dari cookie sekali di awal
   useEffect(() => {
     const userCookie = Cookies.get("ignite-user-data");
     setIsLoggedIn(Boolean(userCookie));
   }, []);
 
-  // --- Sinkron favorite dengan item tiap kali item berubah
   useEffect(() => {
     if (!item) {
       setFavCount(0);
@@ -147,6 +142,20 @@ export default function ItemDetail({ item, onFavoriteChange }) {
       : "-";
 
   const weightLabel = weight ? `${weight} lb` : "-";
+  const attunementRaw =
+    item.attunement ??
+    item.format_data?.system?.attunement ??
+    item.raw_data?.system?.attunement ??
+    null;
+
+  const attunementKey = attunementRaw ? String(attunementRaw).toLowerCase() : "";
+
+  const attunementText =
+    attunementKey === "required"
+      ? "⚠️ Attunement is required"
+      : attunementKey === "optional"
+      ? "⚠️ Attunement is optional"
+      : null;
 
   // ===== PROPERTY / DESCRIPTION =====
 
@@ -223,11 +232,7 @@ export default function ItemDetail({ item, onFavoriteChange }) {
         return typeCap;
 
       case "equipment":
-        return joinClean([
-          typeCap,
-          typeValue ? `${typeValue} Armor` : "",
-          base,
-        ]);
+        return joinClean([typeCap, typeValue ? `${typeValue} Armor` : "", base]);
 
       case "tool":
         return toolType || typeCap;
@@ -254,6 +259,73 @@ export default function ItemDetail({ item, onFavoriteChange }) {
   const masteryDescription = masteryKey
     ? MASTERY_DESCRIPTIONS[masteryKey] || ""
     : "";
+
+  // ==========================
+  // ✅ DAMAGE (magical bonus + icons by types)
+  // ==========================
+
+  // label sudah diformat (misal "3d6+1")
+  const magicalBonusLabel =
+    item.damage?.magical_bonus ??
+    item.format_data?.system?.damage?.magical_bonus ??
+    item.raw_data?.system?.damage?.magical_bonus ??
+    item.magical_bonus ??
+    null;
+
+  const hasMagicalBonusLabel =
+    magicalBonusLabel != null && String(magicalBonusLabel).trim() !== "";
+
+  // damage types array (misal ["fire","necrotic"])
+  const damageTypesRaw =
+    item.damage?.types ??
+    item.format_data?.system?.damage?.types ??
+    item.raw_data?.system?.damage?.types ??
+    item.damage_types ??
+    [];
+
+  let damageTypes = [];
+  if (Array.isArray(damageTypesRaw)) {
+    damageTypes = damageTypesRaw;
+  } else if (typeof damageTypesRaw === "string" && damageTypesRaw.trim()) {
+    // kadang tersimpan string JSON / csv
+    try {
+      const parsed = JSON.parse(damageTypesRaw);
+      damageTypes = Array.isArray(parsed) ? parsed : [damageTypesRaw];
+    } catch {
+      damageTypes = damageTypesRaw.split(",").map((s) => s.trim());
+    }
+  }
+
+  // normalize unique
+  damageTypes = Array.from(
+    new Set(
+      damageTypes
+        .map((t) => String(t || "").toLowerCase().trim())
+        .filter(Boolean)
+    )
+  );
+
+  function damageIconSrc(type) {
+    const map = {
+      acid: "/assets/damageType_icon/acid.webp",
+      cold: "/assets/damageType_icon/cold.webp",
+      fire: "/assets/damageType_icon/fire.webp",
+      force: "/assets/damageType_icon/force.webp",
+      lightning: "/assets/damageType_icon/lightning.webp",
+      necrotic: "/assets/damageType_icon/necrotic.webp",
+      psychic: "/assets/damageType_icon/psychic.webp",
+      physical: "/assets/damageType_icon/physical.webp",
+      poison: "/assets/damageType_icon/poison.webp",
+      radiant: "/assets/damageType_icon/radiant.webp",
+      thunder: "/assets/damageType_icon/thunder.webp",
+    };
+
+    const key = String(type || "").toLowerCase().trim();
+    return map[key] || null;
+  }
+
+  const showDamageRow =
+    hasMagicalBonusLabel || (Array.isArray(damageTypes) && damageTypes.length);
 
   return (
     <div className="flex flex-col h-full">
@@ -296,12 +368,50 @@ export default function ItemDetail({ item, onFavoriteChange }) {
                 {priceLabel}
                 {Number(weight) > 0 ? `, ${weightLabel}` : ""}
               </div>
+
               {rarity && (
                 <div
                   className="mt-1 font-semibold break-words capitalize"
                   style={{ color: rarityColor }}
                 >
                   ({rarityKey})
+                </div>
+              )}
+
+              {/* ✅ Damage row: "3d6+1" + icons */}
+              {showDamageRow && (
+                <div className="mt-2 flex items-center justify-end gap-2 flex-wrap">
+                  {hasMagicalBonusLabel && (
+                    <div
+                      className="px-2 py-0.5 rounded-full text-[11px] border bg-slate-900/40 text-slate-100"
+                      style={{ borderColor: rarityColor }}
+                      title="Damage / magical bonus"
+                    >
+                      {String(magicalBonusLabel)}
+                    </div>
+                  )}
+
+                  {damageTypes?.length > 0 && (
+                    <div className="flex items-center gap-1 flex-wrap justify-end">
+                      {damageTypes.map((t, idx) => {
+                        const src = damageIconSrc(t);
+                        if (!src) return null;
+
+                        return (
+                          <img
+                            key={`${t}-${idx}`}
+                            src={src}
+                            alt={t}
+                            title={t}
+                            className="w-4 h-4 rounded-sm opacity-90"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -348,9 +458,15 @@ export default function ItemDetail({ item, onFavoriteChange }) {
 
       <div className="my-2 h-px bg-gradient-to-r from-transparent via-amber-300/50 to-transparent" />
 
-      {/* BODY */}
       <div className="flex-1 flex flex-col">
-        {/* Atas: description + mastery (scroll) */}
+        {attunementText && (
+          <div className="mb-2 rounded-lg border border-amber-300/40 bg-amber-500/10 px-3 py-2">
+            <p className="text-xs text-amber-200 font-medium">
+              {attunementText}
+            </p>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto pr-1">
           <p className="text-sm uppercase tracking-wide text-slate-400 mb-1">
             Description

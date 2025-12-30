@@ -13,13 +13,13 @@ export const MENU_CONFIG = [
     ],
   },
   {
-    id: "dashboard",
-    label: "Dashboard",
-    href: "/creator/dashboard",
+    id: "article",
+    label: "Article",
+    href: "/creator/article",
     icon: Hourglass,
     items: [
-      { label: "Testing", href: "/creator/dashboard/testing" },
-      { label: "Testing 1", href: "/creator/dashboard/testing-1" },
+      { label: "journal", href: "/creator/article/journal" },
+      { label: "Testing 1", href: "/creator/article/testing-1" },
     ],
   },
 ];

@@ -59,7 +59,7 @@ const FILTERS = {
     "Warlock",
     "Wizard",
   ],
-  // ⚠️ levels UI tetap tampil Cantrips, 1..9 (tapi state kita simpan string "0".."9")
+  // UI Cantrips, state disimpan "0".."9"
   levels: ["Cantrips", 1, 2, 3, 4, 5, 6, 7, 8, 9],
   castTime: [
     "Action",
@@ -102,16 +102,14 @@ const FILTERS = {
 
 function uniq(arr) {
   return Array.from(
-    new Set(
-      (arr || []).filter((x) => x !== null && x !== undefined && x !== "")
-    )
+    new Set((arr || []).filter((x) => x !== null && x !== undefined && x !== ""))
   );
 }
 function removeFrom(arr, v) {
   return (arr || []).filter((x) => x !== v);
 }
 
-// tri-state cycle for options: 0(off) -> 1(ONLY/whitelist) -> 2(BLACKLIST) -> 0(off)
+// 0(off) -> 1(ONLY) -> 2(NO) -> 0
 function cycleTriState(prev, key, value) {
   const onlyKey = `${key}Only`;
   const blackKey = `${key}Blacklist`;
@@ -122,16 +120,9 @@ function cycleTriState(prev, key, value) {
   const inOnly = only.includes(value);
   const inBlack = black.includes(value);
 
-  // OFF -> ONLY
   if (!inOnly && !inBlack) {
-    return {
-      ...prev,
-      [onlyKey]: [...only, value],
-      [blackKey]: black,
-    };
+    return { ...prev, [onlyKey]: [...only, value], [blackKey]: black };
   }
-
-  // ONLY -> BLACKLIST
   if (inOnly && !inBlack) {
     return {
       ...prev,
@@ -139,13 +130,7 @@ function cycleTriState(prev, key, value) {
       [blackKey]: [...black, value],
     };
   }
-
-  // BLACKLIST -> OFF
-  return {
-    ...prev,
-    [onlyKey]: only,
-    [blackKey]: removeFrom(black, value),
-  };
+  return { ...prev, [onlyKey]: only, [blackKey]: removeFrom(black, value) };
 }
 
 function cycleFlag(prev, flagKey) {
@@ -154,7 +139,7 @@ function cycleFlag(prev, flagKey) {
   return { ...prev, [flagKey]: next };
 }
 
-// Homebrew cycle: 0(off) -> 1(include) -> 2(only) -> 0(off)
+// homebrew: 0(off) -> 1(include) -> 2(only) -> 0
 function cycleHomebrew(prev, code) {
   const include = uniq(prev.homebrewInclude);
   const only = uniq(prev.homebrewOnly);
@@ -172,20 +157,15 @@ function cycleHomebrew(prev, code) {
       homebrewOnly: [...only, code],
     };
   }
-  return {
-    ...prev,
-    homebrewInclude: include,
-    homebrewOnly: removeFrom(only, code),
-  };
+  return { ...prev, homebrewInclude: include, homebrewOnly: removeFrom(only, code) };
 }
 
 const INITIAL_SELECTED = {
   favoritesOnly: false,
 
-  // ✅ tri-state lists for all filter categories:
   classesOnly: [],
   classesBlacklist: [],
-  levelsOnly: [], // stored as string "0".."9"
+  levelsOnly: [],
   levelsBlacklist: [],
   castTimeOnly: [],
   castTimeBlacklist: [],
@@ -194,11 +174,9 @@ const INITIAL_SELECTED = {
   schoolOnly: [],
   schoolBlacklist: [],
 
-  // ✅ tri-state flag (0/1/2)
   ritualMode: 0,
   concentrationMode: 0,
 
-  // ✅ Homebrew include/only/off
   homebrewInclude: [],
   homebrewOnly: [],
 
@@ -241,7 +219,6 @@ function normalizeSchoolForModal(arr) {
   });
 }
 
-// normalize levels to string "0".."9"
 function normalizeLevelsForModal(arr) {
   if (!Array.isArray(arr)) return [];
   return arr
@@ -265,7 +242,7 @@ export default function SpellFilterModal({
   const getInitialFromValue = (val) => {
     const base = { ...INITIAL_SELECTED, ...(val || {}) };
 
-    // backward compat (kalau dulu masih pakai arrays biasa)
+    // legacy arrays
     const legacyClasses = Array.isArray(base.classes) ? base.classes : [];
     const legacyLevels = Array.isArray(base.levels) ? base.levels : [];
     const legacyCast = Array.isArray(base.castTime) ? base.castTime : [];
@@ -276,14 +253,9 @@ export default function SpellFilterModal({
     return {
       ...base,
 
-      // legacy -> ONLY (whitelist)
-      classesOnly: uniq(
-        base.classesOnly?.length ? base.classesOnly : legacyClasses
-      ),
+      classesOnly: uniq(base.classesOnly?.length ? base.classesOnly : legacyClasses),
       levelsOnly: uniq(
-        normalizeLevelsForModal(
-          base.levelsOnly?.length ? base.levelsOnly : legacyLevels
-        )
+        normalizeLevelsForModal(base.levelsOnly?.length ? base.levelsOnly : legacyLevels)
       ),
 
       castTimeOnly: uniq(
@@ -291,9 +263,7 @@ export default function SpellFilterModal({
           ? normalizeCastTimeForModal(base.castTimeOnly)
           : normalizeCastTimeForModal(legacyCast)
       ),
-      damageTypeOnly: uniq(
-        base.damageTypeOnly?.length ? base.damageTypeOnly : legacyDmg
-      ),
+      damageTypeOnly: uniq(base.damageTypeOnly?.length ? base.damageTypeOnly : legacyDmg),
       schoolOnly: uniq(
         base.schoolOnly?.length
           ? normalizeSchoolForModal(base.schoolOnly)
@@ -301,29 +271,37 @@ export default function SpellFilterModal({
       ),
 
       classesBlacklist: uniq(base.classesBlacklist),
-      levelsBlacklist: uniq(
-        normalizeLevelsForModal(base.levelsBlacklist || [])
-      ),
-      castTimeBlacklist: uniq(
-        normalizeCastTimeForModal(base.castTimeBlacklist || [])
-      ),
+      levelsBlacklist: uniq(normalizeLevelsForModal(base.levelsBlacklist || [])),
+      castTimeBlacklist: uniq(normalizeCastTimeForModal(base.castTimeBlacklist || [])),
       damageTypeBlacklist: uniq(base.damageTypeBlacklist),
-      schoolBlacklist: uniq(
-        normalizeSchoolForModal(base.schoolBlacklist || [])
-      ),
+      schoolBlacklist: uniq(normalizeSchoolForModal(base.schoolBlacklist || [])),
 
       ritualMode: Number(base.ritualMode ?? 0),
       concentrationMode: Number(base.concentrationMode ?? 0),
 
-      // homebrew legacy -> include
       homebrewInclude: uniq(
         base.homebrewInclude?.length ? base.homebrewInclude : legacyHB
       ).map((x) => String(x).trim().toLowerCase()),
-      homebrewOnly: uniq(base.homebrewOnly).map((x) =>
-        String(x).trim().toLowerCase()
-      ),
+      homebrewOnly: uniq(base.homebrewOnly).map((x) => String(x).trim().toLowerCase()),
 
       favoritesOnly: !!base.favoritesOnly,
+
+      durationMinIndex:
+        typeof base.durationMinIndex === "number"
+          ? base.durationMinIndex
+          : DURATION_MIN_INDEX_DEFAULT,
+      durationMaxIndex:
+        typeof base.durationMaxIndex === "number"
+          ? base.durationMaxIndex
+          : DURATION_MAX_INDEX_DEFAULT,
+      durationIncludeInstant: !!base.durationIncludeInstant,
+      durationIncludePermanent: !!base.durationIncludePermanent,
+      durationIncludeSpecial: !!base.durationIncludeSpecial,
+
+      rangeMin: typeof base.rangeMin === "number" ? base.rangeMin : RANGE_MIN_DEFAULT,
+      rangeMax: typeof base.rangeMax === "number" ? base.rangeMax : RANGE_MAX_DEFAULT,
+      rangeIncludeSelf: !!base.rangeIncludeSelf,
+      rangeIncludeTouch: !!base.rangeIncludeTouch,
     };
   };
 
@@ -334,7 +312,6 @@ export default function SpellFilterModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  // ✅ reset konsisten
   const handleReset = () => setSelected(getInitialFromValue({}));
 
   const handleApply = () => {
@@ -347,19 +324,11 @@ export default function SpellFilterModal({
       levelsOnly: uniq(selected.levelsOnly).map(String),
       levelsBlacklist: uniq(selected.levelsBlacklist).map(String),
 
-      castTimeOnly: uniq(selected.castTimeOnly).map((v) =>
-        String(v).toLowerCase()
-      ),
-      castTimeBlacklist: uniq(selected.castTimeBlacklist).map((v) =>
-        String(v).toLowerCase()
-      ),
+      castTimeOnly: uniq(selected.castTimeOnly).map((v) => String(v).toLowerCase()),
+      castTimeBlacklist: uniq(selected.castTimeBlacklist).map((v) => String(v).toLowerCase()),
 
-      damageTypeOnly: uniq(selected.damageTypeOnly).map((v) =>
-        String(v).toLowerCase()
-      ),
-      damageTypeBlacklist: uniq(selected.damageTypeBlacklist).map((v) =>
-        String(v).toLowerCase()
-      ),
+      damageTypeOnly: uniq(selected.damageTypeOnly).map((v) => String(v).toLowerCase()),
+      damageTypeBlacklist: uniq(selected.damageTypeBlacklist).map((v) => String(v).toLowerCase()),
 
       schoolOnly: uniq(selected.schoolOnly)
         .map((s) => SCHOOL_CODE_BY_LABEL[s] || String(s))
@@ -371,12 +340,8 @@ export default function SpellFilterModal({
       ritualMode: Number(selected.ritualMode ?? 0),
       concentrationMode: Number(selected.concentrationMode ?? 0),
 
-      homebrews: uniq(selected.homebrewInclude).map((x) =>
-        String(x).trim().toLowerCase()
-      ),
-      homebrewOnly: uniq(selected.homebrewOnly).map((x) =>
-        String(x).trim().toLowerCase()
-      ),
+      homebrews: uniq(selected.homebrewInclude).map((x) => String(x).trim().toLowerCase()),
+      homebrewOnly: uniq(selected.homebrewOnly).map((x) => String(x).trim().toLowerCase()),
 
       favoritesOnly: !!selected.favoritesOnly,
 
@@ -392,14 +357,8 @@ export default function SpellFilterModal({
       durationIncludePermanent: !!selected.durationIncludePermanent,
       durationIncludeSpecial: !!selected.durationIncludeSpecial,
 
-      rangeMin:
-        typeof selected.rangeMin === "number"
-          ? selected.rangeMin
-          : RANGE_MIN_DEFAULT,
-      rangeMax:
-        typeof selected.rangeMax === "number"
-          ? selected.rangeMax
-          : RANGE_MAX_DEFAULT,
+      rangeMin: typeof selected.rangeMin === "number" ? selected.rangeMin : RANGE_MIN_DEFAULT,
+      rangeMax: typeof selected.rangeMax === "number" ? selected.rangeMax : RANGE_MAX_DEFAULT,
       rangeIncludeSelf: !!selected.rangeIncludeSelf,
       rangeIncludeTouch: !!selected.rangeIncludeTouch,
     };
@@ -427,41 +386,68 @@ export default function SpellFilterModal({
         return "Level";
       case "castTime":
         return "Cast Time";
-      case "range":
-        return "Range";
       case "damageType":
         return "Damage Type";
-      case "school":
-        return "School";
       default:
         return key;
     }
   };
 
+  // tri-state state getter: 0/1/2
+  const optionState = (key, value) => {
+    const onlyKey = `${key}Only`;
+    const blackKey = `${key}Blacklist`;
+    if ((selected[blackKey] || []).includes(value)) return 2;
+    if ((selected[onlyKey] || []).includes(value)) return 1;
+    return 0;
+  };
+
+  // normalize values stored for each key (levels -> "0".."9", castTime/school -> modal labels)
+  const normalizeValueForKey = (key, value) => {
+    if (key === "levels") {
+      if (value === "Cantrips") return "0";
+      return String(value);
+    }
+    if (key === "castTime") return normalizeCastTimeForModal([value])[0];
+    if (key === "school") return normalizeSchoolForModal([value])[0];
+    return value;
+  };
+
+  // ===== HOME BREW codes memo =====
+  const homebrewCodes = useMemo(() => {
+    return (homebrewOptions || [])
+      .filter((hb) => hb?.code)
+      .map((hb) => ({
+        ...hb,
+        code: String(hb.code || "").trim().toLowerCase(),
+      }))
+      .filter((hb) => hb.code.length > 0);
+  }, [homebrewOptions]);
+
+  const homebrewStateOf = (code) => {
+    if ((selected.homebrewOnly || []).includes(code)) return 2;
+    if ((selected.homebrewInclude || []).includes(code)) return 1;
+    return 0;
+  };
+
+  // ===========================
+  // ✅ DURATION & RANGE VALUES
+  // ===========================
   const durationMinIdx = Math.max(
     0,
-    Math.min(
-      DURATION_STEPS.length - 1,
-      selected.durationMinIndex ?? DURATION_MIN_INDEX_DEFAULT
-    )
+    Math.min(DURATION_STEPS.length - 1, selected.durationMinIndex ?? DURATION_MIN_INDEX_DEFAULT)
   );
   const durationMaxIdx = Math.max(
     durationMinIdx,
-    Math.min(
-      DURATION_STEPS.length - 1,
-      selected.durationMaxIndex ?? DURATION_MAX_INDEX_DEFAULT
-    )
+    Math.min(DURATION_STEPS.length - 1, selected.durationMaxIndex ?? DURATION_MAX_INDEX_DEFAULT)
   );
 
   const rangeMinVal =
-    typeof selected.rangeMin === "number"
-      ? selected.rangeMin
-      : RANGE_MIN_DEFAULT;
+    typeof selected.rangeMin === "number" ? selected.rangeMin : RANGE_MIN_DEFAULT;
+
   const rangeMaxVal = Math.max(
     rangeMinVal,
-    typeof selected.rangeMax === "number"
-      ? selected.rangeMax
-      : RANGE_MAX_DEFAULT
+    typeof selected.rangeMax === "number" ? selected.rangeMax : RANGE_MAX_DEFAULT
   );
 
   const handleRangeMinInputChange = (e) => {
@@ -494,57 +480,189 @@ export default function SpellFilterModal({
     }));
   };
 
-  // state getter for tri-state options: 0/1/2
-  const optionState = (key, value) => {
-    const onlyKey = `${key}Only`;
-    const blackKey = `${key}Blacklist`;
-    if ((selected[blackKey] || []).includes(value)) return 2;
-    if ((selected[onlyKey] || []).includes(value)) return 1;
-    return 0;
-  };
+  // ===========================
+  // ✅ SLIDER BLOCK (LABEL/INPUT DI ATAS, SLIDER DI BAWAH)
+  // ===========================
+  function RangeSliderBlock({
+    title,
+    min,
+    max,
+    step,
+    leftValue,
+    rightValue,
+    leftLabelSuffix = "",
+    rightLabelSuffix = "",
+    leftDisabled = false,
+    rightDisabled = false,
+    onLeftChange,
+    onRightChange,
+    onSliderChange,
+    trackClassName,
+    thumbClassName,
+  }) {
+    return (
+      <div className="border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
+        {/* header */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+            {title}
+          </div>
+          <div className="text-[11px] text-slate-300">
+            {leftValue}
+            {leftLabelSuffix} – {rightValue}
+            {rightLabelSuffix}
+          </div>
+        </div>
 
-  // ✅ normalize values stored for each key (levels -> "0".."9", castTime/school -> modal labels)
-  const normalizeValueForKey = (key, value) => {
-    if (key === "levels") {
-      if (value === "Cantrips") return "0";
-      return String(value);
-    }
-    if (key === "castTime") {
-      const arr = normalizeCastTimeForModal([value]);
-      return arr[0];
-    }
-    if (key === "school") {
-      const arr = normalizeSchoolForModal([value]);
-      return arr[0];
-    }
-    return value;
-  };
+        {/* ✅ INPUTS on top (left & right) */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 w-28">
+            <input
+              type="number"
+              min={min}
+              max={max}
+              value={leftValue}
+              disabled={leftDisabled}
+              onChange={onLeftChange}
+              className={`w-full rounded-md border border-slate-600 bg-[#02051b] px-2 py-1 text-xs text-slate-100 outline-none focus:ring-1 focus:ring-sky-500 ${
+                leftDisabled ? "opacity-60 cursor-not-allowed" : ""
+              }`}
+            />
+            {leftLabelSuffix ? (
+              <span className="text-xs text-slate-400">{leftLabelSuffix.trim()}</span>
+            ) : null}
+          </div>
 
-  // ✅ homebrew codes (lowercase, trim)
-  const homebrewCodes = useMemo(() => {
-    return (homebrewOptions || [])
-      .filter((hb) => hb?.code)
-      .map((hb) => ({
-        ...hb,
-        code: String(hb.code || "")
-          .trim()
-          .toLowerCase(),
-      }))
-      .filter((hb) => hb.code.length > 0);
-  }, [homebrewOptions]);
+          <div className="flex-1" />
 
-  const homebrewStateOf = (code) => {
-    if ((selected.homebrewOnly || []).includes(code)) return 2;
-    if ((selected.homebrewInclude || []).includes(code)) return 1;
-    return 0;
-  };
+          <div className="flex items-center gap-1 w-28 justify-end">
+            <input
+              type="number"
+              min={min}
+              max={max}
+              value={rightValue}
+              disabled={rightDisabled}
+              onChange={onRightChange}
+              className={`w-full rounded-md border border-slate-600 bg-[#02051b] px-2 py-1 text-xs text-slate-100 outline-none focus:ring-1 focus:ring-sky-500 ${
+                rightDisabled ? "opacity-60 cursor-not-allowed" : ""
+              }`}
+            />
+            {rightLabelSuffix ? (
+              <span className="text-xs text-slate-400">{rightLabelSuffix.trim()}</span>
+            ) : null}
+          </div>
+        </div>
+
+        {/* ✅ SLIDER below */}
+        <div className="mt-3">
+          <Slider.Root
+            className="relative flex w-full items-center h-5"
+            min={min}
+            max={max}
+            step={step}
+            value={[leftValue, rightValue]}
+            onValueChange={onSliderChange}
+          >
+            <Slider.Track className={`bg-slate-700 relative grow rounded-full h-1 ${trackClassName || ""}`}>
+              <Slider.Range className="absolute bg-sky-500 rounded-full h-1" />
+            </Slider.Track>
+            <Slider.Thumb
+              className={`block w-3 h-3 bg-sky-400 rounded-full border border-sky-200 shadow ${thumbClassName || ""}`}
+              aria-label={`${title} min`}
+            />
+            <Slider.Thumb
+              className={`block w-3 h-3 bg-sky-400 rounded-full border border-sky-200 shadow ${thumbClassName || ""}`}
+              aria-label={`${title} max`}
+            />
+          </Slider.Root>
+        </div>
+      </div>
+    );
+  }
+
+  function IndexSliderBlock({
+    title,
+    minIdx,
+    maxIdx,
+    step = 1,
+    leftIdx,
+    rightIdx,
+    leftText,
+    rightText,
+    onSliderChange,
+  }) {
+    return (
+      <div className="border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+            {title}
+          </div>
+          <div className="text-[11px] text-slate-300">
+            {leftText} – {rightText}
+          </div>
+        </div>
+
+        {/* ✅ labels on top */}
+        <div className="flex items-center justify-between text-xs text-slate-300">
+          <span className="w-28 truncate">{leftText}</span>
+          <span className="w-28 text-right truncate">{rightText}</span>
+        </div>
+
+        {/* ✅ slider below */}
+        <div className="mt-3">
+          <Slider.Root
+            className="relative flex w-full items-center h-5"
+            min={minIdx}
+            max={maxIdx}
+            step={step}
+            value={[leftIdx, rightIdx]}
+            onValueChange={onSliderChange}
+          >
+            <Slider.Track className="bg-slate-700 relative grow rounded-full h-1">
+              <Slider.Range className="absolute bg-emerald-500 rounded-full h-1" />
+            </Slider.Track>
+            <Slider.Thumb
+              className="block w-3 h-3 bg-emerald-400 rounded-full border border-emerald-200 shadow"
+              aria-label={`${title} min`}
+            />
+            <Slider.Thumb
+              className="block w-3 h-3 bg-emerald-400 rounded-full border border-emerald-200 shadow"
+              aria-label={`${title} max`}
+            />
+          </Slider.Root>
+        </div>
+
+        {/* flags */}
+        <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-700/60 mt-3">
+          {[{ key: "durationIncludeInstant", label: "Inst" },
+            { key: "durationIncludePermanent", label: "Perm" },
+            { key: "durationIncludeSpecial", label: "Special" },
+          ].map((cfg) => {
+            const active = !!selected[cfg.key];
+            return (
+              <button
+                key={cfg.key}
+                type="button"
+                onClick={() =>
+                  setSelected((prev) => ({ ...prev, [cfg.key]: !prev[cfg.key] }))
+                }
+                className={`px-2.5 py-1 rounded-md border text-[11px] transition ${
+                  active
+                    ? "border-emerald-500 bg-emerald-500/20 text-emerald-100"
+                    : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
+                }`}
+              >
+                {cfg.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      aria-modal="true"
-      role="dialog"
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center" aria-modal="true" role="dialog">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
       <div className="relative z-10 w-full max-w-2xl rounded-xl border border-[#2a2f55] bg-[#050822] p-4 md:p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -553,11 +671,7 @@ export default function SpellFilterModal({
             <SlidersHorizontal className="w-4 h-4 text-slate-300" />
             <span>Filter Spells</span>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 rounded-full hover:bg-slate-800"
-          >
+          <button type="button" onClick={onClose} className="p-1 rounded-full hover:bg-slate-800">
             <X className="w-4 h-4 text-slate-300" />
           </button>
         </div>
@@ -566,7 +680,7 @@ export default function SpellFilterModal({
           {/* ===== FILTER UTAMA (tri-state) ===== */}
           {Object.entries(FILTERS).map(([key, options]) => {
             if (key === "range") return null;
-            if (key === "school") return null;
+            if (key === "school") return null; // school kita render khusus bawah
             return (
               <div key={key}>
                 <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
@@ -579,9 +693,8 @@ export default function SpellFilterModal({
                   ) : (
                     options.map((rawVal) => {
                       const value = normalizeValueForKey(key, rawVal);
-                      const state = optionState(key, value); // 0/1/2
+                      const state = optionState(key, value);
 
-                      // base color per key (for ONLY)
                       const onlyColor =
                         key === "levels"
                           ? "border-emerald-500 bg-emerald-500/20 text-emerald-100"
@@ -591,8 +704,7 @@ export default function SpellFilterModal({
                           ? "border-rose-500 bg-rose-500/20 text-rose-100"
                           : "border-sky-500 bg-sky-500/20 text-sky-100";
 
-                      const blackColor =
-                        "border-slate-500 bg-slate-500/10 text-slate-300";
+                      const blackColor = "border-slate-500 bg-slate-500/10 text-slate-300";
 
                       const cls =
                         state === 2
@@ -616,11 +728,7 @@ export default function SpellFilterModal({
                         <button
                           key={`${key}-${String(rawVal)}`}
                           type="button"
-                          onClick={() =>
-                            setSelected((prev) =>
-                              cycleTriState(prev, key, value)
-                            )
-                          }
+                          onClick={() => setSelected((prev) => cycleTriState(prev, key, value))}
                           className={`px-2.5 py-1 rounded-md border text-xs capitalize transition ${cls}`}
                         >
                           {key === "levels"
@@ -638,13 +746,14 @@ export default function SpellFilterModal({
             );
           })}
 
+          {/* ===== FLAGS ===== */}
           <div className="border-t border-slate-700/60 pt-3 space-y-2">
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
               Other Filters
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {/* Ritual tri-state */}
+              {/* Ritual */}
               {(() => {
                 const s = Number(selected.ritualMode ?? 0);
                 const cls =
@@ -658,9 +767,7 @@ export default function SpellFilterModal({
                 return (
                   <button
                     type="button"
-                    onClick={() =>
-                      setSelected((p) => cycleFlag(p, "ritualMode"))
-                    }
+                    onClick={() => setSelected((p) => cycleFlag(p, "ritualMode"))}
                     className={`px-2.5 py-1 rounded-md border text-xs transition ${cls}`}
                   >
                     Ritual{" "}
@@ -673,7 +780,7 @@ export default function SpellFilterModal({
                 );
               })()}
 
-              {/* Concentration tri-state */}
+              {/* Concentration */}
               {(() => {
                 const s = Number(selected.concentrationMode ?? 0);
                 const cls =
@@ -687,9 +794,7 @@ export default function SpellFilterModal({
                 return (
                   <button
                     type="button"
-                    onClick={() =>
-                      setSelected((p) => cycleFlag(p, "concentrationMode"))
-                    }
+                    onClick={() => setSelected((p) => cycleFlag(p, "concentrationMode"))}
                     className={`px-2.5 py-1 rounded-md border text-xs transition ${cls}`}
                   >
                     Concentration{" "}
@@ -702,15 +807,10 @@ export default function SpellFilterModal({
                 );
               })()}
 
-              {/* Favorites boolean */}
+              {/* favorites */}
               <button
                 type="button"
-                onClick={() =>
-                  setSelected((p) => ({
-                    ...p,
-                    favoritesOnly: !p.favoritesOnly,
-                  }))
-                }
+                onClick={() => setSelected((p) => ({ ...p, favoritesOnly: !p.favoritesOnly }))}
                 className={`px-2.5 py-1 rounded-md border text-xs transition ${
                   selected.favoritesOnly
                     ? "border-amber-500 bg-amber-500/20 text-amber-100"
@@ -722,203 +822,89 @@ export default function SpellFilterModal({
             </div>
           </div>
 
-          {/* ===== DURATION ===== */}
-          <div className="border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
-                Duration
-              </div>
-              <div className="text-xs text-slate-300">
-                {DURATION_STEPS[durationMinIdx].label} –{" "}
-                {DURATION_STEPS[durationMaxIdx].label}
-              </div>
+          {/* ===== DURATION (labels top, slider below) ===== */}
+          <IndexSliderBlock
+            title="Duration"
+            minIdx={0}
+            maxIdx={DURATION_STEPS.length - 1}
+            leftIdx={durationMinIdx}
+            rightIdx={durationMaxIdx}
+            leftText={DURATION_STEPS[durationMinIdx].label}
+            rightText={DURATION_STEPS[durationMaxIdx].label}
+            onSliderChange={([min, max]) => {
+              const clampedMin = Math.max(0, Math.min(DURATION_STEPS.length - 1, min));
+              const clampedMax = Math.max(clampedMin, Math.min(DURATION_STEPS.length - 1, max));
+              setSelected((prev) => ({
+                ...prev,
+                durationMinIndex: clampedMin,
+                durationMaxIndex: clampedMax,
+              }));
+            }}
+          />
+
+          {/* ===== RANGE (inputs top, slider below) ===== */}
+          <RangeSliderBlock
+            title="Range (ft)"
+            min={RANGE_MIN_DEFAULT}
+            max={RANGE_MAX_DEFAULT}
+            step={5}
+            leftValue={rangeMinVal}
+            rightValue={rangeMaxVal}
+            leftLabelSuffix="ft"
+            rightLabelSuffix="ft"
+            onLeftChange={handleRangeMinInputChange}
+            onRightChange={handleRangeMaxInputChange}
+            onSliderChange={([min, max]) => {
+              const clampedMin = Math.max(RANGE_MIN_DEFAULT, Math.min(RANGE_MAX_DEFAULT, min));
+              const clampedMax = Math.max(clampedMin, Math.min(RANGE_MAX_DEFAULT, max));
+              setSelected((prev) => ({
+                ...prev,
+                rangeMin: clampedMin,
+                rangeMax: clampedMax,
+              }));
+            }}
+          />
+
+          {/* range flags */}
+          <div className="-mt-2 border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
+            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">
+              Range Flags
             </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-300 w-14 text-right">
-                  {DURATION_STEPS[durationMinIdx].label}
-                </span>
-
-                <Slider.Root
-                  className="relative flex-1 flex items-center h-5"
-                  min={0}
-                  max={DURATION_STEPS.length - 1}
-                  step={1}
-                  value={[durationMinIdx, durationMaxIdx]}
-                  onValueChange={([min, max]) => {
-                    const clampedMin = Math.max(
-                      0,
-                      Math.min(DURATION_STEPS.length - 1, min)
-                    );
-                    const clampedMax = Math.max(
-                      clampedMin,
-                      Math.min(DURATION_STEPS.length - 1, max)
-                    );
+            <div className="flex flex-wrap gap-3">
+              <label className="inline-flex items-center gap-2 text-xs text-slate-200">
+                <input
+                  type="checkbox"
+                  className="h-3 w-3 rounded border-slate-500 bg-transparent"
+                  checked={selected.rangeIncludeSelf}
+                  onChange={() =>
                     setSelected((prev) => ({
                       ...prev,
-                      durationMinIndex: clampedMin,
-                      durationMaxIndex: clampedMax,
-                    }));
-                  }}
-                >
-                  <Slider.Track className="bg-slate-700 relative grow rounded-full h-1">
-                    <Slider.Range className="absolute bg-emerald-500 rounded-full h-1" />
-                  </Slider.Track>
-                  <Slider.Thumb
-                    className="block w-3 h-3 bg-emerald-400 rounded-full border border-emerald-200 shadow"
-                    aria-label="Minimum duration"
-                  />
-                  <Slider.Thumb
-                    className="block w-3 h-3 bg-emerald-400 rounded-full border border-emerald-200 shadow"
-                    aria-label="Maximum duration"
-                  />
-                </Slider.Root>
+                      rangeIncludeSelf: !prev.rangeIncludeSelf,
+                    }))
+                  }
+                />
+                <span>Include Self</span>
+              </label>
 
-                <span className="text-xs text-slate-300 w-14">
-                  {DURATION_STEPS[durationMaxIdx].label}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-700/60 mt-2">
-                {[
-                  { key: "durationIncludeInstant", short: "Inst" },
-                  { key: "durationIncludePermanent", short: "Perm" },
-                  { key: "durationIncludeSpecial", short: "Special" },
-                ].map((cfg) => {
-                  const active = selected[cfg.key];
-                  return (
-                    <button
-                      key={cfg.key}
-                      type="button"
-                      onClick={() =>
-                        setSelected((prev) => ({
-                          ...prev,
-                          [cfg.key]: !prev[cfg.key],
-                        }))
-                      }
-                      className={`px-2.5 py-1 rounded-md border text-[11px] transition ${
-                        active
-                          ? "border-emerald-500 bg-emerald-500/20 text-emerald-100"
-                          : "border-[#2a2f55] bg-[#0b1034] text-slate-200 hover:bg-[#151d55]"
-                      }`}
-                    >
-                      {cfg.short}
-                    </button>
-                  );
-                })}
-              </div>
+              <label className="inline-flex items-center gap-2 text-xs text-slate-200">
+                <input
+                  type="checkbox"
+                  className="h-3 w-3 rounded border-slate-500 bg-transparent"
+                  checked={selected.rangeIncludeTouch}
+                  onChange={() =>
+                    setSelected((prev) => ({
+                      ...prev,
+                      rangeIncludeTouch: !prev.rangeIncludeTouch,
+                    }))
+                  }
+                />
+                <span>Include Touch</span>
+              </label>
             </div>
           </div>
 
-          {/* ===== RANGE ===== */}
-          <div className="border border-slate-700/70 rounded-lg px-3 py-3 bg-[#050a2a]/60">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
-                Range
-              </div>
-              <div className="text-[11px] text-slate-300">
-                {rangeMinVal} ft – {rangeMaxVal} ft
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 w-24">
-                  <input
-                    type="number"
-                    min={RANGE_MIN_DEFAULT}
-                    max={RANGE_MAX_DEFAULT}
-                    value={rangeMinVal}
-                    onChange={handleRangeMinInputChange}
-                    className="w-full rounded-md border border-slate-600 bg-[#02051b] px-2 py-1 text-xs text-slate-100 outline-none focus:ring-1 focus:ring-sky-500"
-                  />
-                  <span className="text-xs text-slate-400">ft</span>
-                </div>
-
-                <Slider.Root
-                  className="relative flex-1 flex items-center h-5"
-                  min={RANGE_MIN_DEFAULT}
-                  max={RANGE_MAX_DEFAULT}
-                  step={5}
-                  value={[rangeMinVal, rangeMaxVal]}
-                  onValueChange={([min, max]) => {
-                    const clampedMin = Math.max(
-                      RANGE_MIN_DEFAULT,
-                      Math.min(RANGE_MAX_DEFAULT, min)
-                    );
-                    const clampedMax = Math.max(
-                      clampedMin,
-                      Math.min(RANGE_MAX_DEFAULT, max)
-                    );
-                    setSelected((prev) => ({
-                      ...prev,
-                      rangeMin: clampedMin,
-                      rangeMax: clampedMax,
-                    }));
-                  }}
-                >
-                  <Slider.Track className="bg-slate-700 relative grow rounded-full h-1">
-                    <Slider.Range className="absolute bg-sky-500 rounded-full h-1" />
-                  </Slider.Track>
-                  <Slider.Thumb
-                    className="block w-3 h-3 bg-sky-400 rounded-full border border-sky-200 shadow"
-                    aria-label="Minimum range"
-                  />
-                  <Slider.Thumb
-                    className="block w-3 h-3 bg-sky-400 rounded-full border border-sky-200 shadow"
-                    aria-label="Maximum range"
-                  />
-                </Slider.Root>
-
-                <div className="flex items-center gap-1 w-24">
-                  <input
-                    type="number"
-                    min={RANGE_MIN_DEFAULT}
-                    max={RANGE_MAX_DEFAULT}
-                    value={rangeMaxVal}
-                    onChange={handleRangeMaxInputChange}
-                    className="w-full rounded-md border border-slate-600 bg-[#02051b] px-2 py-1 text-xs text-slate-100 outline-none focus:ring-1 focus:ring-sky-500"
-                  />
-                  <span className="text-xs text-slate-400">ft</span>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-3 pt-2 border-t border-slate-700/60 mt-2">
-                <label className="inline-flex items-center gap-2 text-xs text-slate-200">
-                  <input
-                    type="checkbox"
-                    className="h-3 w-3 rounded border-slate-500 bg-transparent"
-                    checked={selected.rangeIncludeSelf}
-                    onChange={() =>
-                      setSelected((prev) => ({
-                        ...prev,
-                        rangeIncludeSelf: !prev.rangeIncludeSelf,
-                      }))
-                    }
-                  />
-                  <span>Include Self</span>
-                </label>
-
-                <label className="inline-flex items-center gap-2 text-xs text-slate-200">
-                  <input
-                    type="checkbox"
-                    className="h-3 w-3 rounded border-slate-500 bg-transparent"
-                    checked={selected.rangeIncludeTouch}
-                    onChange={() =>
-                      setSelected((prev) => ({
-                        ...prev,
-                        rangeIncludeTouch: !prev.rangeIncludeTouch,
-                      }))
-                    }
-                  />
-                  <span>Include Touch</span>
-                </label>
-              </div>
-            </div>
-          </div>
-          {/* ===== SCHOOL (tri-state) — moved below Range ===== */}
-          <div className="mt-4">
+          {/* ===== SCHOOL (tri-state) ===== */}
+          <div className="mt-1">
             <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
               School
             </div>
@@ -930,8 +916,7 @@ export default function SpellFilterModal({
                 const state = optionState(key, value);
 
                 const onlyColor = "border-sky-500 bg-sky-500/20 text-sky-100";
-                const blackColor =
-                  "border-slate-500 bg-slate-500/10 text-slate-300";
+                const blackColor = "border-slate-500 bg-slate-500/10 text-slate-300";
 
                 const cls =
                   state === 2
@@ -955,11 +940,7 @@ export default function SpellFilterModal({
                   <button
                     key={`school-${String(rawVal)}`}
                     type="button"
-                    onClick={() =>
-                      setSelected((prev) =>
-                        cycleTriState(prev, "school", value)
-                      )
-                    }
+                    onClick={() => setSelected((prev) => cycleTriState(prev, "school", value))}
                     className={`px-2.5 py-1 rounded-md border text-xs transition ${cls}`}
                   >
                     {renderButtonLabel("school", rawVal)}
@@ -970,7 +951,7 @@ export default function SpellFilterModal({
             </div>
           </div>
 
-          {/* ===== HOME BREW (include/only/off) ===== */}
+          {/* ===== HOME BREW ===== */}
           <div>
             <div className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wide">
               Homebrew
@@ -981,8 +962,8 @@ export default function SpellFilterModal({
                 <span className="text-xs text-slate-500">No homebrew code</span>
               ) : (
                 homebrewCodes.map((hb) => {
-                  const code = hb.code; // already lowercase
-                  const state = homebrewStateOf(code); // 0/1/2
+                  const code = hb.code;
+                  const state = homebrewStateOf(code);
 
                   const cls =
                     state === 2
@@ -1006,9 +987,7 @@ export default function SpellFilterModal({
                     <button
                       key={hb.id || code}
                       type="button"
-                      onClick={() =>
-                        setSelected((prev) => cycleHomebrew(prev, code))
-                      }
+                      onClick={() => setSelected((prev) => cycleHomebrew(prev, code))}
                       className={`px-2.5 py-1 rounded-md border text-xs transition ${cls}`}
                       title={hb.name || code}
                     >
