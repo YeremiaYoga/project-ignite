@@ -18,7 +18,7 @@ export const MENU_CONFIG = [
     href: "/creator/article",
     icon: Hourglass,
     items: [
-      { label: "journal", href: "/creator/article/journal" },
+      { label: "Journals", href: "/creator/article/journals" },
       { label: "Testing 1", href: "/creator/article/testing-1" },
     ],
   },
