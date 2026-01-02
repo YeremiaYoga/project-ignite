@@ -134,7 +134,6 @@ export default function CreatorSideNav() {
       >
         <div className="mx-auto w-full max-w-[560px] px-3">
           <div className="rounded-2xl border border-slate-800 bg-slate-900/95 backdrop-blur-sm shadow-2xl overflow-hidden">
-            {/* header */}
             <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-slate-100">
                 {selectedMenu?.label}
@@ -150,7 +149,6 @@ export default function CreatorSideNav() {
               </button>
             </div>
 
-            {/* icon switcher row (NO NAVIGATE) */}
             <div className="px-3 py-3 border-b border-slate-800">
               <div className="flex items-center gap-2 overflow-x-auto">
                 {MENU_CONFIG.map((menu) => {
@@ -178,7 +176,6 @@ export default function CreatorSideNav() {
               </div>
             </div>
 
-            {/* items (NAVIGATE) */}
             <div className="max-h-[50vh] overflow-y-auto p-2">
               <div className="space-y-1 text-sm">
                 {selectedMenu?.items?.map((item) => {

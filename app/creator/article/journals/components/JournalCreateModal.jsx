@@ -50,19 +50,6 @@ function buildFvttFormat({ name, pages }) {
   return { name: safeName, pages: fvttPages };
 }
 
-/**
- * Reusable modal for:
- * - create: POST /ignite/journals
- * - edit:   PUT  /ignite/journals/:id  (basic info only)
- *
- * Props:
- * open: boolean
- * mode: "create" | "edit"
- * initial: { id, name, description, private, share_id, pages? } (for edit)
- * onClose: fn
- * onCreated: fn(data)
- * onUpdated: fn(data)
- */
 export default function JournalCreateModal({
   open,
   mode = "create",
@@ -115,7 +102,6 @@ export default function JournalCreateModal({
 
     try {
       if (mode === "create") {
-        // ✅ default minimal pages biar editor gak kosong
         const pages = [
           {
             id: uid(),
@@ -155,12 +141,11 @@ export default function JournalCreateModal({
         return;
       }
 
-      // mode === "edit"
+      // edit
       const payload = {
         name: draft.name.trim(),
         description: draft.description || null,
         private: !!draft.private,
-        // share_id biasanya sebaiknya tidak diubah, tapi kalau kamu mau bisa:
         share_id: draft.share_id.trim(),
       };
 
@@ -178,7 +163,6 @@ export default function JournalCreateModal({
         return;
       }
 
-      // backend idealnya return row terbaru di json.data
       onUpdated?.(json?.data || payload);
       onClose?.();
     } catch (e) {
@@ -195,26 +179,29 @@ export default function JournalCreateModal({
   const primaryLabel = mode === "edit" ? "Save" : "Create";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/55 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-950 text-slate-100 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="px-5 py-4 border-b border-slate-800 bg-gradient-to-r from-slate-950/70 via-slate-950/50 to-indigo-950/20 flex items-center justify-between shrink-0">
-          <div>
+    <div className="fixed inset-0 z-50 bg-black/55 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl rounded-2xl border border-slate-800 bg-slate-950 text-slate-100 shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+        {/* Header */}
+        <div className="px-4 sm:px-5 py-4 border-b border-slate-800 bg-gradient-to-r from-slate-950/70 via-slate-950/50 to-indigo-950/20 flex items-center justify-between gap-3 shrink-0">
+          <div className="min-w-0">
             <p className="text-xs text-slate-400">Creator Panel</p>
-            <p className="text-sm font-semibold">{title}</p>
+            <p className="text-sm font-semibold truncate">{title}</p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900"
+            className="p-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 shrink-0"
             title="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-5 space-y-4 overflow-y-auto flex-1 min-h-0">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
+        {/* Body */}
+        <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 min-h-0">
+          {/* Name + Share */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-3 items-end">
             <div>
               <label className="text-[11px] uppercase tracking-widest text-slate-500">
                 Name
@@ -229,23 +216,25 @@ export default function JournalCreateModal({
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2">
+            {/* Share tools */}
+            <div className="flex items-center gap-2 justify-between lg:justify-end">
               <button
                 type="button"
                 onClick={() =>
                   setDraft((d) => ({ ...d, share_id: genShareId(30) }))
                 }
-                className="p-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 disabled:opacity-40"
+                className="p-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 disabled:opacity-40 shrink-0"
                 title="Regenerate share id"
                 disabled={saving}
               >
                 <RefreshCw className="w-4 h-4 text-slate-200" />
               </button>
 
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-800 bg-slate-950/60">
-                <span className="text-[11px] font-mono text-slate-200">
+              <div className="flex-1 lg:flex-none flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-800 bg-slate-950/60 min-w-0">
+                <span className="text-[11px] font-mono text-slate-200 break-all line-clamp-2 min-w-0">
                   {draft.share_id || "—"}
                 </span>
+
                 <button
                   type="button"
                   onClick={async () => {
@@ -253,7 +242,7 @@ export default function JournalCreateModal({
                       await navigator.clipboard.writeText(draft.share_id || "");
                     } catch {}
                   }}
-                  className="p-1 rounded-lg hover:bg-slate-800"
+                  className="p-1 rounded-lg hover:bg-slate-800 shrink-0"
                   title="Copy"
                   disabled={!draft.share_id}
                 >
@@ -263,6 +252,7 @@ export default function JournalCreateModal({
             </div>
           </div>
 
+          {/* Description */}
           <div>
             <label className="text-[11px] uppercase tracking-widest text-slate-500">
               Description (Opsional)
@@ -278,12 +268,13 @@ export default function JournalCreateModal({
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-3 flex-wrap">
+          {/* Footer actions */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <button
               type="button"
               onClick={() => setDraft((d) => ({ ...d, private: !d.private }))}
               className={[
-                "inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs",
+                "inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border text-xs w-full sm:w-auto",
                 draft.private
                   ? "border-amber-500/30 bg-amber-500/10 text-amber-200 hover:bg-amber-500/15"
                   : "border-emerald-500/30 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15",
@@ -297,11 +288,11 @@ export default function JournalCreateModal({
               {draft.private ? "Private" : "Public"}
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3 py-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 text-xs"
+                className="px-3 py-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 text-xs flex-1 sm:flex-none"
               >
                 Cancel
               </button>
@@ -311,7 +302,7 @@ export default function JournalCreateModal({
                 onClick={submit}
                 disabled={!canSave || saving}
                 className={[
-                  "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium",
+                  "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-medium flex-1 sm:flex-none",
                   !canSave || saving
                     ? "bg-slate-800 text-slate-400 cursor-not-allowed"
                     : "bg-indigo-600/90 hover:bg-indigo-600 text-white",

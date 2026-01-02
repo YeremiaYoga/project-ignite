@@ -1,18 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Copy, Check, Pencil, Trash2, Lock, Globe } from "lucide-react";
+import { Pencil, Trash2, Lock, Globe } from "lucide-react";
 
 export default function JournalTable({
   loading,
   rows,
-  copiedId,
-  onCopyShare,
   onDelete,
   fmtDate,
 }) {
+  const totalCharacterCount = Array.isArray(rows)
+    ? rows.reduce((sum, r) => sum + Number(r.character_count || 0), 0)
+    : 0;
+
   return (
-    <div className=" rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
+    <div className="hidden md:block rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
+      {/* Header */}
       <div className="px-5 py-4 border-b border-slate-800 bg-gradient-to-r from-slate-950/60 via-slate-950/40 to-indigo-950/20">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -22,12 +25,21 @@ export default function JournalTable({
             </p>
           </div>
 
-          <div className="text-xs text-slate-400">
-            {loading ? "Loading..." : `${rows.length} items`}
+          <div className="text-right">
+            <p className="text-xs text-slate-400">
+              {loading ? "Loading..." : `${rows.length} journals`}
+            </p>
+            <p className="text-[11px] text-slate-500">
+              Total Characters:{" "}
+              <span className="text-slate-300 font-medium">
+                {totalCharacterCount}
+              </span>
+            </p>
           </div>
         </div>
       </div>
 
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead className="bg-slate-950/60">
@@ -35,16 +47,22 @@ export default function JournalTable({
               <th className="px-5 py-3 font-medium">Name</th>
               <th className="px-5 py-3 font-medium">Share ID</th>
               <th className="px-5 py-3 font-medium">Privacy</th>
-              <th className="px-5 py-3 font-medium">Pages</th>
+              <th className="px-5 py-3 font-medium text-right">Pages</th>
+              <th className="px-5 py-3 font-medium text-right">
+                Characters
+              </th>
               <th className="px-5 py-3 font-medium">Updated</th>
-              <th className="px-5 py-3 font-medium w-[320px]">Actions</th>
+              <th className="px-5 py-3 font-medium w-[300px]">Actions</th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-slate-800">
             {!loading && rows.length === 0 ? (
               <tr>
-                <td className="px-5 py-6 text-sm text-slate-400" colSpan={6}>
+                <td
+                  className="px-5 py-6 text-sm text-slate-400"
+                  colSpan={7}
+                >
                   No journals found.
                 </td>
               </tr>
@@ -61,6 +79,7 @@ export default function JournalTable({
                     key={r.id}
                     className="text-xs text-slate-200 hover:bg-slate-950/50"
                   >
+                    {/* Name */}
                     <td className="px-5 py-4">
                       <div className="font-medium text-slate-100">
                         {r.name || "-"}
@@ -72,10 +91,12 @@ export default function JournalTable({
                       ) : null}
                     </td>
 
+                    {/* Share ID */}
                     <td className="px-5 py-4 text-slate-300 font-mono">
                       {r.share_id || "-"}
                     </td>
 
+                    {/* Privacy */}
                     <td className="px-5 py-4">
                       <span
                         className={[
@@ -94,12 +115,22 @@ export default function JournalTable({
                       </span>
                     </td>
 
-                    <td className="px-5 py-4 text-slate-300">{pageCount}</td>
+                    {/* Pages */}
+                    <td className="px-5 py-4 text-right text-slate-300">
+                      {pageCount}
+                    </td>
 
+                    {/* Character Count */}
+                    <td className="px-5 py-4 text-right text-slate-300">
+                      {r.character_count ?? 0}
+                    </td>
+
+                    {/* Updated */}
                     <td className="px-5 py-4 text-slate-400">
                       {r.updated_at ? fmtDate(r.updated_at) : "-"}
                     </td>
 
+                    {/* Actions */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Link
