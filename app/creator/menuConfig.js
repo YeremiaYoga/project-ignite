@@ -8,8 +8,7 @@ export const MENU_CONFIG = [
     href: "/creator/timeline/era",
     character_limit: false,
     items: [
-      { label: "Era", href: "/creator/timeline/era" },
-      { label: "Calender", href: "/creator/timeline/calender" },
+      { label: "Calendar", href: "/creator/timeline/calendar" },
       { label: "Event", href: "/creator/timeline/event" },
     ],
   },

@@ -15,6 +15,7 @@ import Step2 from "./Step2";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
+/* ---------------- helpers ---------------- */
 function pickValue(v) {
   if (v && typeof v === "object" && "target" in v) return v.target?.value;
   return v;
@@ -37,13 +38,20 @@ function genShareId(len = 12) {
 }
 function computeTotal(start, end) {
   if (typeof start !== "number" || typeof end !== "number") return null;
+  if (Number.isNaN(start) || Number.isNaN(end)) return null;
   return end - start;
 }
+function numOrNull(v) {
+  if (v === null || v === "" || v === undefined) return null;
+  const n = Number(v);
+  return Number.isNaN(n) ? null : n;
+}
+
 function newEra() {
   return {
     _key: uid(),
     name: "",
-    shorten: "",
+    abbreviation: "",
     other_name: [],
     _other_name_input: "",
     current: false,
@@ -53,66 +61,181 @@ function newEra() {
     description: "",
   };
 }
-function newMonth() {
-  return {
-    _key: uid(),
-    name: "",
-    days: 30,
-    season: [],
-    leap: {
-      state: false,
-      every_year: null,
-      skip_every: null,
-      except_century: false,
-      plus: null,
-    },
-    events: [],
-  };
-}
-function newWeekDay() {
-  return { _key: uid(), name: "", shorten: "" };
+
+function normalizeValuesObj(obj) {
+  return { values: Array.isArray(obj?.values) ? obj.values : [] };
 }
 
-export default function EraForm({ mode = "create", initialData = null }) {
+function normalizeCalendarInitialData(raw) {
+  if (!raw) return null;
+
+  const normalizeEraList = (arr) =>
+    (Array.isArray(arr) ? arr : []).map((e) => ({
+      _key: uid(),
+      name: e?.name || "",
+      abbreviation: e?.abbreviation || "",
+      other_name: Array.isArray(e?.other_name) ? e.other_name : [],
+      _other_name_input: "",
+      current: !!e?.current,
+      start: e?.start ?? null,
+      end: e?.end ?? null,
+      total: e?.total ?? null,
+      description: e?.description || "",
+    }));
+
+  const normalizeMonthList = (arr) =>
+    (Array.isArray(arr) ? arr : []).map((m, idx) => ({
+      _key: uid(),
+      name: m?.name || "",
+      abbreviation: m?.abbreviation || "",
+      ordinal: m?.ordinal ?? idx + 1,
+      days: m?.days ?? 30,
+    }));
+
+  const normalizeDayList = (arr) =>
+    (Array.isArray(arr) ? arr : []).map((d, idx) => ({
+      _key: uid(),
+      name: d?.name || "",
+      abbreviation: d?.abbreviation || "",
+      ordinal: d?.ordinal ?? idx + 1,
+    }));
+
+  const normalizeSeasonList = (arr) =>
+    (Array.isArray(arr) ? arr : []).map((s) => ({
+      _key: uid(),
+      name: s?.name || "",
+      month_start: s?.month_start ?? 1,
+      month_end: s?.month_end ?? 1,
+    }));
+
+  const normalizeWeatherList = (arr) =>
+    (Array.isArray(arr) ? arr : []).map((w) => ({
+      _key: uid(),
+      name: w?.name || "",
+      month_start: w?.month_start ?? 1,
+      month_end: w?.month_end ?? 1,
+      temp_offset: w?.temp_offset ?? 0,
+    }));
+
+  const normalizeMoonValues = (arr) =>
+    (Array.isArray(arr) ? arr : []).map((ph) => ({
+      _key: uid(),
+      name: ph?.name || "",
+      day_start: ph?.day_start ?? 1,
+      day_end: ph?.day_end ?? 1,
+      symbol: ph?.symbol || "",
+    }));
+
+  const monthsValues =
+    raw?.months && Array.isArray(raw.months?.values)
+      ? normalizeMonthList(raw.months.values)
+      : Array.isArray(raw?.months)
+      ? normalizeMonthList(raw.months)
+      : [];
+
+  const daysValues =
+    raw?.days && Array.isArray(raw.days?.values)
+      ? normalizeDayList(raw.days.values)
+      : Array.isArray(raw?.days)
+      ? normalizeDayList(raw.days)
+      : [];
+
+  return {
+    id: raw?.id ?? null,
+    name: raw?.name || "",
+    abbreviation: raw?.abbreviation || "",
+    share_id: raw?.share_id || genShareId(12),
+    private: typeof raw?.private === "boolean" ? raw.private : true,
+    epoch: {
+      private: Number(raw?.epoch?.private ?? -10000),
+      public: Number(raw?.epoch?.public ?? 0),
+    },
+
+    era: normalizeEraList(raw?.era),
+    other_era: normalizeEraList(raw?.other_era),
+
+    months: { values: monthsValues },
+
+    days: {
+      values: daysValues,
+      // support legacy typo/case from sample (days_per_Year)
+      days_per_year:
+        raw?.days?.days_per_year ??
+        raw?.days?.days_per_Year ??
+        raw?.days_per_year ??
+        365,
+      hours_per_day: raw?.days?.hours_per_day ?? 24,
+      minutes_per_hour: raw?.days?.minutes_per_hour ?? 60,
+      seconds_per_minute: raw?.days?.seconds_per_minute ?? 60,
+    },
+
+    seasons: {
+      values: normalizeSeasonList(raw?.seasons?.values ?? raw?.seasons),
+    },
+
+    weather: {
+      values: normalizeWeatherList(raw?.weather?.values ?? raw?.weather),
+    },
+
+    moon_cycle: {
+      name: raw?.moon_cycle?.name || "",
+      values: normalizeMoonValues(raw?.moon_cycle?.values ?? raw?.moon_cycle),
+    },
+  };
+}
+
+/* ---------------- component ---------------- */
+export default function CalendarForm({ mode = "create", initialData = null }) {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
 
-  // ✅ copy state
   const [copied, setCopied] = useState(false);
 
   const [form, setForm] = useState(() => {
-    if (initialData) return initialData;
+    if (initialData) return normalizeCalendarInitialData(initialData);
+
     return {
       id: null,
       name: "",
+      abbreviation: "",
       share_id: genShareId(12),
+      private: true,
       epoch: { private: -10000, public: 0 },
+
       era: [newEra()],
       other_era: [newEra()],
-      days_in_a_year: 365,
-      months: [],
-      weeks: [],
-      moon_cycle: { name: "", total_days: null, phases: [] },
+
+      // ✅ match your JSON sample
+      months: { values: [] },
+      days: {
+        values: [],
+        days_per_year: 365,
+        hours_per_day: 24,
+        minutes_per_hour: 60,
+        seconds_per_minute: 60,
+      },
+      seasons: { values: [] },
+      weather: { values: [] },
+
+      moon_cycle: { name: "", values: [] },
     };
   });
 
   const step1Complete = useMemo(() => {
     if (!form.name?.trim()) return false;
-    if (
-      form.epoch?.private === null ||
-      Number.isNaN(Number(form.epoch?.private))
-    )
+    if (form.epoch?.private === null || Number.isNaN(Number(form.epoch?.private)))
       return false;
     if (form.epoch?.public === null || Number.isNaN(Number(form.epoch?.public)))
       return false;
     return true;
   }, [form]);
 
+  // ---------- list helpers for era / other_era ----------
   const patchListItem = (listKey, key, patch) =>
     setForm((p) => ({
       ...p,
-      [listKey]: (p[listKey] || []).map((x) =>
+      [listKey]: (Array.isArray(p[listKey]) ? p[listKey] : []).map((x) =>
         x._key === key ? { ...x, ...patch } : x
       ),
     }));
@@ -120,12 +243,13 @@ export default function EraForm({ mode = "create", initialData = null }) {
   const addListItem = (listKey, createFn) =>
     setForm((p) => ({
       ...p,
-      [listKey]: [...(p[listKey] || []), createFn()],
+      [listKey]: [...(Array.isArray(p[listKey]) ? p[listKey] : []), createFn()],
     }));
 
   const removeListItem = (listKey, key, fallbackFn) =>
     setForm((p) => {
-      const next = (p[listKey] || []).filter((x) => x._key !== key);
+      const curr = Array.isArray(p[listKey]) ? p[listKey] : [];
+      const next = curr.filter((x) => x._key !== key);
       return {
         ...p,
         [listKey]: next.length ? next : fallbackFn ? [fallbackFn()] : [],
@@ -134,21 +258,23 @@ export default function EraForm({ mode = "create", initialData = null }) {
 
   const addOtherName = (listKey, key) => {
     setForm((p) => {
-      const next = (p[listKey] || []).map((x) => {
+      const curr = Array.isArray(p[listKey]) ? p[listKey] : [];
+      const next = curr.map((x) => {
         if (x._key !== key) return x;
-        const raw = (x._other_name_input || "").trim();
+        const raw = String(x._other_name_input || "").trim();
         if (!raw) return x;
+
         const exists = (x.other_name || []).some(
           (s) => String(s).toLowerCase() === raw.toLowerCase()
         );
+
         return {
           ...x,
-          other_name: exists
-            ? x.other_name || []
-            : [...(x.other_name || []), raw],
+          other_name: exists ? x.other_name || [] : [...(x.other_name || []), raw],
           _other_name_input: "",
         };
       });
+
       return { ...p, [listKey]: next };
     });
   };
@@ -156,7 +282,7 @@ export default function EraForm({ mode = "create", initialData = null }) {
   const removeOtherName = (listKey, key, idx) => {
     setForm((p) => ({
       ...p,
-      [listKey]: (p[listKey] || []).map((x) => {
+      [listKey]: (Array.isArray(p[listKey]) ? p[listKey] : []).map((x) => {
         if (x._key !== key) return x;
         return {
           ...x,
@@ -165,38 +291,6 @@ export default function EraForm({ mode = "create", initialData = null }) {
       }),
     }));
   };
-
-  const addMoonPhase = () =>
-    setForm((p) => ({
-      ...p,
-      moon_cycle: {
-        ...(p.moon_cycle || { name: "", total_days: null, phases: [] }),
-        phases: [
-          ...(p.moon_cycle?.phases || []),
-          { _key: uid(), name: "", day: 1, symbol: "" },
-        ],
-      },
-    }));
-
-  const removeMoonPhase = (phaseKey) =>
-    setForm((p) => ({
-      ...p,
-      moon_cycle: {
-        ...(p.moon_cycle || {}),
-        phases: (p.moon_cycle?.phases || []).filter((x) => x._key !== phaseKey),
-      },
-    }));
-
-  const patchMoonPhase = (phaseKey, patch) =>
-    setForm((p) => ({
-      ...p,
-      moon_cycle: {
-        ...(p.moon_cycle || {}),
-        phases: (p.moon_cycle?.phases || []).map((x) =>
-          x._key === phaseKey ? { ...x, ...patch } : x
-        ),
-      },
-    }));
 
   const goStep = (nextStep) => {
     if (nextStep === 2 && !step1Complete) {
@@ -215,7 +309,6 @@ export default function EraForm({ mode = "create", initialData = null }) {
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
       } else {
-        // fallback
         const ta = document.createElement("textarea");
         ta.value = text;
         document.body.appendChild(ta);
@@ -239,42 +332,86 @@ export default function EraForm({ mode = "create", initialData = null }) {
       return;
     }
 
+    // ✅ build payload matching your sample JSON
     const payload = {
       name: form.name,
+      abbreviation: form.abbreviation || "",
       share_id: form.share_id,
+      private: !!form.private,
       epoch: {
         private: Number(form.epoch.private),
         public: Number(form.epoch.public),
       },
-      era: (form.era || []).map(({ _key, _other_name_input, ...e }) => ({
-        ...e,
-        start: e.start === null ? null : Number(e.start),
-        end: e.end === null || e.end === "" ? null : Number(e.end),
-        total:
-          e.end === null || e.end === ""
-            ? null
-            : computeTotal(Number(e.start), Number(e.end)),
-      })),
-      other_era: (form.other_era || []).map(
-        ({ _key, _other_name_input, ...e }) => ({
-          ...e,
-          start: e.start === null ? null : Number(e.start),
-          end: e.end === null || e.end === "" ? null : Number(e.end),
-          total:
-            e.end === null || e.end === ""
-              ? null
-              : computeTotal(Number(e.start), Number(e.end)),
-        })
+
+      era: (Array.isArray(form.era) ? form.era : []).map(
+        ({ _key, _other_name_input, ...e }) => {
+          const start = numOrNull(e.start);
+          const end = numOrNull(e.end);
+          return {
+            ...e,
+            start,
+            end,
+            total: end === null ? null : computeTotal(start, end),
+          };
+        }
       ),
-      days_in_a_year: Number(form.days_in_a_year),
-      months: (form.months || []).map(({ _key, ...m }) => ({
-        ...m,
-        days: Number(m.days),
-      })),
-      weeks: (form.weeks || []).map(({ _key, ...w }) => w),
+
+      other_era: (Array.isArray(form.other_era) ? form.other_era : []).map(
+        ({ _key, _other_name_input, ...e }) => {
+          const start = numOrNull(e.start);
+          const end = numOrNull(e.end);
+          return {
+            ...e,
+            start,
+            end,
+            total: end === null ? null : computeTotal(start, end),
+          };
+        }
+      ),
+
+      months: {
+        values: (form.months?.values || []).map(({ _key, ...m }, idx) => ({
+          ...m,
+          ordinal: m.ordinal ?? idx + 1,
+          days: Number(m.days ?? 30),
+        })),
+      },
+
+      days: {
+        values: (form.days?.values || []).map(({ _key, ...d }, idx) => ({
+          ...d,
+          ordinal: d.ordinal ?? idx + 1,
+        })),
+        days_per_year: Number(form.days?.days_per_year ?? 365),
+        hours_per_day: Number(form.days?.hours_per_day ?? 24),
+        minutes_per_hour: Number(form.days?.minutes_per_hour ?? 60),
+        seconds_per_minute: Number(form.days?.seconds_per_minute ?? 60),
+      },
+
+      seasons: {
+        values: (form.seasons?.values || []).map(({ _key, ...s }) => ({
+          ...s,
+          month_start: Number(s.month_start ?? 1),
+          month_end: Number(s.month_end ?? 1),
+        })),
+      },
+
+      weather: {
+        values: (form.weather?.values || []).map(({ _key, ...w }) => ({
+          ...w,
+          month_start: Number(w.month_start ?? 1),
+          month_end: Number(w.month_end ?? 1),
+          temp_offset: Number(w.temp_offset ?? 0),
+        })),
+      },
+
       moon_cycle: {
-        ...(form.moon_cycle || {}),
-        phases: (form.moon_cycle?.phases || []).map(({ _key, ...ph }) => ph),
+        name: form.moon_cycle?.name || "",
+        values: (form.moon_cycle?.values || []).map(({ _key, ...ph }) => ({
+          ...ph,
+          day_start: Number(numOrNull(ph.day_start) ?? 1),
+          day_end: Number(numOrNull(ph.day_end) ?? 1),
+        })),
       },
     };
 
@@ -282,8 +419,8 @@ export default function EraForm({ mode = "create", initialData = null }) {
     try {
       const isUpdate = !!form.id;
       const url = isUpdate
-        ? `${API_BASE}/ignite/timelines/${form.id}`
-        : `${API_BASE}/ignite/timelines`;
+        ? `${API_BASE}/ignite/calendars/${form.id}`
+        : `${API_BASE}/ignite/calendars`;
       const method = isUpdate ? "PATCH" : "POST";
 
       const res = await fetch(url, {
@@ -295,8 +432,8 @@ export default function EraForm({ mode = "create", initialData = null }) {
 
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json?.success) {
-        console.error("save timeline failed:", json);
-        alert(json?.message || "Failed to save timeline");
+        console.error("save calendar failed:", json);
+        alert(json?.message || "Failed to save calendar");
         return;
       }
 
@@ -305,7 +442,7 @@ export default function EraForm({ mode = "create", initialData = null }) {
       alert("Saved ✅");
     } catch (e) {
       console.error(e);
-      alert("Failed to save timeline");
+      alert("Failed to save calendar");
     } finally {
       setSaving(false);
     }
@@ -321,12 +458,12 @@ export default function EraForm({ mode = "create", initialData = null }) {
           {/* left: title + share id */}
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-widest text-slate-500">
-              {mode === "update" ? "Edit Timeline" : "Create Timeline"}
+              {mode === "update" ? "Edit Calendar" : "Create Calendar"}
             </p>
 
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <h2 className="text-sm md:text-base font-semibold text-slate-100 truncate">
-                {form.name?.trim() ? form.name : "Untitled Timeline"}
+                {form.name?.trim() ? form.name : "Untitled Calendar"}
               </h2>
 
               <span className="text-[11px] px-2 py-1 rounded-full border border-slate-800 bg-slate-950/60 text-slate-400">
@@ -334,7 +471,7 @@ export default function EraForm({ mode = "create", initialData = null }) {
               </span>
             </div>
 
-            {/* ✅ Share ID row */}
+            {/* Share ID row */}
             <div className="mt-2 flex items-center gap-2">
               <span className="text-[11px] text-slate-500">Share ID</span>
 
@@ -359,7 +496,6 @@ export default function EraForm({ mode = "create", initialData = null }) {
               </div>
             </div>
 
-            {/* validation hint */}
             {showValidation && !step1Complete && (
               <div className="mt-3 inline-flex items-center gap-2 text-xs text-amber-200">
                 <span className="w-7 h-7 rounded-lg border border-amber-500/30 bg-amber-500/10 flex items-center justify-center">
@@ -374,7 +510,6 @@ export default function EraForm({ mode = "create", initialData = null }) {
 
           {/* right: segmented step + actions */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* ✅ Step segmented control */}
             <div className="hidden sm:flex items-center p-1 rounded-2xl border border-slate-800 bg-slate-950/60">
               <button
                 type="button"
@@ -400,15 +535,12 @@ export default function EraForm({ mode = "create", initialData = null }) {
                     : "text-slate-300 hover:text-white hover:bg-slate-900/50",
                   !step1Complete ? "opacity-50 cursor-not-allowed" : "",
                 ].join(" ")}
-                title={
-                  !step1Complete ? "Complete Step 1 first" : "Go to Step 2"
-                }
+                title={!step1Complete ? "Complete Step 1 first" : "Go to Step 2"}
               >
                 Step 2
               </button>
             </div>
 
-            {/* back/next */}
             {step === 2 ? (
               <button
                 type="button"
@@ -436,7 +568,6 @@ export default function EraForm({ mode = "create", initialData = null }) {
               </button>
             )}
 
-            {/* save */}
             <button
               type="button"
               onClick={onSave}
@@ -470,20 +601,7 @@ export default function EraForm({ mode = "create", initialData = null }) {
               newEra={newEra}
             />
           ) : (
-            <Step2
-              form={form}
-              setForm={setForm}
-              patchListItem={patchListItem}
-              addListItem={addListItem}
-              removeListItem={removeListItem}
-              pickValue={pickValue}
-              pickNumber={pickNumber}
-              newMonth={newMonth}
-              newWeekDay={newWeekDay}
-              addMoonPhase={addMoonPhase}
-              removeMoonPhase={removeMoonPhase}
-              patchMoonPhase={patchMoonPhase}
-            />
+            <Step2 form={form} setForm={setForm} />
           )}
         </div>
       </div>

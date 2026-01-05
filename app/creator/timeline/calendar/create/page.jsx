@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import EraForm from "../components/EraForm";
+import CalendarForm from "../components/CalendarForm"; // idealnya rename ke CalendarForm
 
-const BACK_PATH = "/creator/timeline/era"; // ✅ ubah sesuai halaman tabel timeline kamu
+const BACK_PATH = "/creator/timeline/calendar"; // ✅ ubah sesuai halaman tabel calendar kamu
 
-export default function CreateEraPage() {
+export default function CreateCalendarPage() {
   const router = useRouter();
 
   return (
@@ -18,11 +18,11 @@ export default function CreateEraPage() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 text-xs text-slate-200"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Timelines
+          Back to Calendars
         </button>
       </div>
 
-      <EraForm mode="create" />
+      <CalendarForm mode="create" />
     </div>
   );
 }

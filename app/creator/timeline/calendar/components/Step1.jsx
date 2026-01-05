@@ -8,7 +8,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import InputField from "@/components/InputField";
-import RichTextAdvanced from "@/components/InputField"; // ✅ pastikan ini benar (kalau salah, balikin ke RichTextAdvanced)
+import RichTextAdvanced from "@/components/RichTextAdvanced";
 import PillsInput from "./PillsInput";
 
 import {
@@ -28,6 +28,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+/* ---------- helpers ---------- */
 function pickValue(v) {
   if (v && typeof v === "object" && "target" in v) return v.target?.value;
   return v;
@@ -38,17 +39,22 @@ function pickNumber(v, fallback = null) {
   const n = Number(raw);
   return Number.isNaN(n) ? fallback : n;
 }
+function genShareId(len = 12) {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let out = "";
+  for (let i = 0; i < len; i++)
+    out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
 
-/** ✅ Sortable card wrapper */
+/** Sortable card wrapper */
 function SortableEraCard({ id, children }) {
   const { setNodeRef, transform, transition, isDragging } = useSortable({ id });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.75 : 1,
   };
-
   return (
     <div ref={setNodeRef} style={style} className="relative">
       {children}
@@ -56,7 +62,7 @@ function SortableEraCard({ id, children }) {
   );
 }
 
-/** ✅ Header actions: move up/down + drag + delete */
+/** Header actions: move up/down + drag + delete */
 function CardHeaderActions({
   id,
   index,
@@ -69,7 +75,6 @@ function CardHeaderActions({
 
   return (
     <div className="flex items-center gap-1">
-      {/* 🔼 Move Up */}
       <button
         type="button"
         disabled={index === 0}
@@ -81,7 +86,6 @@ function CardHeaderActions({
         <ChevronUp className="w-4 h-4 text-slate-200" />
       </button>
 
-      {/* 🔽 Move Down */}
       <button
         type="button"
         disabled={index === total - 1}
@@ -93,7 +97,6 @@ function CardHeaderActions({
         <ChevronDown className="w-4 h-4 text-slate-200" />
       </button>
 
-      {/* ⠿ Drag Handle */}
       <button
         type="button"
         {...attributes}
@@ -105,7 +108,6 @@ function CardHeaderActions({
         <GripVertical className="w-4 h-4 text-slate-300" />
       </button>
 
-      {/* 🗑 Delete */}
       <button
         type="button"
         onClick={onDelete}
@@ -122,18 +124,22 @@ function CardHeaderActions({
 export default function Step1({
   form,
   setForm,
-  patchListItem,
   addListItem,
   removeListItem,
+  patchListItem,
   addOtherName,
   removeOtherName,
   newEra,
 }) {
-  // ✅ DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  // ✅ Generate ALWAYS creates a new share_id (so user sees it works)
+  const generateShareId = () => {
+    setForm((p) => ({ ...p, share_id: genShareId(12) }));
+  };
 
   // ✅ Only 1 current per list
   const setCurrentInList = (listName, key, nextVal) => {
@@ -163,7 +169,6 @@ export default function Step1({
     });
   };
 
-  // ✅ move up/down (tap buttons)
   const moveItem = (listName, key, direction) => {
     setForm((p) => {
       const arr = Array.isArray(p[listName]) ? p[listName] : [];
@@ -180,19 +185,79 @@ export default function Step1({
 
   return (
     <div className="space-y-4">
-      {/* Timeline Basics */}
+      {/* ================= Calendar Basics ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4 md:p-5">
         <p className="text-[11px] uppercase tracking-widest text-slate-500">
-          Timeline Basics
+          Calendar Basics
         </p>
 
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
           <InputField
-            label="Timeline Name"
+            label="Calendar Name"
             value={form.name}
             onChange={(v) => setForm((p) => ({ ...p, name: pickValue(v) }))}
           />
-          <InputField label="Share ID" value={form.share_id} disabled />
+
+          <InputField
+            label="Abbreviation"
+            value={form.abbreviation || ""}
+            onChange={(v) =>
+              setForm((p) => ({ ...p, abbreviation: pickValue(v) }))
+            }
+          />
+
+          {/* ✅ Share ID + Generate on the LEFT */}
+          <div className="space-y-1">
+            <label className="text-xs text-slate-300">Share ID</label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={generateShareId}
+                className="px-3 h-[42px] rounded-xl border border-slate-700 bg-slate-900/60 hover:bg-slate-800 text-xs text-slate-200 shrink-0"
+              >
+                Generate
+              </button>
+
+              <input
+                value={form.share_id || ""}
+                readOnly
+                className="w-full h-[42px] rounded-xl border border-slate-800 bg-slate-950/60 px-3 text-xs text-slate-200 outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-950/40 px-4 py-3 flex items-center justify-between">
+          <p className="text-xs font-medium text-slate-200">Private</p>
+
+          <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-950/40 px-4 py-3 flex items-center justify-between">
+            <p className="text-xs font-medium text-slate-200">Private</p>
+
+            <button
+              type="button"
+              onClick={() =>
+                setForm((p) => ({
+                  ...p,
+                  private: !p.private,
+                }))
+              }
+              className={[
+                "relative inline-flex h-7 w-12 items-center rounded-full transition border",
+                form.private
+                  ? "bg-indigo-600/70 border-indigo-500/40"
+                  : "bg-slate-900 border-slate-700",
+              ].join(" ")}
+              aria-label="Toggle private"
+              title={form.private ? "Private" : "Public"}
+            >
+              <span
+                className={[
+                  "inline-block h-5 w-5 transform rounded-full bg-white transition",
+                  form.private ? "translate-x-6" : "translate-x-1",
+                ].join(" ")}
+              />
+            </button>
+          </div>
         </div>
 
         <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -271,25 +336,20 @@ export default function Step1({
                         }
                       />
                       <InputField
-                        label="Shorten"
-                        value={e.shorten}
+                        label="Abbreviation"
+                        value={e.abbreviation}
                         onChange={(v) =>
                           patchListItem("era", e._key, {
-                            shorten: pickValue(v),
+                            abbreviation: pickValue(v),
                           })
                         }
                       />
                     </div>
 
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3">
-                      <div>
-                        <p className="text-xs font-medium text-slate-200">
-                          Current Era
-                        </p>
-                        <p className="text-[11px] text-slate-500">
-                          Only one era can be marked as current.
-                        </p>
-                      </div>
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3">
+                      <p className="text-xs font-medium text-slate-200">
+                        Current Era
+                      </p>
 
                       <label className="inline-flex items-center gap-2 cursor-pointer select-none">
                         <input
@@ -300,14 +360,12 @@ export default function Step1({
                           }
                           className="h-4 w-4 rounded border-slate-700 bg-slate-900"
                         />
-                        <span className="text-xs text-slate-300">
-                          Set as current
-                        </span>
+                        <span className="text-xs text-slate-300">Current</span>
                       </label>
                     </div>
 
                     <PillsInput
-                      label="Era Other Names"
+                      label="Other Names"
                       value={e.other_name || []}
                       inputValue={e._other_name_input || ""}
                       onInputChange={(val) =>
@@ -329,7 +387,7 @@ export default function Step1({
                         }
                       />
                       <InputField
-                        label="End (optional)"
+                        label="End"
                         type="number"
                         value={e.end ?? ""}
                         onChange={(v) =>
@@ -412,18 +470,18 @@ export default function Step1({
                         }
                       />
                       <InputField
-                        label="Shorten"
-                        value={e.shorten}
+                        label="Abbreviation"
+                        value={e.abbreviation}
                         onChange={(v) =>
                           patchListItem("other_era", e._key, {
-                            shorten: pickValue(v),
+                            abbreviation: pickValue(v),
                           })
                         }
                       />
                     </div>
 
                     <PillsInput
-                      label="Other Era Other Names"
+                      label="Other Names"
                       value={e.other_name || []}
                       inputValue={e._other_name_input || ""}
                       onInputChange={(val) =>
@@ -447,7 +505,7 @@ export default function Step1({
                         }
                       />
                       <InputField
-                        label="End (optional)"
+                        label="End"
                         type="number"
                         value={e.end ?? ""}
                         onChange={(v) =>
