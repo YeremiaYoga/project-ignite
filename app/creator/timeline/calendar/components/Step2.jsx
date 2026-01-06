@@ -1,7 +1,16 @@
 "use client";
 
-import { Plus, Trash2, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import {
+  Plus,
+  Trash2,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
+  Image as ImageIcon,
+} from "lucide-react";
 import InputField from "@/components/InputField";
+import ImagePicker from "@/components/ImagePicker";
 
 import {
   DndContext,
@@ -20,6 +29,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+/* ---------- helpers ---------- */
 function pickValue(v) {
   if (v && typeof v === "object" && "target" in v) return v.target?.value;
   return v;
@@ -101,6 +111,17 @@ export default function Step2({ form, setForm }) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  const MEDIA_URL = process.env.NEXT_PUBLIC_MEDIA_URL || "";
+
+  const SEASON_PICKER_BASE = `${MEDIA_URL}/browser/list?path=calender/season_icon`;
+  const MOON_PICKER_BASE = `${MEDIA_URL}/calendar/moon/list`;
+
+  const [openSeasonPicker, setOpenSeasonPicker] = useState(false);
+  const [seasonPickingKey, setSeasonPickingKey] = useState(null);
+
+  const [openMoonPicker, setOpenMoonPicker] = useState(false);
+  const [moonPickingKey, setMoonPickingKey] = useState(null);
+
   /* -------- nested get/set -------- */
   const getArr = (path) => {
     if (path === "months")
@@ -112,7 +133,9 @@ export default function Step2({ form, setForm }) {
     if (path === "weather")
       return Array.isArray(form.weather?.values) ? form.weather.values : [];
     if (path === "moon_cycle")
-      return Array.isArray(form.moon_cycle?.values) ? form.moon_cycle.values : [];
+      return Array.isArray(form.moon_cycle?.values)
+        ? form.moon_cycle.values
+        : [];
     return [];
   };
 
@@ -127,7 +150,10 @@ export default function Step2({ form, setForm }) {
       if (path === "weather")
         return { ...p, weather: { ...(p.weather || {}), values: nextArr } };
       if (path === "moon_cycle")
-        return { ...p, moon_cycle: { ...(p.moon_cycle || {}), values: nextArr } };
+        return {
+          ...p,
+          moon_cycle: { ...(p.moon_cycle || {}), values: nextArr },
+        };
       return p;
     });
   };
@@ -198,7 +224,7 @@ export default function Step2({ form, setForm }) {
 
   return (
     <div className="space-y-4">
-      {/* ================= Months (already DnD) ================= */}
+      {/* ================= Months ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-100">Months</p>
@@ -211,6 +237,7 @@ export default function Step2({ form, setForm }) {
                 abbreviation: "",
                 ordinal: (form.months?.values?.length || 0) + 1,
                 days: 30,
+                leap_days: null,
               })
             }
             className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs"
@@ -277,7 +304,27 @@ export default function Step2({ form, setForm }) {
                           })
                         }
                       />
-                      <InputField label="Ordinal" value={m.ordinal ?? ""} disabled />
+                      <InputField
+                        label="Ordinal"
+                        value={m.ordinal ?? ""}
+                        disabled
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <InputField
+                        label="Leap Days (optional)"
+                        type="number"
+                        value={m.leap_days ?? ""}
+                        onChange={(v) =>
+                          patchItem("months", m._key, {
+                            leap_days: pickNumber(v, null),
+                          })
+                        }
+                      />
+                      <div className="text-[11px] text-slate-500 self-end">
+                        Used when leap year triggers.
+                      </div>
                     </div>
                   </div>
                 </SortableCard>
@@ -287,7 +334,7 @@ export default function Step2({ form, setForm }) {
         </div>
       </div>
 
-      {/* ================= Days (DnD + arrows) ================= */}
+      {/* ================= Days ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-100">Days</p>
@@ -374,7 +421,9 @@ export default function Step2({ form, setForm }) {
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
-            onDragEnd={({ active, over }) => reorder("days", active?.id, over?.id)}
+            onDragEnd={({ active, over }) =>
+              reorder("days", active?.id, over?.id)
+            }
           >
             <SortableContext
               items={(form.days?.values || []).map((x) => x._key)}
@@ -384,7 +433,9 @@ export default function Step2({ form, setForm }) {
                 <SortableCard key={d._key} id={d._key}>
                   <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs text-slate-400">Day #{d.ordinal ?? "-"}</p>
+                      <p className="text-xs text-slate-400">
+                        Day #{d.ordinal ?? "-"}
+                      </p>
                       <CardHeaderActions
                         id={d._key}
                         onMoveUp={() => moveUp("days", d._key)}
@@ -412,7 +463,11 @@ export default function Step2({ form, setForm }) {
                       />
                     </div>
 
-                    <InputField label="Ordinal" value={d.ordinal ?? ""} disabled />
+                    <InputField
+                      label="Ordinal"
+                      value={d.ordinal ?? ""}
+                      disabled
+                    />
                   </div>
                 </SortableCard>
               ))}
@@ -421,7 +476,7 @@ export default function Step2({ form, setForm }) {
         </div>
       </div>
 
-      {/* ================= Seasons (DnD + arrows) ================= */}
+      {/* ================= Seasons (ImagePicker langsung) ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-100">Seasons</p>
@@ -433,6 +488,7 @@ export default function Step2({ form, setForm }) {
                 name: "",
                 month_start: 1,
                 month_end: 1,
+                icon: "",
               })
             }
             className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs"
@@ -454,57 +510,107 @@ export default function Step2({ form, setForm }) {
               items={(form.seasons?.values || []).map((x) => x._key)}
               strategy={verticalListSortingStrategy}
             >
-              {(form.seasons?.values || []).map((s) => (
-                <SortableCard key={s._key} id={s._key}>
-                  <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-slate-400">Season</p>
-                      <CardHeaderActions
-                        id={s._key}
-                        onMoveUp={() => moveUp("seasons", s._key)}
-                        onMoveDown={() => moveDown("seasons", s._key)}
-                        onDelete={() => removeItem("seasons", s._key)}
-                      />
-                    </div>
+              {(form.seasons?.values || []).map((s) => {
+                const hasIcon = String(s.icon || "").trim().length > 0;
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <InputField
-                        label="Name"
-                        value={s.name}
-                        onChange={(v) =>
-                          patchItem("seasons", s._key, { name: pickValue(v) })
-                        }
-                      />
-                      <InputField
-                        label="Month start"
-                        type="number"
-                        value={s.month_start ?? 1}
-                        onChange={(v) =>
-                          patchItem("seasons", s._key, {
-                            month_start: pickNumber(v, 1),
-                          })
-                        }
-                      />
-                      <InputField
-                        label="Month end"
-                        type="number"
-                        value={s.month_end ?? 1}
-                        onChange={(v) =>
-                          patchItem("seasons", s._key, {
-                            month_end: pickNumber(v, 1),
-                          })
-                        }
-                      />
+                return (
+                  <SortableCard key={s._key} id={s._key}>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-slate-400">Season</p>
+                        <CardHeaderActions
+                          id={s._key}
+                          onMoveUp={() => moveUp("seasons", s._key)}
+                          onMoveDown={() => moveDown("seasons", s._key)}
+                          onDelete={() => removeItem("seasons", s._key)}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <InputField
+                          label="Name"
+                          value={s.name}
+                          onChange={(v) =>
+                            patchItem("seasons", s._key, { name: pickValue(v) })
+                          }
+                        />
+                        <InputField
+                          label="Month start"
+                          type="number"
+                          value={s.month_start ?? 1}
+                          onChange={(v) =>
+                            patchItem("seasons", s._key, {
+                              month_start: pickNumber(v, 1),
+                            })
+                          }
+                        />
+                        <InputField
+                          label="Month end"
+                          type="number"
+                          value={s.month_end ?? 1}
+                          onChange={(v) =>
+                            patchItem("seasons", s._key, {
+                              month_end: pickNumber(v, 1),
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden flex items-center justify-center">
+                          {hasIcon ? (
+                            <img
+                              src={s.icon}
+                              alt="Season Icon"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-[11px] text-slate-500">
+                              —
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div className="text-[11px] text-slate-400">Icon</div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSeasonPickingKey(s._key);
+                                setOpenSeasonPicker(true);
+                              }}
+                              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 text-xs text-slate-100"
+                            >
+                              <ImageIcon className="w-4 h-4 text-slate-200" />
+                              {hasIcon ? "Change" : "Pick icon"}
+                            </button>
+
+                            {hasIcon ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  patchItem("seasons", s._key, { icon: "" })
+                                }
+                                className="w-9 h-9 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 flex items-center justify-center"
+                                title="Clear icon"
+                              >
+                                <Trash2 className="w-4 h-4 text-slate-200" />
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </SortableCard>
-              ))}
+                  </SortableCard>
+                );
+              })}
             </SortableContext>
           </DndContext>
         </div>
       </div>
 
-      {/* ================= Weather (DnD + arrows) ================= */}
+      {/* ================= Weather ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-100">Weather</p>
@@ -598,7 +704,7 @@ export default function Step2({ form, setForm }) {
         </div>
       </div>
 
-      {/* ================= Moon Cycle (already DnD) ================= */}
+      {/* ================= Moon Cycle (rapi + tanpa Icon URL) ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-100">Moon Cycle</p>
@@ -610,7 +716,7 @@ export default function Step2({ form, setForm }) {
                 name: "",
                 day_start: 1,
                 day_end: 1,
-                symbol: "",
+                icon: "",
               })
             }
             className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs"
@@ -643,67 +749,143 @@ export default function Step2({ form, setForm }) {
               items={(form.moon_cycle?.values || []).map((x) => x._key)}
               strategy={verticalListSortingStrategy}
             >
-              {(form.moon_cycle?.values || []).map((ph) => (
-                <SortableCard key={ph._key} id={ph._key}>
-                  <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-slate-400">Phase</p>
-                      <CardHeaderActions
-                        id={ph._key}
-                        onMoveUp={() => moveUp("moon_cycle", ph._key)}
-                        onMoveDown={() => moveDown("moon_cycle", ph._key)}
-                        onDelete={() => removeItem("moon_cycle", ph._key)}
-                      />
-                    </div>
+              {(form.moon_cycle?.values || []).map((ph) => {
+                const hasIcon = String(ph.icon || "").trim().length > 0;
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <InputField
-                        label="Name"
-                        value={ph.name}
-                        onChange={(v) =>
-                          patchItem("moon_cycle", ph._key, { name: pickValue(v) })
-                        }
-                      />
-                      <InputField
-                        label="Symbol"
-                        value={ph.symbol}
-                        onChange={(v) =>
-                          patchItem("moon_cycle", ph._key, {
-                            symbol: pickValue(v),
-                          })
-                        }
-                      />
-                    </div>
+                return (
+                  <SortableCard key={ph._key} id={ph._key}>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-slate-400">Phase</p>
+                        <CardHeaderActions
+                          id={ph._key}
+                          onMoveUp={() => moveUp("moon_cycle", ph._key)}
+                          onMoveDown={() => moveDown("moon_cycle", ph._key)}
+                          onDelete={() => removeItem("moon_cycle", ph._key)}
+                        />
+                      </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <InputField
-                        label="Day start"
-                        type="number"
-                        value={ph.day_start ?? 1}
-                        onChange={(v) =>
-                          patchItem("moon_cycle", ph._key, {
-                            day_start: pickNumber(v, 1),
-                          })
-                        }
-                      />
-                      <InputField
-                        label="Day end"
-                        type="number"
-                        value={ph.day_end ?? 1}
-                        onChange={(v) =>
-                          patchItem("moon_cycle", ph._key, {
-                            day_end: pickNumber(v, 1),
-                          })
-                        }
-                      />
+                      {/* ✅ rapihin: name + start + end satu baris */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <InputField
+                          label="Name"
+                          value={ph.name}
+                          onChange={(v) =>
+                            patchItem("moon_cycle", ph._key, {
+                              name: pickValue(v),
+                            })
+                          }
+                        />
+                        <InputField
+                          label="Day start"
+                          type="number"
+                          value={ph.day_start ?? 1}
+                          onChange={(v) =>
+                            patchItem("moon_cycle", ph._key, {
+                              day_start: pickNumber(v, 1),
+                            })
+                          }
+                        />
+                        <InputField
+                          label="Day end"
+                          type="number"
+                          value={ph.day_end ?? 1}
+                          onChange={(v) =>
+                            patchItem("moon_cycle", ph._key, {
+                              day_end: pickNumber(v, 1),
+                            })
+                          }
+                        />
+                      </div>
+
+                      {/* ✅ icon block rapi */}
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden flex items-center justify-center">
+                          {hasIcon ? (
+                            <img
+                              src={ph.icon}
+                              alt="Moon Icon"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-[11px] text-slate-500">
+                              —
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div className="text-[11px] text-slate-400">Icon</div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMoonPickingKey(ph._key);
+                                setOpenMoonPicker(true);
+                              }}
+                              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 text-xs text-slate-100"
+                            >
+                              <ImageIcon className="w-4 h-4 text-slate-200" />
+                              {hasIcon ? "Change" : "Pick icon"}
+                            </button>
+
+                            {hasIcon ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  patchItem("moon_cycle", ph._key, { icon: "" })
+                                }
+                                className="w-9 h-9 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 flex items-center justify-center"
+                                title="Clear icon"
+                              >
+                                <Trash2 className="w-4 h-4 text-slate-200" />
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </SortableCard>
-              ))}
+                  </SortableCard>
+                );
+              })}
             </SortableContext>
           </DndContext>
         </div>
       </div>
+
+      {/* ================= Modals ================= */}
+      <ImagePicker
+        isOpen={openSeasonPicker}
+        baseUrl={SEASON_PICKER_BASE}
+        title="Select Season Icon"
+        onSelect={(url) => {
+          if (seasonPickingKey)
+            patchItem("seasons", seasonPickingKey, { icon: url });
+          setOpenSeasonPicker(false);
+          setSeasonPickingKey(null);
+        }}
+        onClose={() => {
+          setOpenSeasonPicker(false);
+          setSeasonPickingKey(null);
+        }}
+      />
+
+      <ImagePicker
+        isOpen={openMoonPicker}
+        baseUrl={MOON_PICKER_BASE}
+        title="Select Moon Phase Icon"
+        onSelect={(url) => {
+          if (moonPickingKey)
+            patchItem("moon_cycle", moonPickingKey, { icon: url });
+          setOpenMoonPicker(false);
+          setMoonPickingKey(null);
+        }}
+        onClose={() => {
+          setOpenMoonPicker(false);
+          setMoonPickingKey(null);
+        }}
+      />
     </div>
   );
 }

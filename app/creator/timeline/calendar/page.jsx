@@ -20,10 +20,6 @@ function safeArray(v) {
   return Array.isArray(v) ? v : [];
 }
 
-/**
- * Compute season name for a given month ordinal
- * seasons: [{name, month_start, month_end}]
- */
 function getSeasonName(seasons, monthOrdinal) {
   const list = safeArray(seasons);
   const m = Number(monthOrdinal);
@@ -48,7 +44,6 @@ function getMonthTitle(month) {
   const abbr = month?.abbreviation ? ` (${month.abbreviation})` : "";
   return `${name}${abbr}`;
 }
-
 
 function getWeekdayHeaders(calendar) {
   const days = safeArray(calendar?.days?.values);
@@ -91,7 +86,6 @@ function CalendarPreview({ calendar, onClose }) {
   const [monthIndex, setMonthIndex] = useState(0);
   const [year, setYear] = useState(0);
 
-  // reset if calendar changes
   useEffect(() => {
     setMonthIndex(0);
     setYear(0);
@@ -99,12 +93,8 @@ function CalendarPreview({ calendar, onClose }) {
 
   const activeMonth = months[monthIndex] || null;
 
-  const weekdayHeaders = useMemo(
-    () => getWeekdayHeaders(calendar),
-    [calendar]
-  );
+  const weekdayHeaders = useMemo(() => getWeekdayHeaders(calendar), [calendar]);
 
-  // ✅ number of columns follows days.values.length (fallback 7)
   const cols = useMemo(() => {
     const n = weekdayHeaders.length;
     return Number.isFinite(n) && n > 0 ? n : 7;
@@ -120,18 +110,52 @@ function CalendarPreview({ calendar, onClose }) {
     return getSeasonName(seasons, ord);
   }, [seasons, activeMonth, monthIndex]);
 
-  // simple grid: sequential day cells
-  const gridCells = useMemo(() => {
-    const cells = [];
-    for (let i = 1; i <= daysInMonth; i++) cells.push(i);
-    return cells;
-  }, [daysInMonth]);
 
-  const remainder = useMemo(() => gridCells.length % cols, [gridCells, cols]);
-  const trailingPads = useMemo(
-    () => (cols - remainder) % cols,
-    [cols, remainder]
-  );
+  const baseStartIndex = 0;
+
+  const monthDaysArr = useMemo(() => {
+    return months.map((m) => {
+      const d = Number(m?.days ?? 30);
+      return Number.isFinite(d) && d > 0 ? d : 30;
+    });
+  }, [months]);
+
+  const yearDays = useMemo(() => {
+    return monthDaysArr.reduce((a, b) => a + b, 0) || 0;
+  }, [monthDaysArr]);
+
+  const daysBeforeThisMonth = useMemo(() => {
+    let sum = 0;
+    for (let i = 0; i < monthIndex; i++) sum += monthDaysArr[i] ?? 0;
+    return sum;
+  }, [monthIndex, monthDaysArr]);
+
+  const mod = (n, m) => ((n % m) + m) % m;
+
+  const startOffset = useMemo(() => {
+    if (!cols) return 0;
+    // total days passed since month 0 year 0
+    const totalDaysBefore =
+      (yearDays ? year * yearDays : 0) + daysBeforeThisMonth;
+    return mod(baseStartIndex + totalDaysBefore, cols);
+  }, [cols, year, yearDays, daysBeforeThisMonth]);
+
+  const leadingPads = startOffset;
+
+  const allCells = useMemo(() => {
+    const cells = [];
+    for (let i = 0; i < leadingPads; i++)
+      cells.push({ kind: "pad", key: `lead-${i}` });
+    for (let d = 1; d <= daysInMonth; d++)
+      cells.push({ kind: "day", day: d, key: `day-${d}` });
+    return cells;
+  }, [leadingPads, daysInMonth]);
+
+  const trailingPads = useMemo(() => {
+    if (!cols) return 0;
+    const rem = allCells.length % cols;
+    return (cols - rem) % cols;
+  }, [allCells, cols]);
 
   const goPrev = () => {
     if (!months.length) return;
@@ -236,26 +260,35 @@ function CalendarPreview({ calendar, onClose }) {
           className="grid gap-1 pb-3"
           style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
         >
-          {gridCells.map((day) => (
-            <div
-              key={day}
-              className="h-10 rounded-lg border border-slate-800 bg-slate-950/40 flex items-center justify-center text-xs text-slate-100 hover:bg-slate-900/40 transition"
-              title={`Day ${day}`}
-            >
-              {day}
-            </div>
-          ))}
+          {allCells.map((cell) =>
+            cell.kind === "pad" ? (
+              <div
+                key={cell.key}
+                className="h-10 rounded-lg border border-dashed border-slate-700/60 bg-transparent"
+                aria-hidden="true"
+              />
+            ) : (
+              <div
+                key={cell.key}
+                className="h-10 rounded-lg border border-slate-800 bg-slate-950/40 flex items-center justify-center text-xs text-slate-100 hover:bg-slate-900/40 transition"
+                title={`Day ${cell.day}`}
+              >
+                {cell.day}
+              </div>
+            )
+          )}
 
           {Array.from({ length: trailingPads }).map((_, i) => (
             <div
-              key={`pad-${i}`}
-              className="h-10 rounded-lg border border-slate-900/40 bg-transparent"
+              key={`trail-${i}`}
+              className="h-10 rounded-lg border border-dashed border-slate-700/60 bg-transparent"
+              aria-hidden="true"
             />
           ))}
         </div>
       </div>
 
-      {/* bottom bar (no clock) */}
+      {/* bottom bar */}
       <div className="px-4 py-3 border-t border-slate-800 bg-slate-950/70">
         <div className="flex items-center justify-between gap-3">
           <div className="text-[11px] text-slate-500">
@@ -357,7 +390,9 @@ export default function CalendarListPage() {
   const usedSlots = ownedRows.length;
   const totalSlots = typeof calendarLimit === "number" ? calendarLimit : 0;
   const isLimited = typeof calendarLimit === "number";
-  const remainingSlots = isLimited ? Math.max(0, totalSlots - usedSlots) : 999999;
+  const remainingSlots = isLimited
+    ? Math.max(0, totalSlots - usedSlots)
+    : 999999;
   const isLimitReached = isLimited && usedSlots >= totalSlots;
 
   const fmtDate = (d) => {
@@ -391,7 +426,9 @@ export default function CalendarListPage() {
           <p className="text-[11px] uppercase tracking-widest text-slate-500">
             Creator Panel
           </p>
-          <h1 className="text-xl font-semibold text-slate-100 mt-1">Calendars</h1>
+          <h1 className="text-xl font-semibold text-slate-100 mt-1">
+            Calendars
+          </h1>
         </div>
 
         <div className="rounded-2xl bg-slate-950/40 p-3 md:p-4 w-full md:w-auto">
@@ -462,7 +499,9 @@ export default function CalendarListPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs text-slate-400">Manage</p>
-              <p className="text-sm font-semibold text-slate-100">Calendar Table</p>
+              <p className="text-sm font-semibold text-slate-100">
+                Calendar Table
+              </p>
             </div>
 
             <div className="text-xs text-slate-400">
@@ -500,12 +539,18 @@ export default function CalendarListPage() {
                       className="text-xs text-slate-200 hover:bg-slate-950/50"
                     >
                       <td className="px-5 py-4">
-                        <div className="font-medium text-slate-100">{r.name || "-"}</div>
+                        <div className="font-medium text-slate-100">
+                          {r.name || "-"}
+                        </div>
                       </td>
 
-                      <td className="px-5 py-4 text-slate-300">{r.abbreviation || "-"}</td>
+                      <td className="px-5 py-4 text-slate-300">
+                        {r.abbreviation || "-"}
+                      </td>
 
-                      <td className="px-5 py-4 text-slate-300">{r.share_id || "-"}</td>
+                      <td className="px-5 py-4 text-slate-300">
+                        {r.share_id || "-"}
+                      </td>
 
                       <td className="px-5 py-4">
                         <div className="inline-flex items-center gap-2">
@@ -600,17 +645,25 @@ export default function CalendarListPage() {
 
                       <p className="text-[11px] text-slate-500 mt-1">
                         Abbr:{" "}
-                        <span className="text-slate-300">{r.abbreviation || "-"}</span>
+                        <span className="text-slate-300">
+                          {r.abbreviation || "-"}
+                        </span>
                       </p>
 
                       <p className="text-[11px] text-slate-500 mt-1">
                         Share ID:{" "}
-                        <span className="text-slate-300">{r.share_id || "-"}</span>
+                        <span className="text-slate-300">
+                          {r.share_id || "-"}
+                        </span>
                       </p>
 
                       <p className="text-[11px] text-slate-500 mt-1">
                         Visibility:{" "}
-                        <span className={isPrivate ? "text-slate-300" : "text-emerald-200"}>
+                        <span
+                          className={
+                            isPrivate ? "text-slate-300" : "text-emerald-200"
+                          }
+                        >
                           {isPrivate ? "Private" : "Public"}
                         </span>
                       </p>

@@ -2,17 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { X, Loader2, Image as ImageIcon } from "lucide-react";
 
-/**
- * 🖼️ Dynamic Image Picker
- * - Bisa dipakai untuk /profile/list, /backgrounds/list, /gallery/list, dll.
- *
- * Props:
- *  - isOpen: boolean
- *  - baseUrl: string → contoh `${process.env.NEXT_PUBLIC_API_URL}/profile/list`
- *  - title: string → contoh "Select Profile Picture"
- *  - onSelect(url: string, file: object)
- *  - onClose()
- */
+
 export default function ImagePicker({
   isOpen,
   baseUrl,

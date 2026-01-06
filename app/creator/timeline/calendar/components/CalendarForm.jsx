@@ -12,6 +12,7 @@ import {
 
 import Step1 from "./Step1";
 import Step2 from "./Step2";
+import Step3 from "./Step3";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -62,10 +63,6 @@ function newEra() {
   };
 }
 
-function normalizeValuesObj(obj) {
-  return { values: Array.isArray(obj?.values) ? obj.values : [] };
-}
-
 function normalizeCalendarInitialData(raw) {
   if (!raw) return null;
 
@@ -90,6 +87,7 @@ function normalizeCalendarInitialData(raw) {
       abbreviation: m?.abbreviation || "",
       ordinal: m?.ordinal ?? idx + 1,
       days: m?.days ?? 30,
+      leap_days: m?.leap_days ?? null,
     }));
 
   const normalizeDayList = (arr) =>
@@ -100,12 +98,14 @@ function normalizeCalendarInitialData(raw) {
       ordinal: d?.ordinal ?? idx + 1,
     }));
 
+  // ✅ include icon
   const normalizeSeasonList = (arr) =>
     (Array.isArray(arr) ? arr : []).map((s) => ({
       _key: uid(),
       name: s?.name || "",
       month_start: s?.month_start ?? 1,
       month_end: s?.month_end ?? 1,
+      icon: s?.icon || "", // ✅ IMPORTANT
     }));
 
   const normalizeWeatherList = (arr) =>
@@ -117,13 +117,14 @@ function normalizeCalendarInitialData(raw) {
       temp_offset: w?.temp_offset ?? 0,
     }));
 
+  // ✅ moon values use icon (not symbol)
   const normalizeMoonValues = (arr) =>
     (Array.isArray(arr) ? arr : []).map((ph) => ({
       _key: uid(),
       name: ph?.name || "",
       day_start: ph?.day_start ?? 1,
       day_end: ph?.day_end ?? 1,
-      symbol: ph?.symbol || "",
+      icon: ph?.icon || ph?.symbol || "", // tolerate older data
     }));
 
   const monthsValues =
@@ -140,6 +141,8 @@ function normalizeCalendarInitialData(raw) {
       ? normalizeDayList(raw.days)
       : [];
 
+  const cy = raw?.current_year || null;
+
   return {
     id: raw?.id ?? null,
     name: raw?.name || "",
@@ -151,6 +154,7 @@ function normalizeCalendarInitialData(raw) {
       public: Number(raw?.epoch?.public ?? 0),
     },
 
+    // keep era arrays (backend can accept array or {values}, but UI uses array)
     era: normalizeEraList(raw?.era),
     other_era: normalizeEraList(raw?.other_era),
 
@@ -158,7 +162,6 @@ function normalizeCalendarInitialData(raw) {
 
     days: {
       values: daysValues,
-      // support legacy typo/case from sample (days_per_Year)
       days_per_year:
         raw?.days?.days_per_year ??
         raw?.days?.days_per_Year ??
@@ -172,7 +175,6 @@ function normalizeCalendarInitialData(raw) {
     seasons: {
       values: normalizeSeasonList(raw?.seasons?.values ?? raw?.seasons),
     },
-
     weather: {
       values: normalizeWeatherList(raw?.weather?.values ?? raw?.weather),
     },
@@ -181,6 +183,21 @@ function normalizeCalendarInitialData(raw) {
       name: raw?.moon_cycle?.name || "",
       values: normalizeMoonValues(raw?.moon_cycle?.values ?? raw?.moon_cycle),
     },
+
+    // ✅ current_year (if missing, keep safe defaults)
+    current_year: {
+      era: String(cy?.era ?? ""),
+      era_year: Number(cy?.era_year ?? 0),
+      true_year: Number(cy?.true_year ?? 0),
+    },
+
+    // ✅ leap_year (optional, if you already added Step3)
+    leap_year: raw?.leap_year
+      ? {
+          leap_start: Number(raw?.leap_year?.leap_start ?? 0),
+          leap_interval: Number(raw?.leap_year?.leap_interval ?? 4),
+        }
+      : null,
   };
 }
 
@@ -189,7 +206,6 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
-
   const [copied, setCopied] = useState(false);
 
   const [form, setForm] = useState(() => {
@@ -206,7 +222,6 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
       era: [newEra()],
       other_era: [newEra()],
 
-      // ✅ match your JSON sample
       months: { values: [] },
       days: {
         values: [],
@@ -217,8 +232,13 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
       },
       seasons: { values: [] },
       weather: { values: [] },
-
       moon_cycle: { name: "", values: [] },
+
+      // ✅ current_year default
+      current_year: { era: "", era_year: 0, true_year: 0 },
+
+      // ✅ leap_year default (optional)
+      leap_year: null,
     };
   });
 
@@ -293,7 +313,7 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
   };
 
   const goStep = (nextStep) => {
-    if (nextStep === 2 && !step1Complete) {
+    if ((nextStep === 2 || nextStep === 3) && !step1Complete) {
       setShowValidation(true);
       return;
     }
@@ -332,7 +352,6 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
       return;
     }
 
-    // ✅ build payload matching your sample JSON
     const payload = {
       name: form.name,
       abbreviation: form.abbreviation || "",
@@ -374,6 +393,7 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
           ...m,
           ordinal: m.ordinal ?? idx + 1,
           days: Number(m.days ?? 30),
+          leap_days: numOrNull(m.leap_days),
         })),
       },
 
@@ -388,11 +408,13 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
         seconds_per_minute: Number(form.days?.seconds_per_minute ?? 60),
       },
 
+      // ✅ send icon too
       seasons: {
         values: (form.seasons?.values || []).map(({ _key, ...s }) => ({
           ...s,
           month_start: Number(s.month_start ?? 1),
           month_end: Number(s.month_end ?? 1),
+          icon: String(s.icon || ""),
         })),
       },
 
@@ -405,14 +427,30 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
         })),
       },
 
+      // ✅ send icon too (no symbol)
       moon_cycle: {
         name: form.moon_cycle?.name || "",
         values: (form.moon_cycle?.values || []).map(({ _key, ...ph }) => ({
           ...ph,
           day_start: Number(numOrNull(ph.day_start) ?? 1),
           day_end: Number(numOrNull(ph.day_end) ?? 1),
+          icon: String(ph.icon || ""),
         })),
       },
+
+      current_year: {
+        era: String(form.current_year?.era || ""),
+        era_year: Number(form.current_year?.era_year ?? 0),
+        true_year: Number(form.current_year?.true_year ?? 0),
+      },
+
+      // ✅ optional
+      leap_year: form.leap_year
+        ? {
+            leap_start: Number(form.leap_year?.leap_start ?? 0),
+            leap_interval: Number(form.leap_year?.leap_interval ?? 4),
+          }
+        : null,
     };
 
     setSaving(true);
@@ -448,14 +486,14 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
     }
   }
 
-  const stepLabel = step === 1 ? "Step 1" : "Step 2";
+  const stepLabel = step === 1 ? "Step 1" : step === 2 ? "Step 2" : "Step 3";
 
   return (
     <div className="h-[calc(100vh-120px)] flex flex-col overflow-hidden">
       {/* ====== HEADER ====== */}
       <div className="shrink-0 rounded-2xl border border-slate-800 bg-slate-950/50 backdrop-blur-sm">
         <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* left: title + share id */}
+          {/* left */}
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-widest text-slate-500">
               {mode === "update" ? "Edit Calendar" : "Create Calendar"}
@@ -508,7 +546,7 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
             )}
           </div>
 
-          {/* right: segmented step + actions */}
+          {/* right */}
           <div className="flex items-center gap-2 shrink-0">
             <div className="hidden sm:flex items-center p-1 rounded-2xl border border-slate-800 bg-slate-950/60">
               <button
@@ -539,21 +577,39 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
               >
                 Step 2
               </button>
-            </div>
 
-            {step === 2 ? (
               <button
                 type="button"
-                onClick={() => goStep(1)}
+                onClick={() => goStep(3)}
+                disabled={!step1Complete}
+                className={[
+                  "px-3 py-2 text-xs rounded-xl transition",
+                  step === 3
+                    ? "bg-indigo-600/20 text-indigo-100 border border-indigo-500/30"
+                    : "text-slate-300 hover:text-white hover:bg-slate-900/50",
+                  !step1Complete ? "opacity-50 cursor-not-allowed" : "",
+                ].join(" ")}
+                title={!step1Complete ? "Complete Step 1 first" : "Go to Step 3"}
+              >
+                Step 3
+              </button>
+            </div>
+
+            {step > 1 ? (
+              <button
+                type="button"
+                onClick={() => goStep(step - 1)}
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 text-xs"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Back</span>
               </button>
-            ) : (
+            ) : null}
+
+            {step < 3 ? (
               <button
                 type="button"
-                onClick={() => goStep(2)}
+                onClick={() => goStep(step + 1)}
                 disabled={!step1Complete}
                 className={[
                   "inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition",
@@ -566,7 +622,7 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
                 <span className="hidden sm:inline">Next</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
-            )}
+            ) : null}
 
             <button
               type="button"
@@ -600,8 +656,10 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
               pickNumber={pickNumber}
               newEra={newEra}
             />
-          ) : (
+          ) : step === 2 ? (
             <Step2 form={form} setForm={setForm} />
+          ) : (
+            <Step3 form={form} setForm={setForm} />
           )}
         </div>
       </div>
