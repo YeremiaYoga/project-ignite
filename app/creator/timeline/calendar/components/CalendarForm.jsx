@@ -47,6 +47,24 @@ function numOrNull(v) {
   const n = Number(v);
   return Number.isNaN(n) ? null : n;
 }
+function parseJsonMaybe(v) {
+  if (v === null || v === undefined) return v;
+  if (typeof v !== "string") return v;
+  const s = v.trim();
+  if (!s) return null;
+  try {
+    return JSON.parse(s);
+  } catch {
+    return v; // biar kelihatan kalau memang bukan JSON
+  }
+}
+function sumMoonCycleLength(values) {
+  const arr = Array.isArray(values) ? values : [];
+  return arr.reduce((sum, it) => {
+    const n = Number(it?.day_length ?? 0);
+    return sum + (Number.isFinite(n) ? n : 0);
+  }, 0);
+}
 
 function newEra() {
   return {
@@ -63,8 +81,31 @@ function newEra() {
   };
 }
 
+/**
+ * Normalize calendar initialData (supports:
+ * - raw fields already objects
+ * - raw fields as JSON string (from SQL / Supabase)
+ * Ensures:
+ * - seasons.values[].icon exists
+ * - moon_cycle.values[].icon exists
+ * - moon_cycle.cycle_length computed from sum(day_length)
+ */
 function normalizeCalendarInitialData(raw) {
   if (!raw) return null;
+
+  const parsed = {
+    ...raw,
+    epoch: parseJsonMaybe(raw.epoch),
+    era: parseJsonMaybe(raw.era),
+    other_era: parseJsonMaybe(raw.other_era),
+    months: parseJsonMaybe(raw.months),
+    days: parseJsonMaybe(raw.days),
+    seasons: parseJsonMaybe(raw.seasons),
+    weather: parseJsonMaybe(raw.weather),
+    moon_cycle: parseJsonMaybe(raw.moon_cycle),
+    current_year: parseJsonMaybe(raw.current_year),
+    leap_year: parseJsonMaybe(raw.leap_year),
+  };
 
   const normalizeEraList = (arr) =>
     (Array.isArray(arr) ? arr : []).map((e) => ({
@@ -96,16 +137,18 @@ function normalizeCalendarInitialData(raw) {
       name: d?.name || "",
       abbreviation: d?.abbreviation || "",
       ordinal: d?.ordinal ?? idx + 1,
+      is_rest_day:
+        typeof d?.is_rest_day === "boolean" ? d.is_rest_day : false,
+      rest_day_color: String(d?.rest_day_color || "#FF0000"),
     }));
 
-  // ✅ include icon
   const normalizeSeasonList = (arr) =>
     (Array.isArray(arr) ? arr : []).map((s) => ({
       _key: uid(),
       name: s?.name || "",
       month_start: s?.month_start ?? 1,
       month_end: s?.month_end ?? 1,
-      icon: s?.icon || "", // ✅ IMPORTANT
+      icon: String(s?.icon || ""), // ✅ keep icon
     }));
 
   const normalizeWeatherList = (arr) =>
@@ -117,87 +160,123 @@ function normalizeCalendarInitialData(raw) {
       temp_offset: w?.temp_offset ?? 0,
     }));
 
-  // ✅ moon values use icon (not symbol)
   const normalizeMoonValues = (arr) =>
     (Array.isArray(arr) ? arr : []).map((ph) => ({
       _key: uid(),
       name: ph?.name || "",
-      day_start: ph?.day_start ?? 1,
-      day_end: ph?.day_end ?? 1,
-      icon: ph?.icon || ph?.symbol || "", // tolerate older data
+      day_length: Number.isFinite(Number(ph?.day_length))
+        ? Number(ph.day_length)
+        : Number.isFinite(Number(ph?.day_end)) &&
+          Number.isFinite(Number(ph?.day_start))
+        ? Math.max(0, Number(ph.day_end) - Number(ph.day_start))
+        : 1,
+      icon: String(ph?.icon || ""), // ✅ NOT symbol
     }));
 
   const monthsValues =
-    raw?.months && Array.isArray(raw.months?.values)
-      ? normalizeMonthList(raw.months.values)
-      : Array.isArray(raw?.months)
-      ? normalizeMonthList(raw.months)
+    parsed?.months && Array.isArray(parsed.months?.values)
+      ? normalizeMonthList(parsed.months.values)
+      : Array.isArray(parsed?.months)
+      ? normalizeMonthList(parsed.months)
       : [];
 
   const daysValues =
-    raw?.days && Array.isArray(raw.days?.values)
-      ? normalizeDayList(raw.days.values)
-      : Array.isArray(raw?.days)
-      ? normalizeDayList(raw.days)
+    parsed?.days && Array.isArray(parsed.days?.values)
+      ? normalizeDayList(parsed.days.values)
+      : Array.isArray(parsed?.days)
+      ? normalizeDayList(parsed.days)
       : [];
 
-  const cy = raw?.current_year || null;
+  const seasonsValues = normalizeSeasonList(
+    parsed?.seasons?.values ?? parsed?.seasons
+  );
+
+  const weatherValues = normalizeWeatherList(
+    parsed?.weather?.values ?? parsed?.weather
+  );
+
+  const moonValues = normalizeMoonValues(
+    parsed?.moon_cycle?.values ?? parsed?.moon_cycle
+  );
+
+  const cy =
+    parsed?.current_year ??
+    parsed?.currentYear ??
+    parsed?.calendar_current_year ??
+    null;
+
+  const ly =
+    parsed?.leap_year ??
+    parsed?.leapYear ??
+    parsed?.calendar_leap_year ??
+    null;
+
+  const nOrNull = (v) => {
+    if (v === "" || v === undefined || v === null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const leapStart = nOrNull(ly?.leap_start);
+  const leapInterval = nOrNull(ly?.leap_interval);
+  const normalizedLeap =
+    leapStart === null && leapInterval === null
+      ? null
+      : { leap_start: leapStart, leap_interval: leapInterval };
+
+  // ✅ cycle_length: prefer backend value if valid (>0), else compute sum(day_length)
+  const parsedCycleLen = Number(parsed?.moon_cycle?.cycle_length);
+  const computedCycleLen = sumMoonCycleLength(moonValues);
+  const cycleLen =
+    Number.isFinite(parsedCycleLen) && parsedCycleLen > 0
+      ? parsedCycleLen
+      : computedCycleLen;
 
   return {
-    id: raw?.id ?? null,
-    name: raw?.name || "",
-    abbreviation: raw?.abbreviation || "",
-    share_id: raw?.share_id || genShareId(12),
-    private: typeof raw?.private === "boolean" ? raw.private : true,
+    id: parsed?.id ?? null,
+    name: parsed?.name || "",
+    abbreviation: parsed?.abbreviation || "",
+    share_id: parsed?.share_id || genShareId(12),
+    private: typeof parsed?.private === "boolean" ? parsed.private : true,
+
     epoch: {
-      private: Number(raw?.epoch?.private ?? -10000),
-      public: Number(raw?.epoch?.public ?? 0),
+      private: Number(parsed?.epoch?.private ?? -10000),
+      public: Number(parsed?.epoch?.public ?? 0),
     },
 
-    // keep era arrays (backend can accept array or {values}, but UI uses array)
-    era: normalizeEraList(raw?.era),
-    other_era: normalizeEraList(raw?.other_era),
+    era: normalizeEraList(parsed?.era),
+    other_era: normalizeEraList(parsed?.other_era),
 
     months: { values: monthsValues },
 
     days: {
       values: daysValues,
       days_per_year:
-        raw?.days?.days_per_year ??
-        raw?.days?.days_per_Year ??
-        raw?.days_per_year ??
+        parsed?.days?.days_per_year ??
+        parsed?.days?.days_per_Year ??
+        parsed?.days_per_year ??
         365,
-      hours_per_day: raw?.days?.hours_per_day ?? 24,
-      minutes_per_hour: raw?.days?.minutes_per_hour ?? 60,
-      seconds_per_minute: raw?.days?.seconds_per_minute ?? 60,
+      hours_per_day: parsed?.days?.hours_per_day ?? 24,
+      minutes_per_hour: parsed?.days?.minutes_per_hour ?? 60,
+      seconds_per_minute: parsed?.days?.seconds_per_minute ?? 60,
     },
 
-    seasons: {
-      values: normalizeSeasonList(raw?.seasons?.values ?? raw?.seasons),
-    },
-    weather: {
-      values: normalizeWeatherList(raw?.weather?.values ?? raw?.weather),
-    },
+    seasons: { values: seasonsValues },
+    weather: { values: weatherValues },
 
     moon_cycle: {
-      name: raw?.moon_cycle?.name || "",
-      values: normalizeMoonValues(raw?.moon_cycle?.values ?? raw?.moon_cycle),
+      name: parsed?.moon_cycle?.name || "",
+      cycle_length: cycleLen, // ✅ now exists & correct
+      values: moonValues,
     },
 
-    // ✅ current_year (if missing, keep safe defaults)
     current_year: {
       era: String(cy?.era ?? ""),
       era_year: Number(cy?.era_year ?? 0),
       true_year: Number(cy?.true_year ?? 0),
     },
 
-    // ✅ leap_year (optional, if you already added Step3)
-    leap_year: raw?.leap_year
-      ? {
-          leap_start: Number(raw?.leap_year?.leap_start ?? 0),
-          leap_interval: Number(raw?.leap_year?.leap_interval ?? 4),
-        }
-      : null,
+    leap_year: normalizedLeap,
   };
 }
 
@@ -232,12 +311,11 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
       },
       seasons: { values: [] },
       weather: { values: [] },
-      moon_cycle: { name: "", values: [] },
 
-      // ✅ current_year default
+      // ✅ include cycle_length from start
+      moon_cycle: { name: "", cycle_length: 0, values: [] },
+
       current_year: { era: "", era_year: 0, true_year: 0 },
-
-      // ✅ leap_year default (optional)
       leap_year: null,
     };
   });
@@ -352,11 +430,22 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
       return;
     }
 
+    const moonValuesPayload = (form.moon_cycle?.values || []).map(
+      ({ _key, ...ph }) => ({
+        ...ph,
+        day_length: Math.max(0, Number(numOrNull(ph.day_length) ?? 1)),
+        icon: String(ph.icon || ""),
+      })
+    );
+
+    const cycleLenPayload = sumMoonCycleLength(moonValuesPayload);
+
     const payload = {
       name: form.name,
       abbreviation: form.abbreviation || "",
       share_id: form.share_id,
       private: !!form.private,
+
       epoch: {
         private: Number(form.epoch.private),
         public: Number(form.epoch.public),
@@ -401,6 +490,8 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
         values: (form.days?.values || []).map(({ _key, ...d }, idx) => ({
           ...d,
           ordinal: d.ordinal ?? idx + 1,
+          is_rest_day: !!d.is_rest_day,
+          rest_day_color: String(d.rest_day_color || "#FF0000"),
         })),
         days_per_year: Number(form.days?.days_per_year ?? 365),
         hours_per_day: Number(form.days?.hours_per_day ?? 24),
@@ -408,7 +499,6 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
         seconds_per_minute: Number(form.days?.seconds_per_minute ?? 60),
       },
 
-      // ✅ send icon too
       seasons: {
         values: (form.seasons?.values || []).map(({ _key, ...s }) => ({
           ...s,
@@ -427,15 +517,10 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
         })),
       },
 
-      // ✅ send icon too (no symbol)
       moon_cycle: {
         name: form.moon_cycle?.name || "",
-        values: (form.moon_cycle?.values || []).map(({ _key, ...ph }) => ({
-          ...ph,
-          day_start: Number(numOrNull(ph.day_start) ?? 1),
-          day_end: Number(numOrNull(ph.day_end) ?? 1),
-          icon: String(ph.icon || ""),
-        })),
+        cycle_length: cycleLenPayload, // ✅ always sum(day_length)
+        values: moonValuesPayload,
       },
 
       current_year: {
@@ -444,7 +529,6 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
         true_year: Number(form.current_year?.true_year ?? 0),
       },
 
-      // ✅ optional
       leap_year: form.leap_year
         ? {
             leap_start: Number(form.leap_year?.leap_start ?? 0),
@@ -475,8 +559,14 @@ export default function CalendarForm({ mode = "create", initialData = null }) {
         return;
       }
 
+      // ✅ refresh form from saved server response (keeps icons/cycle_length in sync)
       const saved = json?.data || null;
-      if (saved?.id && !form.id) setForm((p) => ({ ...p, id: saved.id }));
+      if (saved) {
+        setForm(normalizeCalendarInitialData(saved));
+      } else if (json?.data?.id && !form.id) {
+        setForm((p) => ({ ...p, id: json.data.id }));
+      }
+
       alert("Saved ✅");
     } catch (e) {
       console.error(e);

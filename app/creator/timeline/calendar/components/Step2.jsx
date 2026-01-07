@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Plus,
   Trash2,
@@ -29,11 +29,11 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-/* ---------- helpers ---------- */
 function pickValue(v) {
   if (v && typeof v === "object" && "target" in v) return v.target?.value;
   return v;
 }
+
 function pickNumber(v, fallback = null) {
   const raw = pickValue(v);
   if (raw === "" || raw === null || raw === undefined) return fallback;
@@ -44,7 +44,6 @@ function uid() {
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
-/** sortable wrapper */
 function SortableCard({ id, children }) {
   const { setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = {
@@ -59,7 +58,6 @@ function SortableCard({ id, children }) {
   );
 }
 
-/** drag handle + up/down + delete */
 function CardHeaderActions({ id, onDelete, onMoveUp, onMoveDown }) {
   const { attributes, listeners } = useSortable({ id });
 
@@ -112,8 +110,7 @@ export default function Step2({ form, setForm }) {
   );
 
   const MEDIA_URL = process.env.NEXT_PUBLIC_MEDIA_URL || "";
-
-  const SEASON_PICKER_BASE = `${MEDIA_URL}/browser/list?path=calender/season_icon`;
+  const SEASON_PICKER_BASE = `${MEDIA_URL}/calendar/season/list`;
   const MOON_PICKER_BASE = `${MEDIA_URL}/calendar/moon/list`;
 
   const [openSeasonPicker, setOpenSeasonPicker] = useState(false);
@@ -122,7 +119,22 @@ export default function Step2({ form, setForm }) {
   const [openMoonPicker, setOpenMoonPicker] = useState(false);
   const [moonPickingKey, setMoonPickingKey] = useState(null);
 
-  /* -------- nested get/set -------- */
+  const pickUrl = (v) => {
+    if (!v) return "";
+    if (typeof v === "string") return v;
+    return String(v.url || v.src || v.path || v.file_url || "");
+  };
+
+  const resolveMediaUrl = (u) => {
+    const s = String(u || "").trim();
+    if (!s) return "";
+    if (/^https?:\/\//i.test(s) || s.startsWith("data:")) return s;
+
+    if (!MEDIA_URL) return s;
+    if (s.startsWith("/")) return `${MEDIA_URL}${s}`;
+    return `${MEDIA_URL}/${s}`;
+  };
+
   const getArr = (path) => {
     if (path === "months")
       return Array.isArray(form.months?.values) ? form.months.values : [];
@@ -165,7 +177,33 @@ export default function Step2({ form, setForm }) {
       return it;
     });
   };
+  const addStandardWeekTemplate = () => {
+    const base = [
+      { name: "Monday", abbreviation: "Mon", is_rest_day: false },
+      { name: "Tuesday", abbreviation: "Tue", is_rest_day: false },
+      { name: "Wednesday", abbreviation: "Wed", is_rest_day: false },
+      { name: "Thursday", abbreviation: "Thu", is_rest_day: false },
+      { name: "Friday", abbreviation: "Fri", is_rest_day: false },
+      { name: "Saturday", abbreviation: "Sat", is_rest_day: true },
+      { name: "Sunday", abbreviation: "Sun", is_rest_day: true },
+    ];
 
+    const existing = getArr("days");
+
+    const startOrdinal = existing.length;
+
+    const templated = base.map((d, i) => ({
+      _key: uid(),
+      name: d.name,
+      abbreviation: d.abbreviation,
+      ordinal: startOrdinal + i + 1,
+      is_rest_day: d.is_rest_day,
+      rest_day_color: d.is_rest_day ? "#FF0000" : "#FF0000",
+    }));
+
+    const next = normalizeOrdinals("days", [...existing, ...templated]);
+    setArr("days", next);
+  };
   const reorder = (path, activeId, overId) => {
     if (!overId || activeId === overId) return;
     const arr = getArr(path);
@@ -221,6 +259,17 @@ export default function Step2({ form, setForm }) {
     const next = arr.map((x) => (x._key === key ? { ...x, ...patch } : x));
     setArr(path, next);
   };
+
+  /* cycle_length = sum(day_length) */
+  const cycleLength = useMemo(() => {
+    const vals = Array.isArray(form.moon_cycle?.values)
+      ? form.moon_cycle.values
+      : [];
+    return vals.reduce((sum, it) => {
+      const n = Number(it?.day_length ?? 0);
+      return sum + (Number.isFinite(n) ? n : 0);
+    }, 0);
+  }, [form.moon_cycle?.values]);
 
   return (
     <div className="space-y-4">
@@ -336,23 +385,39 @@ export default function Step2({ form, setForm }) {
 
       {/* ================= Days ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-semibold text-slate-100">Days</p>
-          <button
-            type="button"
-            onClick={() =>
-              addItem("days", {
-                _key: uid(),
-                name: "",
-                abbreviation: "",
-                ordinal: (form.days?.values?.length || 0) + 1,
-              })
-            }
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs"
-          >
-            <Plus className="w-4 h-4" />
-            Add Day
-          </button>
+
+          <div className="flex items-center gap-2">
+            {/* Template button */}
+            <button
+              type="button"
+              onClick={addStandardWeekTemplate}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-700 bg-slate-900/60 hover:bg-slate-800 text-xs text-slate-100"
+              title="Add standard Monday–Sunday week"
+            >
+              Template: Mon–Sun
+            </button>
+
+            {/* Existing Add Day */}
+            <button
+              type="button"
+              onClick={() =>
+                addItem("days", {
+                  _key: uid(),
+                  name: "",
+                  abbreviation: "",
+                  ordinal: (form.days?.values?.length || 0) + 1,
+                  is_rest_day: false,
+                  rest_day_color: "#FF0000",
+                })
+              }
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs"
+            >
+              <Plus className="w-4 h-4" />
+              Add Day
+            </button>
+          </div>
         </div>
 
         <div className="p-4 space-y-4">
@@ -429,54 +494,125 @@ export default function Step2({ form, setForm }) {
               items={(form.days?.values || []).map((x) => x._key)}
               strategy={verticalListSortingStrategy}
             >
-              {(form.days?.values || []).map((d) => (
-                <SortableCard key={d._key} id={d._key}>
-                  <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-slate-400">
-                        Day #{d.ordinal ?? "-"}
-                      </p>
-                      <CardHeaderActions
-                        id={d._key}
-                        onMoveUp={() => moveUp("days", d._key)}
-                        onMoveDown={() => moveDown("days", d._key)}
-                        onDelete={() => removeItem("days", d._key)}
-                      />
-                    </div>
+              {(form.days?.values || []).map((d) => {
+                const isRest = Boolean(d.is_rest_day);
+                const color = String(d.rest_day_color || "#FF0000");
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <InputField
-                        label="Name"
-                        value={d.name}
-                        onChange={(v) =>
-                          patchItem("days", d._key, { name: pickValue(v) })
-                        }
-                      />
-                      <InputField
-                        label="Abbreviation"
-                        value={d.abbreviation}
-                        onChange={(v) =>
-                          patchItem("days", d._key, {
-                            abbreviation: pickValue(v),
-                          })
-                        }
-                      />
-                    </div>
+                return (
+                  <SortableCard key={d._key} id={d._key}>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-slate-400">
+                          Day #{d.ordinal ?? "-"}
+                        </p>
+                        <CardHeaderActions
+                          id={d._key}
+                          onMoveUp={() => moveUp("days", d._key)}
+                          onMoveDown={() => moveDown("days", d._key)}
+                          onDelete={() => removeItem("days", d._key)}
+                        />
+                      </div>
 
-                    <InputField
-                      label="Ordinal"
-                      value={d.ordinal ?? ""}
-                      disabled
-                    />
-                  </div>
-                </SortableCard>
-              ))}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <InputField
+                          label="Name"
+                          value={d.name}
+                          onChange={(v) =>
+                            patchItem("days", d._key, { name: pickValue(v) })
+                          }
+                        />
+                        <InputField
+                          label="Abbreviation"
+                          value={d.abbreviation}
+                          onChange={(v) =>
+                            patchItem("days", d._key, {
+                              abbreviation: pickValue(v),
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <InputField
+                          label="Ordinal"
+                          value={d.ordinal ?? ""}
+                          disabled
+                        />
+
+                        <div className="flex items-end gap-4">
+                          <div className="flex flex-col gap-1">
+                            <div className="text-sm text-slate-100">
+                              Rest day
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = !Boolean(d.is_rest_day);
+                                patchItem("days", d._key, {
+                                  is_rest_day: next,
+                                  rest_day_color: d.rest_day_color || "#FF0000",
+                                });
+                              }}
+                              className={[
+                                "relative inline-flex h-6 w-11 items-center rounded-full border transition shrink-0",
+                                isRest
+                                  ? "bg-indigo-600/80 border-indigo-500/40"
+                                  : "bg-slate-900/60 border-slate-700",
+                              ].join(" ")}
+                              title="Rest day"
+                            >
+                              <span
+                                className={[
+                                  "inline-block h-5 w-5 transform rounded-full bg-white transition",
+                                  isRest ? "translate-x-5" : "translate-x-0.5",
+                                ].join(" ")}
+                              />
+                            </button>
+                          </div>
+
+                          {/* Rest day color (sejajar dengan toggle) */}
+                          {isRest ? (
+                            <div className="flex items-end gap-2">
+                              <input
+                                type="color"
+                                value={color}
+                                onChange={(e) =>
+                                  patchItem("days", d._key, {
+                                    rest_day_color: e.target.value,
+                                  })
+                                }
+                                className="h-10 w-12 rounded-lg border border-slate-800 bg-slate-950/60 p-1"
+                                title="Rest day color"
+                              />
+
+                              <div className="min-w-[200px]">
+                                <InputField
+                                  label="Rest day color"
+                                  value={color}
+                                  onChange={(v) =>
+                                    patchItem("days", d._key, {
+                                      rest_day_color: String(
+                                        pickValue(v) || "#FF0000"
+                                      ),
+                                    })
+                                  }
+                                />
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  </SortableCard>
+                );
+              })}
             </SortableContext>
           </DndContext>
         </div>
       </div>
 
-      {/* ================= Seasons (ImagePicker langsung) ================= */}
+      {/* ================= Seasons ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-100">Seasons</p>
@@ -511,7 +647,8 @@ export default function Step2({ form, setForm }) {
               strategy={verticalListSortingStrategy}
             >
               {(form.seasons?.values || []).map((s) => {
-                const hasIcon = String(s.icon || "").trim().length > 0;
+                const iconUrl = resolveMediaUrl(s.icon);
+                const hasIcon = !!iconUrl;
 
                 return (
                   <SortableCard key={s._key} id={s._key}>
@@ -560,7 +697,7 @@ export default function Step2({ form, setForm }) {
                         <div className="w-12 h-12 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden flex items-center justify-center">
                           {hasIcon ? (
                             <img
-                              src={s.icon}
+                              src={iconUrl}
                               alt="Season Icon"
                               className="w-full h-full object-cover"
                             />
@@ -704,7 +841,7 @@ export default function Step2({ form, setForm }) {
         </div>
       </div>
 
-      {/* ================= Moon Cycle (rapi + tanpa Icon URL) ================= */}
+      {/* ================= Moon Cycle ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950/40 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-100">Moon Cycle</p>
@@ -714,8 +851,7 @@ export default function Step2({ form, setForm }) {
               addItem("moon_cycle", {
                 _key: uid(),
                 name: "",
-                day_start: 1,
-                day_end: 1,
+                day_length: 1,
                 icon: "",
               })
             }
@@ -727,16 +863,19 @@ export default function Step2({ form, setForm }) {
         </div>
 
         <div className="p-4 space-y-4">
-          <InputField
-            label="Moon name"
-            value={form.moon_cycle?.name || ""}
-            onChange={(v) =>
-              setForm((p) => ({
-                ...p,
-                moon_cycle: { ...(p.moon_cycle || {}), name: pickValue(v) },
-              }))
-            }
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <InputField
+              label="Moon name"
+              value={form.moon_cycle?.name || ""}
+              onChange={(v) =>
+                setForm((p) => ({
+                  ...p,
+                  moon_cycle: { ...(p.moon_cycle || {}), name: pickValue(v) },
+                }))
+              }
+            />
+            <InputField label="Cycle length" value={cycleLength} disabled />
+          </div>
 
           <DndContext
             sensors={sensors}
@@ -750,7 +889,9 @@ export default function Step2({ form, setForm }) {
               strategy={verticalListSortingStrategy}
             >
               {(form.moon_cycle?.values || []).map((ph) => {
-                const hasIcon = String(ph.icon || "").trim().length > 0;
+                const iconUrl = resolveMediaUrl(ph.icon);
+                console.log(ph);
+                const hasIcon = !!iconUrl;
 
                 return (
                   <SortableCard key={ph._key} id={ph._key}>
@@ -765,8 +906,7 @@ export default function Step2({ form, setForm }) {
                         />
                       </div>
 
-                      {/* ✅ rapihin: name + start + end satu baris */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <InputField
                           label="Name"
                           value={ph.name}
@@ -777,33 +917,22 @@ export default function Step2({ form, setForm }) {
                           }
                         />
                         <InputField
-                          label="Day start"
+                          label="Day length"
                           type="number"
-                          value={ph.day_start ?? 1}
+                          value={ph.day_length ?? 1}
                           onChange={(v) =>
                             patchItem("moon_cycle", ph._key, {
-                              day_start: pickNumber(v, 1),
-                            })
-                          }
-                        />
-                        <InputField
-                          label="Day end"
-                          type="number"
-                          value={ph.day_end ?? 1}
-                          onChange={(v) =>
-                            patchItem("moon_cycle", ph._key, {
-                              day_end: pickNumber(v, 1),
+                              day_length: Math.max(0, pickNumber(v, 1) ?? 1),
                             })
                           }
                         />
                       </div>
 
-                      {/* ✅ icon block rapi */}
                       <div className="flex items-start gap-3">
                         <div className="w-12 h-12 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden flex items-center justify-center">
                           {hasIcon ? (
                             <img
-                              src={ph.icon}
+                              src={iconUrl}
                               alt="Moon Icon"
                               className="w-full h-full object-cover"
                             />
@@ -859,7 +988,8 @@ export default function Step2({ form, setForm }) {
         isOpen={openSeasonPicker}
         baseUrl={SEASON_PICKER_BASE}
         title="Select Season Icon"
-        onSelect={(url) => {
+        onSelect={(picked) => {
+          const url = pickUrl(picked);
           if (seasonPickingKey)
             patchItem("seasons", seasonPickingKey, { icon: url });
           setOpenSeasonPicker(false);
@@ -875,7 +1005,8 @@ export default function Step2({ form, setForm }) {
         isOpen={openMoonPicker}
         baseUrl={MOON_PICKER_BASE}
         title="Select Moon Phase Icon"
-        onSelect={(url) => {
+        onSelect={(picked) => {
+          const url = pickUrl(picked);
           if (moonPickingKey)
             patchItem("moon_cycle", moonPickingKey, { icon: url });
           setOpenMoonPicker(false);
